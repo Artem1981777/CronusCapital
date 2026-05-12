@@ -1,6 +1,6 @@
 import "./cronus.css"
 import { useState, useEffect } from "react"
-import { runCronusPipeline } from "./agents/cronusAgents"
+import { runCronusPipeline, setApiKey } from "./agents/cronusAgents"
 import type { AgentState, MarketSignal, BetOpportunity } from "./agents/cronusAgents"
 
 const TOPICS = ["crypto markets", "US elections", "Fed interest rates", "AI stocks", "Bitcoin ETF"]
@@ -116,6 +116,15 @@ export default function App() {
   const [chainStats, setChainStats] = useState<ChainStats | null>(null)
   const [reasoningLogs, setReasoningLogs] = useState<ReasoningLog[]>([])
   const [sessionTxCount, setSessionTxCount] = useState(0)
+  const [apiKey, setApiKeyState] = useState(localStorage.getItem("cronus_api_key") || "")
+  function updateApiKey(key: string) {
+    setApiKeyState(key)
+    setApiKey(key)
+    localStorage.setItem("cronus_api_key", key)
+  }
+  const [showKeyInput, setShowKeyInput] = useState(false)
+
+  useEffect(() => { setApiKey(localStorage.getItem("cronus_api_key") || "") }, [])
 
   useEffect(() => {
     const rpc = import.meta.env.VITE_RPC_URL
@@ -144,6 +153,7 @@ export default function App() {
 
   async function runAgents() {
     if (!topic.trim()) return
+    if (!apiKey.trim()) { setShowKeyInput(true); return }
     setLoading(true); setState(null); setReasoningLogs([])
     setAgentPhase("scout")
     addLog("SCOUT", "Scanning agora for signals on: " + topic + ". Monitoring sentiment across news feeds...")
@@ -230,6 +240,28 @@ export default function App() {
           </div>
         )}
       </div>
+      {showKeyInput && (
+        <div style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.85)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 100 }}>
+          <div style={{ background: "#0a0806", border: "1px solid #c9a84c", padding: "32px", maxWidth: "480px", width: "90%" }}>
+            <div style={{ color: "#c9a84c", fontFamily: "Cinzel, serif", fontSize: "14px", letterSpacing: "3px", marginBottom: "8px" }}>ENTER API KEY</div>
+            <div style={{ color: "#555", fontSize: "11px", marginBottom: "20px", lineHeight: 1.6 }}>
+              Enter your Anthropic API key to consult the oracles.<br/>
+              Get one at console.anthropic.com · Stored locally only.
+            </div>
+            <input
+              type="password"
+              placeholder="sk-ant-..."
+              value={apiKey}
+              onChange={e => updateApiKey(e.target.value)}
+              style={{ width: "100%", padding: "12px 16px", background: "#060504", border: "1px solid #2a2416", color: "#d4c5a0", fontSize: "13px", fontFamily: "Courier New, monospace", marginBottom: "12px" }}
+            />
+            <div style={{ display: "flex", gap: "8px" }}>
+              <button onClick={() => { if(apiKey.trim()) { setShowKeyInput(false); runAgents(); } }} style={{ flex: 1, padding: "12px", background: "#c9a84c", border: "none", color: "#060504", fontFamily: "Cinzel, serif", fontSize: "12px", letterSpacing: "2px", fontWeight: 600 }}>CONFIRM</button>
+              <button onClick={() => setShowKeyInput(false)} style={{ padding: "12px 20px", background: "transparent", border: "1px solid #2a2416", color: "#555", fontFamily: "Cinzel, serif", fontSize: "12px" }}>CANCEL</button>
+            </div>
+          </div>
+        </div>
+      )}
       <div style={{ borderTop: "1px solid #111", padding: "16px 32px", display: "flex", justifyContent: "space-between" }}>
         <div style={{ color: "#333", fontSize: "10px", letterSpacing: "2px" }}>CRONUS CAPITAL · AGORA AGENTS HACKATHON 2026</div>
         <div style={{ color: "#333", fontSize: "10px", letterSpacing: "2px" }}>POWERED BY ARC · CIRCLE · USDC</div>

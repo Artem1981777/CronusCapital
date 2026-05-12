@@ -2,6 +2,8 @@
 // Scout → Analyst → Executor
 
 const API_URL = '/api/claude';
+let userApiKey = '';
+export function setApiKey(key: string) { userApiKey = key; }
 
 export interface MarketSignal {
   id: string;
@@ -30,7 +32,7 @@ export interface AgentState {
 async function callClaude(prompt: string, system: string): Promise<string> {
   const res = await fetch(API_URL, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', ...(userApiKey ? { 'x-api-key': userApiKey } : {}) },
     body: JSON.stringify({
       model: 'claude-sonnet-4-20250514',
       max_tokens: 1000,
@@ -60,9 +62,11 @@ export async function runScout(topic: string): Promise<MarketSignal[]> {
   
   try {
     const text = await callClaude(prompt, system);
+    console.log("SCOUT RAW:", text);
     const clean = text.replace(/```json|```/g, '').trim();
     return JSON.parse(clean);
-  } catch {
+  } catch (e) {
+    console.log("SCOUT ERROR:", e);
     return [];
   }
 }
