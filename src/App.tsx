@@ -128,7 +128,7 @@ export default function App() {
   useEffect(() => { setApiKey(localStorage.getItem("cronus_api_key") || "") }, [])
 
   useEffect(() => {
-    const rpc = import.meta.env.VITE_RPC_URL
+    const rpc = '/api/rpc'
     if (!rpc) return
     async function fetchChain() {
       try {
