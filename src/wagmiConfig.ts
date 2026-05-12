@@ -3,7 +3,7 @@ import { defineChain } from "viem"
 import { walletConnect, injected, metaMask } from "wagmi/connectors"
 
 export const arcTestnet = defineChain({
-  id: 1313161555,
+  id: 5042002,
   name: "Arc Testnet",
   nativeCurrency: { name: "USD Coin", symbol: "USDC", decimals: 6 },
   rpcUrls: {
