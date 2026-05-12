@@ -58,7 +58,7 @@ export function WalletButton() {
               fontFamily: "Courier New, monospace", fontSize: "11px",
               letterSpacing: "1px", cursor: "pointer", textAlign: "left"
             }}>
-              {connector.name === "WalletConnect" ? "📱 " : "🦊 "}{connector.name}
+              {connector.name === "MetaMask" ? "🦊 " : connector.name === "WalletConnect" ? "🔗 " : connector.name === "OKX Wallet" ? "◆ " : connector.name === "Nightly" ? "🌙 " : connector.name === "Injected" ? "💉 " : connector.name === "Trust Wallet" ? "🛡️ " : connector.name === "Coinbase Wallet" ? "🔵 " : connector.name === "Safe" ? "🔒 " : "◈ "}{connector.name}
             </button>
           ))}
         </div>
