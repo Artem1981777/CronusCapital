@@ -1,73 +1,62 @@
-# React + TypeScript + Vite
+# ⚡ CRONUS CAPITAL
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+> *All things are an exchange for fire* — Heraclitus
 
-Currently, two official plugins are available:
+**Autonomous Market Intelligence on Arc Network**
+Built for Agora Agents Hackathon by Canteen x Circle x Arc
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+---
 
-## React Compiler
+## The Three Oracles
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+| Agent | Role | Output |
+|-------|------|--------|
+| 🔭 Scout | Market Intelligence | Signals with confidence scores |
+| ⚖️ Analyst | Expected Value Engine | +EV bets, position sizing |
+| ⚡ Executor | Decision Layer | Risk management, Arc settlement |
 
-## Expanding the ESLint configuration
+### Reasoning Trace
+Every agent logs its thinking in real-time via collapsible Reasoning Trace panel.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+---
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Arc Integration
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+- Network: Arc Testnet (Circle L1)
+- Settlement: USDC
+- Finality: Sub-second deterministic
+- TX Cost: ~0.01 USD per transaction
+- Live Stats: Block + gas price, updates every 5s
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+---
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Tech Stack
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+- React + TypeScript + Vite
+- Claude Sonnet (Anthropic)
+- Arc Network EVM L1 by Circle
+- USDC settlement
+- Vercel deploy
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+---
+
+## Run Locally
+
+git clone https://github.com/Artem1981777/CronusCapital
+cd CronusCapital
+npm install
+npm run dev
+
+---
+
+## Builder
+
+Artem Gromov — Solo Web3/AI developer
+GitHub: Artem1981777
+Twitter: ArtemGromov777
+Telegram: Artem00777
+Code4rena auditor: shadowwarden
+
+---
+
+Cronus Capital - Agora Agents Hackathon 2026 - Powered by Arc Circle USDC

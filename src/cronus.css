@@ -1,0 +1,19 @@
+@import url("https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;900&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap");
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #060504; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+@keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+@keyframes shimmer { 0%{background-position:-200% center} 100%{background-position:200% center} }
+.gold-shimmer {
+  background: linear-gradient(90deg, #c9a84c, #f0d080, #c9a84c);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmer 3s linear infinite;
+}
+input:focus { outline: none; }
+button:hover { opacity: 0.85; cursor: pointer; }
+button:active { transform: scale(0.98); }
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: #0a0806; }
+::-webkit-scrollbar-thumb { background: #2a2416; }
