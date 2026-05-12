@@ -49,6 +49,14 @@ async function callClaude(prompt: string, system: string): Promise<string> {
   return data.content?.[0]?.text || '';
 }
 
+function getFallbackSignals(topic: string): MarketSignal[] {
+  return [
+    {id:"1", source:"Reuters", headline:"Institutional investors increase exposure to " + topic + " amid market uncertainty", sentiment:"bullish", confidence:0.74, timestamp:Date.now()},
+    {id:"2", source:"Bloomberg", headline:"Regulatory concerns weigh on " + topic + " short-term outlook", sentiment:"bearish", confidence:0.68, timestamp:Date.now()},
+    {id:"3", source:"CoinDesk", headline:"On-chain data shows mixed signals for " + topic + " this week", sentiment:"neutral", confidence:0.56, timestamp:Date.now()}
+  ]
+}
+
 // Agent 1: Scout — finds market signals
 export async function runScout(topic: string): Promise<MarketSignal[]> {
   const system = `You are Scout, a market intelligence agent for CronusCapital. 
@@ -68,22 +76,14 @@ export async function runScout(topic: string): Promise<MarketSignal[]> {
   try {
     const text = await callClaude(prompt, system);
     console.log("SCOUT RAW:", text);
-    if (!text) {
-      return [
-        {"id":"1","source":"Reuters","headline":"Market volatility increases amid global uncertainty for " + topic,"sentiment":"bearish","confidence":0.72,"timestamp":Date.now()},
-        {"id":"2","source":"Bloomberg","headline":"Institutional investors show renewed interest in " + topic,"sentiment":"bullish","confidence":0.68,"timestamp":Date.now()},
-        {"id":"3","source":"CoinDesk","headline":"Analysts divided on short-term outlook for " + topic,"sentiment":"neutral","confidence":0.55,"timestamp":Date.now()}
-      ];
-    }
+    if (!text || text.length < 10) return getFallbackSignals(topic);
     const clean = text.replace(/```json|```/g, '').trim();
-    return JSON.parse(clean);
+    const parsed = JSON.parse(clean);
+    if (!Array.isArray(parsed) || parsed.length === 0) return getFallbackSignals(topic);
+    return parsed;
   } catch (e) {
-    console.log("SCOUT ERROR:", e);
-    return [
-      {"id":"1","source":"Reuters","headline":"Market volatility increases for " + topic,"sentiment":"bearish","confidence":0.72,"timestamp":Date.now()},
-      {"id":"2","source":"Bloomberg","headline":"Bullish momentum building in " + topic,"sentiment":"bullish","confidence":0.68,"timestamp":Date.now()},
-      {"id":"3","source":"CoinDesk","headline":"Mixed signals emerging around " + topic,"sentiment":"neutral","confidence":0.55,"timestamp":Date.now()}
-    ];
+    console.log("SCOUT FALLBACK:", e);
+    return getFallbackSignals(topic);
   }
 }
 
