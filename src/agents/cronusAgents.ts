@@ -49,9 +49,14 @@ export async function runScout(topic: string): Promise<MarketSignal[]> {
   Respond ONLY with valid JSON array of signals, no markdown, no explanation.
   Each signal: { id, source, headline, sentiment, confidence (0-1), timestamp }`;
   
-  const prompt = `Find 3 prediction market signals about: ${topic}
-  Current time: ${Date.now()}
-  Return JSON array only.`;
+  const prompt = `You are analyzing prediction markets. Generate exactly 3 market signals about: ${topic}
+  
+  Return ONLY a valid JSON array with exactly this structure, no other text:
+  [
+    {"id":"1","source":"Reuters","headline":"Example headline about ${topic}","sentiment":"bullish","confidence":0.75,"timestamp":${Date.now()}},
+    {"id":"2","source":"Bloomberg","headline":"Another signal","sentiment":"bearish","confidence":0.65,"timestamp":${Date.now()}},
+    {"id":"3","source":"CoinDesk","headline":"Third signal","sentiment":"neutral","confidence":0.55,"timestamp":${Date.now()}}
+  ]`;
   
   try {
     const text = await callClaude(prompt, system);
