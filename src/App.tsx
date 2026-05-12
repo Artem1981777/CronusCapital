@@ -1,6 +1,8 @@
 import "./cronus.css"
 import { useState, useEffect } from "react"
 import { WalletButton } from "./components/WalletButton"
+import { useCronusContract } from "./hooks/useCronusContract"
+import { useAccount } from "wagmi"
 import { runCronusPipeline, setApiKey } from "./agents/cronusAgents"
 import type { AgentState, MarketSignal, BetOpportunity } from "./agents/cronusAgents"
 
@@ -117,6 +119,9 @@ export default function App() {
   const [chainStats, setChainStats] = useState<ChainStats | null>(null)
   const [reasoningLogs, setReasoningLogs] = useState<ReasoningLog[]>([])
   const [sessionTxCount, setSessionTxCount] = useState(0)
+  const [onChainTxs, setOnChainTxs] = useState<string[]>([])
+  const { logDecision } = useCronusContract()
+  const { isConnected } = useAccount()
   const [apiKey, setApiKeyState] = useState(localStorage.getItem("cronus_api_key") || "")
   function updateApiKey(key: string) {
     setApiKeyState(key)
@@ -170,6 +175,12 @@ export default function App() {
     await new Promise(r => setTimeout(r, 300))
     addLog("EXECUTOR", "Consensus reached. " + result.executor.decisions.length + " decisions finalized. Ready for Arc USDC settlement.")
     setAgentPhase("done"); setState(result)
+    if (isConnected) {
+      result.executor.decisions.forEach(async (decision) => {
+        const hash = await logDecision(topic, decision, 3, 80)
+        if (hash) setOnChainTxs(prev => [...prev, hash])
+      })
+    }
     setSessionTxCount(prev => prev + result.executor.decisions.length)
     setChainStats(prev => prev ? { ...prev, txCount: prev.txCount + result.executor.decisions.length } : prev)
     setLoading(false)
@@ -265,6 +276,15 @@ export default function App() {
               <button onClick={() => setShowKeyInput(false)} style={{ padding: "12px 20px", background: "transparent", border: "1px solid #2a2416", color: "#555", fontFamily: "Cinzel, serif", fontSize: "12px" }}>CANCEL</button>
             </div>
           </div>
+        </div>
+      )}
+      {onChainTxs.length > 0 && (
+        <div style={{ padding: "12px 32px", background: "#050505", borderTop: "1px solid #39ff1422" }}>
+          {onChainTxs.map((hash, i) => (
+            <div key={i} style={{ color: "#39ff1466", fontSize: "10px", letterSpacing: "1px", fontFamily: "Courier New, monospace", marginBottom: "4px" }}>
+              ⛓ ON-CHAIN: <a href={"https://testnet.arcscan.app/tx/" + hash} target="_blank" style={{ color: "#39ff14" }}>{hash.slice(0,20)}...</a>
+            </div>
+          ))}
         </div>
       )}
       <div style={{ borderTop: "1px solid #39ff1422", padding: "16px 32px", display: "flex", justifyContent: "space-between" }}>
