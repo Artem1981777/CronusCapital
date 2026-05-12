@@ -1,5 +1,6 @@
 import "./cronus.css"
 import { useState, useEffect } from "react"
+import { WalletButton } from "./components/WalletButton"
 import { runCronusPipeline, setApiKey } from "./agents/cronusAgents"
 import type { AgentState, MarketSignal, BetOpportunity } from "./agents/cronusAgents"
 
@@ -192,9 +193,12 @@ export default function App() {
           <div style={{ fontFamily: "Cinzel, serif", fontSize: "24px", fontWeight: 900, letterSpacing: "4px", color: "#c9a84c" }} className="gold-shimmer">CRONUS CAPITAL</div>
           <div style={{ color: "#444", fontSize: "10px", letterSpacing: "4px", marginTop: "2px" }}>AUTONOMOUS MARKET INTELLIGENCE · ARC NETWORK</div>
         </div>
-        <div style={{ textAlign: "right" }}>
-          <div style={{ color: "#c9a84c", fontSize: "11px", letterSpacing: "2px" }}>SESSION TXS: {sessionTxCount}</div>
-          <div style={{ color: "#333", fontSize: "10px", letterSpacing: "2px", marginTop: "2px" }}>~$0.01 PER TX · USDC</div>
+        <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
+          <div style={{ textAlign: "right" }}>
+            <div style={{ color: "#c9a84c", fontSize: "11px", letterSpacing: "2px" }}>SESSION TXS: {sessionTxCount}</div>
+            <div style={{ color: "#333", fontSize: "10px", letterSpacing: "2px", marginTop: "2px" }}>~$0.01 PER TX · USDC</div>
+          </div>
+          <WalletButton />
         </div>
       </div>
       <div style={{ textAlign: "center", padding: "48px 32px 32px", borderBottom: "1px solid #111" }}>
