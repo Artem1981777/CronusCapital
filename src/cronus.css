@@ -1,19 +1,53 @@
-@import url("https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;900&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Uncial+Antiqua&family=MedievalSharp&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;900&display=swap");
+
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { background: #060504; }
-@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
-@keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
-@keyframes shimmer { 0%{background-position:-200% center} 100%{background-position:200% center} }
-.gold-shimmer {
-  background: linear-gradient(90deg, #c9a84c, #f0d080, #c9a84c);
-  background-size: 200% auto;
+body { background: #000; }
+
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+@keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+@keyframes greenShimmer {
+  0%{background-position:-200% center}
+  100%{background-position:200% center}
+}
+@keyframes scanline {
+  0%{transform:translateY(-100%)}
+  100%{transform:translateY(100vh)}
+}
+@keyframes glow {
+  0%,100%{text-shadow:0 0 8px #39ff14, 0 0 20px #39ff14}
+  50%{text-shadow:0 0 16px #39ff14, 0 0 40px #39ff14, 0 0 60px #39ff14}
+}
+
+.celtic-title {
+  font-family: "Cinzel Decorative", "Cinzel", serif;
+  background: linear-gradient(90deg, #39ff14, #00ff88, #39ff14, #7fff00, #39ff14);
+  background-size: 300% auto;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  animation: shimmer 3s linear infinite;
+  animation: greenShimmer 4s linear infinite;
+  filter: drop-shadow(0 0 8px rgba(57,255,20,0.5));
 }
+
+.celtic-glow {
+  animation: glow 2s ease-in-out infinite;
+}
+
+.scanline {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: rgba(57,255,20,0.08);
+  animation: scanline 8s linear infinite;
+  pointer-events: none;
+  z-index: 999;
+}
+
 input:focus { outline: none; }
-button:hover { opacity: 0.85; cursor: pointer; }
-button:active { transform: scale(0.98); }
-::-webkit-scrollbar { width: 4px; }
-::-webkit-scrollbar-track { background: #0a0806; }
-::-webkit-scrollbar-thumb { background: #2a2416; }
+button:hover { opacity: 0.8; cursor: pointer; }
+button:active { transform: scale(0.97); }
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-track { background: #000; }
+::-webkit-scrollbar-thumb { background: #39ff14; }
+
+.wallet-icon { font-size: 14px; margin-right: 8px; }
