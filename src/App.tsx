@@ -1,7 +1,7 @@
 import "./cronus.css"
 import { useState, useEffect } from "react"
 import { WalletButton } from "./components/WalletButton"
-import { Dashboard } from "./components/Dashboard"
+import { Dashboard, saveDecision } from "./components/Dashboard"
 import { useCronusContract } from "./hooks/useCronusContract"
 import { useAccount } from "wagmi"
 import { runCronusPipeline, setApiKey } from "./agents/cronusAgents"
@@ -179,7 +179,14 @@ export default function App() {
     if (isConnected) {
       result.executor.decisions.forEach(async (decision) => {
         const hash = await logDecision(topic, decision, 3, 80)
-        if (hash) setOnChainTxs(prev => [...prev, hash])
+        if (hash) {
+          setOnChainTxs(prev => [...prev, hash])
+          saveDecision(topic, decision, hash)
+        }
+      })
+    } else {
+      result.executor.decisions.forEach((decision) => {
+        saveDecision(topic, decision, "0x" + Math.random().toString(16).slice(2))
       })
     }
     setSessionTxCount(prev => prev + result.executor.decisions.length)
@@ -279,7 +286,7 @@ export default function App() {
           </div>
         </div>
       )}
-      <Dashboard />
+      <Dashboard totalOnChain={sessionTxCount} />
 
       {onChainTxs.length > 0 && (
         <div style={{ padding: "12px 32px", background: "#050505", borderTop: "1px solid #39ff1422" }}>
