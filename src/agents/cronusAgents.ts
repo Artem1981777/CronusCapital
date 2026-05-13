@@ -157,13 +157,10 @@ export async function runAnalyst(signals: MarketSignal[]): Promise<BetOpportunit
 
 // Agent 3: Executor — makes final decisions
 export async function runExecutor(opportunities: BetOpportunity[]): Promise<string[]> {
-  const system = `You are Executor, the decision-making agent for CronusCapital.
-  Make final autonomous trading decisions. Be concise and decisive.
-  Respond with a JSON array of decision strings only.`;
+  const system = "You are Executor, autonomous decision agent for CronusCapital. Rules: max 5% bankroll per position, min edge 3%, daily loss limit 20%. Make EXECUTE or HOLD decisions. Respond ONLY with JSON array of decision strings.";
   
-  const prompt = `Make final decisions on these opportunities:
-  ${JSON.stringify(opportunities)}
-  Consider risk management. Return JSON array of 2-3 decision strings.`;
+  const opps = opportunities.map(o => o.question + " -> " + o.recommendation + " EV:" + o.expectedValue + "% SIZE:" + o.size + "USDC").join(" | ")
+  const prompt = "Final risk-managed decisions for these Polymarket opportunities: " + opps + ". Output EXECUTE or HOLD for each. Format: EXECUTE: BUY [direction] on [market] - EV [X]% SIZE [Y] USDC or HOLD: [reason]. Return JSON array of 2 strings only.";
   
   try {
     const text = await callClaude(prompt, system);
