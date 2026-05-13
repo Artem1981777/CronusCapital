@@ -12,6 +12,9 @@ export default async function handler(req, res) {
     book: "https://clob.polymarket.com/book"
   }
   
+  // Remove tag param — Polymarket tags are not reliable
+  delete params.tag
+  
   const base = endpoints[endpoint] || endpoints.markets
   const query = new URLSearchParams(params).toString()
   const url = query ? base + "?" + query : base
