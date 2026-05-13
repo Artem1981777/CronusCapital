@@ -117,7 +117,7 @@ export async function runScout(topic: string): Promise<MarketSignal[]> {
 }
 
 function getFallbackOpportunities(signals: MarketSignal[]): BetOpportunity[] {
-  return signals.slice(0, 2).map((signal, i) => {
+  return signals.slice(0, 2).map((signal) => {
     const isYes = signal.sentiment === "bullish"
     const edge = Math.round((signal.confidence - 0.5) * 100)
     const kellySize = Math.max(5, Math.min(50, Math.round(edge * 0.4)))
