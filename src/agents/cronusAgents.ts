@@ -117,26 +117,19 @@ export async function runScout(topic: string): Promise<MarketSignal[]> {
 }
 
 function getFallbackOpportunities(signals: MarketSignal[]): BetOpportunity[] {
-  const bullish = signals.find(s => s.sentiment === "bullish")
-  const bearish = signals.find(s => s.sentiment === "bearish")
-  return [
-    {
+  return signals.slice(0, 2).map((signal, i) => {
+    const isYes = signal.sentiment === "bullish"
+    const edge = Math.round((signal.confidence - 0.5) * 100)
+    const kellySize = Math.max(5, Math.min(50, Math.round(edge * 0.4)))
+    return {
       market: "Polymarket",
-      question: bullish ? "Will " + bullish.source + " signal prove correct this week?" : "Will crypto markets rise this week?",
-      recommendation: "YES",
-      expectedValue: 67,
-      reasoning: bullish ? "Strong institutional signal with " + Math.round((bullish.confidence)*100) + "% confidence from " + bullish.source : "Bullish momentum detected",
-      size: 25
-    },
-    {
-      market: "Polymarket",
-      question: bearish ? "Will regulatory pressure impact markets negatively?" : "Will markets drop below key support?",
-      recommendation: "NO",
-      expectedValue: 58,
-      reasoning: bearish ? "Regulatory FUD historically overpriced, " + Math.round((1-bearish.confidence)*100) + "% contrarian edge" : "Support levels holding",
-      size: 15
+      question: signal.headline,
+      recommendation: isYes ? "YES" : "NO",
+      expectedValue: Math.round(signal.confidence * 100),
+      reasoning: "Bayesian prior from Polymarket price. Edge: " + edge + "%. Kelly fraction applied. Confidence: " + Math.round(signal.confidence * 100) + "%",
+      size: kellySize
     }
-  ]
+  })
 }
 
 // Agent 2: Analyst — finds +EV opportunities
