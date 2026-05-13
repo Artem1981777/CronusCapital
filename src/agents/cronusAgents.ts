@@ -67,7 +67,7 @@ async function fetchPolymarketData(): Promise<any[]> {
   } catch (e) { return [] }
 }
 
-function polyToSignals(markets: any[], topic: string): MarketSignal[] {
+function polyToSignals(markets: any[], _topic: string): MarketSignal[] {
   return markets.map((m: any, i: number) => {
     let prices = [0.5, 0.5]
     try { prices = JSON.parse(m.outcomePrices).map(Number) } catch {}
