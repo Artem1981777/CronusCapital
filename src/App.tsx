@@ -1,6 +1,7 @@
 import "./cronus.css"
 import { useState, useEffect } from "react"
 import { WalletButton } from "./components/WalletButton"
+import { Dashboard } from "./components/Dashboard"
 import { useCronusContract } from "./hooks/useCronusContract"
 import { useAccount } from "wagmi"
 import { runCronusPipeline, setApiKey } from "./agents/cronusAgents"
@@ -278,6 +279,8 @@ export default function App() {
           </div>
         </div>
       )}
+      <Dashboard />
+
       {onChainTxs.length > 0 && (
         <div style={{ padding: "12px 32px", background: "#050505", borderTop: "1px solid #39ff1422" }}>
           {onChainTxs.map((hash, i) => (
