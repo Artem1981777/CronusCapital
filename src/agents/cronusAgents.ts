@@ -57,8 +57,37 @@ function getFallbackSignals(topic: string): MarketSignal[] {
   ]
 }
 
+
+async function fetchPolymarketData(): Promise<any[]> {
+  try {
+    const res = await fetch("/api/polymarket?endpoint=markets&active=true&limit=5&order=volume&ascending=false")
+    const data = await res.json()
+    if (Array.isArray(data) && data.length > 0) return data.slice(0, 3)
+    return []
+  } catch (e) { return [] }
+}
+
+function polyToSignals(markets: any[], topic: string): MarketSignal[] {
+  return markets.map((m: any, i: number) => {
+    let prices = [0.5, 0.5]
+    try { prices = JSON.parse(m.outcomePrices).map(Number) } catch {}
+    const yp = prices[0]
+    return {
+      id: String(i+1),
+      source: "Polymarket",
+      headline: m.question,
+      sentiment: (yp > 0.6 ? "bullish" : yp < 0.4 ? "bearish" : "neutral") as any,
+      confidence: Math.min(0.95, Math.abs(yp-0.5)*2+0.5),
+      timestamp: Date.now()
+    }
+  })
+}
+
 // Agent 1: Scout — finds market signals
 export async function runScout(topic: string): Promise<MarketSignal[]> {
+  const polyData = await fetchPolymarketData()
+  if (polyData.length > 0) return polyToSignals(polyData, topic)
+
   const system = `You are Scout, a market intelligence agent for CronusCapital. 
   Analyze news and generate market signals. 
   Respond ONLY with valid JSON array of signals, no markdown, no explanation.
