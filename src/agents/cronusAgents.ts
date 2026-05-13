@@ -164,19 +164,25 @@ export async function runExecutor(opportunities: BetOpportunity[]): Promise<stri
   
   try {
     const text = await callClaude(prompt, system);
-    if (!text || text.length < 10) return [
-      "EXECUTE: BUY position on YES — EV 67% detected via institutional signal",
-      "HOLD: Monitor NO position — contrarian edge identified, await confirmation"
-    ];
+    if (!text || text.length < 10) {
+      return opportunities.map(o => {
+        if (o.expectedValue > 60) {
+          return "EXECUTE: " + o.recommendation + " on " + o.question.slice(0, 50) + " — EV " + o.expectedValue + "% SIZE " + o.size + " USDC"
+        }
+        return "HOLD: " + o.question.slice(0, 50) + " — edge insufficient (" + o.expectedValue + "% EV)"
+      })
+    }
     const clean = text.replace(/```json|```/g, '').trim();
     const parsed = JSON.parse(clean);
     if (!Array.isArray(parsed) || parsed.length === 0) return ["EXECUTE: Position identified, awaiting Arc settlement"];
     return parsed;
   } catch {
-    return [
-      "EXECUTE: BUY position on YES — EV 67% detected via institutional signal",
-      "HOLD: Monitor NO position — contrarian edge identified, await confirmation"
-    ];
+    return opportunities.map(o => {
+      if (o.expectedValue > 60) {
+        return "EXECUTE: " + o.recommendation + " on " + o.question.slice(0, 50) + " — EV " + o.expectedValue + "% SIZE " + o.size + " USDC"
+      }
+      return "HOLD: " + o.question.slice(0, 50) + " — edge below threshold"
+    })
   }
 }
 
