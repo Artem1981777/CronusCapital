@@ -161,7 +161,7 @@ export default function App() {
 
   async function runAgents() {
     if (!topic.trim()) return
-    if (!apiKey.trim()) { setShowKeyInput(true); return }
+    // API key optional - agents work with fallback data
     setLoading(true); setState(null); setReasoningLogs([])
     setAgentPhase("scout")
     addLog("SCOUT", "Scanning agora for signals on: " + topic + ". Monitoring sentiment across news feeds...")
