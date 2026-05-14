@@ -2,6 +2,7 @@ import "./cronus.css"
 import { useState, useEffect } from "react"
 import { WalletButton } from "./components/WalletButton"
 import { Dashboard, saveDecision } from "./components/Dashboard"
+import { LiveMarkets } from "./components/LiveMarkets"
 import { useCronusContract } from "./hooks/useCronusContract"
 import { useAccount } from "wagmi"
 import { runCronusPipeline, setApiKey } from "./agents/cronusAgents"
@@ -286,6 +287,7 @@ export default function App() {
           </div>
         </div>
       )}
+      <LiveMarkets />
       <Dashboard totalOnChain={sessionTxCount} />
 
       {onChainTxs.length > 0 && (
