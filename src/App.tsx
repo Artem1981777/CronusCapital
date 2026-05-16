@@ -110,6 +110,7 @@ function BetCard({ bet }: { bet: BetOpportunity }) {
         <span style={{ color: "#666", fontSize: "11px" }}>SIZE: {bet.size} USDC</span>
       </div>
       <div style={{ color: "#555", fontSize: "11px", marginTop: "6px", fontStyle: "italic" }}>{bet.reasoning}</div>
+      <a href={"https://polymarket.com/search?q=" + encodeURIComponent(bet.question.slice(0, 50))} target="_blank" style={{ display: "block", marginTop: "10px", padding: "6px", background: "transparent", border: "1px solid #39ff1433", color: "#39ff1466", fontFamily: "Cinzel, serif", fontSize: "9px", letterSpacing: "2px", textAlign: "center", textDecoration: "none" }}>BET ON POLYMARKET →</a>
     </div>
   )
 }
