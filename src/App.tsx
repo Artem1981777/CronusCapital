@@ -3,6 +3,7 @@ import { useState, useEffect } from "react"
 import { WalletButton } from "./components/WalletButton"
 import { Dashboard, saveDecision } from "./components/Dashboard"
 import { LiveMarkets } from "./components/LiveMarkets"
+import { Onboarding } from "./components/Onboarding"
 import { useCronusContract } from "./hooks/useCronusContract"
 import { useAccount } from "wagmi"
 import { runCronusPipeline, setApiKey } from "./agents/cronusAgents"
@@ -208,6 +209,7 @@ export default function App() {
   return (
     <div style={{ minHeight: "100vh", background: "#000", color: "#39ff14", fontFamily: "Cinzel, serif" }}>
       <div className="scanline" />
+      <Onboarding />
       <ChainBar stats={chainStats} />
       <div style={{ borderBottom: "1px solid #39ff1422", padding: "20px 32px", display: "flex", alignItems: "center", justifyContent: "space-between", background: "linear-gradient(180deg, #050505 0%, transparent 100%)" }}>
         <div>
