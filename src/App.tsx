@@ -63,18 +63,46 @@ function ReasoningPanel({ logs }: { logs: ReasoningLog[] }) {
 function AgentCard({ name, icon, role, status, children }: { name: string; icon: string; role: string; status: string; children?: React.ReactNode }) {
   const statusColor = status === "done" ? "#39ff14" : status === "running" ? "#00ff88" : "#39ff1433"
   const statusLabel = status === "done" ? "COMPLETE" : status === "running" ? "PROCESSING..." : "STANDBY"
+  const progress = status === "done" ? 100 : status === "running" ? 60 : 0
   return (
-    <div style={{ border: "1px solid #39ff1422", borderTop: "2px solid #39ff14", background: "linear-gradient(180deg, #040404 0%, #020202 100%)", padding: "24px", position: "relative", boxShadow: "0 0 20px #39ff1411 inset" }}>
+    <div style={{
+      border: "1px solid #39ff1422",
+      borderTop: "2px solid " + (status === "idle" ? "#39ff1433" : "#39ff14"),
+      background: "linear-gradient(180deg, #040404 0%, #020202 100%)",
+      padding: "24px", position: "relative",
+      boxShadow: status === "running" ? "0 0 30px #39ff1422 inset" : "0 0 20px #39ff1411 inset",
+      transition: "all 0.3s ease"
+    }}>
+      {status === "running" && (
+        <div style={{
+          position: "absolute", top: 0, left: 0, right: 0, height: "2px",
+          background: "linear-gradient(90deg, transparent, #39ff14, transparent)",
+          animation: "shimmer 1.5s linear infinite"
+        }} />
+      )}
       <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "16px" }}>
-        <span style={{ fontSize: "28px" }}>{icon}</span>
+        <span style={{ fontSize: "28px", filter: status === "running" ? "drop-shadow(0 0 8px #39ff14)" : "none", transition: "filter 0.3s" }}>{icon}</span>
         <div>
           <div style={{ color: "#39ff14", fontFamily: "Cinzel, serif", fontSize: "18px", letterSpacing: "3px", fontWeight: 700, textShadow: "0 0 10px #39ff1466" }}>{name}</div>
           <div style={{ color: "#39ff1455", fontSize: "10px", letterSpacing: "3px", fontFamily: "Cinzel, serif" }}>{role}</div>
         </div>
         <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: "6px" }}>
-          <div style={{ width: "7px", height: "7px", borderRadius: "50%", background: statusColor, boxShadow: status === "running" ? "0 0 12px " + statusColor : "0 0 6px " + statusColor }} />
+          <div style={{
+            width: "7px", height: "7px", borderRadius: "50%",
+            background: statusColor,
+            boxShadow: status === "running" ? "0 0 12px " + statusColor : "0 0 6px " + statusColor,
+            animation: status === "running" ? "pulse 1s infinite" : "none"
+          }} />
           <span style={{ color: statusColor, fontSize: "10px", letterSpacing: "3px", fontFamily: "Cinzel, serif", fontWeight: 700 }}>{statusLabel}</span>
         </div>
+      </div>
+      <div style={{ marginBottom: "12px", height: "2px", background: "#39ff1411", borderRadius: "1px", overflow: "hidden" }}>
+        <div style={{
+          height: "100%", width: progress + "%",
+          background: "linear-gradient(90deg, #39ff14, #00ff88)",
+          transition: "width 0.5s ease",
+          boxShadow: "0 0 8px #39ff14"
+        }} />
       </div>
       <div style={{ borderTop: "1px solid #39ff1422", paddingTop: "16px" }}>{children}</div>
     </div>
