@@ -30,6 +30,10 @@ function payerOf(header) {
   } catch (_) { return "demo" }
 }
 
+function memoOf(header) {
+	try { const p = decode(header); return (p && p.memo) || null } catch (e) { return null }
+}
+
 async function facilitator(path, header, requirements) {
   const res = await fetch(`${FACILITATOR}/${path}`, {
     method: "POST", headers: { "Content-Type": "application/json" },
@@ -76,7 +80,7 @@ export default async function handler(req, res) {
   if (DEMO) {
     const report = await generateReport(topic)
     res.setHeader("X-PAYMENT-RESPONSE", Buffer.from(JSON.stringify({ success: true, network: NETWORK, demo: true })).toString("base64"))
-    res.status(200).json({ paid: true, demo: true, payer: payerOf(header), report })
+    res.status(200).json({ paid: true, demo: true, payer: payerOf(header), memo: memoOf(header), report })
     return
   }
 
@@ -87,6 +91,6 @@ export default async function handler(req, res) {
     const settlement = await facilitator("settle", header, requirements)
     if (settlement && settlement.success)
       res.setHeader("X-PAYMENT-RESPONSE", Buffer.from(JSON.stringify(settlement)).toString("base64"))
-    res.status(200).json({ paid: true, payer: v.payer, settlement, report })
+    res.status(200).json({ paid: true, payer: v.payer, memo: memoOf(header), settlement, report })
   } catch (e) { res.status(500).json({ error: String(e) }) }
 }
