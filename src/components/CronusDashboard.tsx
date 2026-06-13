@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react"
 import type { CSSProperties } from "react"
+import { useAccount, useConnect, useDisconnect } from "wagmi"
 
 /* ============================================================
    CRONUS CAPITAL — WOW DASHBOARD (cyber-Egyptian)
-   + functional CONNECT, Arc v0.7.2 badge, memo/batch strip, privacy roadmap
+   + real multi-wallet connect (MetaMask / Rabby / OKX / Trust / WalletConnect)
    ============================================================ */
 
 type Trend = "up" | "down" | "flat"
@@ -16,6 +17,48 @@ interface Signal { id: string; asset: string; action: Action; conf: number; time
 
 function fmtUsd(n: number): string {
 	return "$" + n.toLocaleString("en-US", { maximumFractionDigits: 0 })
+}
+
+function WalletConnectModal(props: { open: boolean; onClose: () => void }) {
+	const { connectors, connect, isPending } = useConnect()
+	const { isConnected, address } = useAccount()
+	const { disconnect } = useDisconnect()
+	if (!props.open) return null
+
+	// Dedup connectors by name (EIP-6963 discovery can add duplicates)
+	const seen = new Set<string>()
+	const list = connectors.filter((c) => {
+		const key = (c.name || c.id || "").toLowerCase()
+		if (!key || seen.has(key)) return false
+		seen.add(key)
+		return true
+	})
+
+	return (
+		<div className="cd-modal-overlay" onClick={props.onClose}>
+			<div className="cd-wallet-modal" onClick={(e) => e.stopPropagation()}>
+				<div className="cd-modal-title">☥ CONNECT WALLET</div>
+				{isConnected ? (
+					<div className="cd-wallet-connected">
+						<div className="cd-wallet-addr">{address ? address.slice(0, 6) + "…" + address.slice(-4) : "Connected"}</div>
+						<button className="cd-btn cd-btn-danger" onClick={() => disconnect()}>DISCONNECT</button>
+					</div>
+				) : (
+					<div className="cd-wallet-list">
+						{list.map((c) => (
+							<button key={c.uid} className="cd-wallet-row" disabled={isPending} onClick={() => connect({ connector: c })}>
+								{c.icon ? <img className="cd-wallet-ico" src={c.icon} alt="" /> : <span className="cd-wallet-ico cd-wallet-ico-fb">{(c.name || "?").charAt(0)}</span>}
+								<span className="cd-wallet-name">{c.name}</span>
+								<span className="cd-wallet-arrow">→</span>
+							</button>
+						))}
+						{list.length === 0 && <div className="cd-wallet-empty">No wallet detected. Install MetaMask, Rabby, OKX or Trust Wallet.</div>}
+					</div>
+				)}
+				<button className="cd-btn cd-btn-ghost" onClick={props.onClose}>CLOSE</button>
+			</div>
+		</div>
+	)
 }
 
 function ConfidenceRing(props: { value: number }) {
@@ -126,6 +169,8 @@ export function CronusDashboard() {
 	const [ready, setReady] = useState(false)
 	const [running, setRunning] = useState(false)
 	const [riskOpen, setRiskOpen] = useState(false)
+	const [walletOpen, setWalletOpen] = useState(false)
+	const { isConnected, address } = useAccount()
 
 	useEffect(() => {
 		const t = setTimeout(() => setReady(true), 700)
@@ -188,12 +233,7 @@ export function CronusDashboard() {
 		setTimeout(() => setRunning(false), 2800)
 	}
 
-	// Clicks the real wallet-connect button rendered elsewhere in the app
-	const connectWallet = () => {
-		const all = Array.from(document.querySelectorAll("button"))
-		const target = all.find((b) => /connect wallet/i.test(b.textContent || ""))
-		if (target) target.click()
-	}
+	const walletLabel = isConnected && address ? "☥ " + address.slice(0, 4) + "…" + address.slice(-4) : "☥ CONNECT"
 
 	return (
 		<section className={"cd-root" + (running ? " cd-running" : "")}>
@@ -204,7 +244,7 @@ export function CronusDashboard() {
 					<div className="cd-head-sub">Autonomous Market Intelligence · Arc Network · USDC</div>
 					<div className="cd-badge">⚡ v0.7.2 READY · MEMO + BATCHED PAYMENTS</div>
 				</div>
-				<button className="cd-ankh" title="Connect Wallet" onClick={connectWallet}>☥ CONNECT</button>
+				<button className={"cd-ankh" + (isConnected ? " cd-ankh-on" : "")} title="Connect Wallet" onClick={() => setWalletOpen(true)}>{walletLabel}</button>
 			</header>
 
 			{ready ? (
@@ -266,6 +306,7 @@ export function CronusDashboard() {
 
 			{running && <div className="cd-scan" />}
 			<RiskModal open={riskOpen} onClose={() => setRiskOpen(false)} />
+			<WalletConnectModal open={walletOpen} onClose={() => setWalletOpen(false)} />
 		</section>
 	)
 }
