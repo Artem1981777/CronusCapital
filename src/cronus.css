@@ -227,7 +227,7 @@ button:active { transform: scale(0.97); }
 
 /* ===== EGYPT BG — LIGHTER OVERLAY ===== */
 .egypt-bg {
-	background-image: linear-gradient(rgba(0,0,0,0.10), rgba(0,0,0,0.24)), url("/egypt-bg.jpg") !important;
+	background-image: linear-gradient(rgba(0,0,0,0.36), rgba(0,0,0,0.54)), url("/egypt-bg.jpg") !important;
 }
 
 /* ============================================================
