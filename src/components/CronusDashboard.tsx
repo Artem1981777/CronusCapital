@@ -3,44 +3,21 @@ import type { CSSProperties } from "react"
 
 /* ============================================================
    CRONUS CAPITAL — WOW DASHBOARD (cyber-Egyptian)
-   Pure-CSS animations. All styling = .cd-* classes in cronus.css
-   CUSTOMIZE markers show where to plug real on-chain data.
+   + functional CONNECT, Arc v0.7.2 badge, memo/batch strip, privacy roadmap
    ============================================================ */
 
 type Trend = "up" | "down" | "flat"
 type AgentState = "idle" | "scanning" | "analyzing" | "executing"
 type Action = "LONG" | "SHORT" | "HOLD"
 
-interface Kpi {
-	id: string
-	label: string
-	value: string
-	sub: string
-	trend: Trend
-	accent: "green" | "gold"
-	progress?: number
-}
-interface AgentInfo {
-	id: string
-	name: string
-	role: string
-	glyph: string
-	state: AgentState
-	perf: number
-}
-interface Signal {
-	id: string
-	asset: string
-	action: Action
-	conf: number
-	time: string
-}
+interface Kpi { id: string; label: string; value: string; sub: string; trend: Trend; accent: "green" | "gold"; progress?: number }
+interface AgentInfo { id: string; name: string; role: string; glyph: string; state: AgentState; perf: number }
+interface Signal { id: string; asset: string; action: Action; conf: number; time: string }
 
 function fmtUsd(n: number): string {
 	return "$" + n.toLocaleString("en-US", { maximumFractionDigits: 0 })
 }
 
-// ---- Circular confidence ring (SVG) ----
 function ConfidenceRing(props: { value: number }) {
 	const r = 46
 	const circ = 2 * Math.PI * r
@@ -59,7 +36,6 @@ function ConfidenceRing(props: { value: number }) {
 	)
 }
 
-// ---- KPI card ----
 function KpiCard(props: { kpi: Kpi }) {
 	const k = props.kpi
 	const arrow = k.trend === "up" ? "▲" : k.trend === "down" ? "▼" : "■"
@@ -70,17 +46,12 @@ function KpiCard(props: { kpi: Kpi }) {
 			<div className="cd-card-glow" />
 			<div className="cd-card-label">{k.label}</div>
 			<div className="cd-card-value">{k.value}</div>
-			<div className={"cd-card-sub " + trendClass}>
-				<span className="cd-arrow">{arrow}</span> {k.sub}
-			</div>
-			{typeof k.progress === "number" && (
-				<div className="cd-bar"><div className="cd-bar-fill" style={barStyle} /></div>
-			)}
+			<div className={"cd-card-sub " + trendClass}><span className="cd-arrow">{arrow}</span> {k.sub}</div>
+			{typeof k.progress === "number" && (<div className="cd-bar"><div className="cd-bar-fill" style={barStyle} /></div>)}
 		</div>
 	)
 }
 
-// ---- Agent row ----
 function AgentRow(props: { a: AgentInfo }) {
 	const a = props.a
 	const perfStyle: CSSProperties = { width: a.perf + "%" }
@@ -97,7 +68,6 @@ function AgentRow(props: { a: AgentInfo }) {
 	)
 }
 
-// ---- Market radar ----
 function MarketRadar(props: { blips: Array<{ id: string; x: number; y: number; hot: boolean }> }) {
 	return (
 		<div className="cd-radar">
@@ -111,7 +81,6 @@ function MarketRadar(props: { blips: Array<{ id: string; x: number; y: number; h
 	)
 }
 
-// ---- Live ticker ----
 function LiveTicker(props: { signals: Array<Signal> }) {
 	const text = props.signals.map((s) => s.asset + " " + s.action + " · " + s.conf + "% · " + s.time).join("    𓂀    ")
 	return (
@@ -125,7 +94,6 @@ function LiveTicker(props: { signals: Array<Signal> }) {
 	)
 }
 
-// ---- Risk modal (sliders) ----
 function RiskModal(props: { open: boolean; onClose: () => void }) {
 	const [maxRisk, setMaxRisk] = useState(35)
 	const [leverage, setLeverage] = useState(2)
@@ -159,19 +127,16 @@ export function CronusDashboard() {
 	const [running, setRunning] = useState(false)
 	const [riskOpen, setRiskOpen] = useState(false)
 
-	// skeleton -> content
 	useEffect(() => {
 		const t = setTimeout(() => setReady(true), 700)
 		return () => clearTimeout(t)
 	}, [])
-
-	// CUSTOMIZE: replace this fake tick with your real on-chain / API polling
 	useEffect(() => {
 		const id = setInterval(() => setTick((v) => v + 1), 2000)
 		return () => clearInterval(id)
 	}, [])
 
-	// ---- derived metrics (CUSTOMIZE with real data) ----
+	// CUSTOMIZE: replace with real on-chain / API data
 	const portfolio = 124820 + tick * 137
 	const pnlPct = (12.4 + (tick % 7) * 0.25).toFixed(1)
 	const confidence = 78 + (tick % 9)
@@ -188,31 +153,46 @@ export function CronusDashboard() {
 		{ id: "sh", label: "Sharpe Ratio", value: sharpe, sub: "risk-adjusted", trend: Number(sharpe) > 2 ? "up" : "flat", accent: "gold" },
 		{ id: "rk", label: "Risk Exposure", value: risk + "%", sub: risk > 40 ? "elevated" : "nominal", trend: risk > 40 ? "down" : "flat", accent: "green", progress: risk },
 	]
-
 	const agents: Array<AgentInfo> = [
 		{ id: "scout", name: "SCOUT", role: "Signal Discovery", glyph: "𓅃", state: running ? "scanning" : "idle", perf: 92 },
 		{ id: "analyst", name: "ANALYST", role: "Risk & Conviction", glyph: "𓂀", state: running ? "analyzing" : "idle", perf: 87 },
 		{ id: "executor", name: "EXECUTOR", role: "On-chain Settlement", glyph: "𓊽", state: running ? "executing" : "idle", perf: 95 },
 	]
-
 	const blips = [
 		{ id: "b1", x: 28, y: 32 }, { id: "b2", x: 66, y: 44 }, { id: "b3", x: 48, y: 70 },
 		{ id: "b4", x: 72, y: 24 }, { id: "b5", x: 38, y: 54 }, { id: "b6", x: 58, y: 62 },
 	].map((b, i) => ({ ...b, hot: (i + tick) % 3 === 0 }))
-
 	const signals: Array<Signal> = [
 		{ id: "s1", asset: "BTC", action: "LONG", conf: 82, time: "12s" },
 		{ id: "s2", asset: "ETH", action: "LONG", conf: 74, time: "41s" },
 		{ id: "s3", asset: "SOL", action: "SHORT", conf: 68, time: "1m" },
 		{ id: "s4", asset: "ARB", action: "HOLD", conf: 55, time: "2m" },
 	]
-
 	const skeletons = [0, 1, 2, 3, 4, 5]
+
+	// Arc v0.7.2 memo + batching showcase
+	const memoSeed = (0x7f2a + tick * 13).toString(16).toUpperCase().slice(-4)
+	const memo = "CRONUS-" + signals[0].asset + "-" + memoSeed
+	const batchCount = 2 + (tick % 4)
+
+	const privacy = [
+		{ g: "𓂀", t: "Opt-in confidentiality", d: "Per-function privacy in plain Solidity" },
+		{ g: "𓊽", t: "Composable", d: "Public + private finalize in one block" },
+		{ g: "☥", t: "Governed visibility", d: "Auditors via signed query, others see nothing" },
+		{ g: "𓆣", t: "Quantum-safe", d: "Hybrid post-quantum (harvest-now-decrypt-later)" },
+	]
 
 	const consult = () => {
 		setRunning(true)
 		// CUSTOMIZE: trigger your real Scout -> Analyst -> Executor pipeline here
 		setTimeout(() => setRunning(false), 2800)
+	}
+
+	// Clicks the real wallet-connect button rendered elsewhere in the app
+	const connectWallet = () => {
+		const all = Array.from(document.querySelectorAll("button"))
+		const target = all.find((b) => /connect wallet/i.test(b.textContent || ""))
+		if (target) target.click()
 	}
 
 	return (
@@ -222,8 +202,9 @@ export function CronusDashboard() {
 				<div className="cd-head-text">
 					<div className="cd-head-title">CRONUS ORACLE DASHBOARD</div>
 					<div className="cd-head-sub">Autonomous Market Intelligence · Arc Network · USDC</div>
+					<div className="cd-badge">⚡ v0.7.2 READY · MEMO + BATCHED PAYMENTS</div>
 				</div>
-				<div className="cd-ankh" title="Connect Wallet">☥ CONNECT</div>
+				<button className="cd-ankh" title="Connect Wallet" onClick={connectWallet}>☥ CONNECT</button>
 			</header>
 
 			{ready ? (
@@ -252,9 +233,7 @@ export function CronusDashboard() {
 				</div>
 				<div className="cd-panel cd-actions">
 					<div className="cd-panel-title">⚡ ORACLE ACTIONS</div>
-					<button className="cd-btn cd-btn-primary" onClick={consult} disabled={running}>
-						{running ? "CONSULTING…" : "CONSULT ORACLES"}
-					</button>
+					<button className="cd-btn cd-btn-primary" onClick={consult} disabled={running}>{running ? "CONSULTING…" : "CONSULT ORACLES"}</button>
 					<button className="cd-btn cd-btn-danger" onClick={() => window.confirm("Force execute current strategy on-chain?")}>FORCE EXECUTE</button>
 					<button className="cd-btn cd-btn-gold" onClick={() => setRiskOpen(true)}>RISK ADJUST</button>
 					<button className="cd-btn cd-btn-ghost" onClick={() => window.scrollTo({ top: 99999, behavior: "smooth" })}>VIEW LIVE MARKETS</button>
@@ -263,6 +242,27 @@ export function CronusDashboard() {
 			</div>
 
 			<LiveTicker signals={signals} />
+
+			<div className="cd-memo">
+				<span className="cd-memo-tag">𓏏 ARC v0.7.2</span>
+				Last settlement memo: <b>{memo}</b> · batched <b>{batchCount}</b> calls ✓ · reconciliation-ready
+			</div>
+
+			<div className="cd-panel">
+				<div className="cd-panel-title">🔒 ARC PRIVACY SECTOR · ROADMAP</div>
+				<div className="cd-roadmap-grid">
+					{privacy.map((p) => (
+						<div key={p.t} className="cd-rm">
+							<div className="cd-rm-glyph">{p.g}</div>
+							<div>
+								<div className="cd-rm-t">{p.t}</div>
+								<div className="cd-rm-d">{p.d}</div>
+							</div>
+						</div>
+					))}
+				</div>
+				<div className="cd-rm-note">Proposed design — confidential agent strategies & positions (not live yet).</div>
+			</div>
 
 			{running && <div className="cd-scan" />}
 			<RiskModal open={riskOpen} onClose={() => setRiskOpen(false)} />
