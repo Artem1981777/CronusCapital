@@ -200,3 +200,17 @@ button:active { transform: scale(0.97); }
 	content: ""; position: absolute; inset: 0; pointer-events: none;
 	background: radial-gradient(ellipse 55% 75% at 50% 42%, rgba(0,0,0,0.74), rgba(0,0,0,0.30) 55%, rgba(0,0,0,0) 100%);
 }
+
+/* ===== REAL EGYPTIAN PHOTO BACKGROUND ===== */
+.egypt-bg {
+	background-image: linear-gradient(rgba(3,8,3,0.45), rgba(0,0,0,0.68)), url("/egypt-bg.png");
+	background-size: cover;
+	background-position: center center;
+	background-repeat: no-repeat;
+}
+.hiero-wall, .deities, .pyramid-wrap { display: none !important; }
+.hiero-rain { opacity: 0.15 !important; }
+.egypt-glow { opacity: 0.35 !important; }
+.egypt-bg::after {
+	background: radial-gradient(ellipse 62% 82% at 50% 45%, rgba(0,0,0,0.32), rgba(0,0,0,0) 72%) !important;
+}
