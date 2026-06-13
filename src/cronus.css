@@ -170,3 +170,10 @@ button:active { transform: scale(0.97); }
 	animation: deityFloat 9s ease-in-out infinite;
 }
 @keyframes deityFloat { 0%,100% { transform: translateY(0); opacity: 0.10; } 50% { transform: translateY(-14px); opacity: 0.18; } }
+
+/* visibility fix: поднять фон над непрозрачными предками + плотность */
+.egypt-bg { z-index: 0 !important; pointer-events: none !important; }
+.hiero-rain { opacity: 0.4 !important; }
+.hiero-wall { opacity: 0.1 !important; }
+.deity { opacity: 0.22 !important; }
+.egypt-glow { opacity: 1 !important; }
