@@ -21,6 +21,7 @@ export const wagmiConfig = createConfig({
 	chains: [arcTestnet],
 	connectors: [
 		injected({ target: "metaMask" }),
+		injected(),
 		walletConnect({ projectId }),
 	],
 	transports: { [arcTestnet.id]: http("/api/rpc") },
