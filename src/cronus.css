@@ -224,3 +224,8 @@ button:active { transform: scale(0.97); }
 }
 .hiero-wall, .deities, .pyramid-wrap, .hiero-rain, .egypt-glow { display: none !important; }
 .egypt-bg::after { display: none !important; }
+
+/* ===== EGYPT BG — LIGHTER OVERLAY ===== */
+.egypt-bg {
+	background-image: linear-gradient(rgba(0,0,0,0.10), rgba(0,0,0,0.24)), url("/egypt-bg.jpg") !important;
+}
