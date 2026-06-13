@@ -18,16 +18,16 @@ interface ReasoningLog { agent: string; timestamp: number; thought: string }
 
 function ChainBar({ stats }: { stats: ChainStats | null }) {
   return (
-    <div style={{ background: "#050505", borderBottom: "1px solid #39ff1433", padding: "7px 32px", display: "flex", gap: "24px", alignItems: "center", fontSize: "11px", letterSpacing: "3px", overflowX: "auto", fontFamily: "Cinzel, serif" }}>
+    <div style={{ background: "#050505", borderBottom: "1px solid #39e01433", padding: "7px 32px", display: "flex", gap: "24px", alignItems: "center", fontSize: "11px", letterSpacing: "3px", overflowX: "auto", fontFamily: "Cinzel, serif" }}>
       <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
-        <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: stats?.alive ? "#39ff14" : "#ff4444", boxShadow: stats?.alive ? "0 0 10px #39ff14" : "none", animation: stats?.alive ? "pulse 2s infinite" : "none" }} />
-        <span style={{ color: stats?.alive ? "#39ff14" : "#ff4444", fontWeight: 700 }}>{stats?.alive ? "ARC LIVE" : "CONNECTING"}</span>
+        <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: stats?.alive ? "#39e014" : "#ff4444", boxShadow: stats?.alive ? "0 0 10px #39e014" : "none", animation: stats?.alive ? "pulse 2s infinite" : "none" }} />
+        <span style={{ color: stats?.alive ? "#39e014" : "#ff4444", fontWeight: 700 }}>{stats?.alive ? "ARC LIVE" : "CONNECTING"}</span>
       </div>
       {stats && <>
-        <span style={{ color: "#39ff1466" }}>BLOCK <span style={{ color: "#39ff14", fontWeight: 700 }}>#{stats.block.toLocaleString()}</span></span>
-        <span style={{ color: "#39ff1466" }}>GAS <span style={{ color: "#00ff88", fontWeight: 700 }}>{stats.gasPrice} GWEI</span></span>
-        <span style={{ color: "#39ff1466" }}>SESSION TXS <span style={{ color: "#39ff14", fontWeight: 700 }}>{stats.txCount}</span></span>
-        <span style={{ color: "#39ff1433" }}>USDC · TESTNET</span>
+        <span style={{ color: "#39e01466" }}>BLOCK <span style={{ color: "#39e014", fontWeight: 700 }}>#{stats.block.toLocaleString()}</span></span>
+        <span style={{ color: "#39e01466" }}>GAS <span style={{ color: "#00e078", fontWeight: 700 }}>{stats.gasPrice} GWEI</span></span>
+        <span style={{ color: "#39e01466" }}>SESSION TXS <span style={{ color: "#39e014", fontWeight: 700 }}>{stats.txCount}</span></span>
+        <span style={{ color: "#39e01433" }}>USDC · TESTNET</span>
       </>}
     </div>
   )
@@ -63,30 +63,30 @@ function ReasoningPanel({ logs }: { logs: ReasoningLog[] }) {
 }
 
 function AgentCard({ name, icon, role, status, children }: { name: string; icon: string; role: string; status: string; children?: React.ReactNode }) {
-  const statusColor = status === "done" ? "#39ff14" : status === "running" ? "#00ff88" : "#39ff1433"
+  const statusColor = status === "done" ? "#39e014" : status === "running" ? "#00e078" : "#39e01433"
   const statusLabel = status === "done" ? "COMPLETE" : status === "running" ? "PROCESSING..." : "STANDBY"
   const progress = status === "done" ? 100 : status === "running" ? 60 : 0
   return (
     <div style={{
-      border: "1px solid #39ff1422",
-      borderTop: "2px solid " + (status === "idle" ? "#39ff1433" : "#39ff14"),
+      border: "1px solid #39e01422",
+      borderTop: "2px solid " + (status === "idle" ? "#39e01433" : "#39e014"),
       background: "linear-gradient(180deg, #040404 0%, #020202 100%)",
       padding: "24px", position: "relative",
-      boxShadow: status === "running" ? "0 0 30px #39ff1422 inset" : "0 0 20px #39ff1411 inset",
+      boxShadow: status === "running" ? "0 0 30px #39e01422 inset" : "0 0 20px #39e01411 inset",
       transition: "all 0.3s ease"
     }}>
       {status === "running" && (
         <div style={{
           position: "absolute", top: 0, left: 0, right: 0, height: "2px",
-          background: "linear-gradient(90deg, transparent, #39ff14, transparent)",
+          background: "linear-gradient(90deg, transparent, #39e014, transparent)",
           animation: "shimmer 1.5s linear infinite"
         }} />
       )}
       <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "16px" }}>
-        <span style={{ fontSize: "28px", filter: status === "running" ? "drop-shadow(0 0 8px #39ff14)" : "none", transition: "filter 0.3s" }}>{icon}</span>
+        <span style={{ fontSize: "28px", filter: status === "running" ? "drop-shadow(0 0 8px #39e014)" : "none", transition: "filter 0.3s" }}>{icon}</span>
         <div>
-          <div style={{ color: "#39ff14", fontFamily: "Cinzel, serif", fontSize: "18px", letterSpacing: "3px", fontWeight: 700, textShadow: "0 0 10px #39ff1466" }}>{name}</div>
-          <div style={{ color: "#39ff1455", fontSize: "10px", letterSpacing: "3px", fontFamily: "Cinzel, serif" }}>{role}</div>
+          <div style={{ color: "#39e014", fontFamily: "Cinzel, serif", fontSize: "18px", letterSpacing: "3px", fontWeight: 700, textShadow: "0 0 10px #39e01466" }}>{name}</div>
+          <div style={{ color: "#39e01455", fontSize: "10px", letterSpacing: "3px", fontFamily: "Cinzel, serif" }}>{role}</div>
         </div>
         <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: "6px" }}>
           <div style={{
@@ -98,15 +98,15 @@ function AgentCard({ name, icon, role, status, children }: { name: string; icon:
           <span style={{ color: statusColor, fontSize: "10px", letterSpacing: "3px", fontFamily: "Cinzel, serif", fontWeight: 700 }}>{statusLabel}</span>
         </div>
       </div>
-      <div style={{ marginBottom: "12px", height: "2px", background: "#39ff1411", borderRadius: "1px", overflow: "hidden" }}>
+      <div style={{ marginBottom: "12px", height: "2px", background: "#39e01411", borderRadius: "1px", overflow: "hidden" }}>
         <div style={{
           height: "100%", width: progress + "%",
-          background: "linear-gradient(90deg, #39ff14, #00ff88)",
+          background: "linear-gradient(90deg, #39e014, #00e078)",
           transition: "width 0.5s ease",
-          boxShadow: "0 0 8px #39ff14"
+          boxShadow: "0 0 8px #39e014"
         }} />
       </div>
-      <div style={{ borderTop: "1px solid #39ff1422", paddingTop: "16px" }}>{children}</div>
+      <div style={{ borderTop: "1px solid #39e01422", paddingTop: "16px" }}>{children}</div>
     </div>
   )
 }
@@ -140,7 +140,7 @@ function BetCard({ bet }: { bet: BetOpportunity }) {
         <span style={{ color: "#666", fontSize: "11px" }}>SIZE: {bet.size} USDC</span>
       </div>
       <div style={{ color: "#555", fontSize: "11px", marginTop: "6px", fontStyle: "italic" }}>{bet.reasoning}</div>
-      <a href={"https://polymarket.com/search?q=" + encodeURIComponent(bet.question.slice(0, 50))} target="_blank" style={{ display: "block", marginTop: "10px", padding: "6px", background: "transparent", border: "1px solid #39ff1433", color: "#39ff1466", fontFamily: "Cinzel, serif", fontSize: "9px", letterSpacing: "2px", textAlign: "center", textDecoration: "none" }}>BET ON POLYMARKET →</a>
+      <a href={"https://polymarket.com/search?q=" + encodeURIComponent(bet.question.slice(0, 50))} target="_blank" style={{ display: "block", marginTop: "10px", padding: "6px", background: "transparent", border: "1px solid #39e01433", color: "#39e01466", fontFamily: "Cinzel, serif", fontSize: "9px", letterSpacing: "2px", textAlign: "center", textDecoration: "none" }}>BET ON POLYMARKET →</a>
     </div>
   )
 }
@@ -238,36 +238,36 @@ export default function App() {
   }
 
   return (
-    <div style={{ minHeight: "100vh", background: "transparent", color: "#39ff14", fontFamily: "Cinzel, serif" }}>
+    <div style={{ minHeight: "100vh", background: "transparent", color: "#39e014", fontFamily: "Cinzel, serif" }}>
       <div className="scanline" />
       <EgyptTheme />
         <CronusDashboard />
       <ChainBar stats={chainStats} />
-      <div style={{ borderBottom: "1px solid #39ff1422", padding: "20px 32px", display: "flex", alignItems: "center", justifyContent: "space-between", background: "linear-gradient(180deg, #050505 0%, transparent 100%)" }}>
+      <div style={{ borderBottom: "1px solid #39e01422", padding: "20px 32px", display: "flex", alignItems: "center", justifyContent: "space-between", background: "linear-gradient(180deg, #050505 0%, transparent 100%)" }}>
         <div>
           <div style={{ fontSize: "28px", fontWeight: 900, letterSpacing: "6px" }} className="celtic-title">CRONUS CAPITAL</div>
-          <div style={{ color: "#39ff1455", fontSize: "10px", letterSpacing: "5px", marginTop: "4px", fontFamily: "Cinzel, serif" }}>AUTONOMOUS MARKET INTELLIGENCE · ARC NETWORK</div>
+          <div style={{ color: "#39e01455", fontSize: "10px", letterSpacing: "5px", marginTop: "4px", fontFamily: "Cinzel, serif" }}>AUTONOMOUS MARKET INTELLIGENCE · ARC NETWORK</div>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: "20px" }}>
           <div style={{ textAlign: "right" }}>
-            <div style={{ color: "#39ff14", fontSize: "12px", letterSpacing: "2px", fontFamily: "Cinzel, serif", fontWeight: 700 }}>SESSION TXS: {sessionTxCount}</div>
-            <div style={{ color: "#39ff1444", fontSize: "10px", letterSpacing: "2px", marginTop: "2px", fontFamily: "Cinzel, serif" }}>~$0.01 PER TX · USDC</div>
+            <div style={{ color: "#39e014", fontSize: "12px", letterSpacing: "2px", fontFamily: "Cinzel, serif", fontWeight: 700 }}>SESSION TXS: {sessionTxCount}</div>
+            <div style={{ color: "#39e01444", fontSize: "10px", letterSpacing: "2px", marginTop: "2px", fontFamily: "Cinzel, serif" }}>~$0.01 PER TX · USDC</div>
           </div>
           <WalletButton />
         </div>
       </div>
-      <div style={{ textAlign: "center", padding: "48px 32px 32px", borderBottom: "1px solid #39ff1422" }}>
-        <div style={{ fontFamily: "Cinzel, serif", fontSize: "12px", letterSpacing: "7px", color: "#39ff1466", marginBottom: "16px", textShadow: "0 0 10px #39ff1444" }}>⬡ THE THREE ORACLES OF THE AGORA ⬡</div>
-        <div style={{ fontFamily: "Cinzel, serif", fontSize: "16px", color: "#39ff14aa", maxWidth: "500px", margin: "0 auto 32px", lineHeight: 1.8, letterSpacing: "1px" }}>
+      <div style={{ textAlign: "center", padding: "48px 32px 32px", borderBottom: "1px solid #39e01422" }}>
+        <div style={{ fontFamily: "Cinzel, serif", fontSize: "12px", letterSpacing: "7px", color: "#39e01466", marginBottom: "16px", textShadow: "0 0 10px #39e01444" }}>⬡ THE THREE ORACLES OF THE AGORA ⬡</div>
+        <div style={{ fontFamily: "Cinzel, serif", fontSize: "16px", color: "#39e014aa", maxWidth: "500px", margin: "0 auto 32px", lineHeight: 1.8, letterSpacing: "1px" }}>
           "All things are an exchange for fire, and fire for all things"
-          <br /><span style={{ fontSize: "12px", color: "#39ff1455", letterSpacing: "2px" }}>— HERACLITUS · FRAGMENT 90</span>
+          <br /><span style={{ fontSize: "12px", color: "#39e01455", letterSpacing: "2px" }}>— HERACLITUS · FRAGMENT 90</span>
         </div>
         <div style={{ display: "flex", maxWidth: "560px", margin: "0 auto" }}>
-          <input value={topic} onChange={e => setTopic(e.target.value)} onKeyDown={e => e.key === "Enter" && runAgents()} placeholder="Enter market topic to analyze..." style={{ flex: 1, padding: "14px 20px", background: "#050505", border: "1px solid #39ff1433", borderRight: "none", color: "#39ff14", fontSize: "13px", fontFamily: "Cinzel, serif", letterSpacing: "1px" }} />
-          <button onClick={runAgents} disabled={loading} style={{ padding: "14px 28px", background: loading ? "#111" : "#39ff14", border: "none", color: loading ? "#39ff1444" : "#000", fontFamily: "Cinzel, serif", fontSize: "12px", letterSpacing: "3px", fontWeight: 900, boxShadow: loading ? "none" : "0 0 20px #39ff1466" }}>{loading ? "CONSULTING..." : "CONSULT"}</button>
+          <input value={topic} onChange={e => setTopic(e.target.value)} onKeyDown={e => e.key === "Enter" && runAgents()} placeholder="Enter market topic to analyze..." style={{ flex: 1, padding: "14px 20px", background: "#050505", border: "1px solid #39e01433", borderRight: "none", color: "#39e014", fontSize: "13px", fontFamily: "Cinzel, serif", letterSpacing: "1px" }} />
+          <button onClick={runAgents} disabled={loading} style={{ padding: "14px 28px", background: loading ? "#111" : "#39e014", border: "none", color: loading ? "#39e01444" : "#000", fontFamily: "Cinzel, serif", fontSize: "12px", letterSpacing: "3px", fontWeight: 900, boxShadow: loading ? "none" : "0 0 20px #39e01466" }}>{loading ? "CONSULTING..." : "CONSULT"}</button>
         </div>
         <div style={{ display: "flex", gap: "8px", justifyContent: "center", marginTop: "14px", flexWrap: "wrap" }}>
-          {TOPICS.map(t => <button key={t} onClick={() => setTopic(t)} style={{ padding: "5px 14px", background: "transparent", border: "1px solid #39ff1433", color: "#39ff1477", fontSize: "10px", fontFamily: "Cinzel, serif", letterSpacing: "1px" }}>{t}</button>)}
+          {TOPICS.map(t => <button key={t} onClick={() => setTopic(t)} style={{ padding: "5px 14px", background: "transparent", border: "1px solid #39e01433", color: "#39e01477", fontSize: "10px", fontFamily: "Cinzel, serif", letterSpacing: "1px" }}>{t}</button>)}
         </div>
       </div>
       <div style={{ padding: "32px", maxWidth: "1100px", margin: "0 auto" }}>
@@ -294,8 +294,8 @@ export default function App() {
         )}
         {!loading && !state && (
           <div style={{ textAlign: "center", padding: "60px 0" }}>
-            <div style={{ fontSize: "48px", marginBottom: "16px", color: "#39ff1433", textShadow: "0 0 20px #39ff1422" }}>⬡</div>
-            <div style={{ color: "#39ff1444", fontSize: "11px", letterSpacing: "6px", fontFamily: "Cinzel, serif" }}>AWAITING MARKET QUERY</div>
+            <div style={{ fontSize: "48px", marginBottom: "16px", color: "#39e01433", textShadow: "0 0 20px #39e01422" }}>⬡</div>
+            <div style={{ color: "#39e01444", fontSize: "11px", letterSpacing: "6px", fontFamily: "Cinzel, serif" }}>AWAITING MARKET QUERY</div>
           </div>
         )}
       </div>
@@ -326,17 +326,17 @@ export default function App() {
       <Dashboard totalOnChain={sessionTxCount} />
 
       {onChainTxs.length > 0 && (
-        <div style={{ padding: "12px 32px", background: "#050505", borderTop: "1px solid #39ff1422" }}>
+        <div style={{ padding: "12px 32px", background: "#050505", borderTop: "1px solid #39e01422" }}>
           {onChainTxs.map((hash, i) => (
-            <div key={i} style={{ color: "#39ff1466", fontSize: "10px", letterSpacing: "1px", fontFamily: "Courier New, monospace", marginBottom: "4px" }}>
-              ⛓ ON-CHAIN: <a href={"https://testnet.arcscan.app/tx/" + hash} target="_blank" style={{ color: "#39ff14" }}>{hash.slice(0,20)}...</a>
+            <div key={i} style={{ color: "#39e01466", fontSize: "10px", letterSpacing: "1px", fontFamily: "Courier New, monospace", marginBottom: "4px" }}>
+              ⛓ ON-CHAIN: <a href={"https://testnet.arcscan.app/tx/" + hash} target="_blank" style={{ color: "#39e014" }}>{hash.slice(0,20)}...</a>
             </div>
           ))}
         </div>
       )}
-      <div style={{ borderTop: "1px solid #39ff1422", padding: "16px 32px", display: "flex", justifyContent: "space-between" }}>
-        <div style={{ color: "#39ff1444", fontSize: "10px", letterSpacing: "3px", fontFamily: "Cinzel, serif" }}>⬡ CRONUS CAPITAL · AGORA AGENTS HACKATHON 2026</div>
-        <div style={{ color: "#39ff1444", fontSize: "10px", letterSpacing: "3px", fontFamily: "Cinzel, serif" }}>POWERED BY ARC · CIRCLE · USDC ⬡</div>
+      <div style={{ borderTop: "1px solid #39e01422", padding: "16px 32px", display: "flex", justifyContent: "space-between" }}>
+        <div style={{ color: "#39e01444", fontSize: "10px", letterSpacing: "3px", fontFamily: "Cinzel, serif" }}>⬡ CRONUS CAPITAL · AGORA AGENTS HACKATHON 2026</div>
+        <div style={{ color: "#39e01444", fontSize: "10px", letterSpacing: "3px", fontFamily: "Cinzel, serif" }}>POWERED BY ARC · CIRCLE · USDC ⬡</div>
       </div>
     </div>
   )

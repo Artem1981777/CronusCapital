@@ -30,50 +30,50 @@ export function Dashboard({ totalOnChain }: { totalOnChain: number }) {
   const held = decisions.filter(d => d.decision.includes("HOLD")).length
 
   return (
-    <div style={{ margin: "24px 32px 0", border: "1px solid #39ff1422", background: "#050505" }}>
+    <div style={{ margin: "24px 32px 0", border: "1px solid #39e01422", background: "#050505" }}>
       <div
         onClick={() => setOpen(o => !o)}
         style={{
           padding: "14px 20px", display: "flex",
           justifyContent: "space-between", alignItems: "center",
-          cursor: "pointer", borderBottom: open ? "1px solid #39ff1422" : "none"
+          cursor: "pointer", borderBottom: open ? "1px solid #39e01422" : "none"
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-          <span style={{ color: "#39ff14", fontSize: "11px", letterSpacing: "3px", fontFamily: "Cinzel, serif" }}>
+          <span style={{ color: "#39e014", fontSize: "11px", letterSpacing: "3px", fontFamily: "Cinzel, serif" }}>
             ⬡ ON-CHAIN DECISION HISTORY
           </span>
           <span style={{
-            background: "#39ff1422", color: "#39ff14",
+            background: "#39e01422", color: "#39e014",
             fontSize: "9px", padding: "2px 8px", letterSpacing: "1px", fontFamily: "Cinzel, serif"
           }}>{totalOnChain} ON-CHAIN</span>
           <span style={{
-            background: "#39ff1411", color: "#39ff1488",
+            background: "#39e01411", color: "#39e01488",
             fontSize: "9px", padding: "2px 8px", letterSpacing: "1px", fontFamily: "Cinzel, serif"
           }}>{decisions.length} LOCAL</span>
         </div>
-        <span style={{ color: "#39ff1455", fontSize: "12px" }}>{open ? "▲" : "▼"}</span>
+        <span style={{ color: "#39e01455", fontSize: "12px" }}>{open ? "▲" : "▼"}</span>
       </div>
 
       {open && (
         <div style={{ padding: "16px 20px" }}>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "12px", marginBottom: "20px" }}>
-            <div style={{ padding: "12px", border: "1px solid #39ff1422", textAlign: "center" }}>
-              <div style={{ color: "#39ff14", fontSize: "22px", fontFamily: "Cinzel, serif", fontWeight: 700 }}>{totalOnChain}</div>
-              <div style={{ color: "#39ff1455", fontSize: "9px", letterSpacing: "2px" }}>ON-CHAIN TXS</div>
+            <div style={{ padding: "12px", border: "1px solid #39e01422", textAlign: "center" }}>
+              <div style={{ color: "#39e014", fontSize: "22px", fontFamily: "Cinzel, serif", fontWeight: 700 }}>{totalOnChain}</div>
+              <div style={{ color: "#39e01455", fontSize: "9px", letterSpacing: "2px" }}>ON-CHAIN TXS</div>
             </div>
-            <div style={{ padding: "12px", border: "1px solid #39ff1422", textAlign: "center" }}>
-              <div style={{ color: "#39ff14", fontSize: "22px", fontFamily: "Cinzel, serif", fontWeight: 700 }}>{executed}</div>
-              <div style={{ color: "#39ff1455", fontSize: "9px", letterSpacing: "2px" }}>EXECUTED</div>
+            <div style={{ padding: "12px", border: "1px solid #39e01422", textAlign: "center" }}>
+              <div style={{ color: "#39e014", fontSize: "22px", fontFamily: "Cinzel, serif", fontWeight: 700 }}>{executed}</div>
+              <div style={{ color: "#39e01455", fontSize: "9px", letterSpacing: "2px" }}>EXECUTED</div>
             </div>
-            <div style={{ padding: "12px", border: "1px solid #39ff1422", textAlign: "center" }}>
-              <div style={{ color: "#39ff14", fontSize: "22px", fontFamily: "Cinzel, serif", fontWeight: 700 }}>{held}</div>
-              <div style={{ color: "#39ff1455", fontSize: "9px", letterSpacing: "2px" }}>HELD</div>
+            <div style={{ padding: "12px", border: "1px solid #39e01422", textAlign: "center" }}>
+              <div style={{ color: "#39e014", fontSize: "22px", fontFamily: "Cinzel, serif", fontWeight: 700 }}>{held}</div>
+              <div style={{ color: "#39e01455", fontSize: "9px", letterSpacing: "2px" }}>HELD</div>
             </div>
           </div>
 
           {decisions.length === 0 ? (
-            <div style={{ color: "#39ff1433", fontSize: "11px", letterSpacing: "2px", fontFamily: "Cinzel, serif" }}>
+            <div style={{ color: "#39e01433", fontSize: "11px", letterSpacing: "2px", fontFamily: "Cinzel, serif" }}>
               NO LOCAL HISTORY YET — CONSULT THE ORACLES
             </div>
           ) : (
@@ -81,26 +81,26 @@ export function Dashboard({ totalOnChain }: { totalOnChain: number }) {
               {decisions.map((d, i) => (
                 <div key={i} style={{
                   padding: "10px 14px", marginBottom: "8px",
-                  border: "1px solid #39ff1422",
-                  borderLeft: "2px solid " + (d.decision.includes("EXECUTE") ? "#39ff14" : "#39ff1444")
+                  border: "1px solid #39e01422",
+                  borderLeft: "2px solid " + (d.decision.includes("EXECUTE") ? "#39e014" : "#39e01444")
                 }}>
                   <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "4px" }}>
-                    <span style={{ color: "#39ff14", fontSize: "9px", letterSpacing: "2px", fontFamily: "Cinzel, serif" }}>
+                    <span style={{ color: "#39e014", fontSize: "9px", letterSpacing: "2px", fontFamily: "Cinzel, serif" }}>
                       {d.decision.includes("EXECUTE") ? "⚡ EXECUTE" : "⏸ HOLD"}
                     </span>
-                    <span style={{ color: "#39ff1444", fontSize: "9px" }}>
+                    <span style={{ color: "#39e01444", fontSize: "9px" }}>
                       {new Date(d.timestamp).toLocaleTimeString()}
                     </span>
                   </div>
-                  <div style={{ color: "#39ff14aa", fontSize: "11px", lineHeight: 1.4, marginBottom: "4px" }}>
+                  <div style={{ color: "#39e014aa", fontSize: "11px", lineHeight: 1.4, marginBottom: "4px" }}>
                     {d.decision.slice(0, 120)}{d.decision.length > 120 ? "..." : ""}
                   </div>
                   <div style={{ display: "flex", justifyContent: "space-between" }}>
-                    <span style={{ color: "#39ff1444", fontSize: "9px" }}>TOPIC: {d.topic}</span>
+                    <span style={{ color: "#39e01444", fontSize: "9px" }}>TOPIC: {d.topic}</span>
                     <a
                       href={"https://testnet.arcscan.app/tx/" + d.txHash}
                       target="_blank"
-                      style={{ color: "#39ff1466", fontSize: "9px", letterSpacing: "1px" }}
+                      style={{ color: "#39e01466", fontSize: "9px", letterSpacing: "1px" }}
                     >TX →</a>
                   </div>
                 </div>
@@ -112,7 +112,7 @@ export function Dashboard({ totalOnChain }: { totalOnChain: number }) {
             <a
               href={"https://testnet.arcscan.app/address/" + DEPLOYED_CONTRACT}
               target="_blank"
-              style={{ color: "#39ff1466", fontSize: "10px", letterSpacing: "2px", fontFamily: "Cinzel, serif" }}
+              style={{ color: "#39e01466", fontSize: "10px", letterSpacing: "2px", fontFamily: "Cinzel, serif" }}
             >VIEW CONTRACT ON ARCSCAN →</a>
           </div>
         </div>

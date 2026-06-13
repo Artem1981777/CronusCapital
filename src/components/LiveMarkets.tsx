@@ -56,40 +56,40 @@ export function LiveMarkets() {
   }
 
   return (
-    <div style={{ margin: "0 32px 24px", border: "1px solid #39ff1422", background: "#050505" }}>
+    <div style={{ margin: "0 32px 24px", border: "1px solid #39e01422", background: "#050505" }}>
       <div
         onClick={() => setOpen(o => !o)}
         style={{
           padding: "14px 20px", display: "flex",
           justifyContent: "space-between", alignItems: "center",
-          cursor: "pointer", borderBottom: open ? "1px solid #39ff1422" : "none"
+          cursor: "pointer", borderBottom: open ? "1px solid #39e01422" : "none"
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-          <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#39ff14", boxShadow: "0 0 8px #39ff14", animation: "pulse 2s infinite" }} />
-          <span style={{ color: "#39ff14", fontSize: "11px", letterSpacing: "3px", fontFamily: "Cinzel, serif" }}>
+          <div style={{ width: "6px", height: "6px", borderRadius: "50%", background: "#39e014", boxShadow: "0 0 8px #39e014", animation: "pulse 2s infinite" }} />
+          <span style={{ color: "#39e014", fontSize: "11px", letterSpacing: "3px", fontFamily: "Cinzel, serif" }}>
             LIVE POLYMARKET FEED
           </span>
           {markets.length > 0 && (
-            <span style={{ background: "#39ff1422", color: "#39ff14", fontSize: "9px", padding: "2px 8px", letterSpacing: "1px", fontFamily: "Cinzel, serif" }}>
+            <span style={{ background: "#39e01422", color: "#39e014", fontSize: "9px", padding: "2px 8px", letterSpacing: "1px", fontFamily: "Cinzel, serif" }}>
               {markets.length} ACTIVE
             </span>
           )}
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
           {lastUpdate && (
-            <span style={{ color: "#39ff1444", fontSize: "9px", fontFamily: "Courier New, monospace" }}>
+            <span style={{ color: "#39e01444", fontSize: "9px", fontFamily: "Courier New, monospace" }}>
               {lastUpdate.toLocaleTimeString()}
             </span>
           )}
-          <span style={{ color: "#39ff1455" }}>{open ? "▲" : "▼"}</span>
+          <span style={{ color: "#39e01455" }}>{open ? "▲" : "▼"}</span>
         </div>
       </div>
 
       {open && (
         <div style={{ padding: "16px 20px" }}>
           {loading && markets.length === 0 ? (
-            <div style={{ color: "#39ff1455", fontSize: "11px", letterSpacing: "2px", fontFamily: "Cinzel, serif" }}>
+            <div style={{ color: "#39e01455", fontSize: "11px", letterSpacing: "2px", fontFamily: "Cinzel, serif" }}>
               FETCHING LIVE MARKETS...
             </div>
           ) : (
@@ -101,22 +101,22 @@ export function LiveMarkets() {
                 const isBullish = price.yes > 0.5
                 return (
                   <div key={i} style={{
-                    padding: "12px", border: "1px solid #39ff1422",
-                    borderLeft: "2px solid " + (isBullish ? "#39ff14" : "#cf6679"),
+                    padding: "12px", border: "1px solid #39e01422",
+                    borderLeft: "2px solid " + (isBullish ? "#39e014" : "#cf6679"),
                     background: "#030303"
                   }}>
-                    <div style={{ color: "#39ff14aa", fontSize: "11px", lineHeight: 1.4, marginBottom: "8px", minHeight: "32px" }}>
+                    <div style={{ color: "#39e014aa", fontSize: "11px", lineHeight: 1.4, marginBottom: "8px", minHeight: "32px" }}>
                       {m.question.slice(0, 70)}{m.question.length > 70 ? "..." : ""}
                     </div>
                     <div style={{ display: "flex", gap: "8px", marginBottom: "8px" }}>
                       <div style={{
                         flex: 1, padding: "6px", textAlign: "center",
-                        background: "#39ff1411", border: "1px solid #39ff1433"
+                        background: "#39e01411", border: "1px solid #39e01433"
                       }}>
-                        <div style={{ color: "#39ff14", fontSize: "14px", fontWeight: 700, fontFamily: "Cinzel, serif" }}>
+                        <div style={{ color: "#39e014", fontSize: "14px", fontWeight: 700, fontFamily: "Cinzel, serif" }}>
                           {Math.round(price.yes * 100)}%
                         </div>
-                        <div style={{ color: "#39ff1466", fontSize: "9px", letterSpacing: "1px" }}>{outcomes[0] || "YES"}</div>
+                        <div style={{ color: "#39e01466", fontSize: "9px", letterSpacing: "1px" }}>{outcomes[0] || "YES"}</div>
                       </div>
                       <div style={{
                         flex: 1, padding: "6px", textAlign: "center",
@@ -129,13 +129,13 @@ export function LiveMarkets() {
                       </div>
                     </div>
                     <div style={{ display: "flex", justifyContent: "space-between" }}>
-                      <span style={{ color: "#39ff1444", fontSize: "9px", fontFamily: "Courier New, monospace" }}>
+                      <span style={{ color: "#39e01444", fontSize: "9px", fontFamily: "Courier New, monospace" }}>
                         VOL ${Math.round(m.volumeNum).toLocaleString()}
                       </span>
-                      <span style={{ color: "#39ff1444", fontSize: "9px", fontFamily: "Courier New, monospace" }}>
+                      <span style={{ color: "#39e01444", fontSize: "9px", fontFamily: "Courier New, monospace" }}>
                         LIQ ${Math.round(m.liquidityNum).toLocaleString()}
                       </span>
-                      <span style={{ color: daysLeft === "TODAY" ? "#39ff14" : "#39ff1444", fontSize: "9px", fontFamily: "Courier New, monospace" }}>
+                      <span style={{ color: daysLeft === "TODAY" ? "#39e014" : "#39e01444", fontSize: "9px", fontFamily: "Courier New, monospace" }}>
                         {daysLeft}
                       </span>
                     </div>
@@ -147,7 +147,7 @@ export function LiveMarkets() {
           <div style={{ marginTop: "12px", textAlign: "center" }}>
             <button onClick={fetchMarkets} style={{
               padding: "6px 20px", background: "transparent",
-              border: "1px solid #39ff1433", color: "#39ff1466",
+              border: "1px solid #39e01433", color: "#39e01466",
               fontFamily: "Cinzel, serif", fontSize: "9px", letterSpacing: "2px", cursor: "pointer"
             }}>REFRESH</button>
           </div>
