@@ -177,3 +177,26 @@ button:active { transform: scale(0.97); }
 .hiero-wall { opacity: 0.1 !important; }
 .deity { opacity: 0.22 !important; }
 .egypt-glow { opacity: 1 !important; }
+
+/* ===================== DESKTOP / FULL-SCREEN POLISH ===================== */
+.egypt-bg {
+	position: fixed; inset: 0; width: 100vw; height: 100vh;
+	overflow: hidden; z-index: 0 !important; pointer-events: none !important;
+}
+.hiero-wall {
+	display: flex; flex-direction: column; justify-content: space-between;
+	height: 100%; inset: 0 !important; opacity: 0.09 !important;
+}
+.wall-row {
+	font-size: clamp(18px, 2vmin, 32px) !important;
+	letter-spacing: clamp(4px, 0.9vmin, 12px) !important;
+	white-space: nowrap; overflow: hidden;
+}
+.hiero-col { font-size: clamp(15px, 1.7vmin, 26px) !important; }
+.hiero-rain { opacity: 0.36 !important; }
+.deities { inset: 0 !important; }
+.deity { opacity: 0.2 !important; }
+.egypt-bg::after {
+	content: ""; position: absolute; inset: 0; pointer-events: none;
+	background: radial-gradient(ellipse 55% 75% at 50% 42%, rgba(0,0,0,0.74), rgba(0,0,0,0.30) 55%, rgba(0,0,0,0) 100%);
+}
