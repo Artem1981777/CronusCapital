@@ -1,13 +1,12 @@
 // api/signal.js  —  x402-gated premium signal (Lepton · RFB 02 + 06)
 const X402_VERSION = 1
 
-// ---- CONFIG (заполнить из Circle / arc-nanopayments docs) ----
 const NETWORK     = process.env.X402_NETWORK     || "arc-testnet"
 const USDC_ASSET  = process.env.ARC_USDC_ADDRESS || "0xUSDC_ON_ARC_TESTNET"
 const PAY_TO      = process.env.CRONUS_PAYTO     || "0xYOUR_CRONUS_WALLET"
-const PRICE       = process.env.SIGNAL_PRICE     || "20000" // 0.02 USDC (6 decimals)
+const PRICE       = process.env.SIGNAL_PRICE     || "20000"
 const FACILITATOR = process.env.X402_FACILITATOR || "https://x402.org/facilitator"
-// --------------------------------------------------------------
+const DEMO        = process.env.X402_DEMO === "1"
 
 function paymentRequirements(resource) {
   return {
@@ -23,6 +22,13 @@ function paymentRequirements(resource) {
 }
 
 const decode = (h) => JSON.parse(Buffer.from(h, "base64").toString("utf8"))
+
+function payerOf(header) {
+  try {
+    const p = decode(header)
+    return (p && (p.payer || (p.payload && p.payload.authorization && p.payload.authorization.from) || p.from)) || "demo"
+  } catch (_) { return "demo" }
+}
 
 async function facilitator(path, header, requirements) {
   const res = await fetch(`${FACILITATOR}/${path}`, {
@@ -67,16 +73,20 @@ export default async function handler(req, res) {
   const header = req.headers["x-payment"]
   if (!header) { res.status(402).json(requirements); return }
 
+  if (DEMO) {
+    const report = await generateReport(topic)
+    res.setHeader("X-PAYMENT-RESPONSE", Buffer.from(JSON.stringify({ success: true, network: NETWORK, demo: true })).toString("base64"))
+    res.status(200).json({ paid: true, demo: true, payer: payerOf(header), report })
+    return
+  }
+
   try {
     const v = await facilitator("verify", header, requirements)
     if (!v.isValid) { res.status(402).json({ ...requirements, error: v.invalidReason || "payment invalid" }); return }
-
     const report = await generateReport(topic)
-
     const settlement = await facilitator("settle", header, requirements)
     if (settlement && settlement.success)
       res.setHeader("X-PAYMENT-RESPONSE", Buffer.from(JSON.stringify(settlement)).toString("base64"))
-
     res.status(200).json({ paid: true, payer: v.payer, settlement, report })
   } catch (e) { res.status(500).json({ error: String(e) }) }
 }
