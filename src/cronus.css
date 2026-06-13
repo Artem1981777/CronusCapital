@@ -1,53 +1,151 @@
-@import url("https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Uncial+Antiqua&family=MedievalSharp&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Cinzel+Decorative:wght@700;900&family=Noto+Sans+Egyptian+Hieroglyphs&display=swap");
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { background: #000; }
 
-@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
-@keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
-@keyframes greenShimmer {
-  0%{background-position:-200% center}
-  100%{background-position:200% center}
+:root {
+	--green: #39ff14;
+	--green-2: #00ff88;
+	--gold: #c9a84c;
+	--gold-bright: #f0d27a;
 }
-@keyframes scanline {
-  0%{transform:translateY(-100%)}
-  100%{transform:translateY(100vh)}
+
+html, body { background: #02040a; }
+body {
+	min-height: 100vh;
+	background:
+		radial-gradient(1200px 700px at 50% 122%, rgba(57,255,20,0.10), transparent 60%),
+		radial-gradient(900px 600px at 50% -12%, rgba(201,168,76,0.07), transparent 55%),
+		linear-gradient(180deg, #03060a 0%, #02040a 55%, #040a08 100%);
 }
-@keyframes glow {
-  0%,100%{text-shadow:0 0 8px #39ff14, 0 0 20px #39ff14}
-  50%{text-shadow:0 0 16px #39ff14, 0 0 40px #39ff14, 0 0 60px #39ff14}
+
+.egypt-bg { position: fixed; inset: 0; z-index: -2; overflow: hidden; pointer-events: none; }
+.egypt-stars {
+	position: absolute; inset: 0; opacity: 0.55;
+	background-image:
+		radial-gradient(1px 1px at 20% 30%, rgba(57,255,20,0.5), transparent),
+		radial-gradient(1px 1px at 70% 60%, rgba(57,255,20,0.35), transparent),
+		radial-gradient(1px 1px at 40% 80%, rgba(255,255,255,0.22), transparent),
+		radial-gradient(1px 1px at 85% 25%, rgba(0,255,136,0.4), transparent);
+	background-size: 320px 320px, 280px 280px, 360px 360px, 300px 300px;
+	transform: translate(calc(var(--mx, 0) * -8px), calc(var(--my, 0) * -8px));
+	animation: twinkle 6s ease-in-out infinite;
 }
+.egypt-glow {
+	position: absolute; left: 50%; bottom: -12%; width: 900px; height: 900px;
+	transform: translateX(-50%);
+	background: radial-gradient(circle, rgba(57,255,20,0.16), transparent 60%);
+	filter: blur(22px);
+}
+.hiero-rain {
+	position: absolute; inset: 0; opacity: 0.16;
+	transform: translate(calc(var(--mx, 0) * 14px), calc(var(--my, 0) * 10px));
+}
+.hiero-col {
+	position: absolute; top: -30%;
+	font-family: "Noto Sans Egyptian Hieroglyphs", serif;
+	font-size: 26px; color: var(--green);
+	writing-mode: vertical-rl; text-orientation: upright;
+	white-space: nowrap; letter-spacing: 2px;
+	text-shadow: 0 0 8px rgba(57,255,20,0.6);
+	animation-name: hieroFall; animation-timing-function: linear; animation-iteration-count: infinite;
+}
+.pyramid-wrap {
+	position: absolute; left: 50%; bottom: 0;
+	width: min(72vw, 760px); height: min(44vw, 440px);
+	transform: translateX(-50%) translate(calc(var(--mx, 0) * 18px), calc(var(--my, 0) * 6px));
+	filter: drop-shadow(0 0 40px rgba(57,255,20,0.22));
+}
+.pyramid {
+	position: absolute; inset: 0;
+	clip-path: polygon(50% 0, 100% 100%, 0 100%);
+	background: linear-gradient(180deg, rgba(57,255,20,0.16), rgba(20,80,10,0.03));
+	animation: pyramidPulse 7s ease-in-out infinite;
+}
+.pyramid::after {
+	content: ""; position: absolute; inset: 0;
+	clip-path: polygon(50% 0, 52% 100%, 48% 100%);
+	background: linear-gradient(180deg, rgba(240,210,122,0.6), rgba(201,168,76,0));
+}
+.pyramid-reflection {
+	position: absolute; left: 0; right: 0; bottom: -36%; height: 36%;
+	clip-path: polygon(50% 100%, 100% 0, 0 0);
+	background: linear-gradient(0deg, rgba(57,255,20,0.10), transparent);
+	opacity: 0.5; filter: blur(6px);
+}
+
+.splash {
+	position: fixed; inset: 0; z-index: 9999;
+	display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
+	background: radial-gradient(circle at 50% 45%, #06120a 0%, #02040a 70%);
+	animation: splashIn 0.8s ease both;
+}
+.splash-out { animation: splashOut 0.8s ease forwards; pointer-events: none; }
+.splash-rays {
+	position: absolute; width: 120vmax; height: 120vmax; border-radius: 50%;
+	background: conic-gradient(from 0deg, rgba(57,255,20,0) 0deg, rgba(57,255,20,0.05) 12deg, transparent 24deg, rgba(57,255,20,0.05) 36deg, transparent 48deg);
+	animation: spin 36s linear infinite;
+}
+.splash-eye {
+	font-family: "Noto Sans Egyptian Hieroglyphs", serif; font-size: 92px; color: var(--gold-bright);
+	text-shadow: 0 0 24px rgba(240,210,122,0.8), 0 0 60px rgba(57,255,20,0.45);
+	animation: eyeGlow 2.4s ease-in-out infinite;
+}
+.splash-pyramid {
+	width: 120px; height: 70px; clip-path: polygon(50% 0, 100% 100%, 0 100%);
+	background: linear-gradient(180deg, rgba(57,255,20,0.45), rgba(20,80,10,0.1));
+	box-shadow: 0 0 30px rgba(57,255,20,0.5);
+}
+.splash-title {
+	font-family: "Cinzel Decorative", serif; font-size: 40px; font-weight: 900; letter-spacing: 8px;
+	background: linear-gradient(90deg, #39ff14, #00ff88, #aef0a0, #39ff14, #7fff00);
+	background-size: 300% auto;
+	-webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+	filter: drop-shadow(0 0 12px rgba(57,255,20,0.55));
+	animation: greenShimmer 4s linear infinite;
+}
+.splash-sub { font-family: "Cinzel", serif; font-size: 12px; letter-spacing: 6px; color: var(--green); opacity: 0.7; text-align: center; }
+.splash-ankh { font-size: 22px; color: var(--gold); opacity: 0.8; }
 
 .celtic-title {
-  font-family: "Cinzel Decorative", "Cinzel", serif;
-  background: linear-gradient(90deg, #39ff14, #00ff88, #39ff14, #7fff00, #39ff14);
-  background-size: 300% auto;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: greenShimmer 4s linear infinite;
-  filter: drop-shadow(0 0 8px rgba(57,255,20,0.5));
+	font-family: "Cinzel Decorative", "Cinzel", serif;
+	background: linear-gradient(90deg, #39ff14, #00ff88, #39ff14, #7fff00, #39ff14);
+	background-size: 300% auto;
+	-webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+	filter: drop-shadow(0 0 8px rgba(57,255,20,0.5));
+	animation: greenShimmer 4s linear infinite;
 }
-
-.celtic-glow {
-  animation: glow 2s ease-in-out infinite;
-}
+.celtic-glow { animation: glow 2s ease-in-out infinite; }
 
 .scanline {
-  position: fixed;
-  top: 0; left: 0; right: 0;
-  height: 2px;
-  background: rgba(57,255,20,0.08);
-  animation: scanline 8s linear infinite;
-  pointer-events: none;
-  z-index: 999;
+	position: fixed; top: 0; left: 0; right: 0; height: 2px;
+	background: rgba(57,255,20,0.08); animation: scanline 8s linear infinite;
+	pointer-events: none; z-index: 999;
+}
+.glass {
+	background: rgba(6,12,7,0.5);
+	backdrop-filter: blur(14px) saturate(125%); -webkit-backdrop-filter: blur(14px) saturate(125%);
+	border: 1px solid rgba(57,255,20,0.22);
+	box-shadow: 0 8px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(57,255,20,0.12);
 }
 
 input:focus { outline: none; }
-button:hover { opacity: 0.8; cursor: pointer; }
+button:hover { opacity: 0.85; cursor: pointer; }
 button:active { transform: scale(0.97); }
-::-webkit-scrollbar { width: 3px; }
-::-webkit-scrollbar-track { background: #000; }
-::-webkit-scrollbar-thumb { background: #39ff14; }
-
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: #02040a; }
+::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #39ff14, #0c5a14); border-radius: 4px; }
 .wallet-icon { font-size: 14px; margin-right: 8px; }
+
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes shimmer { 0% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+@keyframes twinkle { 0%,100% { opacity: 0.45; } 50% { opacity: 0.8; } }
+@keyframes hieroFall { 0% { transform: translateY(-30%); opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { transform: translateY(160vh); opacity: 0; } }
+@keyframes pyramidPulse { 0%,100% { filter: brightness(1); } 50% { filter: brightness(1.35); } }
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes eyeGlow { 0%,100% { transform: scale(1); opacity: 0.9; } 50% { transform: scale(1.08); opacity: 1; } }
+@keyframes splashIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes splashOut { from { opacity: 1; } to { opacity: 0; visibility: hidden; } }
+@keyframes greenShimmer { 0% { background-position: -200% center; } 100% { background-position: 200% center; } }
+@keyframes glow { 0%,100% { text-shadow: 0 0 8px rgba(57,255,20,0.7); } 50% { text-shadow: 0 0 18px rgba(57,255,20,1), 0 0 40px rgba(57,255,20,0.6); } }
+@keyframes scanline { 0% { transform: translateY(-100%); } 100% { transform: translateY(100vh); } }
