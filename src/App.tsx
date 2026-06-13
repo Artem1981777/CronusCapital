@@ -146,6 +146,7 @@ function BetCard({ bet }: { bet: BetOpportunity }) {
 }
 
 export default function App() {
+	if (new URLSearchParams(window.location.search).get("boom")) throw new Error("boundary test")
   const [topic, setTopic] = useState("")
   const [loading, setLoading] = useState(false)
   const [state, setState] = useState<AgentState | null>(null)
