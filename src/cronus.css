@@ -214,3 +214,13 @@ button:active { transform: scale(0.97); }
 .egypt-bg::after {
 	background: radial-gradient(ellipse 62% 82% at 50% 45%, rgba(0,0,0,0.32), rgba(0,0,0,0) 72%) !important;
 }
+
+/* ===== EGYPT PHOTO BG — FINAL ===== */
+.egypt-bg {
+	background-image: linear-gradient(rgba(0,0,0,0.26), rgba(0,0,0,0.42)), url("/egypt-bg.jpg") !important;
+	background-size: cover !important;
+	background-position: center center !important;
+	background-repeat: no-repeat !important;
+}
+.hiero-wall, .deities, .pyramid-wrap, .hiero-rain, .egypt-glow { display: none !important; }
+.egypt-bg::after { display: none !important; }
