@@ -8,6 +8,7 @@ import { useCronusContract } from "./hooks/useCronusContract"
 import { useAccount } from "wagmi"
 import { runCronusPipeline, setApiKey } from "./agents/cronusAgents"
 import type { AgentState, MarketSignal, BetOpportunity } from "./agents/cronusAgents"
+import { PremiumSignal } from "./components/PremiumSignal"
 
 const TOPICS = ["crypto markets", "US elections", "Fed interest rates", "AI stocks", "Bitcoin ETF"]
 
@@ -318,6 +319,7 @@ export default function App() {
           </div>
         </div>
       )}
+      <PremiumSignal />
       <LiveMarkets />
       <Dashboard totalOnChain={sessionTxCount} />
 
