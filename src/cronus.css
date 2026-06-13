@@ -397,3 +397,13 @@ button:active { transform: scale(0.97); }
 
 /* slightly tone down the acid-green primary button */
 .cd-btn-primary { filter: saturate(0.92) brightness(0.95); }
+
+/* ===== global error boundary ===== */
+.cd-boundary { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; background: #04060a; }
+.cd-boundary-card { max-width: 480px; width: 100%; text-align: center; padding: 40px 28px; border-radius: 18px; background: rgba(8,14,10,0.92); border: 1px solid rgba(57,224,20,0.35); box-shadow: 0 0 40px rgba(57,224,20,0.12); font-family: "Cinzel", serif; }
+.cd-boundary-eye { font-size: 56px; color: #39e014; margin-bottom: 12px; }
+.cd-boundary-title { font-size: 20px; letter-spacing: 0.12em; color: #f0d27a; font-family: "Cinzel Decorative", "Cinzel", serif; margin-bottom: 10px; }
+.cd-boundary-text { font-size: 13px; color: #b9cdb3; line-height: 1.55; margin-bottom: 16px; }
+.cd-boundary-detail { font-size: 11px; color: #ff9a9a; background: rgba(255,90,90,0.08); border: 1px solid rgba(255,90,90,0.2); border-radius: 10px; padding: 10px; text-align: left; white-space: pre-wrap; word-break: break-word; max-height: 140px; overflow: auto; margin-bottom: 18px; }
+.cd-boundary-btn { font-family: "Cinzel", serif; letter-spacing: 0.1em; font-size: 13px; padding: 11px 22px; border-radius: 10px; cursor: pointer; color: #04060a; background: #39e014; border: none; font-weight: 700; }
+.cd-boundary-btn:hover { box-shadow: 0 0 18px rgba(57,224,20,0.4); }
