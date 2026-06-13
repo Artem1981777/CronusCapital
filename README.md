@@ -1,87 +1,30 @@
-# Cronus Capital - Arc Starter Kit
+# Cronus Capital
 
-> Autonomous Market Intelligence on Arc Network
+Autonomous market-intelligence oracle on **Arc Network**: three AI agents (Scout, Analyst, Executor) that surface prediction-market opportunities and settle real **USDC** on-chain, monetized via **x402 pay-per-call**.
 
-**Live Demo:** https://cronus-capital.vercel.app
-**Network:** Arc Testnet (Chain ID: 5042002)
-**Contract:** 0xd81a420BFa4CE8778473BD46195B8E97e928880f
+- Live: https://cronus-capital.vercel.app
+- Repo: https://github.com/Artem1981777/CronusCapital
+- Submission: Lepton by Canteen (Arc) — RFB 02 + RFB 06
 
-Built for **Agora Agents Hackathon** - Arc x Circle x USDC
+## Why Arc
+- USDC as native gas (settlements priced/paid in USDC)
+- x402 pay-per-call micro-monetization of AI inference
+- Arc v0.7.2 memos + batched payments for clean reconciliation
 
----
+## How to use (judges)
+1. Install MetaMask and add Arc Testnet (params below).
+2. Get test USDC + gas: https://faucet.circle.com
+3. Open the live link and click CONNECT to connect MetaMask.
+4. Click FORCE EXECUTE, confirm in MetaMask — sends a real 0.01 USDC settlement on Arc Testnet (link to arcscan appears).
+5. In the Premium Oracle card: enter a topic, click UNLOCK $0.02, sign — get an AI oracle report (x402 pay-per-call).
 
-## Quick Start (5 minutes)
+Note: FORCE EXECUTE = on-chain transaction. UNLOCK $0.02 = signature-authorized x402 call. CONSULT ORACLES = visual animation.
 
-    git clone https://github.com/Artem1981777/CronusCapital
-    cd CronusCapital
-    cp .env.example .env
-    npm install
-    npm run dev
+## Arc Testnet
+- Chain ID: 5042002
+- RPC: https://rpc.testnet.arc.network
+- Explorer: https://testnet.arcscan.app
+- USDC: 0x3600000000000000000000000000000000000000
 
-Open http://localhost:5173
-
----
-
-## Environment Setup
-
-| Variable | Where to get it |
-|---|---|
-| VITE_ANTHROPIC_API_KEY | https://console.anthropic.com |
-| VITE_WALLETCONNECT_PROJECT_ID | https://cloud.walletconnect.com |
-| VITE_ARC_RPC_URL | Arc Testnet RPC (default provided) |
-
----
-## How It Works
-
-SCOUT -> ANALYST -> EXECUTOR -> Arc On-Chain Log
-
-| Agent | Role | Output |
-|---|---|---|
-| Scout | Market Intelligence | Signals + confidence scores |
-| Analyst | Expected Value Engine | +EV bets sized in USDC |
-| Executor | Decision Layer | Risk management + Arc TX |
-
----
-
-## Arc Network
-
-| Feature | Detail |
-|---|---|
-| Network | Arc Testnet - EVM L1 by Circle |
-| Chain ID | 5042002 |
-| Settlement | USDC |
-| TX Cost | ~$0.01 per transaction |
-| Finality | Sub-second deterministic |
-
-Add to MetaMask: RPC https://rpc.arc-testnet.circle.com / Chain ID 5042002
-
----
-## Tech Stack
-
-- Frontend: React + TypeScript + Vite
-- Blockchain: wagmi + viem -> Arc Network
-- AI Agents: Claude (Anthropic) - 3 specialized agents
-- Settlement: USDC on Arc Testnet
-- Wallet: Reown AppKit
-- Deploy: Vercel
-
----
-
-## Deploy Your Own
-
-1. Fork this repo
-2. Go to https://vercel.com/new and import your fork
-3. Add env variables in Vercel dashboard
-4. Deploy - live in 2 minutes
-
----
-
-## Builder
-
-Artem Gromov - Solo Web3/AI Developer
-- GitHub: @Artem1981777
-- Twitter: @ArtemGromov777
-- Telegram: @Artem00777
-- Code4rena: shadowwarden
-
-*Cronus Capital - Agora Agents Hackathon 2026 - Arc x Circle x USDC*
+## Tech
+React + TypeScript + Vite, wagmi/viem, x402, Anthropic Claude (report generation).
