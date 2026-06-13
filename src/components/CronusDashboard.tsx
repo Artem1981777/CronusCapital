@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react"
 import type { CSSProperties } from "react"
-import { useAccount, useConnect, useDisconnect } from "wagmi"
+import { useAccount, useConnect, useDisconnect, useWriteContract, useWaitForTransactionReceipt, useSwitchChain } from "wagmi"
 
 /* ============================================================
    CRONUS CAPITAL — WOW DASHBOARD (cyber-Egyptian)
-   + real multi-wallet connect (MetaMask / Rabby / OKX / Trust / WalletConnect)
+   FORCE EXECUTE -> real 0.01 USDC test settlement on Arc Testnet
    ============================================================ */
 
 type Trend = "up" | "down" | "flat"
@@ -14,6 +14,24 @@ type Action = "LONG" | "SHORT" | "HOLD"
 interface Kpi { id: string; label: string; value: string; sub: string; trend: Trend; accent: "green" | "gold"; progress?: number }
 interface AgentInfo { id: string; name: string; role: string; glyph: string; state: AgentState; perf: number }
 interface Signal { id: string; asset: string; action: Action; conf: number; time: string }
+
+// === Arc Testnet settlement config — CUSTOMIZE here ===
+const ARC_CHAIN_ID = 5042002
+const USDC_ADDRESS = "0x3600000000000000000000000000000000000000" as const
+const SETTLE_TO = "0xdc6778c5f8cc74b10aed11c48306d4cfc5737fbd" as const // CRONUS treasury (test sink)
+const TEST_AMOUNT = BigInt(10000) // 0.01 USDC (6 decimals)
+const ERC20_ABI = [
+	{
+		type: "function",
+		name: "transfer",
+		stateMutability: "nonpayable",
+		inputs: [
+			{ name: "to", type: "address" },
+			{ name: "amount", type: "uint256" },
+		],
+		outputs: [{ name: "", type: "bool" }],
+	},
+] as const
 
 function fmtUsd(n: number): string {
 	return "$" + n.toLocaleString("en-US", { maximumFractionDigits: 0 })
@@ -25,7 +43,6 @@ function WalletConnectModal(props: { open: boolean; onClose: () => void }) {
 	const { disconnect } = useDisconnect()
 	if (!props.open) return null
 
-	// Dedup connectors by name (EIP-6963 discovery can add duplicates)
 	const seen = new Set<string>()
 	const list = connectors.filter((c) => {
 		const key = (c.name || c.id || "").toLowerCase()
@@ -171,6 +188,9 @@ export function CronusDashboard() {
 	const [riskOpen, setRiskOpen] = useState(false)
 	const [walletOpen, setWalletOpen] = useState(false)
 	const { isConnected, address } = useAccount()
+	const { switchChainAsync } = useSwitchChain()
+	const { writeContractAsync, data: txHash, error: txError, isPending: txPending, reset: txReset } = useWriteContract()
+	const { isLoading: txConfirming, isSuccess: txConfirmed } = useWaitForTransactionReceipt({ hash: txHash, chainId: ARC_CHAIN_ID })
 
 	useEffect(() => {
 		const t = setTimeout(() => setReady(true), 700)
@@ -201,7 +221,7 @@ export function CronusDashboard() {
 	const agents: Array<AgentInfo> = [
 		{ id: "scout", name: "SCOUT", role: "Signal Discovery", glyph: "𓅃", state: running ? "scanning" : "idle", perf: 92 },
 		{ id: "analyst", name: "ANALYST", role: "Risk & Conviction", glyph: "𓂀", state: running ? "analyzing" : "idle", perf: 87 },
-		{ id: "executor", name: "EXECUTOR", role: "On-chain Settlement", glyph: "𓊽", state: running ? "executing" : "idle", perf: 95 },
+		{ id: "executor", name: "EXECUTOR", role: "On-chain Settlement", glyph: "𓊽", state: txConfirming || txPending ? "executing" : running ? "analyzing" : "idle", perf: 95 },
 	]
 	const blips = [
 		{ id: "b1", x: 28, y: 32 }, { id: "b2", x: 66, y: 44 }, { id: "b3", x: 48, y: 70 },
@@ -215,7 +235,6 @@ export function CronusDashboard() {
 	]
 	const skeletons = [0, 1, 2, 3, 4, 5]
 
-	// Arc v0.7.2 memo + batching showcase
 	const memoSeed = (0x7f2a + tick * 13).toString(16).toUpperCase().slice(-4)
 	const memo = "CRONUS-" + signals[0].asset + "-" + memoSeed
 	const batchCount = 2 + (tick % 4)
@@ -233,10 +252,30 @@ export function CronusDashboard() {
 		setTimeout(() => setRunning(false), 2800)
 	}
 
+	// FORCE EXECUTE -> real test settlement tx on Arc Testnet (0.01 USDC self-transfer)
+	const forceExecute = async () => {
+		if (!isConnected || !address) { setWalletOpen(true); return }
+		const ok = window.confirm("FORCE EXECUTE\n\nSend a 0.01 USDC test settlement on Arc Testnet?\n(Real on-chain tx — gas only, funds go to treasury.)")
+		if (!ok) return
+		txReset()
+		try { await switchChainAsync({ chainId: ARC_CHAIN_ID }) } catch { /* may already be on Arc, or wallet will prompt */ }
+		try {
+			await writeContractAsync({
+				chainId: ARC_CHAIN_ID,
+				address: USDC_ADDRESS,
+				abi: ERC20_ABI,
+				functionName: "transfer",
+				args: [SETTLE_TO, TEST_AMOUNT],
+			})
+		} catch { /* error is surfaced via txError below */ }
+	}
+
+	const txBusy = txPending || txConfirming
 	const walletLabel = isConnected && address ? "☥ " + address.slice(0, 4) + "…" + address.slice(-4) : "☥ CONNECT"
+	const txErrText = txError ? String((txError as { shortMessage?: string }).shortMessage || (txError as Error).message || txError).slice(0, 140) : ""
 
 	return (
-		<section className={"cd-root" + (running ? " cd-running" : "")}>
+		<section className={"cd-root" + (running || txBusy ? " cd-running" : "")}>
 			<header className="cd-header">
 				<div className="cd-eye">𓂀</div>
 				<div className="cd-head-text">
@@ -274,12 +313,23 @@ export function CronusDashboard() {
 				<div className="cd-panel cd-actions">
 					<div className="cd-panel-title">⚡ ORACLE ACTIONS</div>
 					<button className="cd-btn cd-btn-primary" onClick={consult} disabled={running}>{running ? "CONSULTING…" : "CONSULT ORACLES"}</button>
-					<button className="cd-btn cd-btn-danger" onClick={() => window.confirm("Force execute current strategy on-chain?")}>FORCE EXECUTE</button>
+					<button className="cd-btn cd-btn-danger" onClick={forceExecute} disabled={txBusy}>{txBusy ? "EXECUTING…" : "FORCE EXECUTE"}</button>
 					<button className="cd-btn cd-btn-gold" onClick={() => setRiskOpen(true)}>RISK ADJUST</button>
 					<button className="cd-btn cd-btn-ghost" onClick={() => window.scrollTo({ top: 99999, behavior: "smooth" })}>VIEW LIVE MARKETS</button>
 					<button className="cd-btn cd-btn-deploy">＋ DEPLOY NEW AGENT</button>
 				</div>
 			</div>
+
+			{(txBusy || txConfirmed || txError) && (
+				<div className={"cd-tx" + (txError ? " cd-tx-err" : txConfirmed ? " cd-tx-ok" : "")}>
+					<span className="cd-tx-glyph">𓊽</span>
+					<div className="cd-tx-body">
+						<span>{txError ? "Execution failed: " + txErrText : txConfirmed ? "✓ Settlement confirmed on Arc Testnet" : txConfirming ? "Settling on-chain… awaiting confirmation" : "Awaiting wallet signature…"}</span>
+						{txHash && <a className="cd-tx-link" href={"https://testnet.arcscan.app/tx/" + txHash} target="_blank" rel="noreferrer">{txHash.slice(0, 10)}…{txHash.slice(-8)} ↗</a>}
+					</div>
+					<button className="cd-tx-x" onClick={() => txReset()}>✕</button>
+				</div>
+			)}
 
 			<LiveTicker signals={signals} />
 
@@ -304,7 +354,7 @@ export function CronusDashboard() {
 				<div className="cd-rm-note">Proposed design — confidential agent strategies & positions (not live yet).</div>
 			</div>
 
-			{running && <div className="cd-scan" />}
+			{(running || txBusy) && <div className="cd-scan" />}
 			<RiskModal open={riskOpen} onClose={() => setRiskOpen(false)} />
 			<WalletConnectModal open={walletOpen} onClose={() => setWalletOpen(false)} />
 		</section>
