@@ -2,6 +2,7 @@ import "./cronus.css"
 import { useState, useEffect } from "react"
 import { WalletButton } from "./components/WalletButton"
 import { Dashboard, saveDecision } from "./components/Dashboard"
+import { RevenueBar } from "./components/RevenueBar"
 import { LiveMarkets } from "./components/LiveMarkets"
 import { EgyptTheme } from "./components/EgyptTheme"
 import { CronusDashboard } from "./components/CronusDashboard"
@@ -325,6 +326,7 @@ export default function App() {
       )}
       <div id="cap-signals" /><PremiumSignal />
       <div id="cap-markets" /><LiveMarkets />
+<RevenueBar />
       <div id="cap-settlements" /><Dashboard totalOnChain={sessionTxCount} />
 
       {onChainTxs.length > 0 && (
