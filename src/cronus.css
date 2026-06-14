@@ -459,3 +459,13 @@ button:active { transform: scale(0.97); }
 .cd-rev-k { color: #39e01488; font-size: 9px; letter-spacing: 2px; margin-top: 2px; }
 .cd-rev-s { color: #39e01455; font-size: 8px; letter-spacing: 1px; margin-top: 2px; }
 @media (max-width: 640px) { .cd-rev { margin: 16px 14px 0; } .cd-rev-grid { grid-template-columns: repeat(2, 1fr); } }
+
+/* Agent Identity badge */
+.cd-aid{display:flex;align-items:center;gap:12px;padding:8px 14px;margin:0 0 10px;border:1px solid #c9a84c55;border-radius:8px;background:linear-gradient(90deg,#0a0f0a,#0e140e);font-family:"Cinzel",serif}
+.cd-aid-glyph{font-size:20px;color:#c9a84c}
+.cd-aid-main{display:flex;flex-direction:column;line-height:1.2}
+.cd-aid-name{font-size:11px;letter-spacing:1px;color:#c9a84c}
+.cd-aid-id{font-size:12px;color:#39e014;text-decoration:none}
+.cd-aid-id:hover{text-decoration:underline}
+.cd-aid-net{margin-left:auto;font-size:10px;color:#7a8a7a;letter-spacing:1px}
+.cd-aid-live{font-size:10px;color:#00e078;letter-spacing:1px}
