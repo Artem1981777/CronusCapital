@@ -1,6 +1,6 @@
 import { createConfig, http } from "wagmi"
 import { defineChain } from "viem"
-import { injected, walletConnect } from "wagmi/connectors"
+import { injected, metaMask, walletConnect } from "wagmi/connectors"
 
 export const arcTestnet = defineChain({
 	id: 5042002,
@@ -20,7 +20,7 @@ const projectId = "854e57f5212e148744af551c3d2794bc"
 export const wagmiConfig = createConfig({
 	chains: [arcTestnet],
 	connectors: [
-		injected({ target: "metaMask" }),
+		metaMask(),
 		injected(),
 		walletConnect({ projectId }),
 	],
