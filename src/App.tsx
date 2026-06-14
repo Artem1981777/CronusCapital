@@ -1,3 +1,4 @@
+import X402Integration from "./components/X402Integration"
 import PositioningStrap from "./components/PositioningStrap"
 import AgentIdentity from "./components/AgentIdentity"
 import "./cronus.css"
@@ -330,6 +331,7 @@ export default function App() {
       <div id="cap-markets" /><LiveMarkets />
 <AgentIdentity />
 <PositioningStrap />
+<X402Integration />
 <RevenueBar />
       <div id="cap-settlements" /><Dashboard totalOnChain={sessionTxCount} />
 
