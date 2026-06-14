@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { useAccount, useConnect, useDisconnect, useBalance } from "wagmi"
 import { arcTestnet } from "../wagmiConfig"
+import { useAutoArcNetwork } from "../hooks/useAutoArcNetwork"
 
 export function WalletButton() {
   const { address, isConnected } = useAccount()
@@ -8,6 +9,7 @@ export function WalletButton() {
   const { disconnect } = useDisconnect()
   const { data: balance } = useBalance({ address })
   const [showMenu, setShowMenu] = useState(false)
+useAutoArcNetwork()
 
   if (isConnected && address) {
     return (
