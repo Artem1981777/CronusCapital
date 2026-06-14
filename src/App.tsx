@@ -8,6 +8,7 @@ import { Dashboard, saveDecision } from "./components/Dashboard"
 import { LiveMarkets } from "./components/LiveMarkets"
 import { EgyptTheme } from "./components/EgyptTheme"
 import { CronusDashboard } from "./components/CronusDashboard"
+import { LiveSettlements } from "./components/LiveSettlements"
 import { useCronusContract } from "./hooks/useCronusContract"
 import { useAccount } from "wagmi"
 import { runCronusPipeline, setApiKey } from "./agents/cronusAgents"
@@ -244,7 +245,7 @@ export default function App() {
     <div style={{ minHeight: "100vh", background: "transparent", color: "#39e014", fontFamily: "Cinzel, serif" }}>
       <div className="scanline" />
       <EgyptTheme />
-        <div id="cap-top" /><CronusDashboard /><div id="cap-agents" />
+        <div id="cap-top" /><CronusDashboard /><LiveSettlements /><div id="cap-agents" />
       <ChainBar stats={chainStats} />
       <div style={{ borderBottom: "1px solid #39e01422", padding: "20px 32px", display: "flex", alignItems: "center", justifyContent: "space-between", background: "linear-gradient(180deg, #050505 0%, transparent 100%)" }}>
         <div>
