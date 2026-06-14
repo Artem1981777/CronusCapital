@@ -1,3 +1,4 @@
+import AgentIdentity from "./components/AgentIdentity"
 import "./cronus.css"
 import { useState, useEffect } from "react"
 import { WalletButton } from "./components/WalletButton"
@@ -326,6 +327,7 @@ export default function App() {
       )}
       <div id="cap-signals" /><PremiumSignal />
       <div id="cap-markets" /><LiveMarkets />
+<AgentIdentity />
 <RevenueBar />
       <div id="cap-settlements" /><Dashboard totalOnChain={sessionTxCount} />
 
