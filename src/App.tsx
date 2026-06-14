@@ -1,3 +1,4 @@
+import PositioningStrap from "./components/PositioningStrap"
 import AgentIdentity from "./components/AgentIdentity"
 import "./cronus.css"
 import { useState, useEffect } from "react"
@@ -328,6 +329,7 @@ export default function App() {
       <div id="cap-signals" /><PremiumSignal />
       <div id="cap-markets" /><LiveMarkets />
 <AgentIdentity />
+<PositioningStrap />
 <RevenueBar />
       <div id="cap-settlements" /><Dashboard totalOnChain={sessionTxCount} />
 

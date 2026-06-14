@@ -469,3 +469,10 @@ button:active { transform: scale(0.97); }
 .cd-aid-id:hover{text-decoration:underline}
 .cd-aid-net{margin-left:auto;font-size:10px;color:#7a8a7a;letter-spacing:1px}
 .cd-aid-live{font-size:10px;color:#00e078;letter-spacing:1px}
+
+/* Positioning strap */
+.cd-pos{margin:0 0 12px;padding:10px 14px;border-left:3px solid #c9a84c;background:linear-gradient(90deg,#0b110b,transparent)}
+.cd-pos-line{font-family:"Cinzel Decorative",serif;font-size:15px;color:#e8e2d0;letter-spacing:.5px}
+.cd-pos-hl{color:#39e014}
+.cd-pos-pills{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.cd-pos-pill{font-size:10px;letter-spacing:1px;color:#c9a84c;border:1px solid #c9a84c44;border-radius:999px;padding:3px 9px;font-family:"Cinzel",serif}
