@@ -407,3 +407,41 @@ button:active { transform: scale(0.97); }
 .cd-boundary-detail { font-size: 11px; color: #ff9a9a; background: rgba(255,90,90,0.08); border: 1px solid rgba(255,90,90,0.2); border-radius: 10px; padding: 10px; text-align: left; white-space: pre-wrap; word-break: break-word; max-height: 140px; overflow: auto; margin-bottom: 18px; }
 .cd-boundary-btn { font-family: "Cinzel", serif; letter-spacing: 0.1em; font-size: 13px; padding: 11px 22px; border-radius: 10px; cursor: pointer; color: #04060a; background: #39e014; border: none; font-weight: 700; }
 .cd-boundary-btn:hover { box-shadow: 0 0 18px rgba(57,224,20,0.4); }
+
+/* ===== Cronus Oracle Rail (sidebar) ===== */
+.cd-sb-toggle{position:fixed;top:14px;left:14px;z-index:90;width:42px;height:42px;background:rgba(5,5,5,.8);border:1px solid #39e01455;color:#39e014;font-size:18px;cursor:pointer;backdrop-filter:blur(6px);box-shadow:0 0 16px #39e01433}
+.cd-sb-overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:95;backdrop-filter:blur(2px)}
+.cd-sb{position:fixed;top:0;left:0;bottom:0;width:270px;z-index:96;background:linear-gradient(180deg,#070707,#020202);border-right:1px solid #39e01433;display:flex;flex-direction:column;font-family:Cinzel,serif;transform:translateX(-100%);transition:transform .32s cubic-bezier(.4,0,.2,1)}
+.cd-sb.open{transform:translateX(0);box-shadow:0 0 40px #39e01433}
+.cd-sb-head{display:flex;align-items:center;justify-content:space-between;padding:20px 20px 16px;border-bottom:1px solid #39e01422}
+.cd-sb-brand{display:flex;align-items:center;gap:10px;color:#39e014;font-size:18px;letter-spacing:4px;font-weight:900;text-shadow:0 0 10px #39e01466}
+.cd-sb-brand span{font-size:24px;text-shadow:0 0 12px #39e014}
+.cd-sb-close{background:none;border:none;color:#39e01477;font-size:18px;cursor:pointer}
+.cd-sb-pill{display:flex;align-items:center;gap:8px;margin:16px 16px 0;padding:10px 12px;border:1px solid #39e01455;background:rgba(57,224,20,.04)}
+.cd-sb-pill.bad{border-color:#ff444455;background:rgba(255,68,68,.04)}
+.cd-sb-dot{width:8px;height:8px;border-radius:50%;background:#39e014;box-shadow:0 0 10px #39e014}
+.cd-sb-pill.bad .cd-sb-dot{background:#ff4444;box-shadow:0 0 10px #ff4444}
+.cd-sb-pill-body{flex:1}
+.cd-sb-pill-title{color:#39e014;font-size:10px;letter-spacing:2px;font-weight:700}
+.cd-sb-pill.bad .cd-sb-pill-title{color:#ff6666}
+.cd-sb-pill-sub{color:#39e01455;font-size:8px;letter-spacing:1px}
+.cd-sb-switch{background:#39e014;border:none;color:#000;font-size:8px;letter-spacing:1px;font-weight:700;padding:5px 8px;cursor:pointer}
+.cd-sb-section{color:#39e01444;font-size:9px;letter-spacing:4px;padding:20px 20px 8px}
+.cd-sb-nav{flex:1;overflow-y:auto;padding:0 12px}
+.cd-sb-item{width:100%;display:flex;align-items:center;gap:12px;padding:11px 12px;margin-bottom:2px;background:none;border:1px solid transparent;color:#9fd9a0;font-size:13px;letter-spacing:2px;cursor:pointer;text-align:left;font-family:Cinzel,serif;transition:all .15s}
+.cd-sb-item:hover{border:1px solid #39e01433;background:rgba(57,224,20,.05);color:#39e014}
+.cd-sb-glyph{font-size:15px;width:20px;text-align:center}
+.cd-sb-text{flex:1}
+.cd-sb-badge{font-size:8px;letter-spacing:1px;color:#000;background:#39e014;padding:2px 6px;font-weight:700}
+.cd-sb-badge.gold{color:#c9a84c;background:none;border:1px solid #c9a84c55}
+.cd-sb-meter{margin:0 16px 12px;padding:12px;border:1px solid #39e01422;background:rgba(57,224,20,.03)}
+.cd-sb-meter-label{color:#39e01466;font-size:8px;letter-spacing:2px;margin-bottom:6px}
+.cd-sb-meter-row{display:flex;justify-content:space-between;align-items:baseline}
+.cd-sb-big{color:#39e014;font-size:20px;font-weight:900;text-shadow:0 0 10px #39e01455}
+.cd-sb-usd{color:#00e078;font-size:12px;font-weight:700}
+.cd-sb-cap{color:#39e01477;font-size:9px;letter-spacing:1px}
+.cd-sb-foot{border-top:1px solid #39e01422;padding:16px}
+.cd-sb-wrow{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.cd-sb-addr{color:#39e01488;font-size:10px;font-family:"Courier New",monospace}
+.cd-sb-bal{color:#39e014;font-size:11px;font-weight:700}
+.cd-sb-note{color:#39e01433;font-size:8px;letter-spacing:1px;margin-top:8px;text-align:center}
