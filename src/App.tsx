@@ -13,7 +13,6 @@ import { useAccount } from "wagmi"
 import { runCronusPipeline, setApiKey } from "./agents/cronusAgents"
 import type { AgentState, MarketSignal, BetOpportunity } from "./agents/cronusAgents"
 import { PremiumSignal } from "./components/PremiumSignal"
-import { CronusSidebar } from "./components/CronusSidebar"
 
 const TOPICS = ["crypto markets", "US elections", "Fed interest rates", "AI stocks", "Bitcoin ETF"]
 
@@ -244,7 +243,6 @@ export default function App() {
   return (
     <div style={{ minHeight: "100vh", background: "transparent", color: "#39e014", fontFamily: "Cinzel, serif" }}>
       <div className="scanline" />
-<CronusSidebar />
       <EgyptTheme />
         <div id="cap-top" /><CronusDashboard /><div id="cap-agents" />
       <ChainBar stats={chainStats} />
