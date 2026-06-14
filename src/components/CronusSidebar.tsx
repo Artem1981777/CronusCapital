@@ -7,7 +7,6 @@ const USDC = "0x3600000000000000000000000000000000000000" as const
 const ERC20_ABI = [ { type: "function", name: "balanceOf", stateMutability: "view", inputs: [ { name: "account", type: "address" } ], outputs: [ { type: "uint256" } ] } ] as const
 
 interface NavItem { id: string; glyph: string; label: string; badge?: string }
-interface Spend { count: number; usd: number }
 
 const NAV: NavItem[] = [
 	{ id: "cap-top", glyph: "𓂀", label: "Overview" },
@@ -20,7 +19,9 @@ const NAV: NavItem[] = [
 export function CronusSidebar() {
 	const [open, setOpen] = useState(false)
 	const [active, setActive] = useState("cap-top")
-	const [spend, setSpend] = useState<Spend>({ count: 0, usd: 0 })
+	const [spend, setSpend] = useState({ count: 0, usd: 0 })
+	const [settles, setSettles] = useState(0)
+	const [earn, setEarn] = useState({ calls: 0, usd: 0 })
 	const { address, isConnected } = useAccount()
 	const chainId = useChainId()
 	const { switchChain } = useSwitchChain()
@@ -29,7 +30,16 @@ export function CronusSidebar() {
 	const usdc = bal ? Number(bal as bigint) / 1e6 : 0
 
 	useEffect(() => {
-		const read = () => { try { const r = JSON.parse(localStorage.getItem("cronus.spend.v1") || "{}"); setSpend({ count: Number(r.count) || 0, usd: Number(r.usd) || 0 }) } catch { /* ignore */ } }
+		const read = () => {
+			try {
+				const s = JSON.parse(localStorage.getItem("cronus.spend.v1") || "{}")
+				setSpend({ count: Number(s.count) || 0, usd: Number(s.usd) || 0 })
+				const d = JSON.parse(localStorage.getItem("cronus_decisions") || "[]")
+				setSettles(Array.isArray(d) ? d.length : 0)
+				const e = JSON.parse(localStorage.getItem("cronus_earnings") || '{"calls":0,"usd":0}')
+				setEarn({ calls: Number(e.calls) || 0, usd: Number(e.usd) || 0 })
+			} catch { /* ignore */ }
+		}
 		read()
 		const t = setInterval(read, 2000)
 		return () => clearInterval(t)
@@ -93,6 +103,11 @@ export function CronusSidebar() {
 					<div className="cd-sb-meter-label">𓏏 x402 SESSION</div>
 					<div className="cd-sb-meter-row"><span className="cd-sb-big">{spend.count}</span><span className="cd-sb-cap">PAID CALLS</span></div>
 					<div className="cd-sb-meter-row"><span className="cd-sb-usd">${spend.usd.toFixed(2)}</span><span className="cd-sb-cap">SPENT · USDC</span></div>
+				</div>
+				<div className="cd-sb-meter">
+					<div className="cd-sb-meter-label">☥ ON-CHAIN LEDGER</div>
+					<div className="cd-sb-meter-row"><span className="cd-sb-big">{settles}</span><span className="cd-sb-cap">SETTLEMENTS</span></div>
+					<div className="cd-sb-meter-row"><span className="cd-sb-usd">${earn.usd.toFixed(2)}</span><span className="cd-sb-cap">EARNED · {earn.calls} CLIENTS</span></div>
 				</div>
 				<div className="cd-sb-foot">
 					{isConnected && (
