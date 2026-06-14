@@ -476,3 +476,15 @@ button:active { transform: scale(0.97); }
 .cd-pos-hl{color:#39e014}
 .cd-pos-pills{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
 .cd-pos-pill{font-size:10px;letter-spacing:1px;color:#c9a84c;border:1px solid #c9a84c44;border-radius:999px;padding:3px 9px;font-family:"Cinzel",serif}
+
+/* x402 integration card */
+.cd-x402{margin:0 0 14px;border:1px solid #39e01433;border-radius:10px;background:#070b07;overflow:hidden;font-family:"Cinzel",serif}
+.cd-x402-head{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:linear-gradient(90deg,#0c140c,#0a0f0a);border-bottom:1px solid #39e01422}
+.cd-x402-title{font-size:11px;letter-spacing:1px;color:#c9a84c}
+.cd-x402-tag{font-size:9px;letter-spacing:1px;color:#070b07;background:#39e014;border-radius:4px;padding:2px 7px}
+.cd-x402-meta{display:flex;gap:10px;flex-wrap:wrap;padding:7px 12px;font-size:10px;color:#7a8a7a;letter-spacing:.5px;border-bottom:1px solid #39e01411}
+.cd-x402-price{color:#39e014}
+.cd-x402-code{padding:10px 12px;overflow-x:auto;font-family:ui-monospace,Menlo,monospace}
+.cd-x402-line{font-size:11px;line-height:1.7;color:#39e014;white-space:pre}
+.cd-x402-cmt{color:#6b7a5a}
+.cd-x402-foot{padding:8px 12px;font-size:10px;color:#9a8a5a;border-top:1px solid #39e01411;line-height:1.4}
