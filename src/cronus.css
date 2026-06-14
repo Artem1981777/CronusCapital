@@ -448,3 +448,14 @@ button:active { transform: scale(0.97); }
 .cd-sb-cast{display:flex;align-items:center;justify-content:center;gap:8px;margin:14px 16px 4px;padding:12px;background:#39e014;border:none;color:#000;font-family:Cinzel,serif;font-size:12px;letter-spacing:3px;font-weight:900;cursor:pointer;box-shadow:0 0 20px #39e01455}
 .cd-sb-cast:active{transform:scale(.97)}
 .cd-sb-item.active{border:1px solid #39e014;background:rgba(57,224,20,.08);color:#39e014}
+
+.cd-rev { margin: 24px 32px 0; border: 1px solid #39e01433; background: #050505; padding: 14px 18px; }
+.cd-rev-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.cd-rev-title { color: #39e014; font-size: 11px; letter-spacing: 3px; font-family: "Cinzel", serif; }
+.cd-rev-tph { color: #c9a84c; font-size: 10px; letter-spacing: 1px; font-family: "Cinzel", serif; }
+.cd-rev-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.cd-rev-cell { border: 1px solid #39e01422; padding: 10px 12px; text-align: center; }
+.cd-rev-v { color: #39e014; font-size: 20px; font-weight: 700; font-family: "Cinzel", serif; }
+.cd-rev-k { color: #39e01488; font-size: 9px; letter-spacing: 2px; margin-top: 2px; }
+.cd-rev-s { color: #39e01455; font-size: 8px; letter-spacing: 1px; margin-top: 2px; }
+@media (max-width: 640px) { .cd-rev { margin: 16px 14px 0; } .cd-rev-grid { grid-template-columns: repeat(2, 1fr); } }
