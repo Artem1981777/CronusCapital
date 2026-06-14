@@ -445,3 +445,6 @@ button:active { transform: scale(0.97); }
 .cd-sb-addr{color:#39e01488;font-size:10px;font-family:"Courier New",monospace}
 .cd-sb-bal{color:#39e014;font-size:11px;font-weight:700}
 .cd-sb-note{color:#39e01433;font-size:8px;letter-spacing:1px;margin-top:8px;text-align:center}
+.cd-sb-cast{display:flex;align-items:center;justify-content:center;gap:8px;margin:14px 16px 4px;padding:12px;background:#39e014;border:none;color:#000;font-family:Cinzel,serif;font-size:12px;letter-spacing:3px;font-weight:900;cursor:pointer;box-shadow:0 0 20px #39e01455}
+.cd-sb-cast:active{transform:scale(.97)}
+.cd-sb-item.active{border:1px solid #39e014;background:rgba(57,224,20,.08);color:#39e014}

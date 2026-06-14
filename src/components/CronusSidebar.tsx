@@ -19,6 +19,7 @@ const NAV: NavItem[] = [
 
 export function CronusSidebar() {
 	const [open, setOpen] = useState(false)
+	const [active, setActive] = useState("cap-top")
 	const [spend, setSpend] = useState<Spend>({ count: 0, usd: 0 })
 	const { address, isConnected } = useAccount()
 	const chainId = useChainId()
@@ -30,14 +31,29 @@ export function CronusSidebar() {
 	useEffect(() => {
 		const read = () => { try { const r = JSON.parse(localStorage.getItem("cronus.spend.v1") || "{}"); setSpend({ count: Number(r.count) || 0, usd: Number(r.usd) || 0 }) } catch { /* ignore */ } }
 		read()
-		const t = setInterval(read, 3000)
+		const t = setInterval(read, 2000)
 		return () => clearInterval(t)
 	}, [])
 
 	function go(id: string) {
+		setActive(id)
 		if (id === "cap-top") window.scrollTo({ top: 0, behavior: "smooth" })
 		else { const el = document.getElementById(id); if (el) el.scrollIntoView({ behavior: "smooth", block: "start" }) }
 		setOpen(false)
+	}
+
+	function quickCast() {
+		const topic = "crypto markets"
+		const input = document.querySelector("input[placeholder='Enter market topic to analyze...']") as HTMLInputElement | null
+		if (input) {
+			const desc = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, "value")
+			if (desc && desc.set) desc.set.call(input, topic)
+			input.dispatchEvent(new Event("input", { bubbles: true }))
+		}
+		const btn = Array.from(document.querySelectorAll("button")).find((b) => (b.textContent || "").trim().toUpperCase() === "CONSULT") as HTMLButtonElement | undefined
+		window.scrollTo({ top: 0, behavior: "smooth" })
+		setOpen(false)
+		setTimeout(() => { if (btn) btn.click() }, 120)
 	}
 
 	return (
@@ -57,10 +73,11 @@ export function CronusSidebar() {
 					</div>
 					{!onArc && <button className="cd-sb-switch" onClick={() => switchChain({ chainId: ARC_CHAIN_ID })}>SWITCH</button>}
 				</div>
+				<button className="cd-sb-cast" onClick={quickCast}>⚡ QUICK CAST</button>
 				<div className="cd-sb-section">ORACLE</div>
 				<nav className="cd-sb-nav">
 					{NAV.map((n) => (
-						<button key={n.id} className="cd-sb-item" onClick={() => go(n.id)}>
+						<button key={n.id} className={active === n.id ? "cd-sb-item active" : "cd-sb-item"} onClick={() => go(n.id)}>
 							<span className="cd-sb-glyph">{n.glyph}</span>
 							<span className="cd-sb-text">{n.label}</span>
 							{n.badge && <span className="cd-sb-badge">{n.badge}</span>}
