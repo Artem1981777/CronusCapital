@@ -38,11 +38,11 @@ export function LiveSettlements() {
 	return (
 		<section className="cd-feed-wrap">
 			<div className="cd-feed-head">
-				<span className="cd-feed-title">\u26A1 Live On-chain Settlements</span>
-				<span className="cd-feed-meta">{settled.length} settled \u00B7 {rows.length} decisions \u00B7 Arc Testnet</span>
+				<span className="cd-feed-title">{"\u26A1"} Live On-chain Settlements</span>
+				<span className="cd-feed-meta">{settled.length} settled {"\u00B7"} {rows.length} decisions {"\u00B7"} Arc Testnet</span>
 			</div>
 			{settled.length === 0 ? (
-				<div className="cd-feed-empty">No settlements yet \u2014 run FORCE EXECUTE to post a real 0.01 USDC settlement on-chain.</div>
+				<div className="cd-feed-empty">No settlements yet {"\u2014"} run FORCE EXECUTE to post a real 0.01 USDC settlement on-chain.</div>
 			) : (
 				<ol className="cd-feed-list">
 					{settled.slice(0, 12).map((r, i) => (
@@ -50,9 +50,9 @@ export function LiveSettlements() {
 							<span className="cd-feed-idx">#{settled.length - i}</span>
 							<span className="cd-feed-main">
 								<span className="cd-feed-topic">{r.topic || "Market signal"}</span>
-								<span className="cd-feed-sub">{r.decision || "EXECUTE"} \u00B7 {ago(r.timestamp)}{r.agentId ? " \u00B7 " + r.agentId : ""}</span>
+								<span className="cd-feed-sub">{r.decision || "EXECUTE"} {"\u00B7"} {ago(r.timestamp)}{r.agentId ? " \u00B7 " + r.agentId : ""}</span>
 							</span>
-							<a className="cd-feed-tx" href={EXPLORER + r.txHash} target="_blank" rel="noreferrer">{shorten(r.txHash || "")} \u2197</a>
+							<a className="cd-feed-tx" href={EXPLORER + r.txHash} target="_blank" rel="noreferrer">{shorten(r.txHash || "")} {"\u2197"}</a>
 						</li>
 					))}
 				</ol>
