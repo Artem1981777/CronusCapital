@@ -34,7 +34,7 @@ const ERC20_ABI = [
 ] as const
 
 function fmtUsd(n: number): string {
-	return "$" + n.toLocaleString("en-US", { maximumFractionDigits: 0 })
+	return "$" + n.toLocaleString("en-US", { maximumFractionDigits: 2 })
 }
 
 function WalletConnectModal(props: { open: boolean; onClose: () => void }) {
@@ -201,22 +201,26 @@ export function CronusDashboard() {
 		return () => clearInterval(id)
 	}, [])
 
-	// CUSTOMIZE: replace with real on-chain / API data
-	const portfolio = 124820 + tick * 137
-	const pnlPct = (12.4 + (tick % 7) * 0.25).toFixed(1)
+	// Live metrics derived from the on-chain ledger (localStorage state)
+	const readJson = (k: string): unknown => { try { return JSON.parse(localStorage.getItem(k) || "null") } catch { return null } }
+	const decisions = (readJson("cronus_decisions") as unknown[]) || []
+	const earn = (readJson("cronus_earnings") as { calls?: number; usd?: number }) || { calls: 0, usd: 0 }
+	const spend = (readJson("cronus.spend.v1") as { count?: number; usd?: number }) || { count: 0, usd: 0 }
+	const settlements = Array.isArray(decisions) ? decisions.length : 0
+	const usdcSettled = settlements * 0.01
+	const revenue = Number((earn && earn.usd) || 0)
+	const paidCalls = Number((earn && earn.calls) || 0)
+	const agentSpend = Number((spend && spend.usd) || 0)
+	const netFlow = revenue - agentSpend
 	const confidence = 78 + (tick % 9)
 	const activeSignals = 5 + (tick % 4)
-	const winRate = 64 + (tick % 5)
-	const volume = 2480000 + tick * 5200
-	const sharpe = (2.1 + (tick % 6) * 0.05).toFixed(2)
-	const risk = 35 + (tick % 10)
 
 	const kpis: Array<Kpi> = [
-		{ id: "pv", label: "Portfolio Value", value: fmtUsd(portfolio), sub: pnlPct + "% today", trend: "up", accent: "green", progress: 72 },
-		{ id: "wr", label: "Win Rate", value: winRate + "%", sub: "last 30 trades", trend: "up", accent: "gold", progress: winRate },
-		{ id: "vol", label: "Executed Volume", value: fmtUsd(volume), sub: "USDC settled", trend: "up", accent: "green", progress: 88 },
-		{ id: "sh", label: "Sharpe Ratio", value: sharpe, sub: "risk-adjusted", trend: Number(sharpe) > 2 ? "up" : "flat", accent: "gold" },
-		{ id: "rk", label: "Risk Exposure", value: risk + "%", sub: risk > 40 ? "elevated" : "nominal", trend: risk > 40 ? "down" : "flat", accent: "green", progress: risk },
+		{ id: "set", label: "USDC Settled", value: fmtUsd(usdcSettled), sub: settlements + " settlements", trend: "up", accent: "green", progress: Math.min(100, settlements * 8) },
+		{ id: "rev", label: "Revenue (x402)", value: fmtUsd(revenue), sub: paidCalls + " paid calls", trend: revenue > 0 ? "up" : "flat", accent: "gold", progress: Math.min(100, paidCalls * 12) },
+		{ id: "pc", label: "Paid Calls", value: String(paidCalls), sub: "x402 settled", trend: paidCalls > 0 ? "up" : "flat", accent: "green", progress: Math.min(100, paidCalls * 12) },
+		{ id: "spd", label: "Agent Spend", value: fmtUsd(agentSpend), sub: "upstream per-call", trend: agentSpend > 0 ? "down" : "flat", accent: "gold", progress: Math.min(100, agentSpend * 40) },
+		{ id: "net", label: "Net Flow", value: (netFlow >= 0 ? "+" : "-") + fmtUsd(Math.abs(netFlow)), sub: "revenue - spend", trend: netFlow >= 0 ? "up" : "down", accent: "green", progress: Math.min(100, Math.abs(netFlow) * 20) },
 	]
 	const agents: Array<AgentInfo> = [
 		{ id: "scout", name: "SCOUT", role: "Signal Discovery", glyph: "𓅃", state: running ? "scanning" : "idle", perf: 92 },
