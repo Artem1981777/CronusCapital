@@ -488,3 +488,19 @@ button:active { transform: scale(0.97); }
 .cd-x402-line{font-size:11px;line-height:1.7;color:#39e014;white-space:pre}
 .cd-x402-cmt{color:#6b7a5a}
 .cd-x402-foot{padding:8px 12px;font-size:10px;color:#9a8a5a;border-top:1px solid #39e01411;line-height:1.4}
+
+/* ===== Live On-chain Settlements feed ===== */
+.cd-feed-wrap{position:relative;z-index:2;max-width:1200px;margin:clamp(10px,1.8vw,16px) auto;padding:16px 18px;border-radius:16px;background:rgba(6,12,8,0.6);border:1px solid rgba(57,224,20,0.18);box-shadow:0 0 24px rgba(57,224,20,0.06)}
+.cd-feed-head{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.cd-feed-title{font-family:"Cinzel",serif;letter-spacing:2px;font-size:13px;color:#39e014;text-transform:uppercase}
+.cd-feed-meta{font-size:11px;color:#9fe88f;opacity:.85}
+.cd-feed-empty{font-size:12px;color:#9fe88f;opacity:.7;padding:14px;border:1px dashed rgba(57,224,20,0.2);border-radius:10px}
+.cd-feed-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.cd-feed-row{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:10px;background:rgba(0,0,0,0.3);border:1px solid rgba(57,224,20,0.1);transition:border-color .2s ease}
+.cd-feed-row:hover{border-color:rgba(57,224,20,0.35)}
+.cd-feed-idx{font-family:"Cinzel",serif;font-size:12px;color:#c9a84c;min-width:34px}
+.cd-feed-main{flex:1;display:flex;flex-direction:column;gap:2px;min-width:0}
+.cd-feed-topic{font-size:13px;color:#eaffe4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cd-feed-sub{font-size:11px;color:#8fd07f;opacity:.85}
+.cd-feed-tx{font-family:monospace;font-size:12px;color:#39e014;text-decoration:none;white-space:nowrap}
+.cd-feed-tx:hover{text-decoration:underline}
