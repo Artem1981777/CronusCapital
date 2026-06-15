@@ -368,8 +368,9 @@ export function CronusDashboard() {
 				</div>
 			</div>
 
-			<MarketBoard />
-						<SecurityPanel />
+			<SecurityPanel />
+					<MarketBoard />
+						
 			{(txBusy || txConfirmed || txError) && (
 				<div className={"cd-tx" + (txError ? " cd-tx-err" : txConfirmed ? " cd-tx-ok" : "")}>
 					<span className="cd-tx-glyph">𓊽</span>
