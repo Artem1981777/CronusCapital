@@ -524,3 +524,9 @@ button:active { transform: scale(0.97); }
 
 /* ===== REVEAL EGYPT PHOTO: transparent wrappers so fixed bg shows behind content ===== */
 #root, .cd-root { background: transparent !important; }
+
+/* ===== FORCE PHOTO BACKGROUND (final, bulletproof) ===== */
+.hiero-rain, .hiero-wall, .deities, .pyramid-wrap, .egypt-glow, .egypt-stars { display: none !important; }
+.egypt-bg { background-image: linear-gradient(rgba(0,0,0,0.12), rgba(0,0,0,0.22)), url("/egypt-bg.jpg") !important; background-size: cover !important; background-position: center center !important; background-repeat: no-repeat !important; filter: brightness(1.25) !important; z-index: -2 !important; }
+html, body { background: linear-gradient(rgba(0,0,0,0.12), rgba(0,0,0,0.22)), url("/egypt-bg.jpg") !important; background-size: cover !important; background-position: center center !important; background-attachment: fixed !important; background-repeat: no-repeat !important; }
+#root, .cd-root { background: transparent !important; }
