@@ -12,6 +12,7 @@ import { LiveSettlements } from "./components/LiveSettlements"
 import EquityCurve from "./EquityCurve"
 import PolicyGuardrails from "./PolicyGuardrails"
 import VerifiableLedger from "./VerifiableLedger"
+import SecurityPanel from "./SecurityPanel"
 import MultiChart from "./MultiChart"
 import { AgentDemoScout, AgentDemoAnalyst, AgentDemoExecutor } from "./AgentDemo"
 import "./demoSeed"
@@ -340,6 +341,7 @@ export default function App() {
 <X402Integration />
         <PolicyGuardrails />
 			<VerifiableLedger />
+        <SecurityPanel />
       <div id="cap-settlements" /><Dashboard totalOnChain={sessionTxCount} />
 
       {onChainTxs.length > 0 && (
