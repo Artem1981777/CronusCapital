@@ -30,7 +30,7 @@ export default function X402Integration() {
 					<div key={i} className={l.indexOf("#") === 0 ? "cd-x402-line cd-x402-cmt" : "cd-x402-line"}>{l}</div>
 				))}
 			</div>
-			<div className="cd-x402-foot">Any agent or contract can pay Cronus per call. No login, no API key — just USDC on Arc.</div>
+			<div className="cd-x402-foot">Any agent or contract can pay Cronus per call — real on-chain USDC settlement on Arc testnet today. Circle Gateway batched x402 nanopayments (sub-cent) are on the roadmap.</div>
 		</div>
 	)
 }
