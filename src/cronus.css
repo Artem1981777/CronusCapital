@@ -511,3 +511,13 @@ button:active { transform: scale(0.97); }
 /* EGYPT BG STACKING FIX — keep decorative bg strictly behind content */
 .egypt-bg { z-index: -2 !important; }
 .cd-root { position: relative; z-index: 1; }
+
+/* ===== EGYPT BG — RESTORE ORIGINAL LOOK + LIGHTER ===== */
+.egypt-bg {
+  background-image: linear-gradient(rgba(0,0,0,0.08), rgba(0,0,0,0.15)), url("/egypt-bg.jpg") !important;
+  background-size: cover !important;
+  background-position: center center !important;
+  background-repeat: no-repeat !important;
+  filter: brightness(1.3) saturate(1.05) !important;
+  z-index: -2 !important;
+}
