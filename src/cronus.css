@@ -521,3 +521,6 @@ button:active { transform: scale(0.97); }
   filter: brightness(1.3) saturate(1.05) !important;
   z-index: -2 !important;
 }
+
+/* ===== REVEAL EGYPT PHOTO: transparent wrappers so fixed bg shows behind content ===== */
+#root, .cd-root { background: transparent !important; }
