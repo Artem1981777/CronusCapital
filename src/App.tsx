@@ -2,6 +2,7 @@ import ReasoningTrace from "./components/ReasoningTrace";
 import TrackRecord from "./components/TrackRecord";
 import X402Integration from "./components/X402Integration"
 import MoatStrip from "./components/MoatStrip"
+import ComposabilityStrip from "./components/ComposabilityStrip"
 import PositioningStrap from "./components/PositioningStrap"
 import AgentIdentity from "./components/AgentIdentity"
 import "./cronus.css"
@@ -339,6 +340,7 @@ export default function App() {
 <PositioningStrap />
 <X402Integration />
       <MoatStrip />
+      <ComposabilityStrip />
         <PolicyGuardrails />
 			<VerifiableLedger />
       <div id="cap-settlements" /><Dashboard totalOnChain={sessionTxCount} />
