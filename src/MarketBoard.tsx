@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, type CSSProperties } from "react"
 
 type Candle = { t: number; o: number; h: number; l: number; c: number }
 type Kind = "price" | "onchain"
+type Mode = "live" | "cached" | "sim"
 type Coin = { id: string; sym: string; label: string; kind: Kind; exLabel: string; exUrl: string }
 
 const COINS: Coin[] = [
@@ -17,8 +18,17 @@ const RPC = "/api/rpc"
 const ARC_CHAIN_ID = 5042002
 
 function ohlcUrl(id: string) { return "https://api.coingecko.com/api/v3/coins/" + id + "/ohlc?vs_currency=usd&days=1" }
+function cgUrl(id: string) { return "/api/cg?path=" + encodeURIComponent("coins/" + id + "/ohlc?vs_currency=usd&days=1") }
 function fmtUsd(n: number) { return "$" + n.toLocaleString(undefined, { maximumFractionDigits: n < 10 ? 4 : 0 }) }
 function now() { return new Date().toLocaleTimeString() }
+function modeMeta(m: Mode) { return m === "live" ? { t: "● LIVE", c: GREEN } : m === "cached" ? { t: "◍ CACHED", c: GOLD } : { t: "◌ SIMULATED", c: DIM } }
+
+function loadCache(id: string): Candle[] | null {
+  try { const s = localStorage.getItem("cronus_ohlc_" + id); if (!s) return null; const o = JSON.parse(s); return Array.isArray(o.candles) && o.candles.length ? o.candles : null } catch { return null }
+}
+function saveCache(id: string, candles: Candle[]) {
+  try { localStorage.setItem("cronus_ohlc_" + id, JSON.stringify({ ts: Date.now(), candles })) } catch { /* ignore */ }
+}
 
 function synth(id: string): Candle[] {
   const base = id === "bitcoin" ? 65000 : id === "ethereum" ? 3400 : id === "solana" ? 150 : 1.1
@@ -40,7 +50,7 @@ type ArcStat = { block: number; gasGwei: string; chainId: number | null; alive: 
 export default function MarketBoard() {
   const [coinId, setCoinId] = useState("bitcoin")
   const [candles, setCandles] = useState<Candle[]>([])
-  const [live, setLive] = useState(false)
+  const [mode, setMode] = useState<Mode>("sim")
   const [synced, setSynced] = useState("")
   const [arc, setArc] = useState<ArcStat | null>(null)
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
@@ -50,22 +60,26 @@ export default function MarketBoard() {
   useEffect(() => {
     if (coin.kind !== "price") return
     let stop = false
+    const seed = loadCache(coin.id)
+    if (seed) { setCandles(seed); setMode("cached") }
     async function load() {
       try {
-        const res = await fetch(ohlcUrl(coin.id))
+        const res = await fetch(cgUrl(coin.id))
         if (!res.ok) throw new Error("status " + res.status)
         const raw = await res.json()
         if (stop) return
         const cs: Candle[] = raw.map((r: number[]) => ({ t: r[0], o: r[1], h: r[2], l: r[3], c: r[4] }))
         if (!cs.length) throw new Error("empty")
-        setCandles(cs); setLive(true); setSynced(now())
+        setCandles(cs); setMode("live"); setSynced(now()); saveCache(coin.id, cs)
       } catch {
         if (stop) return
-        setCandles(synth(coin.id)); setLive(false); setSynced(now())
+        const c2 = loadCache(coin.id)
+        if (c2) { setCandles(c2); setMode("cached"); setSynced(now()) }
+        else { setCandles(synth(coin.id)); setMode("sim"); setSynced(now()) }
       }
     }
     load()
-    const iv = setInterval(load, 45000)
+    const iv = setInterval(load, 60000)
     return () => { stop = true; clearInterval(iv) }
   }, [coinId])
 
@@ -82,17 +96,12 @@ export default function MarketBoard() {
         ])
         const bd = await b.json(), gd = await g.json(), cd = await c.json()
         if (stop) return
-        setArc({
-          block: parseInt(bd.result, 16),
-          gasGwei: (parseInt(gd.result, 16) / 1e9).toFixed(4),
-          chainId: cd.result ? parseInt(cd.result, 16) : ARC_CHAIN_ID,
-          alive: true,
-        })
-        setLive(true); setSynced(now())
+        setArc({ block: parseInt(bd.result, 16), gasGwei: (parseInt(gd.result, 16) / 1e9).toFixed(4), chainId: cd.result ? parseInt(cd.result, 16) : ARC_CHAIN_ID, alive: true })
+        setMode("live"); setSynced(now())
       } catch {
         if (stop) return
         setArc(prev => prev ? { ...prev, alive: false } : { block: 0, gasGwei: "—", chainId: ARC_CHAIN_ID, alive: false })
-        setLive(false); setSynced(now())
+        setMode("sim"); setSynced(now())
       }
     }
     load()
@@ -140,15 +149,14 @@ export default function MarketBoard() {
   const last = candles.length ? candles[candles.length - 1].c : 0
   const first = candles.length ? candles[0].o : 0
   const chgPct = first ? ((last - first) / first) * 100 : 0
+  const mm = modeMeta(mode)
 
   return (
     <div style={panelStyle}>
       <div style={headStyle}>
         <span style={titleStyle}>{"\u{13080}"} LIVE CANDLES · TOP CRYPTO</span>
         <div style={tabsStyle}>
-          {COINS.map(c => (
-            <span key={c.id} onClick={() => setCoinId(c.id)} style={tabStyle(c.id === coinId)}>{c.sym}</span>
-          ))}
+          {COINS.map(c => (<span key={c.id} onClick={() => setCoinId(c.id)} style={tabStyle(c.id === coinId)}>{c.sym}</span>))}
         </div>
       </div>
 
@@ -159,9 +167,7 @@ export default function MarketBoard() {
             <span style={chgStyle(chgPct)}>{(chgPct >= 0 ? "+" : "") + chgPct.toFixed(2)}%</span>
             <span style={labelStyle}>{coin.label}</span>
           </div>
-          <div ref={wrapRef} style={fullW}>
-            <canvas ref={canvasRef} />
-          </div>
+          <div ref={wrapRef} style={fullW}><canvas ref={canvasRef} /></div>
         </>
       ) : (
         <div style={arcWrapStyle}>
@@ -178,14 +184,12 @@ export default function MarketBoard() {
       )}
 
       <div style={proofStyle}>
-        <span style={liveStyle(live)}>{live ? "● LIVE" : "◌ SIMULATED"}</span>
-        <span style={dimSmall}>Source: {coin.kind === "price" ? "api.coingecko.com" : "rpc.testnet.arc.network"}</span>
+        <span style={liveStyle(mm.c)}>{mm.t}</span>
+        <span style={dimSmall}>Source: {coin.kind === "price" ? "api.coingecko.com · cached 60s" : "rpc.testnet.arc.network"}</span>
         <span style={dimSmall}>synced {synced || "…"}</span>
-        {coin.kind === "price" ? (
-          <a href={ohlcUrl(coin.id)} target="_blank" rel="noreferrer" style={linkStyle}>Verify raw ↗</a>
-        ) : (
-          <a href="https://testnet.arcscan.app" target="_blank" rel="noreferrer" style={linkStyle}>Arc Explorer ↗</a>
-        )}
+        {coin.kind === "price"
+          ? (<a href={ohlcUrl(coin.id)} target="_blank" rel="noreferrer" style={linkStyle}>Verify raw ↗</a>)
+          : (<a href="https://testnet.arcscan.app" target="_blank" rel="noreferrer" style={linkStyle}>Arc Explorer ↗</a>)}
         <a href={coin.exUrl} target="_blank" rel="noreferrer" style={linkStyle}>{coin.exLabel} ↗</a>
       </div>
       <div style={getStyle}>
@@ -195,7 +199,7 @@ export default function MarketBoard() {
       </div>
       <div style={captionStyle}>
         {coin.kind === "price"
-          ? "Real open / high / low / close candles fetched live from CoinGecko. Click \"Verify raw\" to inspect the JSON yourself, or cross-check on " + coin.exLabel + "."
+          ? "Real OHLC candles from CoinGecko, served via a cached edge proxy (60s) to respect the free rate limit. Click \"Verify raw\" to inspect the public JSON yourself, or cross-check on " + coin.exLabel + "."
           : "Live block height, gas and chain id fetched directly from the Arc testnet RPC. No tradeable ARC price exists yet — Circle's Arc token is still in presale."}
       </div>
     </div>
@@ -203,12 +207,7 @@ export default function MarketBoard() {
 }
 
 function ArcCell({ k, v }: { k: string; v: string }) {
-  return (
-    <div style={arcCellStyle}>
-      <div style={arcCellKey}>{k}</div>
-      <div style={arcCellVal}>{v}</div>
-    </div>
-  )
+  return (<div style={arcCellStyle}><div style={arcCellKey}>{k}</div><div style={arcCellVal}>{v}</div></div>)
 }
 
 const panelStyle: CSSProperties = { marginTop: 14, border: "1px solid " + GREEN + "22", background: BG, padding: 16 }
@@ -224,7 +223,7 @@ const bigPriceStyle: CSSProperties = { color: "#eafff0", fontSize: 26, fontWeigh
 function chgStyle(p: number): CSSProperties { return { color: p >= 0 ? GREEN : RED, fontSize: 14, fontWeight: 700 } }
 const labelStyle: CSSProperties = { color: DIM, fontSize: 10, letterSpacing: 2 }
 const proofStyle: CSSProperties = { display: "flex", flexWrap: "wrap", alignItems: "center", gap: 12, marginTop: 12, fontSize: 10, letterSpacing: 1 }
-function liveStyle(on: boolean): CSSProperties { return { color: on ? GREEN : GOLD, fontWeight: 700, letterSpacing: 2 } }
+function liveStyle(c: string): CSSProperties { return { color: c, fontWeight: 700, letterSpacing: 2 } }
 const dimSmall: CSSProperties = { color: DIM, fontSize: 10 }
 const linkStyle: CSSProperties = { color: GREEN, textDecoration: "none", borderBottom: "1px solid " + GREEN + "55" }
 const getStyle: CSSProperties = { marginTop: 8, color: "#5f7a5f", fontSize: 10, fontFamily: "monospace", wordBreak: "break-all" }
