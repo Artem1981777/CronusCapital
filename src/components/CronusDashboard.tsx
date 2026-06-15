@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+import { keccak256, toBytes } from "viem"
 import type { CSSProperties } from "react"
 import { useAccount, useConnect, useDisconnect, useWriteContract, useWaitForTransactionReceipt, useSwitchChain } from "wagmi"
 
@@ -202,12 +203,15 @@ export function CronusDashboard() {
 			const parsed = raw ? JSON.parse(raw) : []
 			const list = Array.isArray(parsed) ? parsed : []
 			if (list.some((r: { txHash?: string }) => r && r.txHash === txHash)) return
+			const settleTs = Date.now()
+			const jobHash = keccak256(toBytes("CRONUS|Manual settlement|FORCE EXECUTE 0.01 USDC|" + txHash + "|" + settleTs))
 			list.unshift({
 				topic: "Manual settlement",
 				decision: "FORCE EXECUTE \u00b7 0.01 USDC settled on Arc Testnet",
 				txHash: txHash,
-				timestamp: Date.now(),
+				timestamp: settleTs,
 				agentId: "executor",
+				jobHash: jobHash,
 			})
 			localStorage.setItem("cronus_decisions", JSON.stringify(list.slice(0, 50)))
 			window.dispatchEvent(new StorageEvent("storage", { key: "cronus_decisions" }))
