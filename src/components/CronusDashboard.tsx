@@ -3,7 +3,7 @@ import { keccak256, toBytes } from "viem"
 import MarketBoard from "../MarketBoard"
 import SecurityPanel from "../SecurityPanel"
 import type { CSSProperties } from "react"
-import { useAccount, useConnect, useDisconnect, useWriteContract, useWaitForTransactionReceipt, useSwitchChain } from "wagmi"
+import { useAccount, useConnect, useDisconnect, useWriteContract, usePublicClient, useWaitForTransactionReceipt, useSwitchChain } from "wagmi"
 import { LiveSettlements } from "./LiveSettlements"
 
 /* ============================================================
@@ -204,6 +204,8 @@ export function CronusDashboard() {
 	const { isConnected, address } = useAccount()
 	const { switchChainAsync } = useSwitchChain()
 	const { writeContractAsync, data: txHash, error: txError, isPending: txPending, reset: txReset } = useWriteContract()
+  const publicClient = usePublicClient({ chainId: ARC_CHAIN_ID })
+  const [preflight, setPreflight] = useState<{ status: "idle" | "running" | "ok" | "fail"; msg?: string }>({ status: "idle" })
 	const { isLoading: txConfirming, isSuccess: txConfirmed } = useWaitForTransactionReceipt({ hash: txHash, chainId: ARC_CHAIN_ID })
 
 	// CRONUS_SETTLEMENT_LOG: persist confirmed FORCE EXECUTE tx into cronus_decisions
@@ -304,6 +306,16 @@ export function CronusDashboard() {
 		if (!ok) return
 		txReset()
 		try { await switchChainAsync({ chainId: ARC_CHAIN_ID }) } catch { /* may already be on Arc, or wallet will prompt */ }
+    setPreflight({ status: "running" })
+    try {
+      if (publicClient) {
+        await publicClient.simulateContract({ account: address, chainId: ARC_CHAIN_ID, address: USDC_ADDRESS, abi: ERC20_ABI, functionName: "transfer", args: [SETTLE_TO, TEST_AMOUNT] })
+      }
+      setPreflight({ status: "ok" })
+    } catch (e) {
+      setPreflight({ status: "fail", msg: String((e as { shortMessage?: string }).shortMessage || (e as Error).message || e).slice(0, 140) })
+      return
+    }
 		try {
 			await writeContractAsync({
 				chainId: ARC_CHAIN_ID,
@@ -371,14 +383,14 @@ export function CronusDashboard() {
 			<SecurityPanel />
 					<MarketBoard />
 						
-			{(txBusy || txConfirmed || txError) && (
-				<div className={"cd-tx" + (txError ? " cd-tx-err" : txConfirmed ? " cd-tx-ok" : "")}>
+			{(txBusy || txConfirmed || txError || preflight.status === "running" || preflight.status === "fail") && (
+				<div className={"cd-tx" + ((txError || preflight.status === "fail") ? " cd-tx-err" : txConfirmed ? " cd-tx-ok" : "")}>
 					<span className="cd-tx-glyph">𓊽</span>
 					<div className="cd-tx-body">
-						<span>{txError ? "Execution failed: " + txErrText : txConfirmed ? "✓ Settlement confirmed on Arc Testnet" : txConfirming ? "Settling on-chain… awaiting confirmation" : "Awaiting wallet signature…"}</span>
+						<span>{preflight.status === "running" ? "PRE-FLIGHT: simulating eth_call..." : preflight.status === "fail" ? "PRE-FLIGHT REVERTED - tx blocked: " + (preflight.msg || "") : txError ? "Execution failed: " + txErrText : txConfirmed ? "✓ Settlement confirmed on Arc Testnet" : txConfirming ? "Settling on-chain… awaiting confirmation" : "Awaiting wallet signature…"}</span>
 						{txHash && <a className="cd-tx-link" href={"https://testnet.arcscan.app/tx/" + txHash} target="_blank" rel="noreferrer">{txHash.slice(0, 10)}…{txHash.slice(-8)} ↗</a>}
 					</div>
-					<button className="cd-tx-x" onClick={() => txReset()}>✕</button>
+					<button className="cd-tx-x" onClick={() => { txReset(); setPreflight({ status: "idle" }) }}>✕</button>
 				</div>
 			)}
 
