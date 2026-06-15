@@ -187,6 +187,8 @@ export function CronusDashboard() {
 	const [running, setRunning] = useState(false)
 	const [riskOpen, setRiskOpen] = useState(false)
 	const [walletOpen, setWalletOpen] = useState(false)
+	const [consultPhase, setConsultPhase] = useState<"idle" | "scout" | "analyst" | "executor">("idle")
+	const [boost, setBoost] = useState(0)
 	const { isConnected, address } = useAccount()
 	const { switchChainAsync } = useSwitchChain()
 	const { writeContractAsync, data: txHash, error: txError, isPending: txPending, reset: txReset } = useWriteContract()
@@ -234,8 +236,8 @@ export function CronusDashboard() {
 	const paidCalls = Number((earn && earn.calls) || 0)
 	const agentSpend = Number((spend && spend.usd) || 0)
 	const netFlow = revenue - agentSpend
-	const confidence = 78 + (tick % 9)
-	const activeSignals = 5 + (tick % 4)
+	const confidence = Math.min(97, 78 + (tick % 9) + boost)
+	const activeSignals = 5 + (tick % 4) + (boost > 0 ? 2 : 0)
 
 	const kpis: Array<Kpi> = [
 		{ id: "set", label: "USDC Settled", value: fmtUsd(usdcSettled), sub: settlements + " settlements", trend: "up", accent: "green", progress: Math.min(100, settlements * 8) },
@@ -245,9 +247,9 @@ export function CronusDashboard() {
 		{ id: "net", label: "Net Flow", value: (netFlow >= 0 ? "+" : "-") + fmtUsd(Math.abs(netFlow)), sub: "revenue - spend", trend: netFlow >= 0 ? "up" : "down", accent: "green", progress: Math.min(100, Math.abs(netFlow) * 20) },
 	]
 	const agents: Array<AgentInfo> = [
-		{ id: "scout", name: "SCOUT", role: "Signal Discovery", glyph: "𓅃", state: running ? "scanning" : "idle", perf: 92 },
-		{ id: "analyst", name: "ANALYST", role: "Risk & Conviction", glyph: "𓂀", state: running ? "analyzing" : "idle", perf: 87 },
-		{ id: "executor", name: "EXECUTOR", role: "On-chain Settlement", glyph: "𓊽", state: txConfirming || txPending ? "executing" : running ? "analyzing" : "idle", perf: 95 },
+		{ id: "scout", name: "SCOUT", role: "Signal Discovery", glyph: "𓅃", state: (consultPhase === "scout" || consultPhase === "analyst" || consultPhase === "executor") ? "scanning" : (running ? "scanning" : "idle"), perf: 92 },
+		{ id: "analyst", name: "ANALYST", role: "Risk & Conviction", glyph: "𓂀", state: (consultPhase === "analyst" || consultPhase === "executor") ? "analyzing" : (running ? "analyzing" : "idle"), perf: 87 },
+		{ id: "executor", name: "EXECUTOR", role: "On-chain Settlement", glyph: "𓊽", state: (txConfirming || txPending) ? "executing" : consultPhase === "executor" ? "executing" : (consultPhase === "scout" || consultPhase === "analyst") ? "analyzing" : (running ? "analyzing" : "idle"), perf: 95 },
 	]
 	const blips = [
 		{ id: "b1", x: 28, y: 32 }, { id: "b2", x: 66, y: 44 }, { id: "b3", x: 48, y: 70 },
@@ -273,9 +275,9 @@ export function CronusDashboard() {
 	]
 
 	const consult = () => {
-		setRunning(true)
+		if (running) return; setRunning(true)
 		// CUSTOMIZE: trigger your real Scout -> Analyst -> Executor pipeline here
-		setTimeout(() => setRunning(false), 2800)
+		setConsultPhase("scout"); setTimeout(() => setConsultPhase("analyst"), 850); setTimeout(() => setConsultPhase("executor"), 1700); setTimeout(() => { setBoost(6 + Math.floor(Math.random() * 8)); setConsultPhase("idle"); setRunning(false) }, 2700)
 	}
 
 	// FORCE EXECUTE -> real test settlement tx on Arc Testnet (0.01 USDC self-transfer)
