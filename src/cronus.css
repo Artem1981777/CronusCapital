@@ -507,3 +507,7 @@ button:active { transform: scale(0.97); }
 
 .cd-btn-exec { color: #04121f; background: linear-gradient(135deg, #3b8cff, #1f5fe0); border-color: #3b8cff; box-shadow: 0 0 18px rgba(59,140,255,0.5); font-weight: 700; }
 .cd-btn-exec:hover { box-shadow: 0 0 28px rgba(59,140,255,0.75); }
+
+/* EGYPT BG STACKING FIX — keep decorative bg strictly behind content */
+.egypt-bg { z-index: -2 !important; }
+.cd-root { position: relative; z-index: 1; }
