@@ -1,4 +1,3 @@
-import EconomicLoop from "./components/EconomicLoop"
 import X402Integration from "./components/X402Integration"
 import MoatStrip from "./components/MoatStrip"
 import PositioningStrap from "./components/PositioningStrap"
@@ -251,9 +250,9 @@ export default function App() {
     <div style={{ minHeight: "100vh", background: "transparent", color: "#39e014", fontFamily: "Cinzel, serif" }}>
       <div className="scanline" />
       <EgyptTheme />
-        <div id="cap-top" /><EconomicLoop /><CronusDashboard />
-        <EquityCurve /><div id="cap-agents" />
-      <ChainBar stats={chainStats} />
+        <div id="cap-top" />
+        <div id="cap-agents" />
+      
       <div style={{ borderBottom: "1px solid #39e01422", padding: "20px 32px", display: "flex", alignItems: "center", justifyContent: "space-between", background: "linear-gradient(180deg, #050505 0%, transparent 100%)" }}>
         <div>
           <div style={{ fontSize: "28px", fontWeight: 900, letterSpacing: "6px" }} className="celtic-title">CRONUS CAPITAL</div>
@@ -332,7 +331,7 @@ export default function App() {
           </div>
         </div>
       )}
-      <div id="cap-signals" /><PremiumSignal />
+      <CronusDashboard /><EquityCurve /><ChainBar stats={chainStats} /><div id="cap-signals" /><PremiumSignal />
       <div id="cap-markets" /><LiveMarkets />
 <AgentIdentity />
 <PositioningStrap />
