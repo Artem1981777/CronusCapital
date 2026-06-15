@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import { keccak256, toBytes } from "viem"
 import MarketsModal from "../MarketsModal"
+import MarketBoard from "../MarketBoard"
 import type { CSSProperties } from "react"
 import { useAccount, useConnect, useDisconnect, useWriteContract, useWaitForTransactionReceipt, useSwitchChain } from "wagmi"
 
@@ -367,6 +368,7 @@ export function CronusDashboard() {
 				</div>
 			</div>
 
+			<MarketBoard />
 			{(txBusy || txConfirmed || txError) && (
 				<div className={"cd-tx" + (txError ? " cd-tx-err" : txConfirmed ? " cd-tx-ok" : "")}>
 					<span className="cd-tx-glyph">𓊽</span>
