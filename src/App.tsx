@@ -1,3 +1,4 @@
+import TrackRecord from "./components/TrackRecord";
 import X402Integration from "./components/X402Integration"
 import MoatStrip from "./components/MoatStrip"
 import PositioningStrap from "./components/PositioningStrap"
@@ -251,7 +252,7 @@ export default function App() {
       <div className="scanline" />
       <EgyptTheme />
         <div id="cap-top" />
-        <div id="cap-agents" /><CronusDashboard /><EquityCurve /><ChainBar stats={chainStats} />
+        <div id="cap-agents" /><CronusDashboard /><EquityCurve /><ChainBar stats={chainStats} /><TrackRecord />
       
       <div style={{ borderBottom: "1px solid #39e01422", padding: "20px 32px", display: "flex", alignItems: "center", justifyContent: "space-between", background: "linear-gradient(180deg, #050505 0%, transparent 100%)" }}>
         <div>
