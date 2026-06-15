@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react"
 import { keccak256, toBytes } from "viem"
+import MarketsModal from "../MarketsModal"
 import type { CSSProperties } from "react"
 import { useAccount, useConnect, useDisconnect, useWriteContract, useWaitForTransactionReceipt, useSwitchChain } from "wagmi"
 
@@ -182,12 +183,21 @@ function RiskModal(props: { open: boolean; onClose: () => void }) {
 	)
 }
 
+const ROSTER = [
+	{ id: "sentinel", name: "SENTINEL", role: "Risk Watch", glyph: "𓋹", perf: 88 },
+	{ id: "herald", name: "HERALD", role: "Sentiment Scout", glyph: "𓁹", perf: 84 },
+	{ id: "pythia", name: "PYTHIA", role: "Macro Oracle", glyph: "𓀀", perf: 91 },
+	{ id: "warden", name: "WARDEN", role: "Compliance", glyph: "𓏏", perf: 86 },
+]
 export function CronusDashboard() {
 	const [tick, setTick] = useState(0)
 	const [ready, setReady] = useState(false)
 	const [running, setRunning] = useState(false)
 	const [riskOpen, setRiskOpen] = useState(false)
 	const [walletOpen, setWalletOpen] = useState(false)
+	const [marketsOpen, setMarketsOpen] = useState(false)
+	const [deployed, setDeployed] = useState<Array<string>>(() => { try { const r = JSON.parse(localStorage.getItem("cronus_agents") || "[]"); return Array.isArray(r) ? r : [] } catch { return [] } })
+	const deployAgent = () => { setDeployed((cur) => { const next = ROSTER.find((r) => !cur.includes(r.id)); if (!next) return cur; const updated = [...cur, next.id]; try { localStorage.setItem("cronus_agents", JSON.stringify(updated)) } catch { /* ignore */ } return updated }) }
 	const [consultPhase, setConsultPhase] = useState<"idle" | "scout" | "analyst" | "executor">("idle")
 	const [boost, setBoost] = useState(0)
 	const { isConnected, address } = useAccount()
@@ -305,6 +315,8 @@ export function CronusDashboard() {
 	}
 
 	const txBusy = txPending || txConfirming
+		const extraAgents: Array<AgentInfo> = []
+		for (const did of deployed) { const c = ROSTER.find((r) => r.id === did); if (c) extraAgents.push({ id: c.id, name: c.name, role: c.role, glyph: c.glyph, state: running ? "analyzing" : "idle", perf: c.perf }) }
 	const walletLabel = isConnected && address ? "☥ " + address.slice(0, 4) + "…" + address.slice(-4) : "☥ CONNECT"
 	const txErrText = txError ? String((txError as { shortMessage?: string }).shortMessage || (txError as Error).message || txError).slice(0, 140) : ""
 
@@ -339,6 +351,7 @@ export function CronusDashboard() {
 				<div className="cd-panel cd-agents">
 					<div className="cd-panel-title">𓀭 AGENT PIPELINE</div>
 					{agents.map((a) => <AgentRow key={a.id} a={a} />)}
+					{extraAgents.map((a) => <AgentRow key={a.id} a={a} />)}
 				</div>
 				<div className="cd-panel cd-radar-panel">
 					<div className="cd-panel-title">𓂀 MARKET INTELLIGENCE</div>
@@ -347,10 +360,10 @@ export function CronusDashboard() {
 				<div className="cd-panel cd-actions">
 					<div className="cd-panel-title">⚡ ORACLE ACTIONS</div>
 					<button className="cd-btn cd-btn-primary" onClick={consult} disabled={running}>{running ? "CONSULTING…" : "CONSULT ORACLES"}</button>
-					<button className="cd-btn cd-btn-danger" onClick={forceExecute} disabled={txBusy}>{txBusy ? "EXECUTING…" : "FORCE EXECUTE"}</button>
+					<button className="cd-btn cd-btn-exec" onClick={forceExecute} disabled={txBusy}>{txBusy ? "EXECUTING…" : "FORCE EXECUTE"}</button>
 					<button className="cd-btn cd-btn-gold" onClick={() => setRiskOpen(true)}>RISK ADJUST</button>
-					<button className="cd-btn cd-btn-ghost" onClick={() => window.scrollTo({ top: 99999, behavior: "smooth" })}>VIEW LIVE MARKETS</button>
-					<button className="cd-btn cd-btn-deploy">＋ DEPLOY NEW AGENT</button>
+					<button className="cd-btn cd-btn-ghost" onClick={() => setMarketsOpen(true)}>VIEW LIVE MARKETS</button>
+					<button className="cd-btn cd-btn-deploy" onClick={deployAgent} disabled={deployed.length >= ROSTER.length}>{deployed.length >= ROSTER.length ? "✓ ALL AGENTS DEPLOYED" : "＋ DEPLOY NEW AGENT"}</button>
 				</div>
 			</div>
 
@@ -390,6 +403,7 @@ export function CronusDashboard() {
 
 			{(running || txBusy) && <div className="cd-scan" />}
 			<RiskModal open={riskOpen} onClose={() => setRiskOpen(false)} />
+			<MarketsModal open={marketsOpen} onClose={() => setMarketsOpen(false)} />
 			<WalletConnectModal open={walletOpen} onClose={() => setWalletOpen(false)} />
 		</section>
 	)

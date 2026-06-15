@@ -504,3 +504,6 @@ button:active { transform: scale(0.97); }
 .cd-feed-sub{font-size:11px;color:#8fd07f;opacity:.85}
 .cd-feed-tx{font-family:monospace;font-size:12px;color:#39e014;text-decoration:none;white-space:nowrap}
 .cd-feed-tx:hover{text-decoration:underline}
+
+.cd-btn-exec { color: #04121f; background: linear-gradient(135deg, #3b8cff, #1f5fe0); border-color: #3b8cff; box-shadow: 0 0 18px rgba(59,140,255,0.5); font-weight: 700; }
+.cd-btn-exec:hover { box-shadow: 0 0 28px rgba(59,140,255,0.75); }
