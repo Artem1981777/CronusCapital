@@ -309,7 +309,7 @@ export function CronusDashboard() {
     setPreflight({ status: "running" })
     try {
       if (publicClient) {
-        await publicClient.simulateContract({ account: address, chainId: ARC_CHAIN_ID, address: USDC_ADDRESS, abi: ERC20_ABI, functionName: "transfer", args: [SETTLE_TO, TEST_AMOUNT] })
+        await publicClient.simulateContract({ account: address, address: USDC_ADDRESS, abi: ERC20_ABI, functionName: "transfer", args: [SETTLE_TO, TEST_AMOUNT] })
       }
       setPreflight({ status: "ok" })
     } catch (e) {
