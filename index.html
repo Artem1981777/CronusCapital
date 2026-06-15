@@ -5,7 +5,13 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>agora-insight-agent</title>
-  </head>
+  <style id="mobile-opt">@media (max-width: 760px) {
+  html, body { overflow-x: hidden !important; }
+  [style*="grid-template-columns"] { grid-template-columns: 1fr 1fr !important; gap: 8px !important; }
+  [style*="display: flex"], [style*="display:flex"] { flex-wrap: wrap !important; }
+  [style*="px 32px"] { padding-left: 14px !important; padding-right: 14px !important; }
+  [style*="px 20px"] { padding-left: 14px !important; padding-right: 14px !important; }
+}</style></head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
