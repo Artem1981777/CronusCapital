@@ -10,6 +10,7 @@ import { EgyptTheme } from "./components/EgyptTheme"
 import { CronusDashboard } from "./components/CronusDashboard"
 import { LiveSettlements } from "./components/LiveSettlements"
 import EquityCurve from "./EquityCurve"
+import { AgentDemoScout, AgentDemoAnalyst, AgentDemoExecutor } from "./AgentDemo"
 import "./demoSeed"
 import { useCronusContract } from "./hooks/useCronusContract"
 import { useAccount } from "wagmi"
@@ -282,10 +283,10 @@ export default function App() {
           <>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "20px" }}>
               <AgentCard name="SCOUT" icon="🔭" role="Market Intelligence" status={getPhaseStatus("scout")}>
-                {state?.scout.signals.length ? state.scout.signals.map(s => <SignalRow key={s.id} signal={s} />) : loading && agentPhase === "scout" ? <div style={{ color: "#444", fontSize: "12px", letterSpacing: "2px" }}>SCANNING AGORA...</div> : null}
+                {state?.scout.signals.length ? state.scout.signals.map(s => <SignalRow key={s.id} signal={s} />) : loading && agentPhase === "scout" ? <div style={{ color: "#444", fontSize: "12px", letterSpacing: "2px" }}>SCANNING AGORA...</div> : <AgentDemoScout />}
               </AgentCard>
               <AgentCard name="ANALYST" icon="⚖️" role="Expected Value Engine" status={getPhaseStatus("analyst")}>
-                {state?.analyst.opportunities.length ? state.analyst.opportunities.map((b, i) => <BetCard key={i} bet={b} />) : loading && (agentPhase === "analyst" || agentPhase === "executor") ? <div style={{ color: "#444", fontSize: "12px", letterSpacing: "2px" }}>WEIGHING OPPORTUNITIES...</div> : null}
+                {state?.analyst.opportunities.length ? state.analyst.opportunities.map((b, i) => <BetCard key={i} bet={b} />) : loading && (agentPhase === "analyst" || agentPhase === "executor") ? <div style={{ color: "#444", fontSize: "12px", letterSpacing: "2px" }}>WEIGHING OPPORTUNITIES...</div> : <AgentDemoAnalyst />}
               </AgentCard>
               <AgentCard name="EXECUTOR" icon="⚡" role="Autonomous Decision Layer" status={getPhaseStatus("executor")}>
                 {state?.executor.decisions.length ? state.executor.decisions.map((d, i) => (
@@ -293,7 +294,7 @@ export default function App() {
                     <div style={{ color: "#c9a84c", fontSize: "10px", letterSpacing: "2px", marginBottom: "4px" }}>DECISION {i + 1}</div>
                     <div style={{ color: "#d4c5a0", fontSize: "12px", lineHeight: 1.5 }}>{d}</div>
                   </div>
-                )) : loading && agentPhase === "executor" ? <div style={{ color: "#444", fontSize: "12px", letterSpacing: "2px" }}>EXECUTING CONSENSUS...</div> : null}
+                )) : loading && agentPhase === "executor" ? <div style={{ color: "#444", fontSize: "12px", letterSpacing: "2px" }}>EXECUTING CONSENSUS...</div> : <AgentDemoExecutor />}
               </AgentCard>
             </div>
             <ReasoningPanel logs={reasoningLogs} />
