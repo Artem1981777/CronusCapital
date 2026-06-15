@@ -204,7 +204,8 @@ export function CronusDashboard() {
 			const list = Array.isArray(parsed) ? parsed : []
 			if (list.some((r: { txHash?: string }) => r && r.txHash === txHash)) return
 			const settleTs = Date.now()
-			const jobHash = keccak256(toBytes("CRONUS|Manual settlement|FORCE EXECUTE 0.01 USDC|" + txHash + "|" + settleTs))
+			const prevHash: string = (list[0] && list[0].jobHash) ? String(list[0].jobHash) : "0x0000000000000000000000000000000000000000000000000000000000000000"
+			const jobHash = keccak256(toBytes("CRONUS|Manual settlement|FORCE EXECUTE \u00b7 0.01 USDC settled on Arc Testnet|" + txHash + "|" + settleTs + "|" + prevHash))
 			list.unshift({
 				topic: "Manual settlement",
 				decision: "FORCE EXECUTE \u00b7 0.01 USDC settled on Arc Testnet",
@@ -212,6 +213,7 @@ export function CronusDashboard() {
 				timestamp: settleTs,
 				agentId: "executor",
 				jobHash: jobHash,
+				prevHash: prevHash,
 			})
 			localStorage.setItem("cronus_decisions", JSON.stringify(list.slice(0, 50)))
 			window.dispatchEvent(new StorageEvent("storage", { key: "cronus_decisions" }))
