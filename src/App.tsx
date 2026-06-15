@@ -251,7 +251,7 @@ export default function App() {
       <div className="scanline" />
       <EgyptTheme />
         <div id="cap-top" />
-        <div id="cap-agents" />
+        <div id="cap-agents" /><CronusDashboard /><EquityCurve /><ChainBar stats={chainStats} />
       
       <div style={{ borderBottom: "1px solid #39e01422", padding: "20px 32px", display: "flex", alignItems: "center", justifyContent: "space-between", background: "linear-gradient(180deg, #050505 0%, transparent 100%)" }}>
         <div>
@@ -266,7 +266,7 @@ export default function App() {
           <WalletButton />
         </div>
       </div>
-      <div style={{ textAlign: "center", padding: "48px 32px 32px", borderBottom: "1px solid #39e01422" }}>
+      <div style={{ textAlign: "center", background: "#050805cc", padding: "22px 32px 18px", borderBottom: "1px solid #39e01422" }}>
         <div style={{ fontFamily: "Cinzel, serif", fontSize: "12px", letterSpacing: "7px", color: "#39e01466", marginBottom: "16px", textShadow: "0 0 10px #39e01444" }}>⬡ THE THREE ORACLES OF THE AGORA ⬡</div>
         <div style={{ fontFamily: "Cinzel, serif", fontSize: "16px", color: "#39e014aa", maxWidth: "500px", margin: "0 auto 32px", lineHeight: 1.8, letterSpacing: "1px" }}>
           "All things are an exchange for fire, and fire for all things"
@@ -331,7 +331,7 @@ export default function App() {
           </div>
         </div>
       )}
-      <CronusDashboard /><EquityCurve /><ChainBar stats={chainStats} /><div id="cap-signals" /><PremiumSignal />
+      <div id="cap-signals" /><PremiumSignal />
       <div id="cap-markets" /><LiveMarkets />
 <AgentIdentity />
 <PositioningStrap />
