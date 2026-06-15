@@ -192,6 +192,28 @@ export function CronusDashboard() {
 	const { writeContractAsync, data: txHash, error: txError, isPending: txPending, reset: txReset } = useWriteContract()
 	const { isLoading: txConfirming, isSuccess: txConfirmed } = useWaitForTransactionReceipt({ hash: txHash, chainId: ARC_CHAIN_ID })
 
+	// CRONUS_SETTLEMENT_LOG: persist confirmed FORCE EXECUTE tx into cronus_decisions
+	useEffect(() => {
+		if (!txConfirmed || !txHash) return
+		try {
+			const raw = localStorage.getItem("cronus_decisions")
+			const parsed = raw ? JSON.parse(raw) : []
+			const list = Array.isArray(parsed) ? parsed : []
+			if (list.some((r: { txHash?: string }) => r && r.txHash === txHash)) return
+			list.unshift({
+				topic: "Manual settlement",
+				decision: "FORCE EXECUTE \u00b7 0.01 USDC settled on Arc Testnet",
+				txHash: txHash,
+				timestamp: Date.now(),
+				agentId: "executor",
+			})
+			localStorage.setItem("cronus_decisions", JSON.stringify(list.slice(0, 50)))
+			window.dispatchEvent(new StorageEvent("storage", { key: "cronus_decisions" }))
+		} catch {
+			/* ignore */
+		}
+	}, [txConfirmed, txHash])
+
 	useEffect(() => {
 		const t = setTimeout(() => setReady(true), 700)
 		return () => clearTimeout(t)
