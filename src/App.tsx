@@ -13,7 +13,6 @@ import EquityCurve from "./EquityCurve"
 import PolicyGuardrails from "./PolicyGuardrails"
 import VerifiableLedger from "./VerifiableLedger"
 import SecurityPanel from "./SecurityPanel"
-import MultiChart from "./MultiChart"
 import { AgentDemoScout, AgentDemoAnalyst, AgentDemoExecutor } from "./AgentDemo"
 import "./demoSeed"
 import { useCronusContract } from "./hooks/useCronusContract"
@@ -301,8 +300,7 @@ export default function App() {
                 )) : loading && agentPhase === "executor" ? <div style={{ color: "#444", fontSize: "12px", letterSpacing: "2px" }}>EXECUTING CONSENSUS...</div> : <AgentDemoExecutor />}
               </AgentCard>
             </div>
-            <SecurityPanel />
-        <MultiChart />
+        <SecurityPanel />
 				<ReasoningPanel logs={reasoningLogs} />
           </>
         )}

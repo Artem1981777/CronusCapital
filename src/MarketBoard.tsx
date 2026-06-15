@@ -1,236 +1,137 @@
-import { useState, useEffect, useRef, type CSSProperties } from "react"
+import { useState, useEffect, type CSSProperties } from "react"
 
-type Candle = { t: number; o: number; h: number; l: number; c: number }
-type Kind = "price" | "onchain"
-type Mode = "live" | "cached" | "sim"
-type Coin = { id: string; sym: string; label: string; kind: Kind; exLabel: string; exUrl: string }
-
-const COINS: Coin[] = [
-  { id: "bitcoin",  sym: "BTC", label: "BTC/USD · INTRADAY", kind: "price", exLabel: "Binance", exUrl: "https://www.binance.com/en/trade/BTC_USDT" },
-  { id: "ethereum", sym: "ETH", label: "ETH/USD · INTRADAY", kind: "price", exLabel: "Binance", exUrl: "https://www.binance.com/en/trade/ETH_USDT" },
-  { id: "solana",   sym: "SOL", label: "SOL/USD · INTRADAY", kind: "price", exLabel: "Binance", exUrl: "https://www.binance.com/en/trade/SOL_USDT" },
-  { id: "arbitrum", sym: "ARB", label: "ARB/USD · INTRADAY", kind: "price", exLabel: "Binance", exUrl: "https://www.binance.com/en/trade/ARB_USDT" },
-  { id: "arc",      sym: "ARC", label: "ARC · CIRCLE ARC NETWORK", kind: "onchain", exLabel: "Circle", exUrl: "https://www.circle.com/pressroom/circle-launches-arc-public-testnet" },
-]
-
-const GREEN = "#39e014", RED = "#e0563a", GOLD = "#c9a84c", DIM = "#7e8c6a", BG = "#070b07"
+const GREEN = "#39e014", GOLD = "#c9a84c", DIM = "#7e8c6a", BG = "#070b07"
 const RPC = "/api/rpc"
 const ARC_CHAIN_ID = 5042002
+const EXPLORER = "https://testnet.arcscan.app"
 
-function ohlcUrl(id: string) { return "https://api.coingecko.com/api/v3/coins/" + id + "/ohlc?vs_currency=usd&days=1" }
-function cgUrl(id: string) { return "/api/cg?path=" + encodeURIComponent("coins/" + id + "/ohlc?vs_currency=usd&days=1") }
-function fmtUsd(n: number) { return "$" + n.toLocaleString(undefined, { maximumFractionDigits: n < 10 ? 4 : 0 }) }
-function now() { return new Date().toLocaleTimeString() }
-function modeMeta(m: Mode) { return m === "live" ? { t: "● LIVE", c: GREEN } : m === "cached" ? { t: "◍ CACHED", c: GOLD } : { t: "◌ SIMULATED", c: DIM } }
-
-function loadCache(id: string): Candle[] | null {
-  try { const s = localStorage.getItem("cronus_ohlc_" + id); if (!s) return null; const o = JSON.parse(s); return Array.isArray(o.candles) && o.candles.length ? o.candles : null } catch { return null }
-}
-function saveCache(id: string, candles: Candle[]) {
-  try { localStorage.setItem("cronus_ohlc_" + id, JSON.stringify({ ts: Date.now(), candles })) } catch { /* ignore */ }
+type Block = { number: number; timestamp: number; txs: number; gasUsed: number; gasLimit: number; baseFee: number; hash: string }
+type Stat = {
+  block: number; gasGwei: string; chainId: number
+  txs: number; gasUsedPct: number; baseFeeGwei: string; avgIntervalSec: string; recent: Block[]
 }
 
-function synth(id: string): Candle[] {
-  const base = id === "bitcoin" ? 65000 : id === "ethereum" ? 3400 : id === "solana" ? 150 : 1.1
-  const out: Candle[] = []
-  let p = base
-  for (let i = 0; i < 48; i++) {
-    const o = p
-    const c = o * (1 + (Math.sin(i / 3) + (Math.random() - 0.5)) * 0.004)
-    const h = Math.max(o, c) * (1 + Math.random() * 0.003)
-    const l = Math.min(o, c) * (1 - Math.random() * 0.003)
-    out.push({ t: Date.now() - (48 - i) * 1800000, o, h, l, c })
-    p = c
-  }
-  return out
+async function call(method: string, params: unknown[] = []) {
+  const r = await fetch(RPC, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ jsonrpc: "2.0", id: 1, method, params }) })
+  if (!r.ok) throw new Error("status " + r.status)
+  const j = await r.json()
+  if (j.error) throw new Error(j.error.message || "rpc error")
+  return j.result
 }
-
-type ArcStat = { block: number; gasGwei: string; chainId: number | null; alive: boolean }
+function hx(v: string | undefined): number { return v ? parseInt(v, 16) : 0 }
+function parseBlock(b: any): Block {
+  return { number: hx(b.number), timestamp: hx(b.timestamp), txs: Array.isArray(b.transactions) ? b.transactions.length : 0, gasUsed: hx(b.gasUsed), gasLimit: hx(b.gasLimit), baseFee: hx(b.baseFeePerGas), hash: b.hash || "" }
+}
 
 export default function MarketBoard() {
-  const [coinId, setCoinId] = useState("bitcoin")
-  const [candles, setCandles] = useState<Candle[]>([])
-  const [mode, setMode] = useState<Mode>("sim")
+  const [stat, setStat] = useState<Stat | null>(null)
   const [synced, setSynced] = useState("")
-  const [arc, setArc] = useState<ArcStat | null>(null)
-  const canvasRef = useRef<HTMLCanvasElement | null>(null)
-  const wrapRef = useRef<HTMLDivElement | null>(null)
-  const coin = COINS.find(c => c.id === coinId) || COINS[0]
+  const [alive, setAlive] = useState(false)
 
   useEffect(() => {
-    if (coin.kind !== "price") return
     let stop = false
-    const seed = loadCache(coin.id)
-    if (seed) { setCandles(seed); setMode("cached") }
     async function load() {
       try {
-        const res = await fetch(cgUrl(coin.id))
-        if (!res.ok) throw new Error("status " + res.status)
-        const raw = await res.json()
-        if (stop) return
-        const cs: Candle[] = raw.map((r: number[]) => ({ t: r[0], o: r[1], h: r[2], l: r[3], c: r[4] }))
-        if (!cs.length) throw new Error("empty")
-        setCandles(cs); setMode("live"); setSynced(now()); saveCache(coin.id, cs)
-      } catch {
-        if (stop) return
-        const c2 = loadCache(coin.id)
-        if (c2) { setCandles(c2); setMode("cached"); setSynced(now()) }
-        else { setCandles(synth(coin.id)); setMode("sim"); setSynced(now()) }
-      }
-    }
-    load()
-    const iv = setInterval(load, 60000)
-    return () => { stop = true; clearInterval(iv) }
-  }, [coinId])
-
-  useEffect(() => {
-    if (coin.kind !== "onchain") return
-    let stop = false
-    const mk = (m: string, id: number) => JSON.stringify({ jsonrpc: "2.0", method: m, params: [], id })
-    async function load() {
-      try {
-        const [b, g, c] = await Promise.all([
-          fetch(RPC, { method: "POST", headers: { "Content-Type": "application/json" }, body: mk("eth_blockNumber", 1) }),
-          fetch(RPC, { method: "POST", headers: { "Content-Type": "application/json" }, body: mk("eth_gasPrice", 2) }),
-          fetch(RPC, { method: "POST", headers: { "Content-Type": "application/json" }, body: mk("eth_chainId", 3) }),
+        const [num, gas, cid, latest] = await Promise.all([
+          call("eth_blockNumber"), call("eth_gasPrice"), call("eth_chainId"), call("eth_getBlockByNumber", ["latest", false]),
         ])
-        const bd = await b.json(), gd = await g.json(), cd = await c.json()
+        const lb = parseBlock(latest)
+        const tip = hx(num)
+        const reqs: Promise<any>[] = []
+        for (let i = 1; i <= 4; i++) reqs.push(call("eth_getBlockByNumber", ["0x" + (tip - i).toString(16), false]).catch(() => null))
+        const prev = (await Promise.all(reqs)).filter(Boolean).map(parseBlock)
         if (stop) return
-        setArc({ block: parseInt(bd.result, 16), gasGwei: (parseInt(gd.result, 16) / 1e9).toFixed(4), chainId: cd.result ? parseInt(cd.result, 16) : ARC_CHAIN_ID, alive: true })
-        setMode("live"); setSynced(now())
+        const recent = [lb, ...prev]
+        let avg = "—"
+        if (recent.length >= 2) {
+          let sum = 0, cnt = 0
+          for (let i = 0; i < recent.length - 1; i++) { const d = recent[i].timestamp - recent[i + 1].timestamp; if (d > 0) { sum += d; cnt++ } }
+          if (cnt) avg = (sum / cnt).toFixed(1)
+        }
+        setStat({
+          block: tip, gasGwei: (hx(gas) / 1e9).toFixed(4), chainId: cid ? hx(cid) : ARC_CHAIN_ID,
+          txs: lb.txs, gasUsedPct: lb.gasLimit ? (lb.gasUsed / lb.gasLimit) * 100 : 0,
+          baseFeeGwei: (lb.baseFee / 1e9).toFixed(4), avgIntervalSec: avg, recent,
+        })
+        setAlive(true); setSynced(new Date().toLocaleTimeString())
       } catch {
         if (stop) return
-        setArc(prev => prev ? { ...prev, alive: false } : { block: 0, gasGwei: "—", chainId: ARC_CHAIN_ID, alive: false })
-        setMode("sim"); setSynced(now())
+        setAlive(false); setSynced(new Date().toLocaleTimeString())
       }
     }
     load()
-    const iv = setInterval(load, 6000)
+    const iv = setInterval(load, 4000)
     return () => { stop = true; clearInterval(iv) }
-  }, [coinId])
+  }, [])
 
-  useEffect(() => {
-    if (coin.kind !== "price") return
-    const canvas = canvasRef.current, wrap = wrapRef.current
-    if (!canvas || !wrap || !candles.length) return
-    const dpr = window.devicePixelRatio || 1
-    const W = wrap.clientWidth, H = 320
-    canvas.width = W * dpr; canvas.height = H * dpr
-    canvas.style.width = W + "px"; canvas.style.height = H + "px"
-    const ctx = canvas.getContext("2d")
-    if (!ctx) return
-    ctx.scale(dpr, dpr); ctx.clearRect(0, 0, W, H)
-    const padL = 8, padR = 70, padT = 14, padB = 18
-    const cw = W - padL - padR, ch = H - padT - padB
-    const hi = Math.max(...candles.map(c => c.h)), lo = Math.min(...candles.map(c => c.l))
-    const range = hi - lo || 1
-    const y = (v: number) => padT + (hi - v) / range * ch
-    ctx.strokeStyle = "#15301522"; ctx.fillStyle = DIM; ctx.font = "10px monospace"; ctx.textAlign = "left"
-    for (let i = 0; i <= 4; i++) {
-      const gy = padT + ch * i / 4
-      ctx.beginPath(); ctx.moveTo(padL, gy); ctx.lineTo(padL + cw, gy); ctx.stroke()
-      ctx.fillText(fmtUsd(hi - range * i / 4), padL + cw + 6, gy + 3)
-    }
-    const n = candles.length, bw = cw / n
-    candles.forEach((c, i) => {
-      const x = padL + i * bw + bw / 2
-      const up = c.c >= c.o
-      ctx.strokeStyle = up ? GREEN : RED; ctx.fillStyle = up ? GREEN : RED
-      ctx.beginPath(); ctx.moveTo(x, y(c.h)); ctx.lineTo(x, y(c.l)); ctx.stroke()
-      const bodyT = y(Math.max(c.o, c.c)), bodyB = y(Math.min(c.o, c.c))
-      ctx.fillRect(x - bw * 0.3, bodyT, bw * 0.6, Math.max(1, bodyB - bodyT))
-    })
-    const last = candles[n - 1].c
-    ctx.strokeStyle = GOLD; ctx.setLineDash([4, 4])
-    ctx.beginPath(); ctx.moveTo(padL, y(last)); ctx.lineTo(padL + cw, y(last)); ctx.stroke()
-    ctx.setLineDash([]); ctx.fillStyle = GOLD; ctx.fillText(fmtUsd(last), padL + cw + 6, y(last) + 3)
-  }, [candles, coinId])
-
-  const last = candles.length ? candles[candles.length - 1].c : 0
-  const first = candles.length ? candles[0].o : 0
-  const chgPct = first ? ((last - first) / first) * 100 : 0
-  const mm = modeMeta(mode)
-
+  const s = stat
   return (
-    <div style={panelStyle}>
-      <div style={headStyle}>
-        <span style={titleStyle}>{"\u{13080}"} LIVE CANDLES · TOP CRYPTO</span>
-        <div style={tabsStyle}>
-          {COINS.map(c => (<span key={c.id} onClick={() => setCoinId(c.id)} style={tabStyle(c.id === coinId)}>{c.sym}</span>))}
-        </div>
+    <div style={panel}>
+      <div style={head}>
+        <span style={title}>{"\u{13080}"} ARC NETWORK · LIVE ON-CHAIN</span>
+        <span style={liveBadge(alive)}>{alive ? "● LIVE" : "◌ RECONNECTING"}</span>
       </div>
 
-      {coin.kind === "price" ? (
-        <>
-          <div style={priceRowStyle}>
-            <span style={bigPriceStyle}>{fmtUsd(last)}</span>
-            <span style={chgStyle(chgPct)}>{(chgPct >= 0 ? "+" : "") + chgPct.toFixed(2)}%</span>
-            <span style={labelStyle}>{coin.label}</span>
-          </div>
-          <div ref={wrapRef} style={fullW}><canvas ref={canvasRef} /></div>
-        </>
-      ) : (
-        <div style={arcWrapStyle}>
-          <div style={arcGridStyle}>
-            <ArcCell k="LIVE BLOCK" v={arc && arc.block ? "#" + arc.block.toLocaleString() : "…"} />
-            <ArcCell k="GAS PRICE" v={arc ? arc.gasGwei + " GWEI · USDC" : "…"} />
-            <ArcCell k="CHAIN ID" v={String(arc?.chainId ?? ARC_CHAIN_ID)} />
-            <ArcCell k="FINALITY" v="≈ 780 ms" />
-          </div>
-          <div style={arcNoteStyle}>
-            Circle Arc — стейблкоин-нативный L1 (USDC как газ, финальность ~780мс). Нативный токен пока на пресейле ($222M, оценка $3B) и ещё не торгуется на биржах — поэтому здесь живые on-chain метрики сети, а не выдуманная цена.
-          </div>
-        </div>
-      )}
+      <div style={grid}>
+        <Cell k="LIVE BLOCK" v={s ? "#" + s.block.toLocaleString() : "…"} big />
+        <Cell k="GAS PRICE" v={s ? s.gasGwei + " GWEI · USDC" : "…"} />
+        <Cell k="CHAIN ID" v={String(s?.chainId ?? ARC_CHAIN_ID)} />
+        <Cell k="FINALITY" v="≈ 780 ms" accent />
+      </div>
+      <div style={grid}>
+        <Cell k="TXS IN BLOCK" v={s ? String(s.txs) : "…"} />
+        <Cell k="GAS USED" v={s ? s.gasUsedPct.toFixed(1) + " %" : "…"} />
+        <Cell k="BASE FEE" v={s ? s.baseFeeGwei + " GWEI" : "…"} />
+        <Cell k="AVG BLOCK TIME" v={s ? s.avgIntervalSec + " s" : "…"} />
+      </div>
 
-      <div style={proofStyle}>
-        <span style={liveStyle(mm.c)}>{mm.t}</span>
-        <span style={dimSmall}>Source: {coin.kind === "price" ? "api.coingecko.com · cached 60s" : "rpc.testnet.arc.network"}</span>
-        <span style={dimSmall}>synced {synced || "…"}</span>
-        {coin.kind === "price"
-          ? (<a href={ohlcUrl(coin.id)} target="_blank" rel="noreferrer" style={linkStyle}>Verify raw ↗</a>)
-          : (<a href="https://testnet.arcscan.app" target="_blank" rel="noreferrer" style={linkStyle}>Arc Explorer ↗</a>)}
-        <a href={coin.exUrl} target="_blank" rel="noreferrer" style={linkStyle}>{coin.exLabel} ↗</a>
+      <div style={feedHead}>RECENT BLOCKS</div>
+      <div style={feed}>
+        {(s?.recent || []).map(b => (
+          <div key={b.number} style={feedRow}>
+            <span style={feedNum}>{"#" + b.number.toLocaleString()}</span>
+            <span style={feedTx}>{b.txs + " txs"}</span>
+            <span style={feedAge}>{Math.max(0, Math.floor(Date.now() / 1000 - b.timestamp)) + "s ago"}</span>
+          </div>
+        ))}
+        {!s && <div style={feedRow}><span style={dim}>connecting to rpc.testnet.arc.network…</span></div>}
       </div>
-      <div style={getStyle}>
-        {coin.kind === "price"
-          ? "GET " + ohlcUrl(coin.id)
-          : "POST https://rpc.testnet.arc.network  { eth_blockNumber, eth_gasPrice, eth_chainId }"}
+
+      <div style={proof}>
+        <span style={liveStyle(alive ? GREEN : DIM)}>{alive ? "● LIVE" : "◌ OFFLINE"}</span>
+        <span style={dim}>{"Source: rpc.testnet.arc.network · synced " + (synced || "…")}</span>
+        <a href={EXPLORER} target="_blank" rel="noreferrer" style={link}>Arc Explorer ↗</a>
+        <a href="https://www.circle.com/pressroom/circle-launches-arc-public-testnet" target="_blank" rel="noreferrer" style={link}>Circle ↗</a>
       </div>
-      <div style={captionStyle}>
-        {coin.kind === "price"
-          ? "Real OHLC candles from CoinGecko, served via a cached edge proxy (60s) to respect the free rate limit. Click \"Verify raw\" to inspect the public JSON yourself, or cross-check on " + coin.exLabel + "."
-          : "Live block height, gas and chain id fetched directly from the Arc testnet RPC. No tradeable ARC price exists yet — Circle's Arc token is still in presale."}
+      <div style={get}>POST {"https://rpc.testnet.arc.network"} {"{ eth_blockNumber, eth_gasPrice, eth_chainId, eth_getBlockByNumber }"}</div>
+      <div style={note}>
+        Circle Arc — стейблкоин-нативный L1: USDC как газ, финальность ~780мс (консенсус Malachite). Нативный токен пока на пресейле ($222M, оценка $3B) и не торгуется на биржах — поэтому показываем живые on-chain метрики сети напрямую с RPC, а не выдуманную цену.
       </div>
     </div>
   )
 }
 
-function ArcCell({ k, v }: { k: string; v: string }) {
-  return (<div style={arcCellStyle}><div style={arcCellKey}>{k}</div><div style={arcCellVal}>{v}</div></div>)
+function Cell({ k, v, big, accent }: { k: string; v: string; big?: boolean; accent?: boolean }) {
+  return (<div style={cell}><div style={cellKey}>{k}</div><div style={cellVal(!!big, !!accent)}>{v}</div></div>)
 }
 
-const panelStyle: CSSProperties = { marginTop: 14, border: "1px solid " + GREEN + "22", background: BG, padding: 16 }
-const headStyle: CSSProperties = { display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 8, marginBottom: 10 }
-const titleStyle: CSSProperties = { color: GOLD, fontSize: 11, letterSpacing: 3, fontFamily: "Cinzel, serif" }
-const tabsStyle: CSSProperties = { display: "flex", gap: 6, flexWrap: "wrap" }
-function tabStyle(active: boolean): CSSProperties {
-  return { padding: "4px 10px", fontSize: 10, letterSpacing: 2, cursor: "pointer", border: "1px solid " + (active ? GOLD : GREEN + "33"), color: active ? GOLD : DIM, background: active ? GOLD + "14" : "transparent", fontFamily: "Cinzel, serif" }
-}
-const fullW: CSSProperties = { width: "100%" }
-const priceRowStyle: CSSProperties = { display: "flex", alignItems: "baseline", gap: 12, marginBottom: 8 }
-const bigPriceStyle: CSSProperties = { color: "#eafff0", fontSize: 26, fontWeight: 700 }
-function chgStyle(p: number): CSSProperties { return { color: p >= 0 ? GREEN : RED, fontSize: 14, fontWeight: 700 } }
-const labelStyle: CSSProperties = { color: DIM, fontSize: 10, letterSpacing: 2 }
-const proofStyle: CSSProperties = { display: "flex", flexWrap: "wrap", alignItems: "center", gap: 12, marginTop: 12, fontSize: 10, letterSpacing: 1 }
+const panel: CSSProperties = { marginTop: 14, border: "1px solid " + GREEN + "22", background: BG, padding: 16 }
+const head: CSSProperties = { display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 8, marginBottom: 12 }
+const title: CSSProperties = { color: GOLD, fontSize: 12, letterSpacing: 3, fontFamily: "Cinzel, serif" }
+function liveBadge(a: boolean): CSSProperties { return { fontSize: 10, fontWeight: 700, letterSpacing: 2, color: a ? GREEN : DIM, border: "1px solid " + (a ? GREEN : DIM) + "55", padding: "3px 8px" } }
+const grid: CSSProperties = { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: 10, marginBottom: 10 }
+const cell: CSSProperties = { border: "1px solid " + GREEN + "22", background: "#040804", padding: "12px 14px" }
+const cellKey: CSSProperties = { color: DIM, fontSize: 9, letterSpacing: 2, marginBottom: 6, fontFamily: "Cinzel, serif" }
+function cellVal(big: boolean, accent: boolean): CSSProperties { return { color: accent ? GOLD : GREEN, fontSize: big ? 22 : 16, fontWeight: 700, fontFamily: "monospace" } }
+const feedHead: CSSProperties = { color: DIM, fontSize: 9, letterSpacing: 2, margin: "8px 0 6px", fontFamily: "Cinzel, serif" }
+const feed: CSSProperties = { border: "1px solid " + GREEN + "1a", background: "#040804", padding: 6 }
+const feedRow: CSSProperties = { display: "flex", justifyContent: "space-between", alignItems: "center", padding: "5px 8px", borderBottom: "1px solid #15301518", fontFamily: "monospace", fontSize: 11 }
+const feedNum: CSSProperties = { color: "#d4e8c5", fontWeight: 700 }
+const feedTx: CSSProperties = { color: GREEN }
+const feedAge: CSSProperties = { color: DIM }
+const dim: CSSProperties = { color: DIM, fontSize: 10 }
+const proof: CSSProperties = { display: "flex", flexWrap: "wrap", alignItems: "center", gap: 12, marginTop: 12, fontSize: 10, letterSpacing: 1 }
 function liveStyle(c: string): CSSProperties { return { color: c, fontWeight: 700, letterSpacing: 2 } }
-const dimSmall: CSSProperties = { color: DIM, fontSize: 10 }
-const linkStyle: CSSProperties = { color: GREEN, textDecoration: "none", borderBottom: "1px solid " + GREEN + "55" }
-const getStyle: CSSProperties = { marginTop: 8, color: "#5f7a5f", fontSize: 10, fontFamily: "monospace", wordBreak: "break-all" }
-const captionStyle: CSSProperties = { marginTop: 6, color: "#4f6a4f", fontSize: 9, lineHeight: 1.5, fontStyle: "italic" }
-const arcWrapStyle: CSSProperties = { padding: "8px 0" }
-const arcGridStyle: CSSProperties = { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: 10 }
-const arcCellStyle: CSSProperties = { border: "1px solid " + GREEN + "22", background: "#040804", padding: "14px 16px" }
-const arcCellKey: CSSProperties = { color: DIM, fontSize: 9, letterSpacing: 2, marginBottom: 6, fontFamily: "Cinzel, serif" }
-const arcCellVal: CSSProperties = { color: GREEN, fontSize: 18, fontWeight: 700, fontFamily: "monospace" }
-const arcNoteStyle: CSSProperties = { marginTop: 12, color: "#6a5f45", fontSize: 11, lineHeight: 1.6, borderLeft: "2px solid " + GOLD + "55", paddingLeft: 12, fontStyle: "italic" }
+const link: CSSProperties = { color: GREEN, textDecoration: "none", borderBottom: "1px solid " + GREEN + "55" }
+const get: CSSProperties = { marginTop: 8, color: "#5f7a5f", fontSize: 10, fontFamily: "monospace", wordBreak: "break-all" }
+const note: CSSProperties = { marginTop: 10, color: "#6a5f45", fontSize: 11, lineHeight: 1.6, borderLeft: "2px solid " + GOLD + "55", paddingLeft: 12, fontStyle: "italic" }
