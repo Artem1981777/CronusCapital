@@ -1,197 +1,237 @@
-import { useEffect, useRef, useState, type CSSProperties } from "react"
+import { useState, useEffect, useRef, type CSSProperties } from "react"
 
 type Candle = { t: number; o: number; h: number; l: number; c: number }
+type Kind = "price" | "onchain"
+type Coin = { id: string; sym: string; label: string; kind: Kind; exLabel: string; exUrl: string }
 
-const COINS = [
-	{ id: "bitcoin", sym: "BTC", binance: "BTC_USDT" },
-	{ id: "ethereum", sym: "ETH", binance: "ETH_USDT" },
-	{ id: "solana", sym: "SOL", binance: "SOL_USDT" },
-	{ id: "arbitrum", sym: "ARB", binance: "ARB_USDT" },
+const COINS: Coin[] = [
+  { id: "bitcoin",  sym: "BTC", label: "BTC/USD · INTRADAY", kind: "price", exLabel: "Binance", exUrl: "https://www.binance.com/en/trade/BTC_USDT" },
+  { id: "ethereum", sym: "ETH", label: "ETH/USD · INTRADAY", kind: "price", exLabel: "Binance", exUrl: "https://www.binance.com/en/trade/ETH_USDT" },
+  { id: "solana",   sym: "SOL", label: "SOL/USD · INTRADAY", kind: "price", exLabel: "Binance", exUrl: "https://www.binance.com/en/trade/SOL_USDT" },
+  { id: "arbitrum", sym: "ARB", label: "ARB/USD · INTRADAY", kind: "price", exLabel: "Binance", exUrl: "https://www.binance.com/en/trade/ARB_USDT" },
+  { id: "arc",      sym: "ARC", label: "ARC · CIRCLE ARC NETWORK", kind: "onchain", exLabel: "Circle", exUrl: "https://www.circle.com/pressroom/circle-launches-arc-public-testnet" },
 ]
 
-const GREEN = "#39e014"
-const RED = "#e0563a"
-const GOLD = "#c9a84c"
-const DIM = "#7e8c6a"
-const BG = "#070b07"
+const GREEN = "#39e014", RED = "#e0563a", GOLD = "#c9a84c", DIM = "#7e8c6a", BG = "#070b07"
+const RPC = "/api/rpc"
+const ARC_CHAIN_ID = 5042002
 
-function ohlcUrl(id: string): string {
-	return "https://api.coingecko.com/api/v3/coins/" + id + "/ohlc?vs_currency=usd&days=1"
-}
-function fmtUsd(n: number): string {
-	if (n >= 100) return "$" + n.toLocaleString("en-US", { maximumFractionDigits: 0 })
-	if (n >= 1) return "$" + n.toFixed(2)
-	return "$" + n.toFixed(4)
-}
-function synth(id: string): Array<Candle> {
-	const base = id === "bitcoin" ? 67000 : id === "ethereum" ? 3150 : id === "solana" ? 148 : 0.78
-	const out: Array<Candle> = []
-	let p = base
-	const now = Date.now()
-	for (let i = 47; i >= 0; i--) {
-		const o = p
-		const drift = (Math.sin(i * 0.7) + (Math.random() - 0.5)) * base * 0.004
-		const c = Math.max(base * 0.85, o + drift)
-		const h = Math.max(o, c) * (1 + Math.random() * 0.002)
-		const l = Math.min(o, c) * (1 - Math.random() * 0.002)
-		out.push({ t: now - i * 1800000, o, h, l, c })
-		p = c
-	}
-	return out
+function ohlcUrl(id: string) { return "https://api.coingecko.com/api/v3/coins/" + id + "/ohlc?vs_currency=usd&days=1" }
+function fmtUsd(n: number) { return "$" + n.toLocaleString(undefined, { maximumFractionDigits: n < 10 ? 4 : 0 }) }
+function now() { return new Date().toLocaleTimeString() }
+
+function synth(id: string): Candle[] {
+  const base = id === "bitcoin" ? 65000 : id === "ethereum" ? 3400 : id === "solana" ? 150 : 1.1
+  const out: Candle[] = []
+  let p = base
+  for (let i = 0; i < 48; i++) {
+    const o = p
+    const c = o * (1 + (Math.sin(i / 3) + (Math.random() - 0.5)) * 0.004)
+    const h = Math.max(o, c) * (1 + Math.random() * 0.003)
+    const l = Math.min(o, c) * (1 - Math.random() * 0.003)
+    out.push({ t: Date.now() - (48 - i) * 1800000, o, h, l, c })
+    p = c
+  }
+  return out
 }
 
-const wrap: CSSProperties = { margin: "18px 0 4px", background: BG, border: "1px solid rgba(201,168,76,0.22)", borderRadius: 14, padding: "14px 16px" }
-const headRow: CSSProperties = { display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 8, marginBottom: 10 }
-const titleS: CSSProperties = { color: GOLD, fontFamily: "Cinzel, serif", fontSize: 14, letterSpacing: 2, textTransform: "uppercase" }
-const tabs: CSSProperties = { display: "flex", gap: 6, flexWrap: "wrap" }
-const statRow: CSSProperties = { display: "flex", alignItems: "baseline", gap: 14, marginBottom: 8 }
-const priceBig: CSSProperties = { color: "#e9f5e2", fontFamily: "monospace", fontSize: 22, fontWeight: 700 }
-const subLabel: CSSProperties = { color: DIM, fontSize: 11 }
-const canvasWrap: CSSProperties = { width: "100%" }
-const proof: CSSProperties = { display: "flex", alignItems: "center", flexWrap: "wrap", gap: 12, marginTop: 10, paddingTop: 10, borderTop: "1px solid rgba(126,140,106,0.16)", fontSize: 11, color: DIM }
-const linkS: CSSProperties = { color: GOLD, textDecoration: "none", border: "1px solid rgba(201,168,76,0.4)", borderRadius: 7, padding: "4px 8px", whiteSpace: "nowrap" }
-const codeS: CSSProperties = { fontFamily: "monospace", fontSize: 10, color: "#5f6b51", wordBreak: "break-all", marginTop: 6 }
-const captionS: CSSProperties = { fontSize: 10, color: "#5f6b51", marginTop: 6, lineHeight: 1.5 }
-
-function tabStyle(active: boolean): CSSProperties {
-	return { padding: "5px 11px", borderRadius: 8, cursor: "pointer", fontFamily: "Cinzel, serif", fontSize: 11, letterSpacing: 1, border: "1px solid " + (active ? GOLD : "rgba(126,140,106,0.3)"), background: active ? "rgba(201,168,76,0.16)" : "transparent", color: active ? GOLD : DIM }
-}
-function chgStyle(up: boolean): CSSProperties {
-	return { color: up ? GREEN : RED, fontFamily: "monospace", fontSize: 14, fontWeight: 700 }
-}
-function liveStyle(on: boolean): CSSProperties {
-	return { color: on ? GREEN : GOLD, fontWeight: 700 }
-}
+type ArcStat = { block: number; gasGwei: string; chainId: number | null; alive: boolean }
 
 export default function MarketBoard() {
-	const [coin, setCoin] = useState(COINS[0])
-	const [candles, setCandles] = useState<Array<Candle>>([])
-	const [live, setLive] = useState(false)
-	const [synced, setSynced] = useState("")
-	const canvasRef = useRef<HTMLCanvasElement | null>(null)
-	const wrapRef = useRef<HTMLDivElement | null>(null)
+  const [coinId, setCoinId] = useState("bitcoin")
+  const [candles, setCandles] = useState<Candle[]>([])
+  const [live, setLive] = useState(false)
+  const [synced, setSynced] = useState("")
+  const [arc, setArc] = useState<ArcStat | null>(null)
+  const canvasRef = useRef<HTMLCanvasElement | null>(null)
+  const wrapRef = useRef<HTMLDivElement | null>(null)
+  const coin = COINS.find(c => c.id === coinId) || COINS[0]
 
-	useEffect(() => {
-		let alive = true
-		async function load() {
-			try {
-				const r = await fetch(ohlcUrl(coin.id))
-				if (!r.ok) throw new Error("bad")
-				const j = await r.json()
-				if (!alive) return
-				const cs: Array<Candle> = Array.isArray(j) ? j.map((row: Array<number>) => ({ t: row[0], o: row[1], h: row[2], l: row[3], c: row[4] })) : []
-				if (cs.length) { setCandles(cs); setLive(true) }
-				else { setCandles(synth(coin.id)); setLive(false) }
-				setSynced(new Date().toLocaleTimeString())
-			} catch {
-				if (!alive) return
-				setCandles(synth(coin.id)); setLive(false); setSynced(new Date().toLocaleTimeString())
-			}
-		}
-		load()
-		const iv = setInterval(load, 45000)
-		return () => { alive = false; clearInterval(iv) }
-	}, [coin])
+  useEffect(() => {
+    if (coin.kind !== "price") return
+    let stop = false
+    async function load() {
+      try {
+        const res = await fetch(ohlcUrl(coin.id))
+        if (!res.ok) throw new Error("status " + res.status)
+        const raw = await res.json()
+        if (stop) return
+        const cs: Candle[] = raw.map((r: number[]) => ({ t: r[0], o: r[1], h: r[2], l: r[3], c: r[4] }))
+        if (!cs.length) throw new Error("empty")
+        setCandles(cs); setLive(true); setSynced(now())
+      } catch {
+        if (stop) return
+        setCandles(synth(coin.id)); setLive(false); setSynced(now())
+      }
+    }
+    load()
+    const iv = setInterval(load, 45000)
+    return () => { stop = true; clearInterval(iv) }
+  }, [coinId])
 
-	useEffect(() => {
-		const draw = () => {
-			const canvas = canvasRef.current
-			const box = wrapRef.current
-			if (!canvas || !box) return
-			const ctx = canvas.getContext("2d")
-			if (!ctx) return
-			const cssW = box.clientWidth || 320
-			const cssH = 300
-			const dpr = window.devicePixelRatio || 1
-			canvas.width = Math.floor(cssW * dpr)
-			canvas.height = Math.floor(cssH * dpr)
-			canvas.style.width = cssW + "px"
-			canvas.style.height = cssH + "px"
-			ctx.setTransform(dpr, 0, 0, dpr, 0, 0)
-			ctx.clearRect(0, 0, cssW, cssH)
-			if (!candles.length) return
-			const padL = 8, padR = 66, padT = 12, padB = 16
-			const plotW = cssW - padL - padR
-			const plotH = cssH - padT - padB
-			let min = Infinity, max = -Infinity
-			for (const c of candles) { if (c.l < min) min = c.l; if (c.h > max) max = c.h }
-			if (!(max > min)) { max = min + 1 }
-			const pd = (max - min) * 0.08
-			min -= pd; max += pd
-			const yOf = (v: number) => padT + (1 - (v - min) / (max - min)) * plotH
-			ctx.font = "10px monospace"
-			ctx.textBaseline = "middle"
-			for (let g = 0; g <= 4; g++) {
-				const v = min + (max - min) * (g / 4)
-				const y = yOf(v)
-				ctx.strokeStyle = "rgba(126,140,106,0.14)"
-				ctx.beginPath(); ctx.moveTo(padL, y); ctx.lineTo(padL + plotW, y); ctx.stroke()
-				ctx.fillStyle = DIM
-				ctx.fillText(fmtUsd(v), padL + plotW + 6, y)
-			}
-			const n = candles.length
-			const slot = plotW / n
-			const bw = Math.max(2, Math.min(10, slot * 0.6))
-			for (let i = 0; i < n; i++) {
-				const c = candles[i]
-				const x = padL + slot * i + slot / 2
-				const up = c.c >= c.o
-				const col = up ? GREEN : RED
-				ctx.strokeStyle = col
-				ctx.fillStyle = col
-				ctx.beginPath(); ctx.moveTo(x, yOf(c.h)); ctx.lineTo(x, yOf(c.l)); ctx.stroke()
-				const yO = yOf(c.o), yC = yOf(c.c)
-				const top = Math.min(yO, yC)
-				const hgt = Math.max(1, Math.abs(yC - yO))
-				ctx.fillRect(x - bw / 2, top, bw, hgt)
-			}
-			const lastC = candles[n - 1].c
-			const ly = yOf(lastC)
-			ctx.setLineDash([4, 3])
-			ctx.strokeStyle = "rgba(201,168,76,0.6)"
-			ctx.beginPath(); ctx.moveTo(padL, ly); ctx.lineTo(padL + plotW, ly); ctx.stroke()
-			ctx.setLineDash([])
-			ctx.fillStyle = GOLD
-			ctx.fillRect(padL + plotW, ly - 7, padR, 14)
-			ctx.fillStyle = "#0a0a0a"
-			ctx.fillText(fmtUsd(lastC), padL + plotW + 4, ly)
-		}
-		draw()
-		window.addEventListener("resize", draw)
-		return () => window.removeEventListener("resize", draw)
-	}, [candles])
+  useEffect(() => {
+    if (coin.kind !== "onchain") return
+    let stop = false
+    const mk = (m: string, id: number) => JSON.stringify({ jsonrpc: "2.0", method: m, params: [], id })
+    async function load() {
+      try {
+        const [b, g, c] = await Promise.all([
+          fetch(RPC, { method: "POST", headers: { "Content-Type": "application/json" }, body: mk("eth_blockNumber", 1) }),
+          fetch(RPC, { method: "POST", headers: { "Content-Type": "application/json" }, body: mk("eth_gasPrice", 2) }),
+          fetch(RPC, { method: "POST", headers: { "Content-Type": "application/json" }, body: mk("eth_chainId", 3) }),
+        ])
+        const bd = await b.json(), gd = await g.json(), cd = await c.json()
+        if (stop) return
+        setArc({
+          block: parseInt(bd.result, 16),
+          gasGwei: (parseInt(gd.result, 16) / 1e9).toFixed(4),
+          chainId: cd.result ? parseInt(cd.result, 16) : ARC_CHAIN_ID,
+          alive: true,
+        })
+        setLive(true); setSynced(now())
+      } catch {
+        if (stop) return
+        setArc(prev => prev ? { ...prev, alive: false } : { block: 0, gasGwei: "—", chainId: ARC_CHAIN_ID, alive: false })
+        setLive(false); setSynced(now())
+      }
+    }
+    load()
+    const iv = setInterval(load, 6000)
+    return () => { stop = true; clearInterval(iv) }
+  }, [coinId])
 
-	const last = candles.length ? candles[candles.length - 1].c : 0
-	const first = candles.length ? candles[0].o : 0
-	const chg = first ? ((last - first) / first) * 100 : 0
+  useEffect(() => {
+    if (coin.kind !== "price") return
+    const canvas = canvasRef.current, wrap = wrapRef.current
+    if (!canvas || !wrap || !candles.length) return
+    const dpr = window.devicePixelRatio || 1
+    const W = wrap.clientWidth, H = 320
+    canvas.width = W * dpr; canvas.height = H * dpr
+    canvas.style.width = W + "px"; canvas.style.height = H + "px"
+    const ctx = canvas.getContext("2d")
+    if (!ctx) return
+    ctx.scale(dpr, dpr); ctx.clearRect(0, 0, W, H)
+    const padL = 8, padR = 70, padT = 14, padB = 18
+    const cw = W - padL - padR, ch = H - padT - padB
+    const hi = Math.max(...candles.map(c => c.h)), lo = Math.min(...candles.map(c => c.l))
+    const range = hi - lo || 1
+    const y = (v: number) => padT + (hi - v) / range * ch
+    ctx.strokeStyle = "#15301522"; ctx.fillStyle = DIM; ctx.font = "10px monospace"; ctx.textAlign = "left"
+    for (let i = 0; i <= 4; i++) {
+      const gy = padT + ch * i / 4
+      ctx.beginPath(); ctx.moveTo(padL, gy); ctx.lineTo(padL + cw, gy); ctx.stroke()
+      ctx.fillText(fmtUsd(hi - range * i / 4), padL + cw + 6, gy + 3)
+    }
+    const n = candles.length, bw = cw / n
+    candles.forEach((c, i) => {
+      const x = padL + i * bw + bw / 2
+      const up = c.c >= c.o
+      ctx.strokeStyle = up ? GREEN : RED; ctx.fillStyle = up ? GREEN : RED
+      ctx.beginPath(); ctx.moveTo(x, y(c.h)); ctx.lineTo(x, y(c.l)); ctx.stroke()
+      const bodyT = y(Math.max(c.o, c.c)), bodyB = y(Math.min(c.o, c.c))
+      ctx.fillRect(x - bw * 0.3, bodyT, bw * 0.6, Math.max(1, bodyB - bodyT))
+    })
+    const last = candles[n - 1].c
+    ctx.strokeStyle = GOLD; ctx.setLineDash([4, 4])
+    ctx.beginPath(); ctx.moveTo(padL, y(last)); ctx.lineTo(padL + cw, y(last)); ctx.stroke()
+    ctx.setLineDash([]); ctx.fillStyle = GOLD; ctx.fillText(fmtUsd(last), padL + cw + 6, y(last) + 3)
+  }, [candles, coinId])
 
-	return (
-		<div style={wrap}>
-			<div style={headRow}>
-				<span style={titleS}>{"\u{13080}"} Live Candles · Top Crypto</span>
-				<div style={tabs}>
-					{COINS.map((c) => (
-						<button key={c.id} style={tabStyle(c.id === coin.id)} onClick={() => setCoin(c)}>{c.sym}</button>
-					))}
-				</div>
-			</div>
-			<div style={statRow}>
-				<span style={priceBig}>{fmtUsd(last)}</span>
-				<span style={chgStyle(chg >= 0)}>{(chg >= 0 ? "+" : "") + chg.toFixed(2)}%</span>
-				<span style={subLabel}>{coin.sym}/USD · intraday</span>
-			</div>
-			<div ref={wrapRef} style={canvasWrap}>
-				<canvas ref={canvasRef} />
-			</div>
-			<div style={proof}>
-				<span style={liveStyle(live)}>{live ? "\u25CF LIVE" : "\u25CB SIMULATED"}</span>
-				<span>Source: api.coingecko.com</span>
-				<span>synced {synced || "\u2026"}</span>
-				<a style={linkS} href={ohlcUrl(coin.id)} target="_blank" rel="noreferrer">Verify raw {"\u2197"}</a>
-				<a style={linkS} href={"https://www.binance.com/en/trade/" + coin.binance} target="_blank" rel="noreferrer">Binance {"\u2197"}</a>
-			</div>
-			<div style={codeS}>GET {ohlcUrl(coin.id)}</div>
-			<div style={captionS}>Real open / high / low / close candles fetched live from CoinGecko. Click {"\u201C"}Verify raw{"\u201D"} to inspect the JSON yourself, or cross-check spot on Binance.</div>
-		</div>
-	)
+  const last = candles.length ? candles[candles.length - 1].c : 0
+  const first = candles.length ? candles[0].o : 0
+  const chgPct = first ? ((last - first) / first) * 100 : 0
+
+  return (
+    <div style={panelStyle}>
+      <div style={headStyle}>
+        <span style={titleStyle}>{"\u{13080}"} LIVE CANDLES · TOP CRYPTO</span>
+        <div style={tabsStyle}>
+          {COINS.map(c => (
+            <span key={c.id} onClick={() => setCoinId(c.id)} style={tabStyle(c.id === coinId)}>{c.sym}</span>
+          ))}
+        </div>
+      </div>
+
+      {coin.kind === "price" ? (
+        <>
+          <div style={priceRowStyle}>
+            <span style={bigPriceStyle}>{fmtUsd(last)}</span>
+            <span style={chgStyle(chgPct)}>{(chgPct >= 0 ? "+" : "") + chgPct.toFixed(2)}%</span>
+            <span style={labelStyle}>{coin.label}</span>
+          </div>
+          <div ref={wrapRef} style={fullW}>
+            <canvas ref={canvasRef} />
+          </div>
+        </>
+      ) : (
+        <div style={arcWrapStyle}>
+          <div style={arcGridStyle}>
+            <ArcCell k="LIVE BLOCK" v={arc && arc.block ? "#" + arc.block.toLocaleString() : "…"} />
+            <ArcCell k="GAS PRICE" v={arc ? arc.gasGwei + " GWEI · USDC" : "…"} />
+            <ArcCell k="CHAIN ID" v={String(arc?.chainId ?? ARC_CHAIN_ID)} />
+            <ArcCell k="FINALITY" v="≈ 780 ms" />
+          </div>
+          <div style={arcNoteStyle}>
+            Circle Arc — стейблкоин-нативный L1 (USDC как газ, финальность ~780мс). Нативный токен пока на пресейле ($222M, оценка $3B) и ещё не торгуется на биржах — поэтому здесь живые on-chain метрики сети, а не выдуманная цена.
+          </div>
+        </div>
+      )}
+
+      <div style={proofStyle}>
+        <span style={liveStyle(live)}>{live ? "● LIVE" : "◌ SIMULATED"}</span>
+        <span style={dimSmall}>Source: {coin.kind === "price" ? "api.coingecko.com" : "rpc.testnet.arc.network"}</span>
+        <span style={dimSmall}>synced {synced || "…"}</span>
+        {coin.kind === "price" ? (
+          <a href={ohlcUrl(coin.id)} target="_blank" rel="noreferrer" style={linkStyle}>Verify raw ↗</a>
+        ) : (
+          <a href="https://testnet.arcscan.app" target="_blank" rel="noreferrer" style={linkStyle}>Arc Explorer ↗</a>
+        )}
+        <a href={coin.exUrl} target="_blank" rel="noreferrer" style={linkStyle}>{coin.exLabel} ↗</a>
+      </div>
+      <div style={getStyle}>
+        {coin.kind === "price"
+          ? "GET " + ohlcUrl(coin.id)
+          : "POST https://rpc.testnet.arc.network  { eth_blockNumber, eth_gasPrice, eth_chainId }"}
+      </div>
+      <div style={captionStyle}>
+        {coin.kind === "price"
+          ? "Real open / high / low / close candles fetched live from CoinGecko. Click \"Verify raw\" to inspect the JSON yourself, or cross-check on " + coin.exLabel + "."
+          : "Live block height, gas and chain id fetched directly from the Arc testnet RPC. No tradeable ARC price exists yet — Circle's Arc token is still in presale."}
+      </div>
+    </div>
+  )
 }
+
+function ArcCell({ k, v }: { k: string; v: string }) {
+  return (
+    <div style={arcCellStyle}>
+      <div style={arcCellKey}>{k}</div>
+      <div style={arcCellVal}>{v}</div>
+    </div>
+  )
+}
+
+const panelStyle: CSSProperties = { marginTop: 14, border: "1px solid " + GREEN + "22", background: BG, padding: 16 }
+const headStyle: CSSProperties = { display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 8, marginBottom: 10 }
+const titleStyle: CSSProperties = { color: GOLD, fontSize: 11, letterSpacing: 3, fontFamily: "Cinzel, serif" }
+const tabsStyle: CSSProperties = { display: "flex", gap: 6, flexWrap: "wrap" }
+function tabStyle(active: boolean): CSSProperties {
+  return { padding: "4px 10px", fontSize: 10, letterSpacing: 2, cursor: "pointer", border: "1px solid " + (active ? GOLD : GREEN + "33"), color: active ? GOLD : DIM, background: active ? GOLD + "14" : "transparent", fontFamily: "Cinzel, serif" }
+}
+const fullW: CSSProperties = { width: "100%" }
+const priceRowStyle: CSSProperties = { display: "flex", alignItems: "baseline", gap: 12, marginBottom: 8 }
+const bigPriceStyle: CSSProperties = { color: "#eafff0", fontSize: 26, fontWeight: 700 }
+function chgStyle(p: number): CSSProperties { return { color: p >= 0 ? GREEN : RED, fontSize: 14, fontWeight: 700 } }
+const labelStyle: CSSProperties = { color: DIM, fontSize: 10, letterSpacing: 2 }
+const proofStyle: CSSProperties = { display: "flex", flexWrap: "wrap", alignItems: "center", gap: 12, marginTop: 12, fontSize: 10, letterSpacing: 1 }
+function liveStyle(on: boolean): CSSProperties { return { color: on ? GREEN : GOLD, fontWeight: 700, letterSpacing: 2 } }
+const dimSmall: CSSProperties = { color: DIM, fontSize: 10 }
+const linkStyle: CSSProperties = { color: GREEN, textDecoration: "none", borderBottom: "1px solid " + GREEN + "55" }
+const getStyle: CSSProperties = { marginTop: 8, color: "#5f7a5f", fontSize: 10, fontFamily: "monospace", wordBreak: "break-all" }
+const captionStyle: CSSProperties = { marginTop: 6, color: "#4f6a4f", fontSize: 9, lineHeight: 1.5, fontStyle: "italic" }
+const arcWrapStyle: CSSProperties = { padding: "8px 0" }
+const arcGridStyle: CSSProperties = { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: 10 }
+const arcCellStyle: CSSProperties = { border: "1px solid " + GREEN + "22", background: "#040804", padding: "14px 16px" }
+const arcCellKey: CSSProperties = { color: DIM, fontSize: 9, letterSpacing: 2, marginBottom: 6, fontFamily: "Cinzel, serif" }
+const arcCellVal: CSSProperties = { color: GREEN, fontSize: 18, fontWeight: 700, fontFamily: "monospace" }
+const arcNoteStyle: CSSProperties = { marginTop: 12, color: "#6a5f45", fontSize: 11, lineHeight: 1.6, borderLeft: "2px solid " + GOLD + "55", paddingLeft: 12, fontStyle: "italic" }
