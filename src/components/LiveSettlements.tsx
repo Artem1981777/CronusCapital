@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 
 const EXPLORER = "https://testnet.arcscan.app/tx/"
 
-interface Decision { topic?: string; decision?: string; txHash?: string; timestamp?: number; agentId?: string }
+interface Decision { topic?: string; decision?: string; txHash?: string; timestamp?: number; agentId?: string; jobHash?: string }
 
 function readDecisions(): Array<Decision> {
 	try {
@@ -50,7 +50,7 @@ export function LiveSettlements() {
 							<span className="cd-feed-idx">#{settled.length - i}</span>
 							<span className="cd-feed-main">
 								<span className="cd-feed-topic">{r.topic || "Market signal"}</span>
-								<span className="cd-feed-sub">{r.decision || "EXECUTE"} {"\u00B7"} {ago(r.timestamp)}{r.agentId ? " \u00B7 " + r.agentId : ""}</span>
+								<span className="cd-feed-sub">{r.decision || "EXECUTE"} {"\u00B7"} {ago(r.timestamp)}{r.agentId ? " \u00B7 " + r.agentId : ""}{r.jobHash ? " \u00B7 \u22A1 " + shorten(r.jobHash) : ""}</span>
 							</span>
 							<a className="cd-feed-tx" href={EXPLORER + r.txHash} target="_blank" rel="noreferrer">{shorten(r.txHash || "")} {"\u2197"}</a>
 						</li>
