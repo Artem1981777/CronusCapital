@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react"
 import { keccak256, toBytes } from "viem"
-import MarketsModal from "../MarketsModal"
 import MarketBoard from "../MarketBoard"
 import type { CSSProperties } from "react"
 import { useAccount, useConnect, useDisconnect, useWriteContract, useWaitForTransactionReceipt, useSwitchChain } from "wagmi"
@@ -196,7 +195,6 @@ export function CronusDashboard() {
 	const [running, setRunning] = useState(false)
 	const [riskOpen, setRiskOpen] = useState(false)
 	const [walletOpen, setWalletOpen] = useState(false)
-	const [marketsOpen, setMarketsOpen] = useState(false)
 	const [deployed, setDeployed] = useState<Array<string>>(() => { try { const r = JSON.parse(localStorage.getItem("cronus_agents") || "[]"); return Array.isArray(r) ? r : [] } catch { return [] } })
 	const deployAgent = () => { setDeployed((cur) => { const next = ROSTER.find((r) => !cur.includes(r.id)); if (!next) return cur; const updated = [...cur, next.id]; try { localStorage.setItem("cronus_agents", JSON.stringify(updated)) } catch { /* ignore */ } return updated }) }
 	const [consultPhase, setConsultPhase] = useState<"idle" | "scout" | "analyst" | "executor">("idle")
@@ -363,7 +361,7 @@ export function CronusDashboard() {
 					<button className="cd-btn cd-btn-primary" onClick={consult} disabled={running}>{running ? "CONSULTING…" : "CONSULT ORACLES"}</button>
 					<button className="cd-btn cd-btn-exec" onClick={forceExecute} disabled={txBusy}>{txBusy ? "EXECUTING…" : "FORCE EXECUTE"}</button>
 					<button className="cd-btn cd-btn-gold" onClick={() => setRiskOpen(true)}>RISK ADJUST</button>
-					<button className="cd-btn cd-btn-ghost" onClick={() => setMarketsOpen(true)}>VIEW LIVE MARKETS</button>
+					<a className="cd-btn cd-btn-ghost" href="https://testnet.arcscan.app" target="_blank" rel="noreferrer">VIEW ON ARC ↗</a>
 					<button className="cd-btn cd-btn-deploy" onClick={deployAgent} disabled={deployed.length >= ROSTER.length}>{deployed.length >= ROSTER.length ? "✓ ALL AGENTS DEPLOYED" : "＋ DEPLOY NEW AGENT"}</button>
 				</div>
 			</div>
@@ -405,7 +403,6 @@ export function CronusDashboard() {
 
 			{(running || txBusy) && <div className="cd-scan" />}
 			<RiskModal open={riskOpen} onClose={() => setRiskOpen(false)} />
-			<MarketsModal open={marketsOpen} onClose={() => setMarketsOpen(false)} />
 			<WalletConnectModal open={walletOpen} onClose={() => setWalletOpen(false)} />
 		</section>
 	)
