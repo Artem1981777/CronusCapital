@@ -10,6 +10,7 @@ import { EgyptTheme } from "./components/EgyptTheme"
 import { CronusDashboard } from "./components/CronusDashboard"
 import { LiveSettlements } from "./components/LiveSettlements"
 import EquityCurve from "./EquityCurve"
+import PolicyGuardrails from "./PolicyGuardrails"
 import { AgentDemoScout, AgentDemoAnalyst, AgentDemoExecutor } from "./AgentDemo"
 import "./demoSeed"
 import { useCronusContract } from "./hooks/useCronusContract"
@@ -334,6 +335,7 @@ export default function App() {
 <AgentIdentity />
 <PositioningStrap />
 <X402Integration />
+        <PolicyGuardrails />
       <div id="cap-settlements" /><Dashboard totalOnChain={sessionTxCount} />
 
       {onChainTxs.length > 0 && (
