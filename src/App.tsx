@@ -301,7 +301,8 @@ export default function App() {
                 )) : loading && agentPhase === "executor" ? <div style={{ color: "#444", fontSize: "12px", letterSpacing: "2px" }}>EXECUTING CONSENSUS...</div> : <AgentDemoExecutor />}
               </AgentCard>
             </div>
-            <MultiChart />
+            <SecurityPanel />
+        <MultiChart />
 				<ReasoningPanel logs={reasoningLogs} />
           </>
         )}
@@ -341,7 +342,6 @@ export default function App() {
 <X402Integration />
         <PolicyGuardrails />
 			<VerifiableLedger />
-        <SecurityPanel />
       <div id="cap-settlements" /><Dashboard totalOnChain={sessionTxCount} />
 
       {onChainTxs.length > 0 && (
