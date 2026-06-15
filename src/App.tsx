@@ -269,7 +269,7 @@ export default function App() {
       </div>
       <div style={{ textAlign: "center", background: "#050805cc", padding: "22px 32px 18px", borderBottom: "1px solid #39e01422" }}>
         <div style={{ fontFamily: "Cinzel, serif", fontSize: "12px", letterSpacing: "7px", color: "#39e01466", marginBottom: "16px", textShadow: "0 0 10px #39e01444" }}>⬡ THE THREE ORACLES OF THE AGORA ⬡</div>
-        <div style={{ fontFamily: "Cinzel, serif", fontSize: "16px", color: "#39e014aa", maxWidth: "500px", margin: "0 auto 32px", lineHeight: 1.8, letterSpacing: "1px" }}>
+        <div style={{ fontFamily: "Cinzel, serif", fontSize: "16px", color: "#39e014aa", maxWidth: "500px", margin: "0 auto 18px", lineHeight: 1.8, letterSpacing: "1px" }}>
           "All things are an exchange for fire, and fire for all things"
           <br /><span style={{ fontSize: "12px", color: "#39e01455", letterSpacing: "2px" }}>— HERACLITUS · FRAGMENT 90</span>
         </div>
@@ -281,7 +281,7 @@ export default function App() {
           {TOPICS.map(t => <button key={t} onClick={() => setTopic(t)} style={{ padding: "5px 14px", background: "transparent", border: "1px solid #39e01433", color: "#39e01477", fontSize: "10px", fontFamily: "Cinzel, serif", letterSpacing: "1px" }}>{t}</button>)}
         </div>
       </div>
-      <div style={{ padding: "32px", maxWidth: "1100px", margin: "0 auto" }}>
+      <div style={{ padding: "14px 32px 32px", maxWidth: "1100px", margin: "0 auto" }}>
         {true && (
           <>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "20px" }}>
