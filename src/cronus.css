@@ -530,3 +530,10 @@ button:active { transform: scale(0.97); }
 .egypt-bg { background-image: linear-gradient(rgba(0,0,0,0.12), rgba(0,0,0,0.22)), url("/egypt-bg.jpg") !important; background-size: cover !important; background-position: center center !important; background-repeat: no-repeat !important; filter: brightness(1.25) !important; z-index: -2 !important; }
 html, body { background: linear-gradient(rgba(0,0,0,0.12), rgba(0,0,0,0.22)), url("/egypt-bg.jpg") !important; background-size: cover !important; background-position: center center !important; background-attachment: fixed !important; background-repeat: no-repeat !important; }
 #root, .cd-root { background: transparent !important; }
+
+/* ===== CLAIM REWARD ===== */
+.cd-btn-claim { background: linear-gradient(135deg,#f6c945,#e89b2b) !important; color:#1a1205 !important; font-weight:800 !important; border:none !important; }
+.cd-btn-claim:hover { filter: brightness(1.08); }
+.cd-btn-claim:disabled { opacity:.6; cursor:not-allowed; }
+.cd-claim-msg { font-size:12px; color:#cfe9d4; padding:6px 8px; line-height:1.45; word-break:break-all; }
+.cd-claim-msg a { color:#7fd1a0; text-decoration:underline; }

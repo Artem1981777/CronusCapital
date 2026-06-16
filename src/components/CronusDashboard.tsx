@@ -300,6 +300,20 @@ export function CronusDashboard() {
 	}
 
 	// FORCE EXECUTE -> real test settlement tx on Arc Testnet (0.01 USDC self-transfer)
+	const [claimBusy, setClaimBusy] = useState(false)
+	const [claimMsg, setClaimMsg] = useState("")
+	const [claimTx, setClaimTx] = useState("")
+	const claimReward = async () => {
+		if (!isConnected || !address) { setWalletOpen(true); return }
+		setClaimBusy(true); setClaimMsg(""); setClaimTx("")
+		try {
+			const r = await fetch("/api/claim", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ to: address }) })
+			const j = await r.json()
+			if (j && j.ok && j.hash) { setClaimTx(j.hash); setClaimMsg("Claimed " + (j.amount || "") + " USDC to your wallet") }
+			else { setClaimMsg("Claim failed: " + ((j && j.error) || ("HTTP " + r.status))) }
+		} catch (e) { setClaimMsg("Claim failed: " + String((e as Error).message || e)) }
+		finally { setClaimBusy(false) }
+	}
 	const forceExecute = async () => {
 		if (!isConnected || !address) { setWalletOpen(true); return }
 		const ok = window.confirm("FORCE EXECUTE\n\nSend a 0.01 USDC test settlement on Arc Testnet?\n(Real on-chain tx — gas only, funds go to treasury.)")
@@ -374,7 +388,9 @@ export function CronusDashboard() {
 					<div className="cd-panel-title">⚡ ORACLE ACTIONS</div>
 					<button className="cd-btn cd-btn-primary" onClick={consult} disabled={running}>{running ? "CONSULTING…" : "CONSULT ORACLES"}</button>
 					<button className="cd-btn cd-btn-exec" onClick={forceExecute} disabled={txBusy}>{txBusy ? "EXECUTING…" : "FORCE EXECUTE"}</button>
-					<button className="cd-btn cd-btn-gold" onClick={() => setRiskOpen(true)}>RISK ADJUST</button>
+					<button className="cd-btn cd-btn-claim" onClick={claimReward} disabled={claimBusy}>{claimBusy ? "CLAIMING..." : "CLAIM REWARD"}</button>
+				{claimMsg ? (<div className="cd-claim-msg">{claimMsg}{claimTx ? (<a href={"https://explorer.testnet.arc.network/tx/" + claimTx} target="_blank" rel="noreferrer"> view tx</a>) : null}</div>) : null}
+				<button className="cd-btn cd-btn-gold" onClick={() => setRiskOpen(true)}>RISK ADJUST</button>
 					<a className="cd-btn cd-btn-ghost" href="https://testnet.arcscan.app" target="_blank" rel="noreferrer">VIEW ON ARC ↗</a>
 					<button className="cd-btn cd-btn-deploy" onClick={deployAgent} disabled={deployed.length >= ROSTER.length}>{deployed.length >= ROSTER.length ? "✓ ALL AGENTS DEPLOYED" : "＋ DEPLOY NEW AGENT"}</button>
 				</div>
