@@ -389,7 +389,7 @@ export function CronusDashboard() {
 					<button className="cd-btn cd-btn-primary" onClick={consult} disabled={running}>{running ? "CONSULTING…" : "CONSULT ORACLES"}</button>
 					<button className="cd-btn cd-btn-exec" onClick={forceExecute} disabled={txBusy}>{txBusy ? "EXECUTING…" : "FORCE EXECUTE"}</button>
 					<button className="cd-btn cd-btn-claim" onClick={claimReward} disabled={claimBusy}>{claimBusy ? "CLAIMING..." : "CLAIM REWARD"}</button>
-				{claimMsg ? (<div className="cd-claim-msg">{claimMsg}{claimTx ? (<a href={"https://explorer.testnet.arc.network/tx/" + claimTx} target="_blank" rel="noreferrer"> view tx</a>) : null}</div>) : null}
+				{claimMsg ? (<div className="cd-claim-msg">{claimMsg}{claimTx ? (<a href={"https://testnet.arcscan.app/tx/" + claimTx} target="_blank" rel="noreferrer"> view tx</a>) : null}</div>) : null}
 				<button className="cd-btn cd-btn-gold" onClick={() => setRiskOpen(true)}>RISK ADJUST</button>
 					<a className="cd-btn cd-btn-ghost" href="https://testnet.arcscan.app" target="_blank" rel="noreferrer">VIEW ON ARC ↗</a>
 					<button className="cd-btn cd-btn-deploy" onClick={deployAgent} disabled={deployed.length >= ROSTER.length}>{deployed.length >= ROSTER.length ? "✓ ALL AGENTS DEPLOYED" : "＋ DEPLOY NEW AGENT"}</button>
