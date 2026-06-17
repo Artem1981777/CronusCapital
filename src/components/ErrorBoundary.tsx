@@ -32,7 +32,7 @@ export class ErrorBoundary extends Component<Props, State> {
 				<div className="cd-boundary-card">
 					<div className="cd-boundary-eye">𓂀</div>
 					<div className="cd-boundary-title">THE ORACLE STUMBLED</div>
-					<p className="cd-boundary-text">Непредвиденная ошибка интерфейса. Состояние не потеряно — можно перезапустить оракула.</p>
+					<p className="cd-boundary-text">Unexpected interface error. Your state is preserved — you can restart the oracle.</p>
 					{this.state.message && <pre className="cd-boundary-detail">{this.state.message}</pre>}
 					<button className="cd-boundary-btn" onClick={this.handleReload}>↻ RESTART ORACLE</button>
 				</div>

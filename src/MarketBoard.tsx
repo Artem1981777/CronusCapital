@@ -105,7 +105,7 @@ export default function MarketBoard() {
       </div>
       <div style={get}>POST {"https://rpc.testnet.arc.network"} {"{ eth_blockNumber, eth_gasPrice, eth_chainId, eth_getBlockByNumber }"}</div>
       <div style={note}>
-        Circle Arc — стейблкоин-нативный L1: USDC как газ, финальность ~780мс (консенсус Malachite). Нативный токен пока на пресейле ($222M, оценка $3B) и не торгуется на биржах — поэтому показываем живые on-chain метрики сети напрямую с RPC, а не выдуманную цену.
+        Circle Arc — a stablecoin-native L1: USDC as gas, ~780ms finality (Malachite consensus). The native token is still in presale ($222M raised, $3B valuation) and is not traded on exchanges yet — so we show the network's live on-chain metrics straight from RPC, not a made-up price.
       </div>
     </div>
   )

@@ -309,7 +309,7 @@ export function CronusDashboard() {
 	const consult = () => {
 		if (running) return; setRunning(true)
 		// CUSTOMIZE: trigger your real Scout -> Analyst -> Executor pipeline here
-		setConsultPhase("scout"); setConsultMsg("🔭 Scout: сканирую рынки…"); setTimeout(() => { setConsultPhase("analyst"); setConsultMsg("⚖️ Analyst: считаю EV и conviction…") }, 850); setTimeout(() => { setConsultPhase("executor"); setConsultMsg("📡 Executor: готовлю расчёт…") }, 1700); setTimeout(() => { setBoost(6 + Math.floor(Math.random() * 8)); setConsultPhase("idle"); setRunning(false); setConsultMsg("✅ Консенсус оракулов: " + (Math.random() > 0.5 ? "BUY" : "HOLD") + " · conviction " + (70 + Math.floor(Math.random() * 25)) + "%") }, 2700)
+		setConsultPhase("scout"); setConsultMsg("🔭 Scout: scanning markets…"); setTimeout(() => { setConsultPhase("analyst"); setConsultMsg("⚖️ Analyst: computing EV and conviction…") }, 850); setTimeout(() => { setConsultPhase("executor"); setConsultMsg("📡 Executor: preparing settlement…") }, 1700); setTimeout(() => { setBoost(6 + Math.floor(Math.random() * 8)); setConsultPhase("idle"); setRunning(false); setConsultMsg("✅ Oracle consensus: " + (Math.random() > 0.5 ? "BUY" : "HOLD") + " · conviction " + (70 + Math.floor(Math.random() * 25)) + "%") }, 2700)
 	}
 
 	// FORCE EXECUTE -> real test settlement tx on Arc Testnet (0.01 USDC self-transfer)
