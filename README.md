@@ -37,3 +37,51 @@ Run `npm install` then `npm run dev`.
 
 ## Demo flow
 Connect wallet (auto-switches to Arc Testnet) -> QUICK CAST a topic -> UNLOCK $0.02 (x402) -> FORCE EXECUTE a real on-chain settlement -> watch REVENUE + ON-CHAIN LEDGER update.
+
+---
+
+# 🏛️ CronusCapital — гид по дашборду
+
+Дашборд сверху вниз: что каждый блок значит и как проверить.
+
+## 1. Радар (верх) 🛰️
+Визуализация Scout-агента, сканирующего prediction-маркеты. Зелёные точки — сигналы с +EV, жёлтые — нейтральные. Декоративный слой, задаёт тему «оракул сканирует рынок».
+
+## 2. ⚡ ORACLE ACTIONS
+
+### 🟢 CONSULT ORACLES
+Пайплайн: **Scout** (сигналы) → **Analyst** (EV / conviction, Brier-калибровка) → **Executor** (готовит расчёт). Показывает live reasoning-логи. Монетизация через x402 (~$0.02/вызов).
+
+### 🔵 FORCE EXECUTE
+Исполняет settlement on-chain. Pre-flight `eth_call` (abort-on-revert) → подпись → реальный USDC-transfer на Arc → «Settlement confirmed» + ссылка на tx.
+
+## 3. 🏦 Vault — депозит / доход / вывод
+
+### DEPOSIT / WITHDRAW
+- **DEPOSIT** — `approve` + `deposit` → начисляются доли (shares), USDC уходит на контракт `0x13B6984357e27dAB17DF44a6396042239e70542C`.
+- **WITHDRAW** — `withdrawAll`: сжигает доли, возвращает депозит + доход.
+
+### Your position / Vault TVL
+- **Your position** — стоимость твоих долей (`convertToAssets(shares)`).
+- **Vault TVL** — весь капитал в пуле (`totalAssets`), виден даже без кошелька.
+
+### ⚙ RUN AGENT STRATEGY (yield engine)
+Агент фиксирует прибыль: серверный endpoint подписью стратегического счёта кладёт реализованный P&L в волт через `addYield` → позиция и TVL растут вживую + реальная tx.
+Честно: на testnet величина P&L смоделирована (0.02–0.07 USDC), но учёт долей и on-chain распределение настоящие.
+
+## 4. 🟡 RISK ADJUST
+Параметры риска агента (пороги conviction, размер позиции).
+
+## 5. VIEW ON ARC ↗
+Ссылка на explorer `testnet.arcscan.app`. Открывать в обычном браузере (Kiwi/Chrome), не во встроенном браузере кошелька.
+
+## 6. + DEPLOY NEW AGENT
+Демонстрация масштабируемости — развернуть новый экземпляр агента.
+
+## 7. Панели верифицируемости (moat)
+- **Verifiable Ledger** — хеш-цепочка решений (keccak256), статус Verified.
+- **Reasoning Trace** — content-commitment рассуждений, бейдж REPRODUCIBLE / MISMATCH.
+- **Track Record** — hit-rate + Brier score (CALIBRATED).
+- **SecOps Panel** — per-tx cap 0.01, daily cap 5.0, 7/7 PASS.
+- **ARC NETWORK LIVE** — живой блок-каунтер + RPC-статус.
+- **Composability / Moat** — ERC-8183, x402, CCTP, ERC-8004, ERC-4626 + P&L.
