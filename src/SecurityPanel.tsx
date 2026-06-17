@@ -66,7 +66,7 @@ export default function SecurityPanel() {
       ))}
 
       <div style={note}>
-        Безопасность агента, который сам распоряжается деньгами — отдельная поверхность атаки, которую почти никто не показывает. Здесь видны реальные гарантии Cronus: лимиты, allowlist, anti-replay и защита от отравленного фида. Статусы читаются из живого состояния агента.
+        Security for an agent that controls its own money is a separate attack surface almost nobody shows. Here are Cronus's real guarantees: spend limits, allowlist, anti-replay, and feed prompt-injection defense. Statuses are read from the agent's live state.
       </div>
     </div>
   )
