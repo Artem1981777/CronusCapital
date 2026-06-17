@@ -50,7 +50,7 @@ Connect wallet (auto-switches to Arc Testnet) -> QUICK CAST a topic -> UNLOCK $0
 ## 2. ⚡ ORACLE ACTIONS
 
 ### 🟢 CONSULT ORACLES
-Пайплайн: **Scout** (сигналы) → **Analyst** (EV / conviction, Brier-калибровка) → **Executor** (готовит расчёт). Показывает live reasoning-логи. Монетизация через x402 (~$0.02/вызов).
+Пайплайн: **Scout** (сигналы) → **Analyst** (EV / conviction, Brier-калибровка) → **Executor** (готовит расчёт). Показывает live reasoning-логи. Это reasoning-симуляция — сама оплату не шлёт; реальная x402-оплата описана в секции «x402 — оплата за вызов» ниже.
 
 ### 🔵 FORCE EXECUTE
 Исполняет settlement on-chain. Pre-flight `eth_call` (abort-on-revert) → подпись → реальный USDC-transfer на Arc → «Settlement confirmed» + ссылка на tx.
@@ -85,3 +85,16 @@ Connect wallet (auto-switches to Arc Testnet) -> QUICK CAST a topic -> UNLOCK $0
 - **SecOps Panel** — per-tx cap 0.01, daily cap 5.0, 7/7 PASS.
 - **ARC NETWORK LIVE** — живой блок-каунтер + RPC-статус.
 - **Composability / Moat** — ERC-8183, x402, CCTP, ERC-8004, ERC-4626 + P&L.
+
+## 💸 x402 — оплата за вызов (почему в кошельке 2 транзы)
+
+Это ядро монетизации (Lepton RFB 02). Кнопка разблокировки премиум-сигнала
+(компонент `X402Integration`) — **реальный платный вызов** по протоколу x402:
+клиент/агент платит контракту Cronus в USDC за доступ к сигналу.
+
+- **Контракт-получатель:** `0xd81a420BFa4CE8778473BD46195B8E97e928880f` (Arc Testnet — задеплоенный агент Cronus).
+- **Цена:** ~$0.02 USDC за вызов.
+- **Почему 2 транзакции подряд:** платёж идёт батчем (`MEMO + BATCHED PAYMENTS`) — хук `useCronusContract` делает два вызова контракта, поэтому кошелёк просит **две подписи**. Обе — настоящие on-chain транзы в твой контракт, видны в эксплорере.
+- В OKX встроенном кошельке они показываются как «Неизвестная транзакция / не удалось расшифровать» — это лишь потому, что у кошелька нет ABI контракта; вызов корректный и безопасный.
+
+> ⚠️ Не путать с **CONSULT ORACLES** на дашборде: та кнопка запускает reasoning-пайплайн (Scout → Analyst → Executor) и сама оплату **не шлёт**. Реальная x402-оплата — именно здесь.
