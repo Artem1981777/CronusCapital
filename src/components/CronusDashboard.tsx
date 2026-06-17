@@ -37,6 +37,18 @@ const ERC20_ABI = [
 	},
 ] as const
 
+const VAULT_ADDRESS = "0x13B6984357e27dAB17DF44a6396042239e70542C" as const
+const VAULT_ABI = [
+	{ type: "function", name: "deposit", stateMutability: "nonpayable", inputs: [{ name: "assets", type: "uint256" }], outputs: [{ name: "", type: "uint256" }] },
+	{ type: "function", name: "withdrawAll", stateMutability: "nonpayable", inputs: [], outputs: [{ name: "", type: "uint256" }] },
+	{ type: "function", name: "convertToAssets", stateMutability: "view", inputs: [{ name: "sh", type: "uint256" }], outputs: [{ name: "", type: "uint256" }] },
+	{ type: "function", name: "shares", stateMutability: "view", inputs: [{ name: "a", type: "address" }], outputs: [{ name: "", type: "uint256" }] },
+	{ type: "function", name: "totalAssets", stateMutability: "view", inputs: [], outputs: [{ name: "", type: "uint256" }] },
+] as const
+const USDC_APPROVE_ABI = [
+	{ type: "function", name: "approve", stateMutability: "nonpayable", inputs: [{ name: "spender", type: "address" }, { name: "amount", type: "uint256" }], outputs: [{ name: "", type: "bool" }] },
+] as const
+
 function fmtUsd(n: number): string {
 	return "$" + n.toLocaleString("en-US", { maximumFractionDigits: 2 })
 }
@@ -300,20 +312,53 @@ export function CronusDashboard() {
 	}
 
 	// FORCE EXECUTE -> real test settlement tx on Arc Testnet (0.01 USDC self-transfer)
-	const [claimBusy, setClaimBusy] = useState(false)
-	const [claimMsg, setClaimMsg] = useState("")
-	const [claimTx, setClaimTx] = useState("")
-	const claimReward = async () => {
-		if (!isConnected || !address) { setWalletOpen(true); return }
-		setClaimBusy(true); setClaimMsg(""); setClaimTx("")
+	const [vaultAmt, setVaultAmt] = useState("0.1")
+	const [vaultBusy, setVaultBusy] = useState(false)
+	const [vaultMsg, setVaultMsg] = useState("")
+	const [vaultTx, setVaultTx] = useState("")
+	const [vaultPos, setVaultPos] = useState("")
+	const [vaultTvl, setVaultTvl] = useState("")
+	const refreshVault = async () => {
+		if (!publicClient || !address) return
 		try {
-			const r = await fetch("/api/claim", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ to: address }) })
-			const j = await r.json()
-			if (j && j.ok && j.hash) { setClaimTx(j.hash); setClaimMsg("Claimed " + (j.amount || "") + " USDC to your wallet") }
-			else { setClaimMsg("Claim failed: " + ((j && j.error) || ("HTTP " + r.status))) }
-		} catch (e) { setClaimMsg("Claim failed: " + String((e as Error).message || e)) }
-		finally { setClaimBusy(false) }
+			const sh = await publicClient.readContract({ address: VAULT_ADDRESS, abi: VAULT_ABI, functionName: "shares", args: [address] })
+			const val = await publicClient.readContract({ address: VAULT_ADDRESS, abi: VAULT_ABI, functionName: "convertToAssets", args: [sh] })
+			const tvl = await publicClient.readContract({ address: VAULT_ADDRESS, abi: VAULT_ABI, functionName: "totalAssets" })
+			setVaultPos((Number(val) / 1e6).toFixed(4)); setVaultTvl((Number(tvl) / 1e6).toFixed(2))
+		} catch { /* ignore */ }
 	}
+	const depositVault = async () => {
+		if (!isConnected || !address) { setWalletOpen(true); return }
+		const amt = Number(vaultAmt)
+		if (!amt || amt <= 0) { setVaultMsg("Enter an amount > 0"); return }
+		const assets = BigInt(Math.round(amt * 1e6))
+		setVaultBusy(true); setVaultMsg(""); setVaultTx("")
+		try { await switchChainAsync({ chainId: ARC_CHAIN_ID }) } catch { /* noop */ }
+		try {
+			setVaultMsg("Approving USDC…")
+			const ah = await writeContractAsync({ chainId: ARC_CHAIN_ID, address: USDC_ADDRESS, abi: USDC_APPROVE_ABI, functionName: "approve", args: [VAULT_ADDRESS, assets] })
+			if (publicClient) await publicClient.waitForTransactionReceipt({ hash: ah })
+			setVaultMsg("Depositing…")
+			const dh = await writeContractAsync({ chainId: ARC_CHAIN_ID, address: VAULT_ADDRESS, abi: VAULT_ABI, functionName: "deposit", args: [assets] })
+			if (publicClient) await publicClient.waitForTransactionReceipt({ hash: dh })
+			setVaultTx(dh); setVaultMsg("Deposited " + amt + " USDC into the vault")
+			await refreshVault()
+		} catch (e) { setVaultMsg("Deposit failed: " + String((e as { shortMessage?: string }).shortMessage || (e as Error).message || e).slice(0, 140)) }
+		finally { setVaultBusy(false) }
+	}
+	const withdrawVault = async () => {
+		if (!isConnected || !address) { setWalletOpen(true); return }
+		setVaultBusy(true); setVaultMsg(""); setVaultTx("")
+		try { await switchChainAsync({ chainId: ARC_CHAIN_ID }) } catch { /* noop */ }
+		try {
+			const wh = await writeContractAsync({ chainId: ARC_CHAIN_ID, address: VAULT_ADDRESS, abi: VAULT_ABI, functionName: "withdrawAll" })
+			if (publicClient) await publicClient.waitForTransactionReceipt({ hash: wh })
+			setVaultTx(wh); setVaultMsg("Withdrew your deposit + yield to your wallet")
+			await refreshVault()
+		} catch (e) { setVaultMsg("Withdraw failed: " + String((e as { shortMessage?: string }).shortMessage || (e as Error).message || e).slice(0, 140)) }
+		finally { setVaultBusy(false) }
+	}
+	useEffect(() => { if (address) refreshVault() }, [address])
 	const forceExecute = async () => {
 		if (!isConnected || !address) { setWalletOpen(true); return }
 		const ok = window.confirm("FORCE EXECUTE\n\nSend a 0.01 USDC test settlement on Arc Testnet?\n(Real on-chain tx — gas only, funds go to treasury.)")
@@ -388,8 +433,15 @@ export function CronusDashboard() {
 					<div className="cd-panel-title">⚡ ORACLE ACTIONS</div>
 					<button className="cd-btn cd-btn-primary" onClick={consult} disabled={running}>{running ? "CONSULTING…" : "CONSULT ORACLES"}</button>
 					<button className="cd-btn cd-btn-exec" onClick={forceExecute} disabled={txBusy}>{txBusy ? "EXECUTING…" : "FORCE EXECUTE"}</button>
-					<button className="cd-btn cd-btn-claim" onClick={claimReward} disabled={claimBusy}>{claimBusy ? "CLAIMING..." : "CLAIM REWARD"}</button>
-				{claimMsg ? (<div className="cd-claim-msg">{claimMsg}{claimTx ? (<a href={"https://testnet.arcscan.app/tx/" + claimTx} target="_blank" rel="noreferrer"> view tx</a>) : null}</div>) : null}
+					<div className="cd-vault">
+					<div className="cd-vault-row">
+						<input className="cd-vault-input" type="number" min="0" step="0.01" value={vaultAmt} onChange={(e) => setVaultAmt(e.target.value)} placeholder="0.10" />
+						<button className="cd-btn cd-btn-claim" onClick={depositVault} disabled={vaultBusy}>{vaultBusy ? "WORKING…" : "DEPOSIT"}</button>
+						<button className="cd-btn cd-btn-exec" onClick={withdrawVault} disabled={vaultBusy}>WITHDRAW</button>
+					</div>
+					<div className="cd-vault-stats">Your position: {vaultPos || "0.0000"} USDC · Vault TVL: {vaultTvl || "0.00"} USDC</div>
+					{vaultMsg ? (<div className="cd-claim-msg">{vaultMsg}{vaultTx ? (<a href={"https://testnet.arcscan.app/tx/" + vaultTx} target="_blank" rel="noreferrer"> view tx</a>) : null}</div>) : null}
+				</div>
 				<button className="cd-btn cd-btn-gold" onClick={() => setRiskOpen(true)}>RISK ADJUST</button>
 					<a className="cd-btn cd-btn-ghost" href="https://testnet.arcscan.app" target="_blank" rel="noreferrer">VIEW ON ARC ↗</a>
 					<button className="cd-btn cd-btn-deploy" onClick={deployAgent} disabled={deployed.length >= ROSTER.length}>{deployed.length >= ROSTER.length ? "✓ ALL AGENTS DEPLOYED" : "＋ DEPLOY NEW AGENT"}</button>

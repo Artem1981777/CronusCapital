@@ -537,3 +537,9 @@ html, body { background: linear-gradient(rgba(0,0,0,0.12), rgba(0,0,0,0.22)), ur
 .cd-btn-claim:disabled { opacity:.6; cursor:not-allowed; }
 .cd-claim-msg { font-size:12px; color:#cfe9d4; padding:6px 8px; line-height:1.45; word-break:break-all; }
 .cd-claim-msg a { color:#7fd1a0; text-decoration:underline; }
+
+/* ===== VAULT ===== */
+.cd-vault { display:flex; flex-direction:column; gap:8px; }
+.cd-vault-row { display:flex; gap:8px; align-items:center; }
+.cd-vault-input { width:90px; padding:10px; border-radius:10px; border:1px solid rgba(246,201,69,.4); background:rgba(0,0,0,.35); color:#f6c945; font-weight:700; }
+.cd-vault-stats { font-size:12px; color:#cfe9d4; }
