@@ -358,7 +358,12 @@ export function CronusDashboard() {
 		} catch (e) { setVaultMsg("Withdraw failed: " + String((e as { shortMessage?: string }).shortMessage || (e as Error).message || e).slice(0, 140)) }
 		finally { setVaultBusy(false) }
 	}
-	useEffect(() => { if (address) refreshVault() }, [address])
+	useEffect(() => {
+		if (!address) { setVaultPos(""); setVaultTvl(""); return }
+		refreshVault()
+		const id = window.setInterval(() => { refreshVault() }, 12000)
+		return () => window.clearInterval(id)
+	}, [address, publicClient])
 	const forceExecute = async () => {
 		if (!isConnected || !address) { setWalletOpen(true); return }
 		const ok = window.confirm("FORCE EXECUTE\n\nSend a 0.01 USDC test settlement on Arc Testnet?\n(Real on-chain tx — gas only, funds go to treasury.)")
