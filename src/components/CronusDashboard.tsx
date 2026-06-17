@@ -212,6 +212,7 @@ export function CronusDashboard() {
 	const [deployed, setDeployed] = useState<Array<string>>(() => { try { const r = JSON.parse(localStorage.getItem("cronus_agents") || "[]"); return Array.isArray(r) ? r : [] } catch { return [] } })
 	const deployAgent = () => { setDeployed((cur) => { const next = ROSTER.find((r) => !cur.includes(r.id)); if (!next) return cur; const updated = [...cur, next.id]; try { localStorage.setItem("cronus_agents", JSON.stringify(updated)) } catch { /* ignore */ } return updated }) }
 	const [consultPhase, setConsultPhase] = useState<"idle" | "scout" | "analyst" | "executor">("idle")
+	const [consultMsg, setConsultMsg] = useState("")
 	const [boost, setBoost] = useState(0)
 	const { isConnected, address } = useAccount()
 	const { switchChainAsync } = useSwitchChain()
@@ -308,7 +309,7 @@ export function CronusDashboard() {
 	const consult = () => {
 		if (running) return; setRunning(true)
 		// CUSTOMIZE: trigger your real Scout -> Analyst -> Executor pipeline here
-		setConsultPhase("scout"); setTimeout(() => setConsultPhase("analyst"), 850); setTimeout(() => setConsultPhase("executor"), 1700); setTimeout(() => { setBoost(6 + Math.floor(Math.random() * 8)); setConsultPhase("idle"); setRunning(false) }, 2700)
+		setConsultPhase("scout"); setConsultMsg("🔭 Scout: сканирую рынки…"); setTimeout(() => { setConsultPhase("analyst"); setConsultMsg("⚖️ Analyst: считаю EV и conviction…") }, 850); setTimeout(() => { setConsultPhase("executor"); setConsultMsg("📡 Executor: готовлю расчёт…") }, 1700); setTimeout(() => { setBoost(6 + Math.floor(Math.random() * 8)); setConsultPhase("idle"); setRunning(false); setConsultMsg("✅ Консенсус оракулов: " + (Math.random() > 0.5 ? "BUY" : "HOLD") + " · conviction " + (70 + Math.floor(Math.random() * 25)) + "%") }, 2700)
 	}
 
 	// FORCE EXECUTE -> real test settlement tx on Arc Testnet (0.01 USDC self-transfer)
@@ -456,6 +457,7 @@ export function CronusDashboard() {
 				<div className="cd-panel cd-actions">
 					<div className="cd-panel-title">⚡ ORACLE ACTIONS</div>
 					<button className="cd-btn cd-btn-primary" onClick={consult} disabled={running}>{running ? "CONSULTING…" : "CONSULT ORACLES"}</button>
+					{consultMsg ? <div className="cd-claim-msg">{consultMsg}</div> : null}
 					<button className="cd-btn cd-btn-exec" onClick={forceExecute} disabled={txBusy}>{txBusy ? "EXECUTING…" : "FORCE EXECUTE"}</button>
 					<div className="cd-vault">
 					<div className="cd-vault-row">
