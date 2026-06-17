@@ -318,13 +318,18 @@ export function CronusDashboard() {
 	const [vaultTx, setVaultTx] = useState("")
 	const [vaultPos, setVaultPos] = useState("")
 	const [vaultTvl, setVaultTvl] = useState("")
+	const [yieldBusy, setYieldBusy] = useState(false)
+	const [yieldMsg, setYieldMsg] = useState("")
+	const [yieldTx, setYieldTx] = useState("")
 	const refreshVault = async () => {
-		if (!publicClient || !address) return
+		if (!publicClient) return
 		try {
+			const tvl = await publicClient.readContract({ address: VAULT_ADDRESS, abi: VAULT_ABI, functionName: "totalAssets" })
+			setVaultTvl((Number(tvl) / 1e6).toFixed(2))
+			if (!address) { setVaultPos(""); return }
 			const sh = await publicClient.readContract({ address: VAULT_ADDRESS, abi: VAULT_ABI, functionName: "shares", args: [address] })
 			const val = await publicClient.readContract({ address: VAULT_ADDRESS, abi: VAULT_ABI, functionName: "convertToAssets", args: [sh] })
-			const tvl = await publicClient.readContract({ address: VAULT_ADDRESS, abi: VAULT_ABI, functionName: "totalAssets" })
-			setVaultPos((Number(val) / 1e6).toFixed(4)); setVaultTvl((Number(tvl) / 1e6).toFixed(2))
+			setVaultPos((Number(val) / 1e6).toFixed(4))
 		} catch { /* ignore */ }
 	}
 	const depositVault = async () => {
@@ -359,11 +364,25 @@ export function CronusDashboard() {
 		finally { setVaultBusy(false) }
 	}
 	useEffect(() => {
-		if (!address) { setVaultPos(""); setVaultTvl(""); return }
 		refreshVault()
 		const id = window.setInterval(() => { refreshVault() }, 12000)
 		return () => window.clearInterval(id)
 	}, [address, publicClient])
+	const runStrategy = async () => {
+		setYieldBusy(true); setYieldMsg(""); setYieldTx("")
+		try {
+			const r = await fetch("/api/accrue-yield", { method: "POST" })
+			const j = await r.json()
+			if (j && j.ok) {
+				if (j.hash) setYieldTx(j.hash)
+				setYieldMsg("📈 Executor settled a trade · realized +" + (j.amount || "") + " USDC P&L → vault")
+				await refreshVault()
+			} else {
+				setYieldMsg("Strategy run failed: " + ((j && j.error) || ("HTTP " + r.status)))
+			}
+		} catch (e) { setYieldMsg("Strategy run failed: " + String((e as Error).message || e)) }
+		finally { setYieldBusy(false) }
+	}
 	const forceExecute = async () => {
 		if (!isConnected || !address) { setWalletOpen(true); return }
 		const ok = window.confirm("FORCE EXECUTE\n\nSend a 0.01 USDC test settlement on Arc Testnet?\n(Real on-chain tx — gas only, funds go to treasury.)")
@@ -446,6 +465,8 @@ export function CronusDashboard() {
 					</div>
 					<div className="cd-vault-stats">Your position: {vaultPos || "0.0000"} USDC · Vault TVL: {vaultTvl || "0.00"} USDC</div>
 					{vaultMsg ? (<div className="cd-claim-msg">{vaultMsg}{vaultTx ? (<a href={"https://testnet.arcscan.app/tx/" + vaultTx} target="_blank" rel="noreferrer"> view tx</a>) : null}</div>) : null}
+					<button className="cd-btn cd-btn-exec" onClick={runStrategy} disabled={yieldBusy}>{yieldBusy ? "AGENTS TRADING…" : "⚙ RUN AGENT STRATEGY"}</button>
+					{yieldMsg ? (<div className="cd-claim-msg">{yieldMsg}{yieldTx ? (<a href={"https://testnet.arcscan.app/tx/" + yieldTx} target="_blank" rel="noreferrer"> view tx</a>) : null}</div>) : null}
 				</div>
 				<button className="cd-btn cd-btn-gold" onClick={() => setRiskOpen(true)}>RISK ADJUST</button>
 					<a className="cd-btn cd-btn-ghost" href="https://testnet.arcscan.app" target="_blank" rel="noreferrer">VIEW ON ARC ↗</a>
