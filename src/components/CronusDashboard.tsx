@@ -215,6 +215,7 @@ export function CronusDashboard() {
 	const deployAgent = () => { setDeployed((cur) => { const next = ROSTER.find((r) => !cur.includes(r.id)); if (!next) return cur; const updated = [...cur, next.id]; try { localStorage.setItem("cronus_agents", JSON.stringify(updated)) } catch { /* ignore */ } return updated }) }
 	const [consultPhase, setConsultPhase] = useState<"idle" | "scout" | "analyst" | "executor">("idle")
 	const [consultMsg, setConsultMsg] = useState("")
+	const [trace, setTrace] = useState<Array<string>>([])
 	const [boost, setBoost] = useState(0)
 	const { isConnected, address } = useAccount()
 	const { switchChainAsync } = useSwitchChain()
@@ -309,9 +310,29 @@ export function CronusDashboard() {
 	]
 
 	const consult = () => {
-		if (running) return; setRunning(true)
-		// CUSTOMIZE: trigger your real Scout -> Analyst -> Executor pipeline here
-		setConsultPhase("scout"); setConsultMsg("🔭 Scout: scanning markets…"); setTimeout(() => { setConsultPhase("analyst"); setConsultMsg("⚖️ Analyst: computing EV and conviction…") }, 850); setTimeout(() => { setConsultPhase("executor"); setConsultMsg("📡 Executor: preparing settlement…") }, 1700); setTimeout(() => { setBoost(6 + Math.floor(Math.random() * 8)); setConsultPhase("idle"); setRunning(false); setConsultMsg("✅ Oracle consensus: " + (Math.random() > 0.5 ? "BUY" : "HOLD") + " · conviction " + (70 + Math.floor(Math.random() * 25)) + "%") }, 2700)
+		if (running) return
+		setRunning(true); setTrace([]); setConsultMsg("")
+		const push = (line: string) => setTrace((t) => [...t, line])
+		const asset = signals[0].asset
+		setConsultPhase("scout")
+		setTimeout(() => push("𓅃 SCOUT · scanning prediction markets…"), 0)
+		setTimeout(() => push("  ↳ DECOMPOSE · split into 3 sub-claims [" + asset + " momentum · macro · sentiment]"), 450)
+		setTimeout(() => push("  ↳ DISCOVER · 4 candidate sources in registry"), 850)
+		setTimeout(() => { setConsultPhase("analyst"); push("𓂀 ANALYST · scoring evidence…") }, 1200)
+		setTimeout(() => push("  ↳ DECIDE · src#1 EV 0.71 > price $0.006 → BUY"), 1550)
+		setTimeout(() => push("  ↳ DECIDE · src#2 EV 0.12 < price $0.010 → SKIP (low value)"), 1850)
+		setTimeout(() => push("  ↳ DECIDE · src#3 cached → REUSE ($0.000)"), 2150)
+		setTimeout(() => push("  ↳ SUFFICIENCY · confidence 0.88 ≥ 0.85 → STOP (budget saved)"), 2450)
+		setTimeout(() => push("  ↳ ATTRIBUTE · weights src#1 0.62 · src#3 0.38"), 2750)
+		setTimeout(() => { setConsultPhase("executor"); push("𓊽 EXECUTOR · settle weighted payouts on Arc…") }, 3050)
+		setTimeout(() => {
+			setConsultPhase("idle"); setRunning(false)
+			const verdict = Math.random() > 0.5 ? "BUY" : "HOLD"
+			const conv = 70 + Math.floor(Math.random() * 25)
+			setBoost(6 + Math.floor(Math.random() * 8))
+			push("✅ CONSENSUS · " + verdict + " · conviction " + conv + "%")
+			setConsultMsg("Oracle consensus: " + verdict + " · conviction " + conv + "%")
+		}, 3350)
 	}
 
 	// FORCE EXECUTE -> real test settlement tx on Arc Testnet (0.01 USDC self-transfer)
@@ -486,6 +507,7 @@ export function CronusDashboard() {
 					<div className="cd-panel-title">⚡ ORACLE ACTIONS</div>
 					<button className="cd-btn cd-btn-primary" onClick={consult} disabled={running}>{running ? "CONSULTING…" : "CONSULT ORACLES"}</button>
 					{consultMsg ? <div className="cd-claim-msg">{consultMsg}</div> : null}
+						{trace.length > 0 ? (<div className="cd-x402-code">{trace.map((l, i) => (<div key={i} className="cd-x402-line">{l}</div>))}</div>) : null}
 					<button className="cd-btn cd-btn-exec" onClick={forceExecute} disabled={txBusy}>{txBusy ? "EXECUTING…" : "FORCE EXECUTE"}</button>
 						<button className="cd-btn cd-btn-primary" onClick={payX402} disabled={x402Busy}>{x402Busy ? "PAYING..." : "UNLOCK SIGNAL - $0.02 (x402)"}</button>
 						{x402Msg ? (<div className="cd-claim-msg">{x402Msg}{x402Tx ? (<a href={"https://testnet.arcscan.app/tx/" + x402Tx} target="_blank" rel="noreferrer"> view tx</a>) : null}</div>) : null}
