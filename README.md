@@ -38,23 +38,20 @@ Demo frame: UNLOCK **+\$0.02** → PAY UPSTREAM **−\$0.005** → **Net Flow +\
 2. **Analyst** — scores EV / conviction, calibrates against track record (Brier score).
 3. **Executor** — settles on-chain (USDC transfer) with a pre-flight eth_call simulation and a keccak jobHash.
 
-### Granular reasoning trace
+### Live reasoning trace (real LLM, not scripted)
 
-Pressing **CONSULT ORACLES** streams the agent's thinking line by line:
+Pressing **CONSULT ORACLES** calls the agent's own serverless endpoint `/api/consult`, which (1) pulls a **live price** from the OKX public ticker (last + 24h change) and (2) asks a **real LLM** (Groq, Llama 3.3 70B) to reason over that live number and return a structured decision. The model's real output streams into the dashboard line by line - there is no `setTimeout` script behind it (open DevTools, Network tab, `/api/consult` to verify). A real run looks like:
 
-    𓅃 SCOUT · scanning prediction markets…
-      ↳ DECOMPOSE · split query into sub-claims
-      ↳ DISCOVER · candidate sources in registry
-    𓂀 ANALYST · scoring evidence…
-      ↳ DECIDE · src#1 EV 0.71 > price → BUY
-      ↳ DECIDE · src#2 EV 0.12 < price → SKIP
-      ↳ DECIDE · src#3 cached → REUSE
-      ↳ SUFFICIENCY · confidence ≥ threshold → STOP (budget saved)
-      ↳ ATTRIBUTE · weighted signal contributions
-    𓊽 EXECUTOR · settle weighted payouts on Arc…
-    ✅ CONSENSUS · verdict · conviction %
+    SCOUT: BTC-USDC live at 63245.4, 24h +0.94%
+    DECOMPOSE: split into momentum / mean-reversion / liquidity sub-claims
+    DISCOVER: +0.94% 24h vs +0.50% trigger -> momentum candidate
+    DECIDE: +0.94% clears trigger -> long bias, EV 0.62 vs 0.50 hurdle
+    SUFFICIENCY: edge 0.12 above 0.05 floor -> stop, no extra data spend
+    ATTRIBUTE: 70% momentum / 30% price level
+    EXECUTOR: settle long bias on Arc, conviction 80
+    CONSENSUS: YES - conviction 80% (live LLM)
 
-This mirrors a real decide → check-budget → attribute pipeline (BUY / SKIP / REUSE), so you can see why the agent paid for what it paid for.
+The trace is the model genuinely deciding on live market data - the same class of engine (Groq + Llama 3.3) as autonomous rivals, but Cronus keeps the moats below (self-monetization, verifiable ledger, and non-custodial signing).
 
 ---
 
@@ -91,6 +88,8 @@ A real vault on Arc Testnet: the user signs deposit/withdraw; yield (addYield) a
 ## What's real vs modeled (honesty)
 
 - ✅ **Real on-chain:** every USDC transfer (x402 earn, upstream spend, vault deposit/withdraw, settlement), the hash-chain ledger, and the pre-flight simulation.
+- ✅ **Real reasoning:** the CONSULT trace is produced live by a real LLM (Groq Llama 3.3) over a live OKX price via /api/consult, not a scripted animation.
+- 🔐 **Non-custodial by design:** unlike autonomous agents that keep a hot private key on the server to self-sign, Cronus reasons autonomously but every settlement is signed in the user wallet - no agent key sits on the server, ever.
 - ⚠️ **Modeled on testnet:** yield magnitudes and EV figures are illustrative — the mechanics, shares, and transactions themselves are real.
 - ℹ️ **x402** here is a real USDC transfer to the agent (pay-per-call) — a pragmatic simplification of the full HTTP-402 + facilitator handshake.
 
