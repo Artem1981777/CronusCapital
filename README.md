@@ -85,6 +85,22 @@ A real vault on Arc Testnet: the user signs deposit/withdraw; yield (addYield) a
 
 ---
 
+## Cronus vs the field
+
+Most projects in this space ship **infrastructure** - a wallet, a policy engine, a lending pool, a prediction-market venue. Cronus ships the thing that proves the infrastructure is worth building: **a complete, honest, self-sustaining business that already earns, spends, abstains, and settles on-chain - without ever holding your key.**
+
+| Rival archetype | Example | What they have | Why Cronus still wins |
+|---|---|---|---|
+| Safety / policy OS | Aegis | guardrails, spend caps, policy engine | Cronus is **non-custodial** - a policy can be bypassed, a key the agent never holds cannot. Caps + allowlist + pre-flight are already enforced, and there is no server key to abuse. |
+| Prediction-market venue | AuraPredict | many markets, social, indexer | A venue is empty without liquidity and users. Cronus is a **profitable participant** that works at zero external users. |
+| Lending / DeFi primitive | Registrai | lending pool, bonded oracle, slashing | Heavier and semi-custodial. Cronus is lighter, non-custodial, and **monetizes itself** via x402 - which a pool cannot. |
+| Data vendor | QMA | quant reports, historical analogs | Cronus has its own honest **MEMORY analog** stage AND the full economic loop - it does not just sell a report. |
+| Single-primitive specialists | perp / vault / memory agents | one deep feature | Each ships one primitive; Cronus runs the **whole loop**: earn -> spend -> net -> settle, plus the vault. |
+
+**One-line thesis:** every rival is a *part* of an agent economy. Cronus is a *working agent economy*, end to end, that you can audit in a browser tab.
+
+---
+
 ## What's real vs modeled (honesty)
 
 - ✅ **Real on-chain:** every USDC transfer (x402 earn, upstream spend, vault deposit/withdraw, settlement), the hash-chain ledger, and the pre-flight simulation.
