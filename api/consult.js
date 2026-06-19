@@ -1,4 +1,4 @@
-// Cronus autonomous oracle: REAL live price -> REAL LLM decision (with error surfacing).
+// Cronus autonomous oracle: REAL live price (OKX) -> REAL LLM decision (Groq / Llama 3.3, free tier).
 export default async function handler(req, res) {
   const topic = (req.query && req.query.topic) || "BTC-USDC momentum";
   const instId = (req.query && req.query.instId) || "BTC-USDC";
@@ -15,19 +15,19 @@ export default async function handler(req, res) {
     }
   } catch (e) { /* price stays null */ }
 
-  const key = process.env.ANTHROPIC_API_KEY;
+  const key = process.env.GROQ_API_KEY;
   if (!key) {
-    return res.status(200).json({ ok:false, live:false, price, changePct, trace:["LLM key not configured"], verdict:"SKIP", conviction:0 });
+    return res.status(200).json({ ok:false, live:false, price, changePct, trace:["GROQ_API_KEY not configured"], verdict:"SKIP", conviction:0 });
   }
 
-  const sys = "You are Cronus, an autonomous on-chain oracle agent on Arc. Given a live market price, reason step by step and issue a verdict. Respond ONLY with strict minified JSON, no prose.";
+  const sys = "You are Cronus, an autonomous on-chain oracle agent on Arc. Given a live market price, reason step by step and issue a verdict. Respond ONLY with strict JSON, no prose.";
   const user = [
     "Topic: " + topic,
     "Instrument: " + instId,
     "Live price: " + (price == null ? "unknown" : price),
     "24h change %: " + (changePct == null ? "unknown" : changePct.toFixed(2)),
     "",
-    "Return JSON with keys:",
+    "Return a JSON object with keys:",
     "trace: array of 6-9 short reasoning lines across stages SCOUT, DECOMPOSE, DISCOVER, DECIDE, SUFFICIENCY, ATTRIBUTE, EXECUTOR; each line must cite a concrete number from above.",
     "verdict: one of YES, NO, SKIP.",
     "conviction: integer 0-100.",
@@ -36,14 +36,15 @@ export default async function handler(req, res) {
 
   let data = null;
   try {
-    const resp = await fetch("https://api.anthropic.com/v1/messages", {
+    const resp = await fetch("https://api.groq.com/openai/v1/chat/completions", {
       method: "POST",
-      headers: { "content-type": "application/json", "x-api-key": key, "anthropic-version": "2023-06-01" },
+      headers: { "content-type": "application/json", "authorization": "Bearer " + key },
       body: JSON.stringify({
-        model: "claude-3-5-haiku-latest",
-        max_tokens: 700,
-        system: sys,
-        messages: [{ role: "user", content: user }]
+        model: "llama-3.3-70b-versatile",
+        max_tokens: 800,
+        temperature: 0.4,
+        response_format: { type: "json_object" },
+        messages: [{ role: "system", content: sys }, { role: "user", content: user }]
       })
     });
     data = await resp.json();
@@ -52,8 +53,8 @@ export default async function handler(req, res) {
   }
 
   let text = "";
-  if (data && Array.isArray(data.content)) {
-    for (const c of data.content) { if (c.type === "text") text += c.text; }
+  if (data && data.choices && data.choices[0] && data.choices[0].message) {
+    text = data.choices[0].message.content || "";
   }
   if (!text) {
     return res.status(200).json({ ok:false, live:true, price, changePct, trace:["LLM returned no text"], verdict:"SKIP", conviction:0, debug: JSON.stringify(data).slice(0, 700) });
