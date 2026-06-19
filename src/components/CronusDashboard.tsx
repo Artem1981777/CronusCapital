@@ -311,33 +311,44 @@ export function CronusDashboard() {
 		{ g: "𓆣", t: "Quantum-safe", d: "Hybrid post-quantum (harvest-now-decrypt-later)" },
 	]
 
-	const consult = () => {
-		if (running) return
-		setRunning(true); setTrace([]); setConsultMsg("")
-		const push = (line: string) => setTrace((t) => [...t, line])
-		const asset = signals[0].asset
-		setConsultPhase("scout")
-		setTimeout(() => push("𓅃 SCOUT · scanning prediction markets…"), 0)
-		setTimeout(() => push("  ↳ DECOMPOSE · split into 3 sub-claims [" + asset + " momentum · macro · sentiment]"), 450)
-		setTimeout(() => push("  ↳ DISCOVER · 4 candidate sources in registry"), 850)
-		setTimeout(() => { setConsultPhase("analyst"); push("𓂀 ANALYST · scoring evidence…") }, 1200)
-		setTimeout(() => push("  ↳ DECIDE · src#1 EV 0.71 > price $0.006 → BUY"), 1550)
-		setTimeout(() => push("  ↳ DECIDE · src#2 EV 0.12 < price $0.010 → SKIP (low value)"), 1850)
-		setTimeout(() => push("  ↳ DECIDE · src#3 cached → REUSE ($0.000)"), 2150)
-		setTimeout(() => push("  ↳ SUFFICIENCY · confidence 0.88 ≥ 0.85 → STOP (budget saved)"), 2450)
-		setTimeout(() => push("  ↳ ATTRIBUTE · weights src#1 0.62 · src#3 0.38"), 2750)
-		setTimeout(() => { setConsultPhase("executor"); push("𓊽 EXECUTOR · settle weighted payouts on Arc…") }, 3050)
-		setTimeout(() => {
-			setConsultPhase("idle"); setRunning(false)
-			const verdict = Math.random() > 0.5 ? "BUY" : "HOLD"
-			const conv = 70 + Math.floor(Math.random() * 25)
-			setBoost(6 + Math.floor(Math.random() * 8))
-			push("✅ CONSENSUS · " + verdict + " · conviction " + conv + "%")
-			setConsultMsg("Oracle consensus: " + verdict + " · conviction " + conv + "%")
-		}, 3350)
-	}
-
-	// FORCE EXECUTE -> real test settlement tx on Arc Testnet (0.01 USDC self-transfer)
+	const consult = async () => {
+    if (running) return
+    setRunning(true)
+    setTrace([])
+    setConsultMsg("")
+    setConsultPhase("scout")
+    const push = (line: string) => setTrace((t) => [...t, line])
+    const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
+    const instId = "BTC-USDC"
+    push("SCOUT - querying live oracle (" + instId + ") + LLM...")
+    try {
+      const res = await fetch("/api/consult?instId=" + instId + "&topic=" + encodeURIComponent(instId + " momentum"))
+      const data = await res.json()
+      if (data && data.price != null) {
+        push("LIVE - " + instId + " = " + data.price + (data.changePct != null ? " (" + Number(data.changePct).toFixed(2) + "% 24h)" : ""))
+      }
+      const lines = (data && Array.isArray(data.trace)) ? data.trace : []
+      setConsultPhase("analyst")
+      for (let i = 0; i < lines.length; i++) {
+        if (i === Math.floor(lines.length * 0.7)) setConsultPhase("executor")
+        await sleep(420)
+        push("  - " + lines[i])
+      }
+      const verdict = (data && data.verdict) ? data.verdict : "SKIP"
+      const conv = (data && typeof data.conviction === "number") ? data.conviction : 0
+      setBoost(Math.max(0, Math.min(15, Math.round(conv / 7))))
+      await sleep(300)
+      push("CONSENSUS - " + verdict + " - conviction " + conv + "% (live LLM)")
+      setConsultMsg("Oracle consensus: " + verdict + " - conviction " + conv + "% (real-time, on live price)")
+    } catch (e) {
+      push("oracle endpoint unreachable - " + String((e as Error).message || e).slice(0, 80))
+      setConsultMsg("Oracle endpoint error")
+    } finally {
+      setConsultPhase("idle")
+      setRunning(false)
+    }
+  }
+  // FORCE EXECUTE -> real test settlement tx on Arc Testnet (0.01 USDC self-transfer)
 	const [vaultAmt, setVaultAmt] = useState("0.1")
 	const [vaultBusy, setVaultBusy] = useState(false)
 	const [vaultMsg, setVaultMsg] = useState("")
