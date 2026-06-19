@@ -1,4 +1,4 @@
-// Cronus autonomous oracle: REAL live price (OKX) -> REAL LLM decision (Groq / Llama 3.3, free tier).
+// Cronus autonomous oracle: REAL live price (OKX) -> REAL LLM decision + historical-analog recall (Groq / Llama 3.3, free tier).
 export default async function handler(req, res) {
   const topic = (req.query && req.query.topic) || "BTC-USDC momentum";
   const instId = (req.query && req.query.instId) || "BTC-USDC";
@@ -20,18 +20,19 @@ export default async function handler(req, res) {
     return res.status(200).json({ ok:false, live:false, price, changePct, trace:["GROQ_API_KEY not configured"], verdict:"SKIP", conviction:0 });
   }
 
-  const sys = "You are Cronus, an autonomous on-chain trading oracle on the Arc network. You get a live market price and must output a crisp, quantitative reasoning trace and a trade verdict, like a sharp quant desk. Be numeric and decisive. Never hedge with vague filler. Respond ONLY with strict minified JSON, no prose, no markdown.";
+  const sys = "You are Cronus, an autonomous on-chain trading oracle on the Arc network. You get a live market price and must output a crisp quantitative reasoning trace, a historical-analog recall, and a trade verdict, like a sharp quant desk. Be numeric and decisive. Never hedge with vague filler. Respond ONLY with strict minified JSON, no prose, no markdown.";
   const user = [
     "Topic: " + topic,
     "Instrument: " + instId,
     "Live price: " + (price == null ? "unknown" : price),
     "24h change %: " + (changePct == null ? "unknown" : changePct.toFixed(2)),
     "",
-    "Return a JSON object with keys trace, verdict, conviction, decisions.",
+    "Return a JSON object with keys trace, analog, verdict, conviction, decisions.",
     "trace: array of 7-9 lines, exactly one per stage in this order: SCOUT, DECOMPOSE, DISCOVER, DECIDE, SUFFICIENCY, ATTRIBUTE, EXECUTOR.",
     "Each line MUST start with the stage name + colon, cite at least one concrete number (live price, 24h change %, an EV 0-1, or a probability threshold), and be terse and decisive.",
     "Forbidden words: indicating, seems, may, potential, can be made, high value. Use trader language instead.",
     "Style example: 'DECIDE: 24h +0.94% clears +0.50% trigger -> long bias, EV 0.62 vs 0.50 hurdle'.",
+    "analog: object with keys regime, outcome, similarity. regime = short label of the closest historical market regime to the current 24h move; outcome = what typically followed that regime, terse and numeric if possible; similarity = number 0-1 (heuristic closeness). This is heuristic recall, NOT a backtest.",
     "verdict: YES if conviction >= 65 and bias bullish; NO if conviction >= 65 and bias bearish; else SKIP.",
     "conviction: integer 0-100 derived from the size/direction of the 24h move and price structure.",
     "decisions: array of 1-3 objects with keys src, ev (number 0-1), price (the live price), action (BUY, SELL, or SKIP)."
@@ -44,7 +45,7 @@ export default async function handler(req, res) {
       headers: { "content-type": "application/json", "authorization": "Bearer " + key },
       body: JSON.stringify({
         model: "llama-3.3-70b-versatile",
-        max_tokens: 900,
+        max_tokens: 1000,
         temperature: 0.5,
         response_format: { type: "json_object" },
         messages: [{ role: "system", content: sys }, { role: "user", content: user }]
@@ -75,6 +76,7 @@ export default async function handler(req, res) {
   return res.status(200).json({
     ok:true, live:true, price, changePct,
     trace: Array.isArray(parsed.trace) ? parsed.trace : [],
+    analog: (parsed.analog && typeof parsed.analog === "object") ? parsed.analog : null,
     verdict: parsed.verdict || "SKIP",
     conviction: parsed.conviction || 0,
     decisions: Array.isArray(parsed.decisions) ? parsed.decisions : []
