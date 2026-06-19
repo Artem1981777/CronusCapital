@@ -24,6 +24,8 @@ const ARC_CHAIN_ID = 5042002
 const USDC_ADDRESS = "0x3600000000000000000000000000000000000000" as const
 const SETTLE_TO = "0xdc6778c5f8cc74b10aed11c48306d4cfc5737fbd" as const // CRONUS treasury (test sink)
 const TEST_AMOUNT = BigInt(10000) // 0.01 USDC (6 decimals)
+const AGENT_ADDRESS = "0xd81a420BFa4CE8778473BD46195B8E97e928880f" as const // CRONUS x402 agent contract
+const X402_AMOUNT = BigInt(20000) // 0.02 USDC (6 decimals) - pay-per-call price
 const ERC20_ABI = [
 	{
 		type: "function",
@@ -322,6 +324,9 @@ export function CronusDashboard() {
 	const [yieldBusy, setYieldBusy] = useState(false)
 	const [yieldMsg, setYieldMsg] = useState("")
 	const [yieldTx, setYieldTx] = useState("")
+	const [x402Busy, setX402Busy] = useState(false)
+	const [x402Msg, setX402Msg] = useState("")
+	const [x402Tx, setX402Tx] = useState("")
 	const refreshVault = async () => {
 		if (!publicClient) return
 		try {
@@ -383,6 +388,29 @@ export function CronusDashboard() {
 			}
 		} catch (e) { setYieldMsg("Strategy run failed: " + String((e as Error).message || e)) }
 		finally { setYieldBusy(false) }
+	}
+		const payX402 = async () => {
+		if (!isConnected || !address) { setWalletOpen(true); return }
+		setX402Busy(true); setX402Msg(""); setX402Tx("")
+		try { await switchChainAsync({ chainId: ARC_CHAIN_ID }) } catch { /* noop */ }
+		try {
+			if (publicClient) {
+				await publicClient.simulateContract({ account: address, address: USDC_ADDRESS, abi: ERC20_ABI, functionName: "transfer", args: [AGENT_ADDRESS, X402_AMOUNT] })
+			}
+			const h = await writeContractAsync({ chainId: ARC_CHAIN_ID, address: USDC_ADDRESS, abi: ERC20_ABI, functionName: "transfer", args: [AGENT_ADDRESS, X402_AMOUNT] })
+			if (publicClient) await publicClient.waitForTransactionReceipt({ hash: h })
+			setX402Tx(h)
+			try {
+				const raw = localStorage.getItem("cronus_earnings")
+				const cur = raw ? JSON.parse(raw) : { calls: 0, usd: 0 }
+				const next = { calls: Number((cur && cur.calls) || 0) + 1, usd: Number((cur && cur.usd) || 0) + 0.02 }
+				localStorage.setItem("cronus_earnings", JSON.stringify(next))
+				window.dispatchEvent(new StorageEvent("storage", { key: "cronus_earnings" }))
+			} catch { /* ignore */ }
+			setX402Msg("x402 payment received - +$0.02 USDC revenue (real on-chain)")
+		} catch (e) {
+			setX402Msg("x402 payment failed: " + String((e as { shortMessage?: string }).shortMessage || (e as Error).message || e).slice(0, 140))
+		} finally { setX402Busy(false) }
 	}
 	const forceExecute = async () => {
 		if (!isConnected || !address) { setWalletOpen(true); return }
@@ -459,6 +487,8 @@ export function CronusDashboard() {
 					<button className="cd-btn cd-btn-primary" onClick={consult} disabled={running}>{running ? "CONSULTING…" : "CONSULT ORACLES"}</button>
 					{consultMsg ? <div className="cd-claim-msg">{consultMsg}</div> : null}
 					<button className="cd-btn cd-btn-exec" onClick={forceExecute} disabled={txBusy}>{txBusy ? "EXECUTING…" : "FORCE EXECUTE"}</button>
+						<button className="cd-btn cd-btn-primary" onClick={payX402} disabled={x402Busy}>{x402Busy ? "PAYING..." : "UNLOCK SIGNAL - $0.02 (x402)"}</button>
+						{x402Msg ? (<div className="cd-claim-msg">{x402Msg}{x402Tx ? (<a href={"https://testnet.arcscan.app/tx/" + x402Tx} target="_blank" rel="noreferrer"> view tx</a>) : null}</div>) : null}
 					<div className="cd-vault">
 					<div className="cd-vault-row">
 						<input className="cd-vault-input" type="number" min="0" step="0.01" value={vaultAmt} onChange={(e) => setVaultAmt(e.target.value)} placeholder="0.10" />
