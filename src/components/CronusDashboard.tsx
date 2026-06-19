@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { keccak256, toBytes } from "viem"
 import MarketBoard from "../MarketBoard"
 import SecurityPanel from "../SecurityPanel"
@@ -217,6 +217,7 @@ export function CronusDashboard() {
 	const [consultPhase, setConsultPhase] = useState<"idle" | "scout" | "analyst" | "executor">("idle")
 	const [consultMsg, setConsultMsg] = useState("")
 	const [trace, setTrace] = useState<Array<string>>([])
+	const txMeta = useRef<{ topic: string; decision: string; agentId: string }>({ topic: "Manual settlement", decision: "FORCE EXECUTE - 0.01 USDC settled on Arc Testnet", agentId: "executor" })
 	const [boost, setBoost] = useState(0)
 	const { isConnected, address } = useAccount()
 	const { switchChainAsync } = useSwitchChain()
@@ -237,11 +238,11 @@ export function CronusDashboard() {
 			const prevHash: string = (list[0] && list[0].jobHash) ? String(list[0].jobHash) : "0x0000000000000000000000000000000000000000000000000000000000000000"
 			const jobHash = keccak256(toBytes("CRONUS|Manual settlement|FORCE EXECUTE \u00b7 0.01 USDC settled on Arc Testnet|" + txHash + "|" + settleTs + "|" + prevHash))
 			list.unshift({
-				topic: "Manual settlement",
-				decision: "FORCE EXECUTE \u00b7 0.01 USDC settled on Arc Testnet",
+				topic: txMeta.current.topic,
+				decision: txMeta.current.decision,
 				txHash: txHash,
 				timestamp: settleTs,
-				agentId: "executor",
+				agentId: txMeta.current.agentId,
 				jobHash: jobHash,
 				prevHash: prevHash,
 			})
@@ -364,6 +365,7 @@ export function CronusDashboard() {
 		} catch { /* ignore */ }
 	}
 	const depositVault = async () => {
+		txMeta.current = { topic: "Vault deposit", decision: "Deposited USDC into vault", agentId: "executor" }
 		if (!isConnected || !address) { setWalletOpen(true); return }
 		const amt = Number(vaultAmt)
 		if (!amt || amt <= 0) { setVaultMsg("Enter an amount > 0"); return }
@@ -383,6 +385,7 @@ export function CronusDashboard() {
 		finally { setVaultBusy(false) }
 	}
 	const withdrawVault = async () => {
+		txMeta.current = { topic: "Vault withdraw", decision: "Withdrew deposit + yield from vault", agentId: "executor" }
 		if (!isConnected || !address) { setWalletOpen(true); return }
 		setVaultBusy(true); setVaultMsg(""); setVaultTx("")
 		try { await switchChainAsync({ chainId: ARC_CHAIN_ID }) } catch { /* noop */ }
@@ -415,6 +418,7 @@ export function CronusDashboard() {
 		finally { setYieldBusy(false) }
 	}
 		const payX402 = async () => {
+		txMeta.current = { topic: "x402 revenue", decision: "x402 payment - +0.02 USDC received on Arc", agentId: "executor" }
 		if (!isConnected || !address) { setWalletOpen(true); return }
 		setX402Busy(true); setX402Msg(""); setX402Tx("")
 		try { await switchChainAsync({ chainId: ARC_CHAIN_ID }) } catch { /* noop */ }
@@ -438,6 +442,7 @@ export function CronusDashboard() {
 		} finally { setX402Busy(false) }
 	}
 		const payUpstream = async () => {
+		txMeta.current = { topic: "Upstream spend", decision: "Upstream data purchase - -0.005 USDC paid on Arc", agentId: "executor" }
 		if (!isConnected || !address) { setWalletOpen(true); return }
 		setSpendBusy(true); setSpendMsg(""); setSpendTx("")
 		try { await switchChainAsync({ chainId: ARC_CHAIN_ID }) } catch { /* noop */ }
@@ -461,6 +466,7 @@ export function CronusDashboard() {
 		} finally { setSpendBusy(false) }
 	}
 	const forceExecute = async () => {
+		txMeta.current = { topic: "Manual settlement", decision: "FORCE EXECUTE - 0.01 USDC settled on Arc Testnet", agentId: "executor" }
 		if (!isConnected || !address) { setWalletOpen(true); return }
 		const ok = window.confirm("FORCE EXECUTE\n\nSend a 0.01 USDC test settlement on Arc Testnet?\n(Real on-chain tx — gas only, funds go to treasury.)")
 		if (!ok) return
