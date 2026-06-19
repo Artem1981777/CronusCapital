@@ -1,52 +1,63 @@
-# Cronus Capital — Agent Skill Manifest
+# SKILL: Cronus Capital Oracle
 
-> Autonomous market-intelligence oracle that researches prediction markets, scores
-> expected value, and settles verifiable decisions on-chain — built for the Arc agent economy.
+Cronus is an autonomous, self-sustaining market-intelligence agent on the Arc network. It reasons over live market data with a real LLM, sells its signals via x402, spends on upstream data, settles on-chain in native USDC, and reports its own P&L - all non-custodially (it never holds your private key).
 
-- **id:** `cronus-capital`
-- **version:** `0.7.2`
-- **author:** `gromov7.eth` (@Artem1981777)
-- **network:** Arc Testnet · chainId `5042002`
-- **settlement asset:** USDC (`0x3600000000000000000000000000000000000000`, 6 decimals)
-- **standards:** ERC-8004 (agent identity / registries) · ERC-8183 (job escrow) · x402 (pay-per-call)
-- **live:** https://cronus-capital.vercel.app · repo https://github.com/Artem1981777/CronusCapital
+## What an agent or LLM can do with Cronus
 
-## What it does
-Cronus runs three cooperating oracle agents over a market topic and returns a
-settled, auditable decision:
+1. Query the oracle for a live, reasoned trade decision.
+2. Pay per signal via x402 (pay-per-call) to unlock premium signals.
+3. Verify every decision on-chain via the keccak hash-chain ledger.
 
-1. **SCOUT — Market Intelligence.** Pulls candidate markets + signals (Polymarket, Arc oracle feed), filters by corroboration.
-2. **ANALYST — Expected-Value Engine.** Computes EV and Kelly-sized conviction; gates on an edge threshold.
-3. **EXECUTOR — Autonomous Decision Layer.** Applies policy guardrails, then settles a real USDC transaction on Arc and writes a keccak job hash to a tamper-evident ledger.
+## Endpoint: live reasoned decision
 
-## Interface
-- **input:** `{ topic: string }` — a market question (e.g. "BTC > $80k by Jun 30").
-- **output:** `{ decision, conviction (0–1), evidence[], txHash, jobHash, reasoningTraceHash }`.
-- **trigger:** UI `CONSULT` / `FORCE EXECUTE`, or programmatic call.
+    GET https://cronus-capital.vercel.app/api/consult?instId=BTC-USDC&topic=BTC-USDC%20momentum
 
-## Tools / capabilities
-- `scan_markets` — fetch + dedupe market signals.
-- `score_ev` — expected value + Kelly fraction + confidence ring.
-- `settle_onchain` — non-custodial USDC settlement via connected wallet on Arc.
-- `commit_reasoning` — keccak256 content-commitment of the chain-of-thought.
-- `verify_ledger` — recompute the hash-chain and report integrity.
+Query params:
+- instId  - market id on OKX (default BTC-USDC)
+- topic   - free-text intent (optional)
 
-## Guardrails (7/7 SecOps, enforced)
-- Non-custodial: agent signs via connected wallet, no keys stored.
-- Allowlisted settlement target only.
-- Per-tx spend cap: **0.01 USDC**.
-- Daily circuit breaker: **5.00 USDC/day**, auto-halt.
-- Replay / double-spend guard (keccak jobHash dedupe).
-- Tamper-evident audit ledger (hash-chained decisions).
-- Feed prompt-injection guard (sanitized + source-allowlisted before the LLM).
+Returns JSON:
 
-## Verifiability
-- **Settlement ledger:** every decision is hash-chained (`jobHash = keccak256(canonical || prevHash)`); any edit breaks the chain.
-- **Reasoning trace:** each consult's CoT is canonicalized and keccak-committed (content-addressed, IPFS-CID parity, anchor-ready); auditors recompute and detect tampering.
-- **Track record:** self-scored hit-rate + Brier + calibration over logged calls — no cherry-picking.
+    {
+      "ok": true,
+      "live": true,
+      "price": 63070.6,
+      "changePct": 0.31,
+      "high24h": 63359.9,
+      "low24h": 62275.1,
+      "vol24h": 37.27,
+      "trace": ["SCOUT: ...", "DECIDE: ...", "EXECUTOR: ..."],
+      "analog": { "regime": "Bull", "outcome": "continued upward", "similarity": 0.70 },
+      "verdict": "SKIP",
+      "conviction": 58,
+      "decisions": [ { "src": "Cronus", "ev": 0.58, "price": 63070.6, "action": "SKIP" } ]
+    }
 
-## Economics
-- Revenue via **x402** pay-per-call (~$0.02/call); settlement cost ~$0.01/tx → net-positive unit economics surfaced live (net flow KPI).
+Field notes:
+- price / changePct / high24h / low24h / vol24h are REAL data pulled live from the OKX public ticker.
+- trace is produced by a real LLM (Groq, Llama 3.3 70B) reasoning ONLY over the provided data; it never invents indicators.
+- analog is a heuristic historical-regime recall (an estimate, not a backtest).
+- verdict is YES / NO / SKIP. Cronus abstains (SKIP) when conviction is below 65 - it is not a YES-machine.
 
-## Explorer
-- RPC: `https://rpc.testnet.arc.network` · Explorer: `https://testnet.arcscan.app` · Faucet: `https://faucet.circle.com`
+## Paying for premium signals (x402)
+
+Premium / unlocked signals settle as a real USDC micro-payment on Arc:
+- UNLOCK SIGNAL: 0.02 USDC to the agent contract (x402 pay-per-call).
+- The agent itself pays upstream for data (PAY UPSTREAM: 0.005 USDC), closing an earn -> spend -> net loop.
+
+## Safety model (why Cronus is safe to call)
+
+- Non-custodial: every settlement is signed in the user's own wallet. No private key sits on any Cronus server - an agent cannot run off with funds it never controls.
+- Hard caps: per-tx cap 0.01 USDC, daily cap 5.0 USDC.
+- Recipient allowlist: funds can only move to the single allowlisted settlement target.
+- Pre-flight: every settlement is simulated with eth_call and aborts on revert.
+- Verifiable ledger: each action is recorded in a keccak256 hash-chain with a Verified status.
+
+## Network
+
+- Arc Testnet - chainId 5042002 - native USDC 0x3600...0000 (6 decimals)
+- Explorer: https://testnet.arcscan.app
+
+## Builder
+
+Artem Gromov - GitHub @Artem1981777
