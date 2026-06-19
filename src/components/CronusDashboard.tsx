@@ -334,6 +334,11 @@ export function CronusDashboard() {
         await sleep(420)
         push("  - " + lines[i])
       }
+      const an = data && data.analog
+      if (an && an.regime) {
+        await sleep(420)
+        push("MEMORY - nearest regime: " + an.regime + (an.outcome ? " -> " + an.outcome : "") + (an.similarity != null ? " (similarity " + Number(an.similarity).toFixed(2) + ")" : ""))
+      }
       const verdict = (data && data.verdict) ? data.verdict : "SKIP"
       const conv = (data && typeof data.conviction === "number") ? data.conviction : 0
       setBoost(Math.max(0, Math.min(15, Math.round(conv / 7))))
