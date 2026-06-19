@@ -85,19 +85,16 @@ A real vault on Arc Testnet: the user signs deposit/withdraw; yield (addYield) a
 
 ---
 
-## Cronus vs the field
+## Why Cronus is different
 
-Most projects in this space ship **infrastructure** - a wallet, a policy engine, a lending pool, a prediction-market venue. Cronus ships the thing that proves the infrastructure is worth building: **a complete, honest, self-sustaining business that already earns, spends, abstains, and settles on-chain - without ever holding your key.**
+Most projects in this space ship **infrastructure** - a wallet, a policy engine, a lending pool, a prediction-market venue. Each is one piece of an agent economy. Cronus ships the thing that proves the infrastructure is worth building: **a complete, honest, self-sustaining business that already earns, spends, abstains, and settles on-chain - without ever holding your key.**
 
-| Rival archetype | Example | What they have | Why Cronus still wins |
-|---|---|---|---|
-| Safety / policy OS | Aegis | guardrails, spend caps, policy engine | Cronus is **non-custodial** - a policy can be bypassed, a key the agent never holds cannot. Caps + allowlist + pre-flight are already enforced, and there is no server key to abuse. |
-| Prediction-market venue | AuraPredict | many markets, social, indexer | A venue is empty without liquidity and users. Cronus is a **profitable participant** that works at zero external users. |
-| Lending / DeFi primitive | Registrai | lending pool, bonded oracle, slashing | Heavier and semi-custodial. Cronus is lighter, non-custodial, and **monetizes itself** via x402 - which a pool cannot. |
-| Data vendor | QMA | quant reports, historical analogs | Cronus has its own honest **MEMORY analog** stage AND the full economic loop - it does not just sell a report. |
-| Single-primitive specialists | perp / vault / memory agents | one deep feature | Each ships one primitive; Cronus runs the **whole loop**: earn -> spend -> net -> settle, plus the vault. |
+- **It runs the whole loop, not one primitive.** Earn via x402 -> spend on upstream data -> report net P&L -> compound into the vault. Most agents do one of these; Cronus does all of them, end to end.
+- **It is non-custodial by construction.** Every settlement is signed in your own wallet - there is no server-side key to misuse. Spend caps, a recipient allowlist, and a pre-flight simulation are enforced on top. A guarantee built on a key the agent never holds is stronger than any policy engine.
+- **Its reasoning is real and honest.** The CONSULT trace is produced live by a real LLM over real OKX market data, and the agent abstains (SKIP) when conviction is below its bar - no scripted animation, no fabricated indicators, no always-YES.
+- **Everything is verifiable in a browser tab.** Live on-chain settlements, a keccak hash-chain ledger of decisions, and the pre-flight simulation are all open to inspection - no trust required.
 
-**One-line thesis:** every rival is a *part* of an agent economy. Cronus is a *working agent economy*, end to end, that you can audit in a browser tab.
+**The thesis:** most builders are shipping *parts* of an agent economy. Cronus is a *working agent economy*, end to end, that you can audit yourself.
 
 ---
 
