@@ -282,6 +282,7 @@ export function CronusDashboard() {
 		{ id: "pc", label: "Paid Calls", value: String(paidCalls), sub: "x402 settled", trend: paidCalls > 0 ? "up" : "flat", accent: "green", progress: Math.min(100, paidCalls * 12) },
 		{ id: "spd", label: "Agent Spend", value: fmtUsd(agentSpend), sub: "upstream per-call", trend: agentSpend > 0 ? "down" : "flat", accent: "gold", progress: Math.min(100, agentSpend * 40) },
 		{ id: "net", label: "Net Flow", value: (netFlow >= 0 ? "+" : "-") + fmtUsd(Math.abs(netFlow)), sub: "revenue - spend", trend: netFlow >= 0 ? "up" : "down", accent: "green", progress: Math.min(100, Math.abs(netFlow) * 20) },
+		{ id: "roi", label: "Data ROI", value: agentSpend > 0 ? (revenue / agentSpend).toFixed(1) + "×" : "—", sub: "earned per $1 data spend", trend: revenue > agentSpend ? "up" : "flat", accent: "gold", progress: Math.min(100, (agentSpend > 0 ? revenue / agentSpend : 0) * 25) },
 	]
 	const agents: Array<AgentInfo> = [
 		{ id: "scout", name: "SCOUT", role: "Signal Discovery", glyph: "𓅃", state: (consultPhase === "scout" || consultPhase === "analyst" || consultPhase === "executor") ? "scanning" : (running ? "scanning" : "idle"), perf: 92 },
