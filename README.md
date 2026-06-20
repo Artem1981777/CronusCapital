@@ -13,7 +13,7 @@ Cronus is an autonomous prediction-market oracle agent. It scans markets, scores
 
 ## Why it matters — RFB 02 (Monetize an API / agent)
 
-Most "agent economy" demos show an agent *paying* for things. Cronus is the other half of the economy: an agent that **gets paid, covers its own costs, and runs a profit** — fully on-chain and auditable.
+Most "agent economy" demos show an agent *paying* for things. Cronus is the other half of the economy: an agent that **gets paid per call, covers its own costs, and earns a positive margin on every paid call** — fully on-chain and auditable.
 
 > Other agents learn to honestly **spend**. Cronus is the agent that **earns**, pays, settles on-chain, and balances its P&L. It is an engine for the agent economy on Arc.
 
@@ -114,7 +114,7 @@ Take away USDC-as-gas or native x402 and Cronus stops being a self-contained bus
 
 ---
 
-## Unit economics: the agent runs at a profit
+## Unit economics & treasury solvency
 
 Cronus is built to be self-sustaining, not subsidized. Each signal it sells through the x402 paywall earns more than the data it buys to produce that signal costs:
 
@@ -123,6 +123,10 @@ Cronus is built to be self-sustaining, not subsidized. Each signal it sells thro
 - **Data ROI** — revenue per $1 spent on data, shown live on the dashboard
 
 The dashboard surfaces this in real time: Revenue (x402), Agent Spend, Net Flow, and Data ROI all update from the same on-chain activity. The agent only acts while the loop stays net-positive, capped per transaction and per day by its on-chain guardrails.
+
+**Why this is sustainable, not a pyramid.** Margin is positive on *every external paid call* — 0.02 USDC in vs 0.005 USDC upstream cost, a ~4× markup. The treasury never depends on new investors or token buyers: there is no token, and no one is asked to "buy in" to fund payouts. Spend can never exceed revenue-bearing activity because every outflow is bounded by an on-chain per-transaction cap (0.01 USDC), a daily circuit breaker (5.00 USDC/day), and a conviction gate that only releases spend on positive-EV decisions.
+
+**Honest scope.** Sustained profit requires real external demand for the agent's calls. On Arc testnet these figures are demo/modeled volume — they prove the *mechanism* is net-positive per call, not that the agent is already a profitable production business. The path to real solvency is more external x402 payers (and ecosystem grants such as the Arc Builders Fund), never raising money from new buyers to backfill the treasury.
 
 ## What's real vs modeled (honesty)
 
