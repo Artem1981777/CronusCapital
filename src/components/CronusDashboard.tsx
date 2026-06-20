@@ -370,6 +370,9 @@ export function CronusDashboard() {
 	const [spendBusy, setSpendBusy] = useState(false)
 	const [spendMsg, setSpendMsg] = useState("")
 	const [spendTx, setSpendTx] = useState("")
+	const [buyBusy, setBuyBusy] = useState(false)
+	const [buyMsg, setBuyMsg] = useState("")
+	const [buyOut, setBuyOut] = useState<{ verdict?: string; conviction?: number; commitment?: string; txHash?: string } | null>(null)
 	const refreshVault = async () => {
 		if (!publicClient) return
 		try {
@@ -458,7 +461,34 @@ export function CronusDashboard() {
 			setX402Msg("x402 payment failed: " + String((e as { shortMessage?: string }).shortMessage || (e as Error).message || e).slice(0, 140))
 		} finally { setX402Busy(false) }
 	}
-		const payUpstream = async () => {
+		const buySignal = async () => {
+		if (!isConnected || !address) { setWalletOpen(true); return }
+		setBuyBusy(true); setBuyMsg("Requesting price (HTTP 402)..."); setBuyOut(null)
+		try {
+			try { await switchChainAsync({ chainId: ARC_CHAIN_ID }) } catch { /* noop */ }
+			const topic = "BTC-USDC momentum"
+			const url = "/api/signal?topic=" + encodeURIComponent(topic)
+			const r1 = await fetch(url)
+			if (r1.status !== 402) { setBuyMsg("Unexpected: endpoint did not return 402"); setBuyBusy(false); return }
+			const reqs = await r1.json()
+			const acc = reqs && reqs.accepts && reqs.accepts[0]
+			const payTo = ((acc && acc.payTo) || SETTLE_TO) as `0x${string}`
+			const amount = BigInt((acc && acc.maxAmountRequired) || "20000")
+			setBuyMsg("Paying 0.02 USDC on Arc...")
+			const h = await writeContractAsync({ chainId: ARC_CHAIN_ID, address: USDC_ADDRESS, abi: ERC20_ABI, functionName: "transfer", args: [payTo, amount] })
+			setBuyMsg("Payment sent, verifying on-chain...")
+			if (publicClient) await publicClient.waitForTransactionReceipt({ hash: h })
+			const r2 = await fetch(url, { headers: { "X-PAYMENT": h } })
+			const out = await r2.json()
+			if (!out || !out.paid) { setBuyMsg("Not verified: " + ((out && out.error) || ("HTTP " + r2.status))); setBuyBusy(false); return }
+			const rep = (out && out.report) || {}
+			setBuyOut({ verdict: rep.verdict, conviction: rep.conviction, commitment: out.commitment, txHash: h })
+			setBuyMsg("Signal unlocked - payment verified on-chain")
+		} catch (e) {
+			setBuyMsg("Buy failed: " + String((e as { shortMessage?: string }).shortMessage || (e as Error).message || e).slice(0, 140))
+		} finally { setBuyBusy(false) }
+	}
+	const payUpstream = async () => {
 		txMeta.current = { topic: "Upstream spend", decision: "Upstream data purchase - -0.005 USDC paid on Arc", agentId: "executor" }
 		if (!isConnected || !address) { setWalletOpen(true); return }
 		setSpendBusy(true); setSpendMsg(""); setSpendTx("")
@@ -559,7 +589,10 @@ export function CronusDashboard() {
 					{consultMsg ? <div className="cd-claim-msg">{consultMsg}</div> : null}
 						{trace.length > 0 ? (<div className="cd-x402-code">{trace.map((l, i) => (<div key={i} className="cd-x402-line">{l}</div>))}</div>) : null}
 					<button className="cd-btn cd-btn-exec" onClick={forceExecute} disabled={txBusy}>{txBusy ? "EXECUTING…" : "FORCE EXECUTE"}</button>
-						<button className="cd-btn cd-btn-primary" onClick={payX402} disabled={x402Busy}>{x402Busy ? "PAYING..." : "UNLOCK SIGNAL - $0.02 (x402)"}</button>
+						<button className="cd-btn cd-btn-gold" onClick={buySignal} disabled={buyBusy}>{buyBusy ? "BUYING..." : "BUY SIGNAL - $0.02 (real x402)"}</button>
+				{buyMsg ? (<div className="cd-claim-msg">{buyMsg}{buyOut && buyOut.txHash ? (<a href={"https://testnet.arcscan.app/tx/" + buyOut.txHash} target="_blank" rel="noreferrer"> view tx</a>) : null}</div>) : null}
+				{buyOut ? (<div className="cd-x402-code"><div className="cd-x402-line">VERDICT: {String(buyOut.verdict || "SKIP")} - conviction {Number(buyOut.conviction || 0)}</div><div className="cd-x402-line">commitment {String(buyOut.commitment || "").slice(0, 18)}...</div><div className="cd-x402-line">payment verified on-chain</div></div>) : null}
+				<button className="cd-btn cd-btn-primary" onClick={payX402} disabled={x402Busy}>{x402Busy ? "PAYING..." : "UNLOCK SIGNAL - $0.02 (x402)"}</button>
 						<button className="cd-btn cd-btn-exec" onClick={payUpstream} disabled={spendBusy}>{spendBusy ? "PAYING..." : "PAY UPSTREAM - $0.005 (agent buys data)"}</button>
 						{spendMsg ? (<div className="cd-claim-msg">{spendMsg}{spendTx ? (<a href={"https://testnet.arcscan.app/tx/" + spendTx} target="_blank" rel="noreferrer"> view tx</a>) : null}</div>) : null}
 						{x402Msg ? (<div className="cd-claim-msg">{x402Msg}{x402Tx ? (<a href={"https://testnet.arcscan.app/tx/" + x402Tx} target="_blank" rel="noreferrer"> view tx</a>) : null}</div>) : null}
