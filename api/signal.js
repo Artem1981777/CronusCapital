@@ -1,96 +1,110 @@
-// api/signal.js  —  x402-gated premium signal (Lepton · RFB 02 + 06)
+// api/signal.js — REAL x402 paywall: pay USDC on Arc, verified on-chain, returns a verifiable signal.
+// Any external agent/wallet can pay and consume. No facilitator dependency; verification is pure JSON-RPC.
+import { keccak256, toBytes } from "viem"
+
 const X402_VERSION = 1
+const NETWORK    = process.env.X402_NETWORK     || "arc-testnet"
+const USDC_ASSET = (process.env.ARC_USDC_ADDRESS || "0x3600000000000000000000000000000000000000").toLowerCase()
+const PAY_TO     = (process.env.CRONUS_PAYTO     || "0xdc6778c5f8cc74b10aed11c48306d4cfc5737fbd").toLowerCase()
+const PRICE      = BigInt(process.env.SIGNAL_PRICE || "20000") // 0.02 USDC (6 decimals)
+const RPC_URL    = process.env.VITE_RPC_URL || process.env.RPC_URL || "https://rpc.testnet.arc.network"
+const MAX_AGE_SEC = Number(process.env.SIGNAL_MAX_AGE_SECONDS || "1800")
+const TRANSFER_TOPIC = "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"
 
-const NETWORK     = process.env.X402_NETWORK     || "arc-testnet"
-const USDC_ASSET  = process.env.ARC_USDC_ADDRESS || "0xUSDC_ON_ARC_TESTNET"
-const PAY_TO      = process.env.CRONUS_PAYTO     || "0xYOUR_CRONUS_WALLET"
-const PRICE       = process.env.SIGNAL_PRICE     || "20000"
-const FACILITATOR = process.env.X402_FACILITATOR || "https://x402.org/facilitator"
-const DEMO        = process.env.X402_DEMO === "1"
-
-function paymentRequirements(resource) {
+function requirements(resource) {
   return {
     x402Version: X402_VERSION,
     accepts: [{
-      scheme: "exact", network: NETWORK, maxAmountRequired: PRICE, resource,
-      description: "Cronus Capital - full +EV market analysis (one report)",
+      scheme: "exact", network: NETWORK, maxAmountRequired: PRICE.toString(), resource,
+      description: "Cronus Capital - verifiable +EV market signal (one call)",
       mimeType: "application/json", payTo: PAY_TO, maxTimeoutSeconds: 120,
       asset: USDC_ASSET, extra: { name: "USDC", version: "2" },
     }],
-    error: "X-PAYMENT header required",
+    error: "X-PAYMENT required: pay " + PRICE.toString() + " atomic USDC to payTo on " + NETWORK + ", then retry with header X-PAYMENT: <txHash>",
   }
 }
 
-const decode = (h) => JSON.parse(Buffer.from(h, "base64").toString("utf8"))
-
-function payerOf(header) {
-  try {
-    const p = decode(header)
-    return (p && (p.payer || (p.payload && p.payload.authorization && p.payload.authorization.from) || p.from)) || "demo"
-  } catch (_) { return "demo" }
-}
-
-function memoOf(header) {
-	try { const p = decode(header); return (p && p.memo) || null } catch (e) { return null }
-}
-
-async function facilitator(path, header, requirements) {
-  const res = await fetch(`${FACILITATOR}/${path}`, {
-    method: "POST", headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ x402Version: X402_VERSION, paymentPayload: decode(header), paymentRequirements: requirements.accepts[0] }),
+async function rpc(method, params) {
+  const r = await fetch(RPC_URL, {
+    method: "POST", headers: { "content-type": "application/json" },
+    body: JSON.stringify({ jsonrpc: "2.0", id: 1, method, params }),
   })
-  return res.json()
+  const j = await r.json()
+  if (j.error) throw new Error(j.error.message || "rpc error")
+  return j.result
 }
 
-async function generateReport(topic) {
-  const key = process.env.ANTHROPIC_API_KEY
-  const system = "You are Cronus, an autonomous market-intelligence analyst. Return ONLY valid JSON: " +
-    '{ "topic": string, "thesis": string, "opportunities": [{ "question": string, "recommendation": "YES"|"NO", "expectedValue": number, "size": number, "reasoning": string }], "riskNote": string }'
-  if (key) {
-    try {
-      const r = await fetch("https://api.anthropic.com/v1/messages", {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "x-api-key": key, "anthropic-version": "2023-06-01" },
-        body: JSON.stringify({ model: "claude-sonnet-4-20250514", max_tokens: 1000, system,
-          messages: [{ role: "user", content: "Full +EV analysis for: " + topic }] }),
-      })
-      const data = await r.json()
-      const text = (data && data.content && data.content[0] && data.content[0].text) || ""
-      if (text) return JSON.parse(text.replace(/```json|```/g, "").trim())
-    } catch (_) {}
+function extractTxHash(header) {
+  const h = String(header || "").trim()
+  if (/^0x[0-9a-fA-F]{64}$/.test(h)) return h
+  try { const p = JSON.parse(Buffer.from(h, "base64").toString("utf8")); if (p && p.txHash) return String(p.txHash) } catch (_) {}
+  try { const p = JSON.parse(h); if (p && p.txHash) return String(p.txHash) } catch (_) {}
+  return null
+}
+
+async function verifyPayment(txHash) {
+  const [receipt, tx] = await Promise.all([
+    rpc("eth_getTransactionReceipt", [txHash]),
+    rpc("eth_getTransactionByHash", [txHash]),
+  ])
+  if (!receipt || !tx) return { ok: false, reason: "tx not found / not mined" }
+  if (receipt.status !== "0x1") return { ok: false, reason: "tx reverted" }
+  let paid = 0n
+  let from = String(tx.from || "").toLowerCase()
+  for (const l of (receipt.logs || [])) {
+    if (l.address && l.address.toLowerCase() === USDC_ASSET && l.topics && l.topics[0] && l.topics[0].toLowerCase() === TRANSFER_TOPIC && l.topics[2]) {
+      const to = "0x" + l.topics[2].slice(26).toLowerCase()
+      if (to === PAY_TO) { paid += BigInt(l.data); from = "0x" + l.topics[1].slice(26).toLowerCase() }
+    }
   }
-  return {
-    topic,
-    thesis: "Edge detected on " + topic + ": implied odds lag fair value on recent sentiment.",
-    opportunities: [{ question: "Will " + topic + " resolve YES this cycle?", recommendation: "YES",
-      expectedValue: 68, size: 25, reasoning: "Bayesian prior vs market price; Kelly-sized at 25 USDC." }],
-    riskNote: "Max 5% bankroll per position; min edge 3%.",
+  if (paid < PRICE && tx.to && tx.to.toLowerCase() === PAY_TO) {
+    paid += BigInt(tx.value || "0x0")
   }
+  if (paid < PRICE) return { ok: false, reason: "no USDC payment >= " + PRICE.toString() + " to payTo (got " + paid.toString() + ")" }
+  try {
+    const block = await rpc("eth_getBlockByNumber", [receipt.blockNumber, false])
+    const age = Math.floor(Date.now() / 1000) - Number(BigInt(block.timestamp))
+    if (age > MAX_AGE_SEC) return { ok: false, reason: "payment older than " + MAX_AGE_SEC + "s (replay window closed)" }
+  } catch (_) {}
+  return { ok: true, from, amount: paid.toString(), block: receipt.blockNumber }
+}
+
+async function generateReport(host, topic, instId) {
+  try {
+    const r = await fetch("https://" + host + "/api/consult?topic=" + encodeURIComponent(topic) + "&instId=" + encodeURIComponent(instId))
+    const j = await r.json()
+    if (j && (j.trace || j.verdict)) return j
+  } catch (_) {}
+  return { ok: false, verdict: "SKIP", conviction: 0, trace: ["oracle unavailable"] }
 }
 
 export default async function handler(req, res) {
-  const topic = String((req.query && req.query.topic) || "crypto markets")
+  const topic = String((req.query && req.query.topic) || "BTC-USDC momentum")
+  const instId = String((req.query && req.query.instId) || "BTC-USDC")
   const host = (req.headers && req.headers.host) || "localhost"
   const resource = "https://" + host + "/api/signal?topic=" + encodeURIComponent(topic)
-  const requirements = paymentRequirements(resource)
 
   const header = req.headers["x-payment"]
-  if (!header) { res.status(402).json(requirements); return }
+  if (!header) { res.status(402).json(requirements(resource)); return }
 
-  if (DEMO) {
-    const report = await generateReport(topic)
-    res.setHeader("X-PAYMENT-RESPONSE", Buffer.from(JSON.stringify({ success: true, network: NETWORK, demo: true })).toString("base64"))
-    res.status(200).json({ paid: true, demo: true, payer: payerOf(header), memo: memoOf(header), report })
-    return
-  }
+  const txHash = extractTxHash(header)
+  if (!txHash) { res.status(402).json({ ...requirements(resource), error: "X-PAYMENT must be an Arc txHash (0x + 64 hex) or base64 JSON { txHash }" }); return }
 
-  try {
-    const v = await facilitator("verify", header, requirements)
-    if (!v.isValid) { res.status(402).json({ ...requirements, error: v.invalidReason || "payment invalid" }); return }
-    const report = await generateReport(topic)
-    const settlement = await facilitator("settle", header, requirements)
-    if (settlement && settlement.success)
-      res.setHeader("X-PAYMENT-RESPONSE", Buffer.from(JSON.stringify(settlement)).toString("base64"))
-    res.status(200).json({ paid: true, payer: v.payer, memo: memoOf(header), settlement, report })
-  } catch (e) { res.status(500).json({ error: String(e) }) }
+  let proof
+  try { proof = await verifyPayment(txHash) }
+  catch (e) { res.status(502).json({ error: "payment verification failed", detail: String((e && e.message) || e) }); return }
+  if (!proof.ok) { res.status(402).json({ ...requirements(resource), error: "payment not verified: " + proof.reason, txHash }); return }
+
+  const report = await generateReport(host, topic, instId)
+  const settledAt = Date.now()
+  const commitment = keccak256(toBytes("CRONUS-SIGNAL|" + txHash + "|" + topic + "|" + (report.verdict || "SKIP") + "|" + (report.conviction || 0) + "|" + settledAt))
+
+  res.setHeader("X-PAYMENT-RESPONSE", Buffer.from(JSON.stringify({ success: true, network: NETWORK, txHash, payer: proof.from, amount: proof.amount })).toString("base64"))
+  res.status(200).json({
+    paid: true,
+    payment: { network: NETWORK, txHash, payer: proof.from, amount: proof.amount, block: proof.block, asset: USDC_ASSET, payTo: PAY_TO, explorer: "https://testnet.arcscan.app/tx/" + txHash },
+    commitment,
+    settledAt,
+    report,
+  })
 }
