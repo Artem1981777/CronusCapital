@@ -114,6 +114,16 @@ Take away USDC-as-gas or native x402 and Cronus stops being a self-contained bus
 
 ---
 
+## Unit economics: the agent runs at a profit
+
+Cronus is built to be self-sustaining, not subsidized. Each signal it sells through the x402 paywall earns more than the data it buys to produce that signal costs:
+
+- **Revenue** — 0.02 USDC per paid call (x402, settled on-chain)
+- **Data cost** — 0.005 USDC per upstream fetch (paid on-chain)
+- **Data ROI** — revenue per $1 spent on data, shown live on the dashboard
+
+The dashboard surfaces this in real time: Revenue (x402), Agent Spend, Net Flow, and Data ROI all update from the same on-chain activity. The agent only acts while the loop stays net-positive, capped per transaction and per day by its on-chain guardrails.
+
 ## What's real vs modeled (honesty)
 
 - ✅ **Real on-chain:** every USDC transfer (x402 earn, upstream spend, vault deposit/withdraw, settlement), the hash-chain ledger, and the pre-flight simulation.
