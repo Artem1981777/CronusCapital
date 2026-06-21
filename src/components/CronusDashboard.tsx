@@ -1,3 +1,4 @@
+import TractionBadge from "./TractionBadge"
 import { useEffect, useRef, useState } from "react"
 import { keccak256, toBytes } from "viem"
 import MarketBoard from "../MarketBoard"
@@ -549,7 +550,7 @@ export function CronusDashboard() {
 
 	return (
 		<section className={"cd-root" + (running || txBusy ? " cd-running" : "")}>
-			<header className="cd-header">
+			<header className="cd-header"><TractionBadge />
 				<div className="cd-eye">𓂀</div>
 				<div className="cd-head-text">
 					<div className="cd-head-title">CRONUS ORACLE DASHBOARD</div>
