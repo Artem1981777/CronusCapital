@@ -1,6 +1,6 @@
 import TractionBadge from "./TractionBadge"
 import { useEffect, useRef, useState } from "react"
-import { keccak256, toBytes } from "viem"
+import { encodeFunctionData, keccak256, stringToHex, toBytes } from "viem"
 import MarketBoard from "../MarketBoard"
 import SecurityPanel from "../SecurityPanel"
 import type { CSSProperties } from "react"
@@ -28,6 +28,8 @@ const TEST_AMOUNT = BigInt(10000) // 0.01 USDC (6 decimals)
 const AGENT_ADDRESS = "0xd81a420BFa4CE8778473BD46195B8E97e928880f" as const // CRONUS x402 agent contract
 const X402_AMOUNT = BigInt(20000) // 0.02 USDC (6 decimals) - pay-per-call price
 const SPEND_AMOUNT = BigInt(5000) // 0.005 USDC (6 decimals) - upstream data cost
+const MEMO_ADDRESS = "0x5294E9927c3306DcBaDb03fe70b92e01cCede505" as const
+const MEMO_ABI = [{ type: "function", name: "memo", stateMutability: "nonpayable", inputs: [{ name: "target", type: "address" }, { name: "data", type: "bytes" }, { name: "memoId", type: "bytes32" }, { name: "memoData", type: "bytes" }], outputs: [] }] as const
 const ERC20_ABI = [
 	{
 		type: "function",
@@ -476,8 +478,11 @@ export function CronusDashboard() {
 			const acc = reqs && reqs.accepts && reqs.accepts[0]
 			const payTo = ((acc && acc.payTo) || SETTLE_TO) as `0x${string}`
 			const amount = BigInt((acc && acc.maxAmountRequired) || "20000")
-			setBuyMsg("Paying 0.02 USDC on Arc...")
-			const h = await writeContractAsync({ chainId: ARC_CHAIN_ID, address: USDC_ADDRESS, abi: ERC20_ABI, functionName: "transfer", args: [payTo, amount] })
+			setBuyMsg("Paying 0.02 USDC via Arc memo (reconcilable)...")
+			const transferData = encodeFunctionData({ abi: ERC20_ABI, functionName: "transfer", args: [payTo, amount] })
+						const memoId = keccak256(toBytes("cronus-signal:" + topic))
+						const memoData = stringToHex("cronus|signal|" + topic + "|" + Date.now())
+						const h = await writeContractAsync({ chainId: ARC_CHAIN_ID, address: MEMO_ADDRESS, abi: MEMO_ABI, functionName: "memo", args: [USDC_ADDRESS, transferData, memoId, memoData] })
 			setBuyMsg("Payment sent, verifying on-chain...")
 			if (publicClient) await publicClient.waitForTransactionReceipt({ hash: h })
 			const r2 = await fetch(url, { headers: { "X-PAYMENT": h } })
