@@ -462,7 +462,8 @@ export function CronusDashboard() {
 		} finally { setX402Busy(false) }
 	}
 		const buySignal = async () => {
-		if (!isConnected || !address) { setWalletOpen(true); return }
+		setBuyOut(null); setBuyMsg("Starting...")
+		if (!isConnected || !address) { setBuyMsg("Connect your wallet first, then press BUY SIGNAL again."); setWalletOpen(true); return }
 		setBuyBusy(true); setBuyMsg("Requesting price (HTTP 402)..."); setBuyOut(null)
 		try {
 			try { await switchChainAsync({ chainId: ARC_CHAIN_ID }) } catch { /* noop */ }
