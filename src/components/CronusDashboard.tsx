@@ -372,7 +372,7 @@ export function CronusDashboard() {
 	const [spendTx, setSpendTx] = useState("")
 	const [buyBusy, setBuyBusy] = useState(false)
 	const [buyMsg, setBuyMsg] = useState("")
-	const [buyOut, setBuyOut] = useState<{ verdict?: string; conviction?: number; commitment?: string; txHash?: string } | null>(null)
+	const [buyOut, setBuyOut] = useState<{ verdict?: string; conviction?: number; commitment?: string; txHash?: string; trace?: string[] } | null>(null)
 	const refreshVault = async () => {
 		if (!publicClient) return
 		try {
@@ -483,7 +483,7 @@ export function CronusDashboard() {
 			const out = await r2.json()
 			if (!out || !out.paid) { setBuyMsg("Not verified: " + ((out && out.error) || ("HTTP " + r2.status))); setBuyBusy(false); return }
 			const rep = (out && out.report) || {}
-			setBuyOut({ verdict: rep.verdict, conviction: rep.conviction, commitment: out.commitment, txHash: h })
+			setBuyOut({ verdict: rep.verdict, conviction: rep.conviction, commitment: out.commitment, txHash: h, trace: Array.isArray(rep.trace) ? rep.trace : [] })
 			setBuyMsg("Signal unlocked - payment verified on-chain")
 		} catch (e) {
 			setBuyMsg("Buy failed: " + String((e as { shortMessage?: string }).shortMessage || (e as Error).message || e).slice(0, 140))
@@ -592,7 +592,7 @@ export function CronusDashboard() {
 					<button className="cd-btn cd-btn-exec" onClick={forceExecute} disabled={txBusy}>{txBusy ? "EXECUTING…" : "FORCE EXECUTE"}</button>
 						<button className="cd-btn cd-btn-gold" onClick={buySignal} disabled={buyBusy}>{buyBusy ? "BUYING..." : "BUY SIGNAL - $0.02 (real x402)"}</button>
 				{buyMsg ? (<div className="cd-claim-msg">{buyMsg}{buyOut && buyOut.txHash ? (<a href={"https://testnet.arcscan.app/tx/" + buyOut.txHash} target="_blank" rel="noreferrer"> view tx</a>) : null}</div>) : null}
-				{buyOut ? (<div className="cd-x402-code"><div className="cd-x402-line">VERDICT: {String(buyOut.verdict || "SKIP")} - conviction {Number(buyOut.conviction || 0)}</div><div className="cd-x402-line">commitment {String(buyOut.commitment || "").slice(0, 18)}...</div><div className="cd-x402-line">payment verified on-chain</div></div>) : null}
+				{buyOut ? (<div className="cd-x402-code"><div className="cd-x402-line">VERDICT: {String(buyOut.verdict || "SKIP")} - conviction {Number(buyOut.conviction || 0)}</div><div className="cd-x402-line">commitment {String(buyOut.commitment || "").slice(0, 18)}...</div><div className="cd-x402-line">payment verified on-chain</div>{buyOut.trace && buyOut.trace.length ? (<><div className="cd-x402-line">agent decision log</div>{buyOut.trace.map((t, i) => (<div key={i} className="cd-x402-line">{"- " + String(t)}</div>))}</>) : null}</div>) : null}
 				<button className="cd-btn cd-btn-primary" onClick={payX402} disabled={x402Busy}>{x402Busy ? "PAYING..." : "UNLOCK SIGNAL (demo) - $0.02 (x402)"}</button>
 						<button className="cd-btn cd-btn-exec" onClick={payUpstream} disabled={spendBusy}>{spendBusy ? "PAYING..." : "PAY UPSTREAM - $0.005 (agent buys data)"}</button>
 						{spendMsg ? (<div className="cd-claim-msg">{spendMsg}{spendTx ? (<a href={"https://testnet.arcscan.app/tx/" + spendTx} target="_blank" rel="noreferrer"> view tx</a>) : null}</div>) : null}
