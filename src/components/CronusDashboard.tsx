@@ -593,7 +593,7 @@ export function CronusDashboard() {
 						<button className="cd-btn cd-btn-gold" onClick={buySignal} disabled={buyBusy}>{buyBusy ? "BUYING..." : "BUY SIGNAL - $0.02 (real x402)"}</button>
 				{buyMsg ? (<div className="cd-claim-msg">{buyMsg}{buyOut && buyOut.txHash ? (<a href={"https://testnet.arcscan.app/tx/" + buyOut.txHash} target="_blank" rel="noreferrer"> view tx</a>) : null}</div>) : null}
 				{buyOut ? (<div className="cd-x402-code"><div className="cd-x402-line">VERDICT: {String(buyOut.verdict || "SKIP")} - conviction {Number(buyOut.conviction || 0)}</div><div className="cd-x402-line">commitment {String(buyOut.commitment || "").slice(0, 18)}...</div><div className="cd-x402-line">payment verified on-chain</div></div>) : null}
-				<button className="cd-btn cd-btn-primary" onClick={payX402} disabled={x402Busy}>{x402Busy ? "PAYING..." : "UNLOCK SIGNAL - $0.02 (x402)"}</button>
+				<button className="cd-btn cd-btn-primary" onClick={payX402} disabled={x402Busy}>{x402Busy ? "PAYING..." : "UNLOCK SIGNAL (demo) - $0.02 (x402)"}</button>
 						<button className="cd-btn cd-btn-exec" onClick={payUpstream} disabled={spendBusy}>{spendBusy ? "PAYING..." : "PAY UPSTREAM - $0.005 (agent buys data)"}</button>
 						{spendMsg ? (<div className="cd-claim-msg">{spendMsg}{spendTx ? (<a href={"https://testnet.arcscan.app/tx/" + spendTx} target="_blank" rel="noreferrer"> view tx</a>) : null}</div>) : null}
 						{x402Msg ? (<div className="cd-claim-msg">{x402Msg}{x402Tx ? (<a href={"https://testnet.arcscan.app/tx/" + x402Tx} target="_blank" rel="noreferrer"> view tx</a>) : null}</div>) : null}
