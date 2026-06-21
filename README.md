@@ -157,6 +157,17 @@ This closes the loop honestly: revenue can be **real external demand, verified o
 
 > Replay protection: payments are accepted only within a freshness window (`SIGNAL_MAX_AGE_SECONDS`, default 1800s). Strict one-time-use can be added with a KV store.
 
+**Two ways to consume the paywall:**
+
+- **From any wallet or agent (CLI):** run `scripts/pay-and-consult.mjs` with a funded `BUYER_PRIVATE_KEY`. Proven with an independent external wallet (tx above).
+- **From the dashboard (one click):** the **BUY SIGNAL** button runs the full x402 flow in-browser - request `402`, pay 0.02 USDC on Arc, verify on-chain, then render the verdict, the keccak `commitment`, and a link to the payment tx. No setup, no demo bypass.
+
+**Agent discovery (machine-readable):** point any AI agent at the manifest or OpenAPI spec to auto-discover price, network, `payTo`, and the pay-then-retry flow:
+
+- Service manifest: `GET /api/manifest`
+- OpenAPI 3.0 / swagger.json: `GET /api/openapi`
+- Every `402` response also embeds a `discovery` block linking both.
+
 ## What's real vs modeled (honesty)
 
 - ✅ **Real on-chain:** every USDC transfer (x402 earn, upstream spend, vault deposit/withdraw, settlement), the hash-chain ledger, and the pre-flight simulation.
