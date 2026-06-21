@@ -12,8 +12,10 @@ const TRANSFER_TOPIC = "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a
 const RPC_URLS = ["https://rpc.testnet.arc.network", process.env.SIGNAL_RPC_URL, process.env.VITE_RPC_URL, process.env.RPC_URL].filter(Boolean)
 
 function requirements(resource) {
+  const origin = String(resource).split("/api/")[0]
   return {
     x402Version: X402_VERSION,
+    discovery: { manifest: origin + "/api/manifest", openapi: origin + "/api/openapi" },
     accepts: [{
       scheme: "exact", network: NETWORK, maxAmountRequired: PRICE.toString(), resource,
       description: "Cronus Capital - verifiable +EV market signal (one call)",
