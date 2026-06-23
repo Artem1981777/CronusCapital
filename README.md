@@ -291,3 +291,19 @@ Connect a wallet on Arc Testnet (chainId 5042002), grab test USDC from the Circl
 - x402 payment proofs are bound to a 30-minute freshness window — stale proofs return `402 replay window closed`.
 - Accepted proofs are one-time-use (Upstash KV, SET NX + TTL) — replaying a proof returns `402 payment proof already consumed`.
 - Verified end-to-end: fresh paid proof `0x5b1d39b5...2290` -> first call `200`, replay -> `402 already consumed`.
+
+## Security deep-dive: the payment-replay attack we closed
+
+**The threat.** In x402, a buyer proves payment by sending a transaction hash. But tx hashes are PUBLIC on the block explorer. With no extra protection, anyone could copy someone else's payment hash and replay it to get paid signals for free, unlimited times. One real payment would unlock infinite free access -- so the "monetization" would be fake.
+
+**The fix (two layers).**
+1. **Freshness window** -- proofs older than 30 min are rejected with `402 replay window closed`.
+2. **One-time-use** -- every accepted proof is burned in Upstash KV (`SET NX` + TTL). Reusing it returns `402 payment proof already consumed`.
+
+**Analogy.** A tx hash is a receipt. Before, the same receipt could be shown at the till forever. Now the till voids it on first use.
+
+**Proven live on Arc testnet.**
+- Fresh paid proof `0x5b1d39b5...2290`: first call `200`, identical replay `402 already consumed`.
+- Stale proof: `402 replay window closed`.
+
+**Why it matters here.** This track is about REAL API/agent monetization. Replay-able payments mean there is no monetization. Cronus enforces exactly one paid access per proof -- and proves it end-to-end on-chain.
