@@ -79,6 +79,18 @@ async function verifyPayment(txHash) {
   return { ok: true, from, amount: paid.toString(), block: receipt.blockNumber }
 }
 
+async function markUsedOnce(txHash) {
+  const base = process.env.KV_REST_API_URL
+  const token = process.env.KV_REST_API_TOKEN
+  if (!base || !token) return { enforced: false, fresh: true }
+  try {
+    const ttl = Math.max(MAX_AGE_SEC, 86400)
+    const r = await fetch(base, { method: "POST", headers: { Authorization: "Bearer " + token, "content-type": "application/json" }, body: JSON.stringify(["SET", "cronus:used:" + txHash, "1", "NX", "EX", String(ttl)]) })
+    const j = await r.json()
+    return { enforced: true, fresh: !!(j && j.result === "OK") }
+  } catch (e) { return { enforced: false, fresh: true } }
+}
+
 async function generateReport(host, topic, instId) {
   try {
     const r = await fetch("https://" + host + "/api/consult?topic=" + encodeURIComponent(topic) + "&instId=" + encodeURIComponent(instId))
@@ -105,6 +117,11 @@ export default async function handler(req, res) {
   catch (e) { res.status(502).json({ error: "payment verification failed", detail: String((e && e.message) || e) }); return }
   if (!proof.ok) { res.status(402).json({ ...requirements(resource), error: "payment not verified: " + proof.reason, txHash }); return }
 
+  const once = await markUsedOnce(txHash)
+  if (once.enforced && !once.fresh) {
+    res.status(402).json({ ...requirements(resource), error: "payment proof already consumed (one-time-use)", txHash })
+    return
+  }
   const report = await generateReport(host, topic, instId)
   const settledAt = Date.now()
   const commitment = keccak256(toBytes("CRONUS-SIGNAL|" + txHash + "|" + topic + "|" + (report.verdict || "SKIP") + "|" + (report.conviction || 0) + "|" + settledAt))
