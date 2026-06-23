@@ -285,3 +285,9 @@ Connect a wallet on Arc Testnet (chainId 5042002), grab test USDC from the Circl
 ---
 
 **Builder:** Artem Gromov · GitHub @Artem1981777 · ETH gromov7.eth
+
+## Replay protection (verified live on Arc testnet)
+
+- x402 payment proofs are bound to a 30-minute freshness window — stale proofs return `402 replay window closed`.
+- Accepted proofs are one-time-use (Upstash KV, SET NX + TTL) — replaying a proof returns `402 payment proof already consumed`.
+- Verified end-to-end: fresh paid proof `0x5b1d39b5...2290` -> first call `200`, replay -> `402 already consumed`.
