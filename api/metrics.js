@@ -1,18 +1,37 @@
-// api/metrics.js - live on-chain traction for Cronus x402 payments.
-// Counts USDC Transfer events to PAY_TO on Arc testnet (real settlement volume).
-// Falls back to known proof txs if log scan is unavailable.
-
+// api/metrics.js - live on-chain x402 traction for Cronus.
+// Reads real USDC payments to PAY_TO from the Arc block explorer and counts only
+// transfers whose value equals the x402 signal price, so unrelated transfers
+// (e.g. vault withdrawals) are excluded. Falls back to known proofs via JSON-RPC.
 const TRANSFER_TOPIC = "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"
 const USDC = (process.env.ARC_USDC_ADDRESS || "0x3600000000000000000000000000000000000000").toLowerCase()
 const PAY_TO = (process.env.CRONUS_PAYTO || "0xdc6778C5F8cC74b10aED11c48306D4Cfc5737FBD").toLowerCase()
+const PRICE = String(process.env.SIGNAL_PRICE || "20000")
+const EXPLORER = process.env.ARC_EXPLORER || "https://testnet.arcscan.app"
 const RPC_URLS = ["https://rpc.testnet.arc.network", process.env.SIGNAL_RPC_URL, process.env.VITE_RPC_URL, process.env.RPC_URL].filter(Boolean)
-const WINDOW = BigInt(process.env.METRICS_BLOCK_WINDOW || "2000000")
-
 const KNOWN = [
   "0xa7a0e3b25394d2c0570be62605f0a379b1a0e5d1ba2e7607f719fbd1ca9943d5",
   "0xfe2764b2b837365ea7cb896fbbe55119ffbf250e51941945bf013a88bb942086",
 ]
-
+async function scanExplorer() {
+  const u = EXPLORER + "/api?module=account&action=tokentx&address=" + PAY_TO + "&contractaddress=" + USDC + "&page=1&offset=10000&sort=desc"
+  const r = await fetch(u, { headers: { accept: "application/json" } })
+  const j = await r.json()
+  if (!j || !Array.isArray(j.result)) throw new Error("explorer: no result array")
+  const byHash = new Map()
+  let lastTx = null, lastBlock = -1
+  for (const tx of j.result) {
+    if (String(tx.to || "").toLowerCase() !== PAY_TO) continue
+    if (String(tx.contractAddress || "").toLowerCase() !== USDC) continue
+    if (String(tx.value) !== PRICE) continue
+    byHash.set(String(tx.hash).toLowerCase(), PRICE)
+    const b = Number(tx.blockNumber)
+    if (b > lastBlock) { lastBlock = b; lastTx = String(tx.hash) }
+  }
+  for (const h of KNOWN) { if (!byHash.has(h.toLowerCase())) byHash.set(h.toLowerCase(), PRICE) }
+  let total = 0n
+  for (const v of byHash.values()) total += BigInt(v)
+  return { source: "onchain-explorer", payments: byHash.size, totalAtomic: total.toString(), lastTx: lastTx || KNOWN[0] }
+}
 async function rpc(method, params) {
   let lastErr
   for (const u of RPC_URLS) {
@@ -27,28 +46,7 @@ async function rpc(method, params) {
   }
   throw lastErr || new Error("all RPCs failed")
 }
-
-const pad32 = (addr) => "0x" + "0".repeat(24) + addr.replace(/^0x/, "").toLowerCase()
 const topicToAddress = (t) => "0x" + t.slice(26).toLowerCase()
-
-async function scanLogs() {
-  const latest = BigInt(await rpc("eth_blockNumber", []))
-  const fromBlock = latest > WINDOW ? latest - WINDOW : 0n
-  const logs = await rpc("eth_getLogs", [{
-    fromBlock: "0x" + fromBlock.toString(16),
-    toBlock: "latest",
-    address: USDC,
-    topics: [TRANSFER_TOPIC, null, pad32(PAY_TO)],
-  }])
-  let total = 0n, lastTx = null, lastBlock = 0n
-  for (const log of logs) {
-    total += BigInt(log.data)
-    const b = BigInt(log.blockNumber)
-    if (b >= lastBlock) { lastBlock = b; lastTx = log.transactionHash }
-  }
-  return { source: "onchain-logs", payments: logs.length, totalAtomic: total.toString(), lastTx }
-}
-
 async function scanKnown() {
   let total = 0n, payments = 0, lastTx = null
   for (const h of KNOWN) {
@@ -63,13 +61,12 @@ async function scanKnown() {
   }
   return { source: "known-proofs", payments, totalAtomic: total.toString(), lastTx }
 }
-
 export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*")
   res.setHeader("Cache-Control", "s-maxage=60, stale-while-revalidate=300")
   try {
     let data
-    try { data = await scanLogs() } catch { data = await scanKnown() }
+    try { data = await scanExplorer() } catch { data = await scanKnown() }
     if (!data || data.payments === 0) {
       try { const k = await scanKnown(); if (k.payments > 0) data = k } catch (e) { /* keep */ }
     }
