@@ -34,6 +34,63 @@ Demo frame: UNLOCK **+\$0.02** → PAY UPSTREAM **−\$0.005** → **Net Flow +\
 
 ---
 
+## Dashboard guide (what you are looking at)
+
+The live demo (https://cronus-capital.vercel.app) is a single screen. Here is every panel, top to bottom.
+
+**Header**
+- **Title - CRONUS ORACLE DASHBOARD.** The agent's control room.
+- **Wallet chip (top-right, e.g. `0xDC...7FBD`).** The connected wallet / agent treasury address. Click to connect or switch wallets.
+- **Traction badge (`N x402 payments . X USDC settled on Arc . last tx`).** Live count of real on-chain x402 payments, read from `/api/metrics`; "last tx" links to the latest settlement on the Arc explorer.
+- **Version badge (`v0.7.2 . MEMO + BATCHED PAYMENTS`).** Marks Arc transaction-memo support.
+
+**Metric cards (top row) - all derived from real on-chain activity**
+- **USDC SETTLED** - total USDC moved through the agent's verified settlements.
+- **REVENUE (X402)** - income earned from paid signal calls.
+- **PAID CALLS** - number of x402 paid calls served.
+- **AGENT SPEND** - what the agent paid upstream for data.
+- **NET FLOW** - revenue minus spend (green when positive); the agent's live margin.
+
+**Metric cards (second row)**
+- **DATA ROI** - USDC earned per 1 USDC of data spend (e.g. 1.6x); proves the loop is net-positive.
+- **CONFIDENCE SCORE** - the agent's calibrated confidence (0-100) over its active signals.
+
+**Agent pipeline (left) - the three oracles, with live status**
+- **SCOUT - Signal Discovery.** Pulls live market data.
+- **ANALYST - Risk & Conviction.** Scores expected value and conviction.
+- **EXECUTOR - On-chain Settlement.** Signs and settles the USDC transaction.
+
+**Market Intelligence (center)** - a live radar of the signals the Scout is tracking.
+
+**Oracle Actions (right) - the buttons you press**
+- **CONSULT ORACLES (free).** Runs the real LLM reasoning trace over live OKX data and prints the decision log plus a consensus verdict. No payment - start here to see how the agent thinks.
+- **FORCE EXECUTE.** Manually triggers an on-chain settlement of the current decision (demo control).
+- **BUY SIGNAL - 0.02 USDC (real x402).** The headline action: pays 0.02 USDC on-chain through Arc's Memo contract, verifies the payment server-side, then unlocks a verifiable signal - showing the verdict, conviction, a keccak `commitment`, the live **agent decision log** (`trace`), and a link to the payment tx. This is real money moving.
+- **UNLOCK SIGNAL (demo) - 0.02 USDC (x402).** The same flow on a no-cost demo path for quick walkthroughs.
+- **PAY UPSTREAM - 0.005 USDC (agent buys data).** The agent spends its own USDC on upstream data - the cost side of the loop.
+- **DEPOSIT / WITHDRAW (bottom).** Move USDC in and out of the ERC-4626-style vault; your position and Vault TVL are shown below.
+- Every paid action prints a **VIEW TX** link to the Arc explorer.
+
+---
+
+## How to use it (step-by-step for judges)
+
+1. **Open the demo** - https://cronus-capital.vercel.app
+2. **Connect your wallet** (top-right chip) and approve switching to **Arc Testnet** (chainId 5042002). Grab test USDC from the Circle faucet if needed.
+3. **Press CONSULT ORACLES (free).** Watch the agent pull live BTC data and reason step by step (SCOUT -> DECOMPOSE -> DISCOVER -> DECIDE -> SUFFICIENCY -> MEMORY -> CONSENSUS). It may return **SKIP** - it abstains when expected value is below its bar, by design.
+4. **Press BUY SIGNAL - 0.02 USDC (real x402).** Confirm the transaction in your wallet. The agent verifies the on-chain payment, then unlocks the signal with its verdict, conviction, `commitment`, and live **agent decision log**. Click **VIEW TX** to see the real settlement (with a `Memo` event) on the Arc explorer.
+5. **Press PAY UPSTREAM - 0.005 USDC** to see the cost side: the agent spends on data. Watch **NET FLOW** stay positive.
+6. **Verify everything yourself:**
+   - Public receipts: https://cronus-capital.vercel.app/api/receipts (add `?format=csv` to export)
+   - Live metrics: https://cronus-capital.vercel.app/api/metrics
+   - Machine discovery: https://cronus-capital.vercel.app/api/manifest and `/api/openapi`
+   - Pay from outside the browser: `scripts/pay-and-consult.mjs` or `scripts/pay-with-memo.mjs`
+7. **(Optional) Deposit into the vault** to see ERC-4626 share accounting, then withdraw.
+
+The whole loop in one screen: **reason -> earn (x402) -> spend (upstream) -> settle -> report**, all real on Arc and all verifiable in a browser tab.
+
+---
+
 ## How it works — 3 oracles
 
 1. **Scout** — scans prediction markets, gathers signals.
@@ -186,6 +243,21 @@ This closes the loop honestly: revenue can be **real external demand, verified o
 - 🔐 **Non-custodial by design:** unlike autonomous agents that keep a hot private key on the server to self-sign, Cronus reasons autonomously but every settlement is signed in the user wallet - no agent key sits on the server, ever.
 - ⚠️ **Modeled on testnet:** yield magnitudes and EV figures are illustrative — the mechanics, shares, and transactions themselves are real.
 - ℹ️ **x402** here is a real USDC transfer to the agent (pay-per-call) — a pragmatic simplification of the full HTTP-402 + facilitator handshake.
+
+---
+
+## What's new (build log)
+
+Latest hardening, newest first:
+
+- **Public on-chain receipts** - `/api/receipts` (JSON + CSV) lists every settled x402 payment with payer, amount, block, `commitment`, and `memoId`. (`46c6ada`)
+- **Receipts in agent discovery** - the `402` challenge now advertises `/api/receipts` alongside the manifest and OpenAPI spec. (`d1e514c`)
+- **BUY SIGNAL via Arc Memo** - the in-browser paid call routes through Arc's `Memo` contract, attaching a reconcilable on-chain reference; backend verification is unchanged. (`89cd5b9`)
+- **Live traction badge** - the header badge reads real settlement counts from `/api/metrics`. (`997272d`)
+- **Live metrics endpoint** - `/api/metrics` reports on-chain x402 traction (payments and USDC settled).
+- **Visible agent decision log** - the reasoning `trace` (SCOUT ... EXECUTOR) renders live inside the BUY SIGNAL result. (`e81ce2c`)
+- **Forkable OSS primitives (MIT)** - `arc-primitives/`: a zero-dependency x402 payment verifier (which independently confirmed our own memo payment) plus a pay-with-memo helper. (`8c2c28c`)
+- **Security and honest trade-offs** - `docs/security-threat-model.md` lists verified properties and flagged limitations.
 
 ---
 
