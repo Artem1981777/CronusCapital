@@ -317,8 +317,8 @@ export default function App() {
           <div style={{ background: "#0a0806", border: "1px solid #c9a84c", padding: "32px", maxWidth: "480px", width: "90%" }}>
             <div style={{ color: "#c9a84c", fontFamily: "Cinzel, serif", fontSize: "14px", letterSpacing: "3px", marginBottom: "8px" }}>ENTER API KEY</div>
             <div style={{ color: "#555", fontSize: "11px", marginBottom: "20px", lineHeight: 1.6 }}>
-              Enter your Anthropic API key to consult the oracles.<br/>
-              Get one at console.anthropic.com · Stored locally only.
+              Optional: provide an LLM API key for the legacy agent panel.<br/>
+              The main dashboard needs no key · Stored locally only.
             </div>
             <input
               type="password"

@@ -16,6 +16,8 @@ export default function handler(req, res) {
     },
     servers: [{ url: origin }],
     paths: {
+      "/api/receipts": { get: { summary: "Public on-chain x402 payment receipts (JSON or CSV)", parameters: [{ name: "format", in: "query", required: false, schema: { type: "string", enum: ["csv"] }, description: "Set to csv to download a CSV export" }], responses: { "200": { description: "Settled x402 payments with txHash, payer, amount, block, commitment, memoId." } } } },
+      "/api/metrics": { get: { summary: "Live x402 traction metrics", responses: { "200": { description: "On-chain payment count and total USDC settled." } } } },
       "/api/signal": {
         get: {
           summary: "Buy a verifiable +EV market signal",
