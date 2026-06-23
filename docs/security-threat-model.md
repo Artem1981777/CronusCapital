@@ -17,6 +17,8 @@ upgrade path for each.
 - Arc-native reconciliation. Payments can be routed through Arc's Memo contract,
   attaching an indexed, reconcilable reference on-chain.
 
+- **Arc-native receipts.** Each paid call emits an on-chain `Memo` event and is listed at `/api/receipts` (JSON + CSV) - verifiable settlement history without a separate registry contract.
+
 ## Trade-offs (flagged for post-hackathon)
 
 1. RPC trust. Payment verification reads from public Arc RPC endpoints. A

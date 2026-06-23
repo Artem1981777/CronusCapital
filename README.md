@@ -1,5 +1,7 @@
 # 𓂀 Cronus Capital
 
+> **Ask Cronus: _"Should I buy BTC right now?"_** The agent scouts live market data, pays for it on-chain via x402, runs an EV check, and returns a verifiable **BUY / SKIP** verdict - every paid call settled in real USDC on Arc, with an on-chain receipt.
+
 **The first AI agent that runs a real business on Arc — it earns, spends, settles, and reports its own P&L on-chain.**
 
 Cronus is an autonomous prediction-market oracle agent. It scans markets, scores expected value with three oracles, and executes settlements in native USDC on Arc. Unlike agents that only *spend*, Cronus **charges for its work and closes the loop net-positive**, with a verifiable trace of every decision.
@@ -171,6 +173,10 @@ This closes the loop honestly: revenue can be **real external demand, verified o
 **Arc-native reconciliation (transaction memos):** payments can be sent through Arc's `Memo` contract (`0x5294E9927c3306DcBaDb03fe70b92e01cCede505`), which wraps the USDC transfer and emits an indexed `Memo` event while preserving the payer as `msg.sender`. This attaches a reconcilable reference (for example `cronus|signal|<topic>|<ts>`) to each payment on-chain - matching Arc's invoice/payout reconciliation use case - with zero change to our paywall, since the wrapped transfer still emits the USDC `Transfer` our verifier checks. Try it: `scripts/pay-with-memo.mjs "<topic>"`.
 
 > Proof: tx `0xa7a0e3b25394d2c0570be62605f0a379b1a0e5d1ba2e7607f719fbd1ca9943d5` carried memoId `0x30c32e7e09b43cee3059b3d8136b591fda8c61d7840cff45911c60ee04e19d46` and unlocked a verified signal (commitment `0xc9acbd88b845a248e3ee669cca257f2e64f8c1daf17f64063d7765bfeae60680`).
+
+## Public on-chain receipts
+
+**Arc-native receipts - no registry contract needed.** Every paid call emits an on-chain `Memo` event that doubles as a receipt. Browse all settled x402 payments at [`/api/receipts`](https://cronus-capital.vercel.app/api/receipts) (JSON) or export [`/api/receipts?format=csv`](https://cronus-capital.vercel.app/api/receipts?format=csv). Each receipt links txHash, payer, amount, block, commitment and memoId to the Arc explorer.
 
 ## What's real vs modeled (honesty)
 
