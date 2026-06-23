@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/banner.svg" alt="Cronus Capital - autonomous oracle agent on Arc" width="100%"/>
+</p>
+
 # 𓂀 Cronus Capital
 
 > **Ask Cronus: _"Should I buy BTC right now?"_** The agent scouts live market data, pays for it on-chain via x402, runs an EV check, and returns a verifiable **BUY / SKIP** verdict - every paid call settled in real USDC on Arc, with an on-chain receipt.
