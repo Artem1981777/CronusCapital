@@ -15,7 +15,7 @@ function requirements(resource) {
   const origin = String(resource).split("/api/")[0]
   return {
     x402Version: X402_VERSION,
-    discovery: { manifest: origin + "/api/manifest", openapi: origin + "/api/openapi" },
+    discovery: { manifest: origin + "/api/manifest", openapi: origin + "/api/openapi", receipts: origin + "/api/receipts" },
     accepts: [{
       scheme: "exact", network: NETWORK, maxAmountRequired: PRICE.toString(), resource,
       description: "Cronus Capital - verifiable +EV market signal (one call)",
