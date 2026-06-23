@@ -80,8 +80,8 @@ async function verifyPayment(txHash) {
 }
 
 async function markUsedOnce(txHash) {
-  const base = process.env.KV_REST_API_URL
-  const token = process.env.KV_REST_API_TOKEN
+  const base = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL
+  const token = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN
   if (!base || !token) return { enforced: false, fresh: true }
   try {
     const ttl = Math.max(MAX_AGE_SEC, 86400)
