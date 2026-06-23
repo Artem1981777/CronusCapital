@@ -235,6 +235,15 @@ This closes the loop honestly: revenue can be **real external demand, verified o
 
 > Proof: tx `0xa7a0e3b25394d2c0570be62605f0a379b1a0e5d1ba2e7607f719fbd1ca9943d5` carried memoId `0x30c32e7e09b43cee3059b3d8136b591fda8c61d7840cff45911c60ee04e19d46` and unlocked a verified signal (commitment `0xc9acbd88b845a248e3ee669cca257f2e64f8c1daf17f64063d7765bfeae60680`).
 
+## Live traction (real, on-chain, verifiable)
+
+As of the latest build, the Cronus x402 paywall has settled **50 real USDC payments (1.00 USDC) on Arc testnet** - every one a genuine on-chain transfer, verifiable in the explorer. The counter is **read live from the Arc block explorer** via `/api/metrics`, value-filtered to the exact 0.02 USDC signal price, so unrelated transfers (such as vault withdrawals) are never counted and the figure updates itself with each new payment.
+
+**Honest scope:** this volume was self-generated against the live endpoint to prove the paywall handles real settlement at scale - it is **not external customer revenue**. Every payment is a real, auditable on-chain settlement; none of it is mocked or hardcoded.
+
+- Live metrics: https://cronus-capital.vercel.app/api/metrics
+- Public receipts: https://cronus-capital.vercel.app/api/receipts (add `?format=csv` to export)
+
 ## Public on-chain receipts
 
 **Arc-native receipts - no registry contract needed.** Every paid call emits an on-chain `Memo` event that doubles as a receipt. Browse all settled x402 payments at [`/api/receipts`](https://cronus-capital.vercel.app/api/receipts) (JSON) or export [`/api/receipts?format=csv`](https://cronus-capital.vercel.app/api/receipts?format=csv). Each receipt links txHash, payer, amount, block, commitment and memoId to the Arc explorer.
@@ -259,6 +268,7 @@ Latest hardening, newest first:
 - **BUY SIGNAL via Arc Memo** - the in-browser paid call routes through Arc's `Memo` contract, attaching a reconcilable on-chain reference; backend verification is unchanged. (`89cd5b9`)
 - **Live traction badge** - the header badge reads real settlement counts from `/api/metrics`. (`997272d`)
 - **Live metrics endpoint** - `/api/metrics` reports on-chain x402 traction (payments and USDC settled).
+- **Live explorer-read traction** - `/api/metrics` and `/api/receipts` now read directly from the Arc block explorer (value-filtered to the 0.02 USDC x402 price), so the counts are self-updating and independently verifiable, not hardcoded. (`4d439b9`)
 - **Visible agent decision log** - the reasoning `trace` (SCOUT ... EXECUTOR) renders live inside the BUY SIGNAL result. (`e81ce2c`)
 - **Forkable OSS primitives (MIT)** - `arc-primitives/`: a zero-dependency x402 payment verifier (which independently confirmed our own memo payment) plus a pay-with-memo helper. (`8c2c28c`)
 - **Security and honest trade-offs** - `docs/security-threat-model.md` lists verified properties and flagged limitations.
