@@ -1,7 +1,7 @@
 // CronusCapital — Three Agent System
 // Scout → Analyst → Executor
 
-const API_URL = '/api/claude';
+const API_URL = '/api/consult';
 let userApiKey = '';
 export function setApiKey(key: string) { userApiKey = key; }
 
@@ -34,7 +34,7 @@ async function callClaude(prompt: string, system: string): Promise<string> {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...(userApiKey ? { 'x-api-key': userApiKey } : {}) },
     body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
+      model: 'llama-3.3-70b-versatile',
       max_tokens: 1000,
       system,
       messages: [{ role: 'user', content: prompt }]

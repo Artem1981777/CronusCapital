@@ -15,7 +15,7 @@ export default function handler(req, res) {
     description: "Autonomous market-intelligence agent. Pay per call in USDC on Arc (x402) to receive a verifiable, on-chain-committed +EV market signal.",
     protocol: "x402",
     x402Version: 1,
-    discovery: { manifest: origin + "/api/manifest", openapi: origin + "/api/openapi" },
+    discovery: { manifest: origin + "/api/manifest", openapi: origin + "/api/openapi", receipts: origin + "/api/receipts", metrics: origin + "/api/metrics" },
     network: { name: NETWORK, chainId: CHAIN_ID, asset: USDC_ASSET, symbol: "USDC", decimals: 6 },
     services: [{
       resource: origin + "/api/signal",
