@@ -361,3 +361,42 @@ Stellar mint, and the recipient USDC balance read live from Stellar Horizon.
 - src/components/ProofBanner.tsx - hero banner with verified proof links
 - src/components/StellarBridge.tsx - Iris attestation status
 - api/complete-stellar.js - serverless mint_and_forward completer
+
+## Autonomous payouts and security (Arc -> Stellar)
+
+Built on top of the proven bridge+proof, two depth upgrades, both live in production.
+
+### Autonomous payout agent
+
+Files: `api/agent-payout.js` + `src/components/AgentPayout.tsx` (commit `c76cb3f`).
+
+The agent evaluates available revenue against a policy and decides, on its own,
+when and how much USDC to route to Stellar for creator payouts and remittances.
+
+- Policy: share percent of revenue, minimum threshold, per-payout cap, enabled flag.
+- Every decision is written to a keccak-chained decision ledger (prevHash -> hash)
+  stored in Upstash KV, and shown in the "Recent agent decisions" panel.
+- Verified on production:
+  - available = 4   -> PAYOUT 1.2000 USDC (30 percent share)
+  - available = 0.5 -> HOLD (below the 1 USDC threshold)
+  - large values    -> capped at the 5.0000 USDC per-payout cap
+- Execution reuses the proven CCTP burn path (depositForBurnWithHook -> mint_and_forward).
+
+Endpoints (`api/agent-payout.js`):
+
+- `GET ?action=status` returns policy, available, and the last decisions.
+- `GET ?action=decide&available=<n>` runs the policy and appends a ledger entry.
+- `GET ?action=set-policy&...` updates share / threshold / cap / recipient / enabled.
+- `GET ?action=set-available&value=<n>` sets the tracked available revenue.
+
+### Completer hardening
+
+File: `api/complete-stellar.js` (commit `e2d5b74`).
+
+- Trust model: the recipient is bound in hookData at burn time, so the
+  permissionless completer cannot redirect funds. The relayer (ephemeral, or from
+  RELAYER_SECRET) only holds XLM for fees, so there is nothing to steal.
+- Graceful already_completed: re-submitting an already minted message returns a
+  clean 200 instead of a raw revert.
+- Idempotency + rate limit: per-message KV cache and per-IP limit (10 per minute).
+- Timeouts: AbortController on every external fetch (Iris / Horizon / friendbot).
