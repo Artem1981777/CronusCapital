@@ -33,6 +33,7 @@ const DEFAULT_POLICY = {
 const ERC20_ABI = [
 	{ type: "function", name: "approve", stateMutability: "nonpayable", inputs: [{ name: "spender", type: "address" }, { name: "amount", type: "uint256" }], outputs: [{ name: "", type: "bool" }] },
 	{ type: "function", name: "allowance", stateMutability: "view", inputs: [{ name: "owner", type: "address" }, { name: "spender", type: "address" }], outputs: [{ name: "", type: "uint256" }] },
+	{ type: "function", name: "balanceOf", stateMutability: "view", inputs: [{ name: "owner", type: "address" }], outputs: [{ name: "", type: "uint256" }] },
 ]
 const TM_ABI = [
 	{ type: "function", name: "depositForBurnWithHook", stateMutability: "nonpayable", inputs: [
@@ -183,7 +184,7 @@ async function runExecute(req, res, q) {
 		return
 	}
 
-	const got = await kvLock(LOCK_KEY, 90)
+	const got = await kvLock(LOCK_KEY, 60)
 	if (got === null && KV_URL) { res.status(429).json({ detail: "executor busy, try again shortly" }); return }
 
 	const pk = normPk(process.env.TREASURY_PRIVATE_KEY)
@@ -199,27 +200,52 @@ async function runExecute(req, res, q) {
 		const fwd = strkeyToBytes32(STELLAR_FORWARDER)
 		const hook = buildHookData(policy.recipientG)
 		const maxFee = amt / 100n
+		const MAX_UINT = (2n ** 256n) - 1n
 
 		let allowance = 0n
 		try {
 			allowance = await publicClient.readContract({ address: ARC_USDC, abi: ERC20_ABI, functionName: "allowance", args: [account.address, ARC_TOKEN_MESSENGER] })
 		} catch { allowance = 0n }
 		if (allowance < amt) {
-			const approveHash = await walletClient.writeContract({ address: ARC_USDC, abi: ERC20_ABI, functionName: "approve", args: [ARC_TOKEN_MESSENGER, amt] })
-			await publicClient.waitForTransactionReceipt({ hash: approveHash })
+			const approveHash = await walletClient.writeContract({ address: ARC_USDC, abi: ERC20_ABI, functionName: "approve", args: [ARC_TOKEN_MESSENGER, MAX_UINT] })
+			try {
+				await publicClient.waitForTransactionReceipt({ hash: approveHash, timeout: 45000 })
+			} catch {
+				await kvDel(LOCK_KEY)
+				res.status(202).json({ executed: false, pending: "approval submitted, retry execute in about 30 seconds", approveTx: approveHash, signer: account.address })
+				return
+			}
 		}
 
 		const burnHash = await walletClient.writeContract({ address: ARC_TOKEN_MESSENGER, abi: TM_ABI, functionName: "depositForBurnWithHook", args: [amt, STELLAR_DOMAIN, fwd, ARC_USDC, fwd, maxFee, 2000, hook] })
-		await publicClient.waitForTransactionReceipt({ hash: burnHash })
 
 		const remaining = Math.max(0, Math.round((available - d.amount) * 10000) / 10000)
 		await kvSet(AVAIL_KEY, String(remaining))
-		const rec = await appendLedger({ at: new Date().toISOString(), action: "payout", amount: d.amount, available: available, recipientG: policy.recipientG, reason: d.reason, executed: true, arcBurnTx: burnHash, signer: account.address, trigger: trigger })
+		const rec = await appendLedger({ at: new Date().toISOString(), action: "payout", amount: d.amount, available: available, recipientG: policy.recipientG, reason: d.reason, executed: true, arcBurnTx: burnHash, signer: account.address, trigger: trigger, submitted: true })
 		await kvDel(LOCK_KEY)
-		res.status(200).json({ decision: rec, executed: true, arcBurnTx: burnHash, explorer: ARCSCAN + burnHash, signer: account.address, remainingAvailable: remaining })
+		res.status(200).json({ decision: rec, executed: true, arcBurnTx: burnHash, explorer: ARCSCAN + burnHash, signer: account.address, remainingAvailable: remaining, note: "burn submitted on Arc; confirm on explorer" })
 	} catch (e) {
 		await kvDel(LOCK_KEY)
 		const msg = (e && e.shortMessage) || (e && e.message) || "execution failed"
+		res.status(500).json({ detail: String(msg).slice(0, 300) })
+	}
+}
+
+async function signerInfo(res) {
+	const pk = normPk(process.env.TREASURY_PRIVATE_KEY)
+	if (!pk) { res.status(500).json({ detail: "TREASURY_PRIVATE_KEY not set" }); return }
+	try {
+		const account = privateKeyToAccount(pk)
+		const publicClient = createPublicClient({ chain: arcChain, transport: http(ARC_RPC) })
+		let native = "0"
+		let usdc = "0"
+		let allow = "0"
+		try { native = String(await publicClient.getBalance({ address: account.address })) } catch {}
+		try { usdc = String(await publicClient.readContract({ address: ARC_USDC, abi: ERC20_ABI, functionName: "balanceOf", args: [account.address] })) } catch {}
+		try { allow = String(await publicClient.readContract({ address: ARC_USDC, abi: ERC20_ABI, functionName: "allowance", args: [account.address, ARC_TOKEN_MESSENGER] })) } catch {}
+		res.status(200).json({ signer: account.address, nativeWei: native, usdc6: usdc, allowance6: allow, rpc: ARC_RPC })
+	} catch (e) {
+		const msg = (e && e.shortMessage) || (e && e.message) || "signer-info failed"
 		res.status(500).json({ detail: String(msg).slice(0, 300) })
 	}
 }
@@ -279,6 +305,17 @@ export default async function handler(req, res) {
 		}
 		const record = await appendLedger(entry)
 		res.status(200).json({ decision: record })
+		return
+	}
+
+	if (action === "signer-info") {
+		await signerInfo(res)
+		return
+	}
+
+	if (action === "unlock") {
+		await kvDel(LOCK_KEY)
+		res.status(200).json({ ok: true, unlocked: true })
 		return
 	}
 
