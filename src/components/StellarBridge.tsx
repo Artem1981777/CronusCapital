@@ -9,9 +9,14 @@ const CCTP_DOMAIN = 27
 const CRONUS_STELLAR = ""
 
 type Ledger = { seq: number; closedAt: string } | null
-type Asset = { numAccounts: number; amount: string } | null
+type Asset = { numAccounts: any; amount: any } | null
 type Bal = { balance: string } | null
 type Pay = { id: string; amount: string; from: string; created: string }
+
+function fmtNum(x: any) {
+  const n = Number(x)
+  return Number.isFinite(n) ? n.toLocaleString() : "\u2014"
+}
 
 const wrap: any = { maxWidth: 1100, margin: "40px auto", padding: "0 20px" }
 const head: any = { display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }
@@ -55,7 +60,11 @@ export function StellarBridge() {
         if (alive && lrec) setLedger({ seq: lrec.sequence, closedAt: lrec.closed_at })
         const ar = await fetch(HORIZON + "/assets?asset_code=USDC&asset_issuer=" + USDC_ISSUER).then(r => r.json())
         const arec = ar && ar._embedded && ar._embedded.records && ar._embedded.records[0]
-        if (alive && arec) setAsset({ numAccounts: arec.num_accounts, amount: arec.amount })
+        if (alive && arec) {
+          const numAcc = arec.num_accounts != null ? arec.num_accounts : (arec.accounts && arec.accounts.authorized)
+          const amt = arec.amount != null ? arec.amount : (arec.balances && arec.balances.authorized)
+          setAsset({ numAccounts: numAcc, amount: amt })
+        }
         if (CRONUS_STELLAR) {
           try {
             const acc = await fetch(HORIZON + "/accounts/" + CRONUS_STELLAR).then(r => r.json())
@@ -89,8 +98,8 @@ export function StellarBridge() {
       <div style={row}>
         <div style={tile}><div style={dim}>Stellar testnet</div><div style={val}>{loading ? "..." : (ledger ? "LIVE" : "n/a")}</div></div>
         <div style={tile}><div style={dim}>Latest ledger</div><div style={val}>{ledger ? "#" + ledger.seq : "..."}</div></div>
-        <div style={tile}><div style={dim}>USDC trustlines</div><div style={val}>{asset ? Number(asset.numAccounts).toLocaleString() : "..."}</div></div>
-        <div style={tile}><div style={dim}>USDC supply</div><div style={val}>{asset ? Number(asset.amount).toLocaleString() : "..."}</div></div>
+        <div style={tile}><div style={dim}>USDC trustlines</div><div style={val}>{asset ? fmtNum(asset.numAccounts) : "..."}</div></div>
+        <div style={tile}><div style={dim}>USDC supply</div><div style={val}>{asset ? fmtNum(asset.amount) : "..."}</div></div>
       </div>
       {CRONUS_STELLAR ? (
         <div style={card}>
