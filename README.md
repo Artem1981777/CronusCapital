@@ -307,3 +307,57 @@ Connect a wallet on Arc Testnet (chainId 5042002), grab test USDC from the Circl
 - Stale proof: `402 replay window closed`.
 
 **Why it matters here.** This track is about REAL API/agent monetization. Replay-able payments mean there is no monetization. Cronus enforces exactly one paid access per proof -- and proves it end-to-end on-chain.
+
+## Stellar Integration: canonical USDC across Arc and Stellar (Circle CCTP)
+
+Cronus moves canonical USDC between Arc (CCTP domain 26) and Stellar (domain 27)
+using Circle Cross-Chain Transfer Protocol (CCTP V2) and the official Stellar
+CctpForwarder. No wrapped assets and no custodial bridge: the same USDC is burned
+on the source chain and minted on the destination chain. The Stellar relayer that
+submits the mint pays only XLM fees and never custodies user funds.
+
+### Verified end-to-end proof
+
+First transfer (1 USDC, Arc to Stellar):
+
+- Burn on Arc (depositForBurnWithHook): [0x8df2...faf172](https://testnet.arcscan.app/tx/0x8df20b0e4d3e46b7fd04336bec44080516d97ef5348b575823a3cd6ca9faf172)
+- Mint on Stellar (mint_and_forward): [b9baf4...805d4](https://stellar.expert/explorer/testnet/tx/b9baf4efea289c49e12e09aa12c6c02d70b6613c2be80b3db7398385a76805d4)
+- USDC trustline on the recipient account: [09cc62...96d3](https://stellar.expert/explorer/testnet/tx/09cc62cbf6493fbf2710cfdfeff07aaeddd1efb33844f343af9bb208e2f896d3)
+
+Recipient account (USDC balance grew 0 to 2.0000 across two verified transfers):
+[GBNJ2J...A2CAZK](https://stellar.expert/explorer/testnet/account/GBNJ2JNNLKQ53MO353PPOTNKI47DMHWVULKXMJMNLQWPF3FBIOA2CAZK)
+
+The live demo renders a hero banner with both proof links and a Proof-of-Transfer
+receipt under the Complete button: Arc burn, Circle attestation (domain 26 to 27),
+Stellar mint, and the recipient USDC balance read live from Stellar Horizon.
+
+### Flow
+
+1. Burn (Arc). StellarBurn.tsx calls depositForBurnWithHook(amount, 27, forwarder, ARC_USDC, forwarder, maxFee, 2000, hookData) on the Arc TokenMessengerV2. The recipient Stellar G-address is encoded in hookData.
+2. Attestation (Circle). Circle Iris observes the burn and produces a signed attestation for the CCTP message (amount, recipient, source and destination domain, nonce).
+3. Complete (Stellar). api/complete-stellar.js (Vercel serverless) fetches the attestation, funds an ephemeral relayer via friendbot, and submits mint_and_forward(message, attestation) to the CctpForwarder on Soroban. Minted USDC is forwarded atomically to the recipient. No recipient signature needed.
+4. Balance (Horizon). StellarWallet.tsx and the Proof-of-Transfer receipt read the live USDC balance from Stellar Horizon.
+
+### Contracts and parameters
+
+| Item | Value |
+| --- | --- |
+| Arc CCTP domain | 26 |
+| Stellar CCTP domain | 27 |
+| Arc TokenMessengerV2 | 0x8FE6B999Dc680CcFDD5Bf7EB0974218be2542DAA |
+| Arc USDC | 0x3600000000000000000000000000000000000000 |
+| Stellar CctpForwarder | CA66Q2WFBND6V4UEB7RD4SAXSVIWMD6RA4X3U32ELVFGXV5PJK4T4VSZ |
+| Stellar USDC issuer | GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5 |
+| Soroban RPC | https://soroban-testnet.stellar.org |
+| Circle Iris sandbox | https://iris-api-sandbox.circle.com |
+| Stellar Horizon | https://horizon-testnet.stellar.org |
+| Network passphrase | Test SDF Network ; September 2015 |
+
+### Source files
+
+- src/components/StellarBurn.tsx - burn and bridge on Arc
+- src/components/StellarComplete.tsx - completion UI plus Proof-of-Transfer receipt (live Horizon balance)
+- src/components/StellarWallet.tsx - link wallet, show USDC and XLM balance
+- src/components/ProofBanner.tsx - hero banner with verified proof links
+- src/components/StellarBridge.tsx - Iris attestation status
+- api/complete-stellar.js - serverless mint_and_forward completer
