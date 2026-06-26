@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react"
+import { createPortal } from "react-dom"
 import { useAccount, useChainId, useSwitchChain, useReadContract } from "wagmi"
 import { WalletButton } from "./WalletButton"
 
@@ -69,8 +70,8 @@ export function CronusSidebar() {
 		setTimeout(() => { if (btn) btn.click() }, 120)
 	}
 
-	return (
-		<>
+	return createPortal(
+<>
 			<button className="cd-sb-toggle" onClick={() => setOpen(true)} aria-label="Open menu">☰</button>
 			{open && <div className="cd-sb-overlay" onClick={() => setOpen(false)} />}
 			<aside className={open ? "cd-sb open" : "cd-sb"}>
@@ -123,6 +124,7 @@ export function CronusSidebar() {
 					<div className="cd-sb-note">Wallet required for oracle actions</div>
 				</div>
 			</aside>
-		</>
+		</>,
+document.body
 	)
 }
