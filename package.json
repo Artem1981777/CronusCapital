@@ -14,6 +14,7 @@
     "@anthropic-ai/sdk": "^0.95.2",
     "@reown/appkit": "^1.8.19",
     "@reown/appkit-adapter-wagmi": "^1.8.19",
+    "@stellar/stellar-sdk": "^16.0.1",
     "@tanstack/react-query": "^5.100.10",
     "@web3modal/base": "^5.1.11",
     "@web3modal/wagmi": "^5.1.11",
