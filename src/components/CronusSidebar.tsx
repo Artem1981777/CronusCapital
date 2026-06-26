@@ -14,6 +14,7 @@ const NAV: NavItem[] = [
 	{ id: "cap-signals", glyph: "📡", label: "Premium Signals", badge: "x402" },
 	{ id: "cap-markets", glyph: "📈", label: "Markets" },
 	{ id: "cap-settlements", glyph: "⚡", label: "Settlements" },
+	{ id: "cap-stellar", glyph: "✦", label: "Stellar", badge: "CCTP" },
 ]
 
 export function CronusSidebar() {
