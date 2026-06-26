@@ -184,8 +184,6 @@ async function runExecute(req, res, q) {
 		return
 	}
 
-	const got = await kvLock(LOCK_KEY, 60)
-	if (got === null && KV_URL) { res.status(429).json({ detail: "executor busy, try again shortly" }); return }
 
 	const pk = normPk(process.env.TREASURY_PRIVATE_KEY)
 	if (!pk) { await kvDel(LOCK_KEY); res.status(500).json({ detail: "TREASURY_PRIVATE_KEY not set" }); return }
