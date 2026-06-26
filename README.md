@@ -400,3 +400,22 @@ File: `api/complete-stellar.js` (commit `e2d5b74`).
   clean 200 instead of a raw revert.
 - Idempotency + rate limit: per-message KV cache and per-IP limit (10 per minute).
 - Timeouts: AbortController on every external fetch (Iris / Horizon / friendbot).
+
+### Server-side autonomous execution (shipped)
+
+The payout agent can now execute the cross-chain burn itself, signed by the treasury key on the server with no browser wallet in the loop. Endpoint: GET /api/agent-payout?action=execute (optional &available=N override). The agent reads policy, decides amount, ensures USDC allowance, and submits depositForBurnWithHook on Arc via CCTP V2. Read-only health check: /api/agent-payout?action=signer-info returns the signer address plus native, USDC and allowance balances.
+
+Proven on Arc testnet (server-signed, Status Success, method depositForBurnWithHook, from treasury 0x6829860b7f61FA01E5bf3D194d9f780ACa5B6787):
+
+- Burn 1: 0xecc9ce81e1adc64356390d3e394880cf2572c6103e31b7b01665662eb10f8d0e
+- Burn 2: 0x0aa56d3aa20490b5f215b6c4749b59baeccd6e4167cc794f9107c333b9539e75
+
+Each burn routes 1.2 USDC (30 percent of 4 USDC available, under the 5 USDC per-payout cap) to the Stellar recipient via the CCTP forwarder, and is appended to the keccak-chained ledger with executed:true and the Arc burn tx hash. The UI panel exposes a one-click "Agent executes on Arc (server-signed)" action and links every executed ledger row to the Arc explorer.
+
+### Autonomous scheduling (no human in the loop)
+
+An external scheduler (cron-job.org) pings the execute endpoint every 15 minutes, so the agent runs itself with no clicks and no browser open. Each scheduled invocation is authenticated with a shared CRON_SECRET and recorded in the ledger with trigger "cron", which distinguishes autonomous runs from manual ones.
+
+Trigger (secret redacted): GET /api/agent-payout?action=execute&secret=REDACTED
+
+On each tick the agent re-reads its policy, decides the amount (30 percent of available, min threshold 1 USDC, per-payout cap 5 USDC), and either holds (nothing to pay) or submits a server-signed CCTP burn on Arc. Payouts are fully autonomous: the treasury pays out on a schedule, by itself, only when the policy allows.
