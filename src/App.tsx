@@ -1,6 +1,7 @@
 import { StellarBridge } from "./components/StellarBridge"
 import StellarWallet from "./components/StellarWallet"
 import StellarBurn from "./components/StellarBurn"
+import StellarComplete from "./components/StellarComplete"
 import ReasoningTrace from "./components/ReasoningTrace";
 import TrackRecord from "./components/TrackRecord";
 import X402Integration from "./components/X402Integration"
@@ -347,7 +348,7 @@ export default function App() {
         <PolicyGuardrails />
 			<VerifiableLedger />
       <div id="cap-settlements" /><Dashboard totalOnChain={sessionTxCount} />
-      <div id="cap-stellar" /><StellarWallet /><StellarBurn /><StellarBridge />
+      <div id="cap-stellar" /><StellarWallet /><StellarBurn /><StellarComplete /><StellarBridge />
 
       {onChainTxs.length > 0 && (
         <div style={{ padding: "12px 32px", background: "#050505", borderTop: "1px solid #39e01422" }}>
