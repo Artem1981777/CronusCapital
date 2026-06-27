@@ -62,7 +62,7 @@ export default async function handler(req, res) {
     "24h volume (base units): " + (vol24h == null ? "unknown" : vol24h),
     "",
     "Return a JSON object with keys trace, analog, verdict, conviction, decisions.",
-    "trace: array of 7-9 lines, exactly one per stage in this order: SCOUT, DECOMPOSE, DISCOVER, DECIDE, SUFFICIENCY, ATTRIBUTE, EXECUTOR. Each line starts with the stage name + colon, cites a concrete number, and is terse and decisive.",
+    "trace: array of 6 lines, exactly one per stage in this order: SCOUT, DECOMPOSE, DISCOVER, DECIDE, SUFFICIENCY, EXECUTOR. Each line starts with the stage name + colon, cites a concrete number, and is terse and decisive.",
     "DATA HONESTY RULE: you may cite ONLY these provided facts (live price, 24h change %, 24h high, 24h low, 24h volume), values you derive from them (e.g. position within the 24h range, distance to high/low), and your own EV (0-1), conviction, and thresholds. You may propose plan levels (entry, stop, target) derived from the provided high/low. You must NOT invent any data you were not given: no RSI, no moving averages (MA/EMA), no Bollinger bands, no 7d/14d/50d or other multi-day averages, no support/resistance levels, and no volume figure other than the provided 24h volume. Fabricating data is prohibited.",
     "Forbidden filler words: indicating, seems, may, potential, can be made, high value.",
     "Style example: 'DECIDE: +0.42% 24h clears +0.20% trigger -> long bias, EV 0.62 vs 0.50 hurdle'.",
