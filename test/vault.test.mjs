@@ -67,3 +67,15 @@ test("yield splits pro-rata between holders", () => {
   assert.equal(convertToAssets(v, v.shares.get("a")), 120n)
   assert.equal(convertToAssets(v, v.shares.get("b")), 360n)
 })
+
+test("convertToAssets returns 0 when the vault has no shares", () => {
+  const v = createVault()
+  assert.equal(convertToAssets(v, 100n), 0n)
+})
+test("withdrawAll for a non-holder returns 0 and leaves accounting intact", () => {
+  const v = createVault()
+  deposit(v, "a", 100n)
+  assert.equal(withdrawAll(v, "zzz"), 0n)
+  assert.equal(v.totalShares, 100n)
+  assert.equal(v.totalAssets, 100n)
+})
