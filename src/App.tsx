@@ -25,7 +25,7 @@ import { AgentDemoScout, AgentDemoAnalyst, AgentDemoExecutor } from "./AgentDemo
 import "./demoSeed"
 import { useCronusContract } from "./hooks/useCronusContract"
 import { useAccount } from "wagmi"
-import { runCronusPipeline, setApiKey } from "./agents/cronusAgents"
+import { runCronusPipeline, runCronusPipelineLive, setApiKey } from "./agents/cronusAgents"
 import type { AgentState, MarketSignal, BetOpportunity } from "./agents/cronusAgents"
 import { PremiumSignal } from "./components/PremiumSignal"
 
@@ -216,7 +216,7 @@ export default function App() {
     setAgentPhase("scout")
     addLog("SCOUT", "Scanning agora for signals on: " + topic + ". Monitoring sentiment across news feeds...")
     await new Promise(r => setTimeout(r, 300))
-    const result = await runCronusPipeline(topic)
+    const result = await (import.meta.env?.VITE_USE_LIVE_ORACLE === "true" ? runCronusPipelineLive(topic) : runCronusPipeline(topic))
     addLog("SCOUT", "Found " + result.scout.signals.length + " signals. Passing to Analyst.")
     setAgentPhase("analyst")
     addLog("ANALYST", "Running EV model — comparing implied vs fair odds across prediction markets...")
