@@ -2,6 +2,10 @@
   <img src="assets/banner.svg" alt="Cronus Capital - autonomous oracle agent on Arc" width="100%"/>
 </p>
 
+<p align="center">
+  <a href="https://github.com/Artem1981777/CronusCapital/actions/workflows/ci.yml"><img src="https://github.com/Artem1981777/CronusCapital/actions/workflows/ci.yml/badge.svg" alt="CI"/></a>
+</p>
+
 # 𓂀 Cronus Capital
 
 > **Ask Cronus: _"Should I buy BTC right now?"_** The agent scouts live market data, pays for it on-chain via x402, runs an EV check, and returns a verifiable **BUY / SKIP** verdict - every paid call settled in real USDC on Arc, with an on-chain receipt.
@@ -81,7 +85,7 @@ The live demo (https://cronus-capital.vercel.app) is a single screen. Here is ev
 
 1. **Open the demo** - https://cronus-capital.vercel.app
 2. **Connect your wallet** (top-right chip) and approve switching to **Arc Testnet** (chainId 5042002). Grab test USDC from the Circle faucet if needed.
-3. **Press CONSULT ORACLES (free).** Watch the agent pull live BTC data and reason step by step (SCOUT -> DECOMPOSE -> DISCOVER -> DECIDE -> SUFFICIENCY -> MEMORY -> CONSENSUS). It may return **SKIP** - it abstains when expected value is below its bar, by design.
+3. **Press CONSULT ORACLES (free).** Watch the agent pull live BTC data and reason step by step (SCOUT -> DECOMPOSE -> DISCOVER -> DECIDE -> SUFFICIENCY -> EXECUTOR -> MEMORY -> CONSENSUS). It may return **SKIP** - it abstains when expected value is below its bar, by design.
 4. **Press BUY SIGNAL - 0.02 USDC (real x402).** Confirm the transaction in your wallet. The agent verifies the on-chain payment, then unlocks the signal with its verdict, conviction, `commitment`, and live **agent decision log**. Click **VIEW TX** to see the real settlement (with a `Memo` event) on the Arc explorer.
 5. **Press PAY UPSTREAM - 0.005 USDC** to see the cost side: the agent spends on data. Watch **NET FLOW** stay positive.
 6. **Verify everything yourself:**
