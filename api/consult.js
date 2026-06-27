@@ -1,11 +1,39 @@
 // Cronus autonomous oracle: REAL OKX market data (price + 24h high/low/volume) -> REAL LLM decision + historical-analog recall (Groq / Llama 3.3).
+
+// POLISH: универсальный retry с экспоненциальным backoff (OKX/Groq иногда дают 5xx/таймаут).
+// Экспортируется для юнит-тестов (test/consult.test.mjs). Не меняет внешний контракт хендлера.
+export async function fetchWithRetry(url, init, opts = {}) {
+  const retries = Number(opts.retries ?? process.env.CONSULT_RETRIES ?? 2); // 2 ретрая = 3 попытки
+  const baseMs = Number(opts.baseMs ?? 250);
+  let lastErr;
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      const res = await fetch(url, init);
+      if (res.ok || res.status < 500) return res; // POLISH: 4xx не ретраим — это не сетевой сбой
+      lastErr = new Error("HTTP " + res.status);
+    } catch (e) { lastErr = e; }
+    if (attempt < retries) {
+      const delay = baseMs * 2 ** attempt + Math.random() * 80; // POLISH: expo + jitter
+      await new Promise(r => setTimeout(r, delay));
+    }
+  }
+  throw lastErr || new Error("fetchWithRetry failed");
+}
+
 export default async function handler(req, res) {
+  // POLISH: опц. CDN-кэш по topic+instId (Vercel кэширует по полному URL). 0 = выкл (дефолт = поведение как раньше).
+  const cacheSec = Number(process.env.CONSULT_CACHE_SECONDS || 0);
+  if (cacheSec > 0) {
+    res.setHeader("Cache-Control", "s-maxage=" + cacheSec + ", stale-while-revalidate=" + (cacheSec * 5));
+  }
+
   const topic = (req.query && req.query.topic) || "BTC-USDC momentum";
-  const instId = (req.query && req.query.instId) || "BTC-USDC";
+  // POLISH: дефолтный инструмент переопределяется через env (дефолт прежний — ничего не ломает).
+  const instId = (req.query && req.query.instId) || process.env.CONSULT_DEFAULT_INST || "BTC-USDC";
 
   let price = null, prevPrice = null, changePct = null, high24h = null, low24h = null, vol24h = null;
   try {
-    const r = await fetch("https://www.okx.com/api/v5/market/ticker?instId=" + encodeURIComponent(instId));
+    const r = await fetchWithRetry("https://www.okx.com/api/v5/market/ticker?instId=" + encodeURIComponent(instId)); // POLISH: было fetch()
     const j = await r.json();
     const t = j && j.data && j.data[0];
     if (t) {
@@ -46,7 +74,7 @@ export default async function handler(req, res) {
 
   let data = null;
   try {
-    const resp = await fetch("https://api.groq.com/openai/v1/chat/completions", {
+    const resp = await fetchWithRetry("https://api.groq.com/openai/v1/chat/completions", { // POLISH: было fetch()
       method: "POST",
       headers: { "content-type": "application/json", "authorization": "Bearer " + key },
       body: JSON.stringify({
