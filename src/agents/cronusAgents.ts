@@ -30,23 +30,13 @@ export interface AgentState {
 }
 
 async function callClaude(prompt: string, system: string): Promise<string> {
-  const res = await fetch(API_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...(userApiKey ? { 'x-api-key': userApiKey } : {}) },
-    body: JSON.stringify({
-      model: 'llama-3.3-70b-versatile',
-      max_tokens: 1000,
-      system,
-      messages: [{ role: 'user', content: prompt }]
-    })
-  });
-  const data = await res.json();
-  console.log("CLAUDE FULL RESPONSE:", JSON.stringify(data).slice(0, 300));
-  if (data.error) {
-    console.log("CLAUDE ERROR:", data.error.message);
-    return '';
-  }
-  return data.content?.[0]?.text || '';
+  // LEGACY no-op. This repo's /api/consult is a GET oracle (see callConsult / CronusDashboard)
+  // and never returns an LLM completion to this POST, so it always yielded '' -> fallback.
+  // The real live LLM path is runCronusPipelineLive() behind VITE_USE_LIVE_ORACLE.
+  // Kept as an explicit stub to preserve the Scout/Analyst/Executor fallback contract
+  // without a guaranteed-useless network round-trip.
+  void prompt; void system; void userApiKey; void API_URL;
+  return '';
 }
 
 function getFallbackSignals(topic: string): MarketSignal[] {
