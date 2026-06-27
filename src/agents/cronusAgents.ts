@@ -207,3 +207,85 @@ export async function runCronusPipeline(topic: string): Promise<AgentState> {
 
   return state;
 }
+
+// ============================================================
+// POLISH (Шаг 3, opt-in): живой OKX+LLM оракул как источник пайплайна.
+// ТОЛЬКО additive — runScout/runAnalyst/runExecutor/runCronusPipeline не тронуты.
+// Включается из App.tsx лишь при VITE_USE_LIVE_ORACLE === "true".
+// Повторяет рабочий GET-вызов из src/components/CronusDashboard.tsx.
+// ============================================================
+const CONSULT_URL = '/api/consult';
+
+function topicToInstId(topic: string): string {
+  const m = (topic || '').toUpperCase().match(/[A-Z]{2,10}-[A-Z]{2,10}/);
+  return m ? m[0] : 'BTC-USDC';
+}
+
+export interface ConsultResult {
+  ok: boolean;
+  live?: boolean;
+  price?: number | null;
+  changePct?: number | null;
+  trace?: string[];
+  analog?: { regime?: string; outcome?: string; similarity?: number } | null;
+  verdict?: string;
+  conviction?: number;
+  decisions?: Array<{ src?: string; ev?: number; price?: number; action?: string }>;
+}
+
+export async function callConsult(topic: string): Promise<ConsultResult | null> {
+  const instId = topicToInstId(topic);
+  try {
+    const res = await fetch(CONSULT_URL + '?instId=' + encodeURIComponent(instId) + '&topic=' + encodeURIComponent(topic));
+    const data = await res.json();
+    if (!data || data.ok === false) return null;
+    return data as ConsultResult;
+  } catch {
+    return null;
+  }
+}
+
+export async function runCronusPipelineLive(topic: string): Promise<AgentState> {
+  const consult = await callConsult(topic);
+  if (!consult) return runCronusPipeline(topic);
+
+  const instId = topicToInstId(topic);
+  const bullish = (consult.verdict === 'YES') || ((consult.changePct ?? 0) > 0);
+  const conf = Math.max(0, Math.min(1, (consult.conviction ?? 0) / 100));
+
+  const signals: MarketSignal[] = [{
+    id: '1',
+    source: 'OKX · Cronus Oracle',
+    headline: instId + ' ' + ((consult.changePct ?? 0) >= 0 ? '+' : '') + (consult.changePct == null ? '?' : consult.changePct.toFixed(2)) + '% 24h @ ' + (consult.price ?? '?'),
+    sentiment: bullish ? 'bullish' : ((consult.verdict === 'NO' || (consult.changePct ?? 0) < 0) ? 'bearish' : 'neutral'),
+    confidence: conf,
+    timestamp: Date.now(),
+  }];
+
+  const decs = Array.isArray(consult.decisions) ? consult.decisions : [];
+  const opportunities: BetOpportunity[] = (decs.length ? decs : [{ src: instId, ev: conf, price: consult.price ?? 0, action: bullish ? 'BUY' : 'SKIP' }])
+    .slice(0, 2)
+    .map((d) => ({
+      market: 'Arc Oracle',
+      question: (d.src || instId) + ' momentum',
+      recommendation: (d.action === 'BUY' ? 'YES' : 'NO') as 'YES' | 'NO',
+      expectedValue: Math.round(((d.ev ?? conf) as number) * 100),
+      reasoning: (consult.trace && consult.trace.length ? consult.trace.join(' | ') : ('Verdict ' + (consult.verdict || 'SKIP') + ', conviction ' + (consult.conviction ?? 0) + '%')),
+      size: Math.max(1, Math.min(50, Math.round(((d.ev ?? conf) as number) * 50))),
+    }));
+
+  let decisions: string[];
+  if (consult.verdict === 'YES' || consult.verdict === 'NO') {
+    decisions = decs.length
+      ? decs.map((d) => 'EXECUTE: ' + (d.action || (bullish ? 'BUY' : 'SELL')) + ' ' + (d.src || instId) + ' — EV ' + Math.round(((d.ev ?? conf) as number) * 100) + '% @ ' + (d.price ?? consult.price ?? '?'))
+      : ['EXECUTE: ' + (bullish ? 'BUY' : 'SELL') + ' ' + instId + ' — conviction ' + (consult.conviction ?? 0) + '%'];
+  } else {
+    decisions = ['HOLD: ' + instId + ' — SKIP, conviction ' + (consult.conviction ?? 0) + '% below bar'];
+  }
+
+  return {
+    scout: { status: 'done', signals },
+    analyst: { status: 'done', opportunities },
+    executor: { status: 'done', decisions },
+  };
+}
