@@ -12,6 +12,8 @@
 
 **The first AI agent that runs a real business on Arc — it earns, spends, settles, and reports its own P&L on-chain.**
 
+> **Now with a NANO tier:** sub-cent ($0.001) paid calls settled **gas-free via Circle Gateway** (EIP-3009), consumed autonomously by an A2A buyer-agent — with honest self-demo labeling (no faked external demand).
+
 Cronus is an autonomous prediction-market oracle agent. It scans markets, scores expected value with three oracles, and executes settlements in native USDC on Arc. Unlike agents that only *spend*, Cronus **charges for its work and closes the loop net-positive**, with a verifiable trace of every decision.
 
 - **Live demo:** https://cronus-capital.vercel.app
@@ -241,12 +243,24 @@ This closes the loop honestly: revenue can be **real external demand, verified o
 
 ## Live traction (real, on-chain, verifiable)
 
-As of the latest build, the Cronus x402 paywall has settled **50 real USDC payments (1.00 USDC) on Arc testnet** - every one a genuine on-chain transfer, verifiable in the explorer. The counter is **read live from the Arc block explorer** via `/api/metrics`, value-filtered to the exact 0.02 USDC signal price, so unrelated transfers (such as vault withdrawals) are never counted and the figure updates itself with each new payment.
+As of the latest build, the Cronus x402 paywall has settled **90+ real USDC payments (~1.9 USDC) on Arc testnet** - every one a genuine on-chain transfer, verifiable in the explorer. The counter is **read live from the Arc block explorer** via `/api/metrics`, value-filtered to the exact 0.02 USDC signal price, so unrelated transfers (such as vault withdrawals) are never counted and the figure updates itself with each new payment.
 
 **Honest scope:** this volume was self-generated against the live endpoint to prove the paywall handles real settlement at scale - it is **not external customer revenue**. Every payment is a real, auditable on-chain settlement; none of it is mocked or hardcoded.
 
 - Live metrics: https://cronus-capital.vercel.app/api/metrics
 - Public receipts: https://cronus-capital.vercel.app/api/receipts (add `?format=csv` to export)
+
+## NANO nanopayments — Circle Gateway (gas-free, sub-cent)
+
+Cronus also exposes a **NANO tier** at **$0.001/call**, settled **gas-free via Circle Gateway** (EIP-3009 signed authorizations, USDC on Arc). An autonomous **buyer-agent** (`scripts/buyer-agent.mjs`) discovers the service from `/api/manifest`, enforces a budget, pays gas-free, and consumes the signal — a full agent-to-agent (A2A) loop.
+
+- **Live nano traction:** https://cronus-capital.vercel.app/api/traction
+- **External-payer leaderboard:** https://cronus-capital.vercel.app/api/leaderboard
+
+**Honest scope (the project's edge):**
+- The buyer-agent is **self-funded**, so its address is registered in `SELF_DEMO_ADDRESSES` and counted as `self_demo_calls` — **never** as `unique_external_payers`. The leaderboard stays empty until a real third party pays.
+- On Arc testnet, Circle Gateway settles **1:1** (each call gets its own settlement id). N→1 **batching is a Circle Gateway protocol capability at scale**, shown as such in the UI — not claimed as achieved here.
+- Gateway settlement identifiers are labeled `gateway-batch` with on-chain tx **pending**; arcscan `/tx/` links render only for real `0x` on-chain hashes.
 
 ## Public on-chain receipts
 
