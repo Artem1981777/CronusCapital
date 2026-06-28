@@ -28,9 +28,9 @@ upgrade path for each.
    freshness window (default 1800s). A tx could in theory be replayed within that
    window. Mitigation: short window. Upgrade: one-time-use via a KV store keyed
    by txHash.
-3. Treasury key. Server-side funded flows use a treasury wallet key held in env.
+3. Treasury hot-wallet (payout signer). The autonomous payout path signs CCTP burns with a treasury key held in env (a hot wallet).
    If leaked, the treasury balance is drainable. Mitigation: keep minimal funds,
-   rotate regularly. No user funds are ever custodied.
+   rotate regularly. A per-payout cap (5 USDC), a daily circuit breaker, and a KV exec-lock bound the blast radius and prevent concurrent double-spend; the cron trigger is authenticated with a shared secret. No user funds are ever custodied - the spend path is fully non-custodial. Upgrade: scoped session key or MPC signer.
 4. Upstream data dependency. Signal quality depends on OKX live market data and
    the LLM. If upstream fails, the response degrades. Mitigation: a live flag is
    returned; numbers are never fabricated when data is missing.
