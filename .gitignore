@@ -25,3 +25,6 @@ dist-ssr
 .vercel
 .env
 seed-traction.mjs
+*.bak.*
+cronus_snapshot.txt
+.env*
