@@ -1,14 +1,15 @@
-// api/info.js — consolidated read-only discovery/metrics router.
-// Preserves /api/manifest, /api/openapi, /api/receipts, /api/metrics as public
-// URLs via vercel.json rewrites (-> /api/info?kind=...), while counting as ONE
-// serverless function (Hobby plan 12-function cap). Logic unchanged: each kind
-// delegates to its original handler, now living in ../lib/.
+// api/info.js — consolidated read-only discovery/metrics/traction router.
+// Preserves /api/manifest, /api/openapi, /api/receipts, /api/metrics,
+// /api/traction, /api/leaderboard as public URLs via vercel.json rewrites
+// (-> /api/info?kind=...), counting as ONE serverless function (Hobby 12-fn cap).
 import manifest from "../lib/manifest.js"
 import openapi from "../lib/openapi.js"
 import receipts from "../lib/receipts.js"
 import metrics from "../lib/metrics.js"
+import traction from "../lib/traction.js"
+import leaderboard from "../lib/leaderboard.js"
 
-const ROUTES = { manifest, openapi, receipts, metrics }
+const ROUTES = { manifest, openapi, receipts, metrics, traction, leaderboard }
 
 export default async function handler(req, res) {
 	const kind = String((req.query && req.query.kind) || "").toLowerCase()
