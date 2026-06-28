@@ -3,7 +3,8 @@ import { privateKeyToAccount } from "viem/accounts"
 
 const BASE = process.env.CRONUS_URL || "https://cronus-capital.vercel.app"
 const PK = process.env.BUYER_PRIVATE_KEY
-if (!PK) { console.error("Set BUYER_PRIVATE_KEY to a SECOND wallet (not the treasury), funded with a little Arc testnet USDC."); process.exit(1) }
+if (!PK) { console.error("Set BUYER_PRIVATE_KEY to a funded wallet (NOT the treasury) with a little Arc testnet USDC."); process.exit(1) }
+const MAX_USD = Number(process.env.BUYER_MAX_USD || "0.05")
 
 const arc = defineChain({
   id: 5042002, name: "Arc Testnet",
@@ -18,19 +19,32 @@ const ERC20 = [{ type: "function", name: "transfer", stateMutability: "nonpayabl
 const topic = process.argv[2] || "BTC-USDC momentum"
 const url = BASE + "/api/signal?topic=" + encodeURIComponent(topic)
 
-console.log("Buyer wallet:", account.address)
+console.log("Cronus external payment — one command")
+console.log("  buyer wallet:", account.address)
+console.log("  topic:", topic)
+
 const r1 = await fetch(url)
-if (r1.status !== 402) { console.error("Expected 402, got", r1.status); console.error(await r1.text()); process.exit(1) }
+if (r1.status !== 402) { console.error("Expected HTTP 402, got", r1.status); console.error(await r1.text()); process.exit(1) }
 const reqs = await r1.json()
-const acc = reqs.accepts[0]
-console.log("402 Payment Required ->", acc.maxAmountRequired, "atomic USDC to", acc.payTo)
+const acc = (reqs.accepts && reqs.accepts[0]) || {}
+const priceUsd = Number(acc.maxAmountRequired || "0") / 1e6
+console.log("  402 Payment Required ->", priceUsd, "USDC to", acc.payTo)
+if (priceUsd > MAX_USD) { console.error("ABORT: price " + priceUsd + " exceeds budget " + MAX_USD + " (raise via BUYER_MAX_USD)."); process.exit(2) }
 
 const hash = await wallet.writeContract({ address: acc.asset, abi: ERC20, functionName: "transfer", args: [acc.payTo, BigInt(acc.maxAmountRequired)] })
-console.log("Paid. tx:", hash)
-console.log("Explorer: https://testnet.arcscan.app/tx/" + hash)
+console.log("  paid. tx:", hash)
+console.log("  explorer: https://testnet.arcscan.app/tx/" + hash)
 await pub.waitForTransactionReceipt({ hash })
-console.log("Confirmed. Claiming signal with proof...")
+console.log("  confirmed. claiming signal with on-chain proof...")
 
 const r2 = await fetch(url, { headers: { "X-PAYMENT": hash } })
-console.log("HTTP", r2.status)
-console.log(JSON.stringify(await r2.json(), null, 2))
+const out = await r2.json().catch(() => ({}))
+console.log("  claim HTTP", r2.status)
+if (out && out.report) console.log("  verdict:", out.report.verdict, "| conviction:", out.report.conviction)
+else console.log(JSON.stringify(out, null, 2))
+
+console.log("")
+console.log("Real external on-chain payment to Cronus. Verify:")
+console.log("  your tx:  https://testnet.arcscan.app/tx/" + hash)
+console.log("  traction: " + BASE + "/api/traction  (standard.payments)")
+console.log("  (for the NANO external-payer leaderboard, pay via: node scripts/buyer-agent.mjs)")
