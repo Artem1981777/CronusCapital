@@ -1,3 +1,4 @@
+import StreamPanel from "./StreamPanel"
 import NanoHeadline from "./NanoHeadline"
 import ReputationBadge from "./ReputationBadge"
 import TractionBadge from "./TractionBadge"
@@ -600,6 +601,7 @@ export function CronusDashboard() {
 				<div className="cd-panel cd-actions">
 					<div className="cd-panel-title">⚡ ORACLE ACTIONS</div>
 						<NanoHeadline />
+						<StreamPanel />
 					<button className="cd-btn cd-btn-primary" onClick={consult} disabled={running}>{running ? "CONSULTING…" : "CONSULT ORACLES"}</button>
 					{consultMsg ? <div className="cd-claim-msg">{consultMsg}</div> : null}
 						{trace.length > 0 ? (<div className="cd-x402-code">{trace.map((l, i) => (<div key={i} className="cd-x402-line">{l}</div>))}</div>) : null}
