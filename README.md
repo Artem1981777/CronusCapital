@@ -37,6 +37,30 @@ Most "agent economy" demos show an agent *paying* for things. Cronus is the othe
 
 ---
 
+## Pay Cronus in 60 seconds (any funded wallet)
+
+Two real, on-chain ways for an external agent/wallet to pay Cronus:
+
+**NANO — $0.001, gas-free via Circle Gateway** (counts toward the external-payer leaderboard):
+
+    export BUYER_PRIVATE_KEY=0x...            # any wallet with a little Arc testnet USDC
+    node scripts/buyer-agent.mjs --deposit 1  # one-time Gateway deposit
+    node scripts/buyer-agent.mjs              # pay $0.001 gas-free + consume signal
+    node scripts/buyer-agent.mjs --stream --seconds 10   # pay-per-second nano stream
+
+A wallet not in `SELF_DEMO_ADDRESSES` shows up as a real `unique_external_payer`:
+- Leaderboard: https://cronus-capital.vercel.app/api/leaderboard
+- Traction:    https://cronus-capital.vercel.app/api/traction
+
+**PREMIUM — $0.02, on-chain x402:**
+
+    export BUYER_PRIVATE_KEY=0x...            # any funded wallet (not the treasury)
+    node scripts/pay-and-consult.mjs "BTC-USDC momentum"
+
+Pays USDC from *your* wallet to the treasury and claims the signal with on-chain proof; verify the tx on arcscan.
+
+> Honesty: self-funded demo traffic is always labeled `self_demo_calls` and excluded from `unique_external_payers`. We never fake external demand.
+
 ## The money loop (all real on-chain)
 
 | Step | Action | On-chain |
