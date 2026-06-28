@@ -1,6 +1,6 @@
 import { test } from "node:test"
 import assert from "node:assert/strict"
-import { reduceTraction, leaderboard } from "../lib/traction.js"
+import { reduceTraction, leaderboard, selfAddresses } from "../lib/traction.js"
 
 const T = "0xdc6778c5f8cc74b10aed11c48306d4cfc5737fbd"
 
@@ -42,4 +42,14 @@ test("reduceTraction sums all micros regardless of exclude", () => {
 	const t = reduceTraction(ledger, { exclude: [T] })
 	assert.equal(t.nano_micros, "3000")
 	assert.equal(t.unique_external_payers, 1)
+})
+
+test("selfAddresses includes treasury + env demo wallets (deduped, lowercased)", () => {
+	process.env.SELF_DEMO_ADDRESSES = "0xAbC, 0xabc ,0xDEF"
+	const s = selfAddresses()
+	assert.ok(s.includes("0xabc"), "lowercased demo wallet present")
+	assert.ok(s.includes("0xdef"), "second demo wallet present")
+	assert.ok(s.includes(T), "treasury always self")
+	assert.equal(s.filter((a) => a === "0xabc").length, 1, "deduped")
+	delete process.env.SELF_DEMO_ADDRESSES
 })
