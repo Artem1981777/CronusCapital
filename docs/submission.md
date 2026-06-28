@@ -34,6 +34,7 @@ Honesty notes (the project's edge):
 - CRONUS x402 agent contract: [0xd81a420BFa4CE8778473BD46195B8E97e928880f](https://testnet.arcscan.app/address/0xd81a420BFa4CE8778473BD46195B8E97e928880f)
 - ERC-8004 Identity Registry: 0x252cAA46b9b0648908000f6C87e0a561DB4dEb6c (agentId 1 = 0x46213abeca58cc9a89a269fd25a8737c700ca164)
 - ERC-8183 Job Escrow: 0x64e55De4CbC3CDf981B2c970807129FA61806873
+- ERC-8004 Reputation (CronusReputation): 0x2A19ad056EaE83364B0a6420685974cA219c209E (deploy tx 0x2b5631aed5a27fe0bd33914c2a4a0aaf3f6380e334fbe9524284cf1d87935fb1; first on-chain feedback tx 0xd922f726c05c7424278b426fbfe653df18bab8a3367a04b44d1b562e076e6c04)
 - Treasury / payTo: 0xdc6778c5f8cc74b10aed11c48306d4cfc5737fbd
 - Circle GatewayWallet (deposit target): 0x0077777d7eba4688bdef3e311b846f25870a19b9
 - Buyer-agent Gateway deposit tx: 0xb817a39ce9a7b5e108831a356027c1e4ac24dabeafcc09ea1766cd8cef02fa7c
@@ -48,4 +49,4 @@ Honesty notes (the project's edge):
 See `docs/demo-script.md` (3-minute judge walkthrough).
 
 ## Scope / planned
-- Trust stack: ERC-8004 identity + ERC-8183 escrow live on-chain; a dedicated on-chain reputation-feedback contract (CronusReputation) is a planned stretch.
+- Trust stack: ERC-8004 identity + ERC-8183 escrow + ERC-8004-style reputation (CronusReputation) are all live on-chain; the buyer-agent writes giveFeedback() after each completed job (identity-gated, de-duplicated per jobRef).
