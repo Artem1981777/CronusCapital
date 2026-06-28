@@ -155,8 +155,9 @@ A real vault on Arc Testnet: the user signs deposit/withdraw; yield (addYield) a
 | x402 | Pay-per-call (~\$0.02 / consult) | LIVE |
 | CCTP | Native USDC, domain 7 | LIVE |
 | ERC-4626 | On-chain vault, share accounting | LIVE |
-| ERC-8004 | Identity Registry **LIVE on Arc** (`0x252cAA46b9b0648908000f6C87e0a561DB4dEb6c`, agentId #1); reputation/validation planned | ✅ LIVE |
+| ERC-8004 | Identity Registry **LIVE on Arc** (`0x252cAA46b9b0648908000f6C87e0a561DB4dEb6c`, agentId #1); resolveByAddress reputation gate | ✅ LIVE |
 | ERC-8183 | Job escrow (fund→submit→release/refund) **LIVE on Arc** (`0x64e55De4CbC3CDf981B2c970807129FA61806873`), gated by ERC-8004 identity | ✅ LIVE |
+| ERC-8004 reputation | CronusReputation **LIVE on Arc** (`0x2A19ad056EaE83364B0a6420685974cA219c209E`); buyer-agent calls giveFeedback(agentId, score, jobRef) after each job; getReputation returns count + average | ✅ LIVE |
 
 ---
 
