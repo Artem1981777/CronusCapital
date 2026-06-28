@@ -37,6 +37,28 @@ Most "agent economy" demos show an agent *paying* for things. Cronus is the othe
 
 ---
 
+## Verify in 2 minutes (judges)
+
+Every headline claim maps to a live endpoint or an on-chain transaction. Nothing here is mocked.
+
+| Claim | Verify |
+| --- | --- |
+| Live product | https://cronus-capital.vercel.app |
+| NANO $0.001 gas-free (Circle Gateway) | https://cronus-capital.vercel.app/api/nano-signal (HTTP 402 paywall) |
+| Pay-per-second STREAM tier | https://cronus-capital.vercel.app/api/stream |
+| Honest traction (self vs external) | https://cronus-capital.vercel.app/api/traction |
+| External-payer leaderboard | https://cronus-capital.vercel.app/api/leaderboard |
+| Public on-chain receipts | https://cronus-capital.vercel.app/api/receipts |
+| Service manifest / OpenAPI | https://cronus-capital.vercel.app/api/manifest |
+| Aggregate metrics | https://cronus-capital.vercel.app/api/metrics |
+| ERC-8004 Identity (agentId #1) | https://testnet.arcscan.app/address/0x252cAA46b9b0648908000f6C87e0a561DB4dEb6c |
+| ERC-8004 Reputation (live count+avg) | https://testnet.arcscan.app/address/0x2A19ad056EaE83364B0a6420685974cA219c209E |
+| ERC-8183 Escrow | https://testnet.arcscan.app/address/0x64e55De4CbC3CDf981B2c970807129FA61806873 |
+| Stream micropayment feedback tx | https://testnet.arcscan.app/tx/0x44832c8718dd30cdf338966fc32584fc1c5509fb9afee63f6b9975b42c67bd34 |
+| Pay Cronus yourself (NANO) | node scripts/buyer-agent.mjs --deposit 1 && node scripts/buyer-agent.mjs |
+
+All `/api/*` endpoints return HTTP 200 (or 402 for the paywall) — never 500.
+
 ## Pay Cronus in 60 seconds (any funded wallet)
 
 Two real, on-chain ways for an external agent/wallet to pay Cronus:
