@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    { "source": "/api/manifest", "destination": "/api/info?kind=manifest" },
+    { "source": "/api/openapi",  "destination": "/api/info?kind=openapi" },
+    { "source": "/api/receipts", "destination": "/api/info?kind=receipts" },
+    { "source": "/api/metrics",  "destination": "/api/info?kind=metrics" }
+  ]
+}
