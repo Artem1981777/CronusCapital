@@ -4,6 +4,7 @@
 // pays gas-free via Circle Gateway (EIP-3009), and consumes the signal.
 // HONEST LABEL: this is an autonomous agent-to-agent demo, NOT organic 3rd-party demand.
 import { GatewayClient } from "@circle-fin/x402-batching/client"
+import { ethers } from "ethers"
 
 function arg(name, def) {
   const i = process.argv.indexOf("--" + name)
@@ -21,6 +22,11 @@ const DEPOSIT  = arg("deposit", null)
 const DRY      = has("dry-run")
 const STATUS   = has("status")
 const PK       = process.env.BUYER_PRIVATE_KEY
+const RPC      = process.env.ARC_RPC || "https://rpc.testnet.arc.network"
+const REPUTATION_REGISTRY = process.env.REPUTATION_REGISTRY || "0x2A19ad056EaE83364B0a6420685974cA219c209E"
+const SELLER_AGENT_ID = Number(process.env.SELLER_AGENT_ID || "1")
+const NO_FEEDBACK = has("no-feedback")
+const SCORE = arg("score", null)
 
 const log  = (...a) => console.log(...a)
 const step = (n, t) => log("\n[" + n + "] " + t)
@@ -98,7 +104,30 @@ async function main() {
   if (data.payment) log("    seller-reported settlement:", data.payment.settlement, data.payment.explorer || "")
 
   step("OK", "Autonomous A2A purchase complete (honest label: agent-to-agent demo).")
-  log("    // TODO P6b: write ERC-8004 reputation feedback for the seller agent after a successful job.")
+  if (NO_FEEDBACK) {
+      log("    [feedback] skipped (--no-feedback).")
+    } else {
+      step("P6b", "Write ERC-8004 reputation feedback for the seller agent")
+      try {
+        const settlementId = String(result.transaction || (data && data.payment && data.payment.settlement) || "")
+        const jobRef = settlementId ? ethers.id("cronus:nano:" + settlementId) : ethers.ZeroHash
+        const delivered = !!(rep && rep.verdict && rep.conviction != null)
+        const score = SCORE ? Math.max(1, Math.min(5, Number(SCORE))) : (delivered ? 5 : 3)
+        log("    score:", score, "(delivery quality, NOT verdict endorsement) | seller agentId:", SELLER_AGENT_ID)
+        const repAbi = ["function giveFeedback(uint256 providerAgentId, uint8 score, bytes32 jobRef, string uri) returns (uint256)", "function getReputation(uint256 a) view returns (uint256,uint256,uint256)"]
+        const provider = new ethers.JsonRpcProvider(RPC)
+        const signer = new ethers.Wallet(PK.startsWith("0x") ? PK : "0x" + PK, provider)
+        const contract = new ethers.Contract(REPUTATION_REGISTRY, repAbi, signer)
+        const tx = await contract.giveFeedback(SELLER_AGENT_ID, score, jobRef, MANIFEST)
+        log("    feedback tx:", tx.hash)
+        await tx.wait()
+        log("    explorer:", "https://testnet.arcscan.app/tx/" + tx.hash)
+        const r = await contract.getReputation(SELLER_AGENT_ID)
+        log("    seller reputation now: count=" + r[0] + " avg=" + (Number(r[2]) / 100).toFixed(2) + "/5")
+      } catch (e) {
+        log("    [feedback] failed (non-fatal):", String(e.message || e).slice(0, 140))
+      }
+    }
 }
 
 main().catch((e) => { console.error("\n[buyer-agent] FAILED:", e.message || e); process.exit(1) })
