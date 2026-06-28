@@ -4,6 +4,7 @@ const CHAIN_ID   = Number(process.env.ARC_CHAIN_ID || "5042002")
 const USDC_ASSET = (process.env.ARC_USDC_ADDRESS || "0x3600000000000000000000000000000000000000").toLowerCase()
 const PAY_TO     = (process.env.CRONUS_PAYTO     || "0xdc6778c5f8cc74b10aed11c48306d4cfc5737fbd").toLowerCase()
 const PRICE      = process.env.SIGNAL_PRICE || "20000"
+const IDENTITY_REGISTRY = (process.env.IDENTITY_REGISTRY || "0x252cAA46b9b0648908000f6C87e0a561DB4dEb6c").toLowerCase()
 
 export default function handler(req, res) {
   const host = (req.headers && req.headers.host) || "localhost"
@@ -17,6 +18,7 @@ export default function handler(req, res) {
     x402Version: 1,
     discovery: { manifest: origin + "/api/manifest", openapi: origin + "/api/openapi", receipts: origin + "/api/receipts", metrics: origin + "/api/metrics" },
     network: { name: NETWORK, chainId: CHAIN_ID, asset: USDC_ASSET, symbol: "USDC", decimals: 6 },
+      identityRegistry: { standard: "ERC-8004", address: IDENTITY_REGISTRY, agentId: 1, agentAddress: "0x46213abeca58cc9a89a269fd25a8737c700ca164", network: NETWORK, explorer: "https://testnet.arcscan.app/address/" + IDENTITY_REGISTRY, note: "x402 sellers can resolveByAddress() this agent before serving (reputation gate)" },
     services: [{
       resource: origin + "/api/signal",
       method: "GET",

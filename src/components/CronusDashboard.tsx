@@ -561,6 +561,7 @@ export function CronusDashboard() {
 					<div className="cd-head-title">CRONUS ORACLE DASHBOARD</div>
 					<div className="cd-head-sub">Autonomous Market Intelligence · Arc Network · USDC</div>
 					<div className="cd-badge">⚡ v0.7.2 READY · MEMO + BATCHED PAYMENTS</div>
+									<a className="cd-badge" href="https://testnet.arcscan.app/address/0x252cAA46b9b0648908000f6C87e0a561DB4dEb6c" target="_blank" rel="noreferrer">🪪 ERC-8004 IDENTITY ✓ on Arc · #1</a>
 				</div>
 				<button className={"cd-ankh" + (isConnected ? " cd-ankh-on" : "")} title="Connect Wallet" onClick={() => setWalletOpen(true)}>{walletLabel}</button>
 			</header>

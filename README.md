@@ -148,7 +148,7 @@ A real vault on Arc Testnet: the user signs deposit/withdraw; yield (addYield) a
 | x402 | Pay-per-call (~\$0.02 / consult) | LIVE |
 | CCTP | Native USDC, domain 7 | LIVE |
 | ERC-4626 | On-chain vault, share accounting | LIVE |
-| ERC-8004 | Agent registries (identity / reputation / validation) | READY |
+| ERC-8004 | Identity Registry **LIVE on Arc** (`0x252cAA46b9b0648908000f6C87e0a561DB4dEb6c`, agentId #1); reputation/validation planned | ✅ LIVE |
 
 ---
 
