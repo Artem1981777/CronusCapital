@@ -81,7 +81,8 @@ export default async function handler(req, res) {
     await recordTraction({ tier: "NANO", network: payment.network || NETWORK, payer: payment.payer, amount: payment.amount, transaction: payment.transaction })
   } catch (_) {}
 
-  const txUrl = payment.transaction ? "https://testnet.arcscan.app/tx/" + payment.transaction : null
+  const isOnchainTx = /^0x[0-9a-fA-F]{64}$/.test(String(payment.transaction || ""))
+  const txUrl = isOnchainTx ? "https://testnet.arcscan.app/tx/" + payment.transaction : null
   if (!res.writableEnded) {
     res.status(200).json({
       paid: true,
@@ -95,6 +96,8 @@ export default async function handler(req, res) {
         amount: payment.amount || null,
         payTo: PAY_TO,
         settlement: payment.transaction || null,
+        settlementType: isOnchainTx ? "onchain" : "gateway-batch",
+        settlementNote: isOnchainTx ? null : "Circle Gateway batched settlement ID; on-chain settlement tx pending batch close",
         explorer: txUrl,
       },
       settledAt,

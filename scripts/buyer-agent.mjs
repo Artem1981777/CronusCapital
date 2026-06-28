@@ -11,6 +11,7 @@ function arg(name, def) {
   return def
 }
 const has = (name) => process.argv.includes("--" + name)
+const isOnchainTx = (t) => /^0x[0-9a-fA-F]{64}$/.test(String(t || ""))
 
 const MANIFEST = String(arg("manifest", process.env.CRONUS_MANIFEST || "https://cronus-capital.vercel.app/api/manifest"))
 const MAX_USD  = Number(arg("max-usd", process.env.BUYER_MAX_USD || "0.01"))
@@ -18,6 +19,7 @@ const TOPIC    = String(arg("topic", "BTC-USDC momentum"))
 const CHAIN    = String(arg("chain", "arcTestnet"))
 const DEPOSIT  = arg("deposit", null)
 const DRY      = has("dry-run")
+const STATUS   = has("status")
 const PK       = process.env.BUYER_PRIVATE_KEY
 
 const log  = (...a) => console.log(...a)
@@ -63,6 +65,8 @@ async function main() {
     log("    gateway USDC (available):", balances.gateway.formattedAvailable)
   } catch (e) { log("    (balance check failed: " + (e.message || e) + ")") }
 
+  if (STATUS) { log("\n[status] balances only — no deposit, no payment."); return }
+
   if (DEPOSIT && DEPOSIT !== true) {
     step("4b", "Deposit into Gateway Wallet: " + DEPOSIT + " USDC")
     const dr = await gateway.deposit(String(DEPOSIT))
@@ -85,7 +89,8 @@ async function main() {
   const data = result.data || {}
   log("    settled. amount:", result.formattedAmount, "USDC")
   log("    settlement tx:", result.transaction || "(batched/pending)")
-  if (result.transaction) log("    explorer: https://testnet.arcscan.app/tx/" + result.transaction)
+  if (isOnchainTx(result.transaction)) log("    explorer:", "https://testnet.arcscan.app/tx/" + result.transaction)
+    else if (result.transaction) log("    settlement id (Circle Gateway batch; on-chain tx pending):", result.transaction)
 
   step(6, "Consumed signal (A2A)")
   const rep = data.report || {}
