@@ -1,3 +1,4 @@
+import PublisherPanel from "./PublisherPanel"
 import StreamPanel from "./StreamPanel"
 import NanoHeadline from "./NanoHeadline"
 import ReputationBadge from "./ReputationBadge"
@@ -647,6 +648,7 @@ export function CronusDashboard() {
 			<LiveTicker signals={signals} />
 					<LiveSettlements />
 					<NanoTraction />
+						<PublisherPanel />
 
 			<div className="cd-memo">
 				<span className="cd-memo-tag">𓏏 ARC v0.7.2</span>
