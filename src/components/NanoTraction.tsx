@@ -60,19 +60,19 @@ export default function NanoTraction() {
 		<section className="cd-nano">
 			<div className="cd-nano-head">
 				<span className="cd-card-label">NANO PAYMENTS · Circle Gateway</span>
-				<span className="cd-nano-tag">gas-free · batched</span>
+				<span className="cd-nano-tag">gas-free · Circle Gateway</span>
 			</div>
 
 			<div className="cd-nano-hero">
-				<div className="cd-nano-hero-num">{batch > 0 ? batch + ":1" : settlements > 0 ? calls + ":" + settlements : "\u2014"}</div>
+				<div className="cd-nano-hero-num">{calls > 0 ? calls : "\u2014"}</div>
 				<div className="cd-nano-hero-sub">
-					{settlements > 0 ? calls + " nano-calls \u2192 " + settlements + " on-chain settlement" + (settlements === 1 ? "" : "s") : "no nano settlements yet"}
+					{calls > 0 ? "gas-free nano-payments \u00b7 Circle Gateway (EIP-3009, sub-cent)" : "no nano payments yet"}
 				</div>
 			</div>
 
 			<div className="cd-nano-grid">
 				<div className="cd-card-glow"><div className="cd-card-label">Nano calls</div><div className="cd-card-value">{calls}</div></div>
-				<div className="cd-card-glow"><div className="cd-card-label">Settlements</div><div className="cd-card-value">{settlements}</div></div>
+				<div className="cd-card-glow"><div className="cd-card-label">Gateway settlements</div><div className="cd-card-value">{settlements}</div></div>
 				<div className="cd-card-glow"><div className="cd-card-label">External payers</div><div className="cd-card-value">{ext}</div></div>
 				<div className="cd-card-glow"><div className="cd-card-label">Nano volume</div><div className="cd-card-value">${vol.toFixed(6)}</div></div>
 			</div>
@@ -84,7 +84,7 @@ export default function NanoTraction() {
 			</div>
 
 			<div className="cd-nano-foot">
-				<span>Self-demo (A2A): <b>{selfDemo}</b> · honestly labeled autonomous traffic</span>
+				<span>Self-demo (A2A): <b>{selfDemo}</b> · honestly labeled autonomous traffic</span><span> · Batching: Circle Gateway batches many signed authorizations \u2192 1 on-chain settlement at scale; on Arc testnet each call settles individually ({batch || 1}:1 observed)</span>
 				{std ? <span> · STANDARD on-chain: <b>{std.payments || 0}</b> calls · ${Number(std.totalUsdc || 0).toFixed(2)}</span> : null}
 			</div>
 
