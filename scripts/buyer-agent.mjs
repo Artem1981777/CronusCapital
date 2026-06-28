@@ -27,6 +27,9 @@ const REPUTATION_REGISTRY = process.env.REPUTATION_REGISTRY || "0x2A19ad056EaE83
 const SELLER_AGENT_ID = Number(process.env.SELLER_AGENT_ID || "1")
 const NO_FEEDBACK = has("no-feedback")
 const SCORE = arg("score", null)
+const STREAM = has("stream")
+const SECONDS = arg("seconds", "10")
+const STREAM_BUDGET = Number(arg("stream-budget", "0.05"))
 
 const log  = (...a) => console.log(...a)
 const step = (n, t) => log("\n[" + n + "] " + t)
@@ -89,6 +92,55 @@ async function main() {
     process.exit(3)
   }
 
+  if (STREAM) {
+    const seconds = Math.max(1, Number(SECONDS) || 10)
+    const projected = seconds * priceUsd
+    if (projected > STREAM_BUDGET) {
+      log("    ABORT: projected " + projected.toFixed(6) + " USDC exceeds --stream-budget " + STREAM_BUDGET + " USDC")
+      process.exit(2)
+    }
+    step(5, "STREAM: pay-per-second nano stream via Circle Gateway (" + seconds + "s @ " + priceUsd + " USDC/sec, budget " + STREAM_BUDGET + ")")
+    let spent = 0
+    let delivered = 0
+    const settlements = []
+    for (let i = 1; i <= seconds; i++) {
+      const t0 = Date.now()
+      try {
+        const sUrl = resource + "?topic=" + encodeURIComponent(TOPIC) + "&stream=" + i
+        const r = await gateway.pay(sUrl)
+        spent += Number(r.formattedAmount || priceUsd)
+        const d = r.data || {}
+        const rep = d.report || {}
+        if (rep.verdict) delivered++
+        if (r.transaction) settlements.push(r.transaction)
+        log("    [" + i + "/" + seconds + "] paid " + (r.formattedAmount || priceUsd) + " USDC | settlement " + (r.transaction || "(batched)") + " | verdict " + (rep.verdict || "-"))
+      } catch (e) {
+        log("    [" + i + "/" + seconds + "] tick failed (non-fatal): " + String(e.message || e).slice(0, 100))
+      }
+      const dt = Date.now() - t0
+      if (dt < 1000) await new Promise((res) => setTimeout(res, 1000 - dt))
+    }
+    step("STREAM-OK", "streamed " + seconds + "s | signals " + delivered + " | spent " + spent.toFixed(6) + " USDC | settlements " + settlements.length)
+    if (!NO_FEEDBACK && settlements.length) {
+      try {
+        const jobRef = ethers.id("cronus:stream:" + settlements[0])
+        const score = SCORE ? Math.max(1, Math.min(5, Number(SCORE))) : (delivered ? 5 : 3)
+        const repAbi = ["function giveFeedback(uint256 providerAgentId, uint8 score, bytes32 jobRef, string uri) returns (uint256)", "function getReputation(uint256 a) view returns (uint256,uint256,uint256)"]
+        const provider = new ethers.JsonRpcProvider(RPC)
+        const signer = new ethers.Wallet(PK.startsWith("0x") ? PK : "0x" + PK, provider)
+        const contract = new ethers.Contract(REPUTATION_REGISTRY, repAbi, signer)
+        const tx = await contract.giveFeedback(SELLER_AGENT_ID, score, jobRef, MANIFEST)
+        log("    [feedback] stream batch tx:", tx.hash)
+        await tx.wait()
+        log("    explorer:", "https://testnet.arcscan.app/tx/" + tx.hash)
+        const rr = await contract.getReputation(SELLER_AGENT_ID)
+        log("    seller reputation now: count=" + rr[0] + " avg=" + (Number(rr[2]) / 100).toFixed(2) + "/5")
+      } catch (e) {
+        log("    [feedback] stream feedback failed (non-fatal):", String(e.message || e).slice(0, 140))
+      }
+    }
+    return
+  }
   step(5, "Pay (gas-free EIP-3009 via Circle Gateway) and consume")
   const url = resource + "?topic=" + encodeURIComponent(TOPIC)
   const result = await gateway.pay(url)
