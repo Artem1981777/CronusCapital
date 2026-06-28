@@ -23,6 +23,12 @@ Cronus is an autonomous prediction-market oracle agent. It scans markets, scores
 
 ---
 
+## Built for the Circle Gateway nanopayments round (Canteen × Circle · Arc)
+
+This submission centers **Circle Gateway nanopayments**: a sub-cent ($0.001) agent-to-agent tier where an autonomous buyer-agent discovers, budgets, and pays **gas-free** (EIP-3009) for Cronus signals, with **honest, self-labeled traction** — no faked external demand. Details in [NANO nanopayments — Circle Gateway](#nano-nanopayments--circle-gateway-gas-free-sub-cent).
+
+---
+
 ## Why it matters — RFB 02 (Monetize an API / agent)
 
 Most "agent economy" demos show an agent *paying* for things. Cronus is the other half of the economy: an agent that **gets paid per call, covers its own costs, and earns a positive margin on every paid call** — fully on-chain and auditable.
@@ -280,6 +286,7 @@ Cronus also exposes a **NANO tier** at **$0.001/call**, settled **gas-free via C
 ## What's new (build log)
 
 Latest hardening, newest first:
+- **Honest NANO traction + Circle Gateway A2A loop** — autonomous buyer-agent pays gas-free via Circle Gateway; self-funded traffic is labeled `self_demo_calls` and excluded from `unique_external_payers`; batching shown as a protocol capability (Arc testnet settles 1:1). (`e19b361`, `6c83b3d`, `4412f6f`, `1694dbd`)
 
 - **Public on-chain receipts** - `/api/receipts` (JSON + CSV) lists every settled x402 payment with payer, amount, block, `commitment`, and `memoId`. (`46c6ada`)
 - **Receipts in agent discovery** - the `402` challenge now advertises `/api/receipts` alongside the manifest and OpenAPI spec. (`d1e514c`)
