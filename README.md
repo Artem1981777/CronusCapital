@@ -144,7 +144,6 @@ A real vault on Arc Testnet: the user signs deposit/withdraw; yield (addYield) a
 
 | Standard | Role | Status |
 |---|---|---|
-| ERC-8183 | Job escrow settlement (keccak jobHash) | LIVE |
 | x402 | Pay-per-call (~\$0.02 / consult) | LIVE |
 | CCTP | Native USDC, domain 7 | LIVE |
 | ERC-4626 | On-chain vault, share accounting | LIVE |
