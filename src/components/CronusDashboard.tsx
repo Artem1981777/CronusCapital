@@ -1,3 +1,4 @@
+import ReputationBadge from "./ReputationBadge"
 import TractionBadge from "./TractionBadge"
 import { useEffect, useRef, useState } from "react"
 import { encodeFunctionData, keccak256, stringToHex, toBytes } from "viem"
@@ -565,6 +566,7 @@ export function CronusDashboard() {
 									<a className="cd-badge" href="https://testnet.arcscan.app/address/0x252cAA46b9b0648908000f6C87e0a561DB4dEb6c" target="_blank" rel="noreferrer">🪪 ERC-8004 IDENTITY ✓ on Arc · #1</a>
 									<a className="cd-badge" href="https://testnet.arcscan.app/address/0x64e55De4CbC3CDf981B2c970807129FA61806873" target="_blank" rel="noreferrer">🤝 ERC-8183 ESCROW ✓ on Arc</a>
 									<a className="cd-badge" href="https://testnet.arcscan.app/address/0x2A19ad056EaE83364B0a6420685974cA219c209E" target="_blank" rel="noreferrer">⭐ ERC-8004 REPUTATION ✓ on Arc</a>
+								<ReputationBadge />
 				</div>
 				<button className={"cd-ankh" + (isConnected ? " cd-ankh-on" : "")} title="Connect Wallet" onClick={() => setWalletOpen(true)}>{walletLabel}</button>
 			</header>
