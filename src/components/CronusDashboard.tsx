@@ -6,6 +6,7 @@ import SecurityPanel from "../SecurityPanel"
 import type { CSSProperties } from "react"
 import { useAccount, useConnect, useDisconnect, useWriteContract, usePublicClient, useWaitForTransactionReceipt, useSwitchChain } from "wagmi"
 import { LiveSettlements } from "./LiveSettlements"
+import NanoTraction from "./NanoTraction"
 
 /* ============================================================
    CRONUS CAPITAL — WOW DASHBOARD (cyber-Egyptian)
@@ -638,6 +639,7 @@ export function CronusDashboard() {
 
 			<LiveTicker signals={signals} />
 					<LiveSettlements />
+					<NanoTraction />
 
 			<div className="cd-memo">
 				<span className="cd-memo-tag">𓏏 ARC v0.7.2</span>
