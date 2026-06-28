@@ -307,7 +307,7 @@ export function CronusDashboard() {
 
 	const memoSeed = (0x7f2a + tick * 13).toString(16).toUpperCase().slice(-4)
 	const memo = "CRONUS-" + signals[0].asset + "-" + memoSeed
-	const batchCount = 2 + (tick % 4)
+	
 
 	const privacy = [
 		{ g: "𓂀", t: "Opt-in confidentiality", d: "Per-function privacy in plain Solidity" },
@@ -643,7 +643,7 @@ export function CronusDashboard() {
 
 			<div className="cd-memo">
 				<span className="cd-memo-tag">𓏏 ARC v0.7.2</span>
-				Last settlement memo: <b>{memo}</b> · batched <b>{batchCount}</b> calls ✓ · reconciliation-ready
+				On-chain settlement memo pattern: <b>{memo}</b> · written to each Arc settlement · reconciliation-ready
 			</div>
 
 			<div className="cd-panel">
