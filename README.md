@@ -41,7 +41,7 @@ Most "agent economy" demos show an agent *paying* for things. Cronus is the othe
 
 | Step | Action | On-chain |
 |---|---|---|
-| **Earn** | Client presses **UNLOCK SIGNAL · \$0.02 (x402)** | real USDC transfer to agent contract 0xd81a420…880f |
+| **Earn** | Client presses **UNLOCK SIGNAL · \$0.02 (x402)** | real USDC transfer to agent contract [0xd81a420…880f](https://testnet.arcscan.app/address/0xd81a420BFa4CE8778473BD46195B8E97e928880f) |
 | **Pay** | Agent buys upstream data — **PAY UPSTREAM · \$0.005** | real USDC transfer out |
 | **Net** | Net Flow = revenue − spend, shown live (green when > 0) | derived from booked tx |
 | **Settle** | Decision written to the Verifiable Ledger (keccak hash-chain) | per-action label, Verified badge + tx link |

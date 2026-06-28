@@ -31,6 +31,7 @@ Honesty notes (the project's edge):
 - All on-chain volume to date is self-generated to prove the rails — not external customer revenue, and none is mocked or hardcoded.
 
 ## On-chain references
+- CRONUS x402 agent contract: [0xd81a420BFa4CE8778473BD46195B8E97e928880f](https://testnet.arcscan.app/address/0xd81a420BFa4CE8778473BD46195B8E97e928880f)
 - ERC-8004 Identity Registry: 0x252cAA46b9b0648908000f6C87e0a561DB4dEb6c (agentId 1 = 0x46213abeca58cc9a89a269fd25a8737c700ca164)
 - ERC-8183 Job Escrow: 0x64e55De4CbC3CDf981B2c970807129FA61806873
 - Treasury / payTo: 0xdc6778c5f8cc74b10aed11c48306d4cfc5737fbd
