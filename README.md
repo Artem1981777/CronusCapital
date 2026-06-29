@@ -558,3 +558,39 @@ An external scheduler (cron-job.org) pings the execute endpoint every 15 minutes
 Trigger (secret redacted): GET /api/agent-payout?action=execute&secret=REDACTED
 
 On each tick the agent re-reads its policy, decides the amount (30 percent of available, min threshold 1 USDC, per-payout cap 5 USDC), and either holds (nothing to pay) or submits a server-signed CCTP burn on Arc. Payouts are fully autonomous: the treasury pays out on a schedule, by itself, only when the policy allows.
+
+## Skin in the Game — Conviction Staking
+
+Cronus doesn't just publish signals — it puts its own USDC behind them. Every stake is
+opened on-chain, held in escrow, and settled verifiably against a price the agent commits
+to *before* the outcome is known. No human override, no edits after the fact.
+
+### Settlement rule
+At a stake's `resolveBy` horizon, the resolver fetches the instrument's last price from
+OKX and compares it to the `openPrice` committed at open time:
+- `YES` is **correct** if `last > openPrice`; `NO` is **correct** if `last < openPrice`.
+- **Correct** -> the staked USDC is returned to the staking wallet.
+- **Wrong** -> the staked USDC is burned to `0x...dEaD`. Irreversible.
+
+### Endpoints
+| Route | Method | Purpose |
+|---|---|---|
+| `/api/open-stake` | POST (auth) | Open a conviction stake; escrow the principal; record commitment + ledger |
+| `/api/resolve-stake` | GET / POST (auth) | GET = no-funds dry-run preview of due positions; POST = settle (return or burn) |
+| `/api/track-record` | GET | Public scorecard: open / resolved / correct / wrong, accuracy, at-risk USDC |
+
+### On-chain roles (Arc testnet, chain 5042002)
+- **Staking / agent-identity wallet (ERC-8004):** `0x46213abeCa58Cc9a89A269fD25A8737C700Ca164`
+- **Stake escrow:** `0xd6Cb6BfA4e922A30a244473ddb2fd3ABA39D5d4D`
+- **Burn sink:** `0x000000000000000000000000000000000000dEaD`
+
+### First live stake
+- Market `BTC-USDC`, verdict **YES**, conviction `0.82`
+- Committed `openPrice = 60147.1`, stake `0.091 USDC`
+- `openTx` `0x60b3bcb223ecbca4e507c52d44be70416059c3a20d1ebe098722f3ae88cf1003`
+- Resolves ~24h after open via `/api/resolve-stake`.
+
+### Honesty
+`/api/track-record` reports `accuracy = null` until at least one position resolves — we
+never claim a hit rate we haven't earned on-chain. At-risk and external metrics reflect
+real on-chain state only.
