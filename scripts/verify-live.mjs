@@ -143,6 +143,22 @@ console.log("\n[8] EIP-712 spend-intent endpoint (no keys: schema + honest rejec
 	ok("wrong payTo rejected (binding enforced)", !!wp.body && wp.body.valid === false, wp.body && wp.body.reason)
 }
 
+console.log("\n[9] verifiability scorecard (GET /api/scorecard)")
+try {
+	const s = await getJson("/api/scorecard")
+	const b = (s && s.body) || {}
+	ok("scorecard reachable + ok:true", b.ok === true)
+	ok("external_payers is 0 (honest)", b.external_payers === 0, "external_payers=" + b.external_payers)
+	const cs = Array.isArray(b.sourceVerifiedContracts) ? b.sourceVerifiedContracts : []
+	ok("4 source-verified contracts listed", cs.length === 4, "count=" + cs.length)
+	ok("all contracts exact_match on sourcify", cs.length === 4 && cs.every((c) => c.sourceVerified && c.sourceVerified.match === "exact_match"))
+	const cl = Array.isArray(b.claims) ? b.claims : []
+	ok("every claim verifiable + has how", cl.length > 0 && cl.every((c) => c.verifiable === true && typeof c.how === "string" && c.how.length > 0), cl.length + " claims")
+	ok("principle states zero-private-keys reproducibility", typeof b.principle === "string" && /zero private keys/i.test(b.principle))
+} catch (e) {
+	ok("scorecard reachable", false, String((e && e.message) || e))
+}
+
 console.log("\n================================================")
 console.log((fail === 0 ? "ALL CHECKS PASSED" : fail + " CHECK(S) FAILED") + " — " + pass + " passed, " + fail + " failed")
 console.log("No private keys were used. Reproduce: npm run verify-live")

@@ -7,6 +7,7 @@
     { "source": "/api/traction",    "destination": "/api/info?kind=traction" },
     { "source": "/api/leaderboard", "destination": "/api/info?kind=leaderboard" },
 		{ "source": "/api/settlements", "destination": "/api/info?kind=settlements" },
-		{ "source": "/api/spend-intent", "destination": "/api/info?kind=spend-intent" }
+		{ "source": "/api/spend-intent", "destination": "/api/info?kind=spend-intent" },
+		{ "source": "/api/scorecard",   "destination": "/api/info?kind=scorecard" }
   ]
 }
