@@ -13,7 +13,6 @@ import type { CSSProperties } from "react"
 import { useAccount, useConnect, useDisconnect, useWriteContract, usePublicClient, useWaitForTransactionReceipt, useSwitchChain } from "wagmi"
 import { LiveSettlements } from "./LiveSettlements"
 import NanoTraction from "./NanoTraction"
-import SiteFooter from "./SiteFooter"
 
 /* ============================================================
    CRONUS CAPITAL — WOW DASHBOARD (cyber-Egyptian)
@@ -676,7 +675,6 @@ export function CronusDashboard() {
 				<div className="cd-rm-note">Proposed design — confidential agent strategies & positions (not live yet).</div>
 			</div>
 
-			<SiteFooter />
 					{(running || txBusy) && <div className="cd-scan" />}
 			<RiskModal open={riskOpen} onClose={() => setRiskOpen(false)} />
 			<WalletConnectModal open={walletOpen} onClose={() => setWalletOpen(false)} />
