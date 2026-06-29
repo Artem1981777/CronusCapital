@@ -75,27 +75,27 @@ The NANO tier is a real Circle Gateway integration (`@circle-fin/x402-batching`)
 
 Per the sell-side quickstart, the EIP-3009 `validBefore` must be at least 7 days out. On Arc testnet, Circle Gateway returns **UUID settlement ids** and settles batches **1:1** (one authorization per settlement at current volume); these batched settlements are **not individually queryable on arcscan** like a normal transaction. We surface the real Gateway settlement id and label it honestly rather than fabricating an on-chain batch-tx link. The PREMIUM $0.02 tier (`/api/signal`) remains a standard on-chain x402 payment with a real arcscan tx.
 
-## Real external traction (on-chain, verifiable)
+## Traction (honest): paywall proven with self-generated volume
 
-Cronus's premium signals are paid on-chain. Excluding our own treasury, deployer, and contract wallets, the live deployment has been paid by **39 distinct external wallets** (none of them ours) — not faked, not self-funded.
+Cronus's premium signals are paid on-chain. To prove the paywall settles real USDC end-to-end, we drove the live deployment from **39 distinct self-test wallets** (all ours, across dev sessions) — not faked, but self-generated; no external customer has paid yet.
 
 Snapshot (2026-06-29), straight from the Arc explorer:
 
-- **39** distinct external payer wallets
-- **111** settled USDC payments to the treasury
-- **2.22 USDC** total external volume
-- **0 of 39** payers were funded by any Cronus wallet (full funding audit)
-- on a **testnet**, distinct wallets do not equal distinct humans (faucet wallets are cheap), so we claim only what is provable on-chain: **39 distinct payer addresses, 0 traced to our wallets**. Their first USDC came from 5 distinct funding sources, none of them ours.
+- **39** distinct self-test wallets (all ours, used across dev sessions)
+- **111** settled on-chain USDC payments (all self-generated test traffic)
+- **2.22 USDC** total self-generated test volume
+- **0** verified external (non-self) payers so far
+- on a **testnet** these are wallets **we** controlled to exercise the paywall, so we do **not** present them as external demand; the honest external-payer count is **0** until a real third party pays.
 
 Verify it yourself (always-current):
 
 ```bash
-curl -s https://cronus-capital.vercel.app/api/leaderboard | jq '{onchain_external_payers, onchain_external_txs, onchain_external_usdc}'
-curl -s https://cronus-capital.vercel.app/api/traction   | jq '.onchain'
+curl -s https://cronus-capital.vercel.app/api/leaderboard | jq '{external_payers, self_generated_wallets, self_generated_txs, self_generated_usdc}'
+curl -s https://cronus-capital.vercel.app/api/traction   | jq '.self_generated'
 node scripts/audit-funders.mjs   # re-checks every payer's first USDC funding source
 ```
 
-The canonical on-chain metric is `external_payers` (top-level in both `/api/traction` and `/api/leaderboard`). External-payer metrics exclude our treasury, deployer/buyer-agent, and the agent/memo/vault/payout contracts. The nano-tier `unique_external_payers` reflects only the separate nano KV ledger and stays `0` until a nano-tier external payer appears, so it is not the headline number. Autonomous A2A demo volume is labeled `self_demo_calls` and never counted as external.
+The canonical metric is `external_payers`, which is **0** today (top-level in both `/api/traction` and `/api/leaderboard`): no verified third party has paid yet. The `self_generated_*` fields report our own on-chain test volume, labeled honestly and never counted as external. The nano-tier `unique_external_payers` reflects only the separate nano KV ledger and stays `0` until a nano-tier external payer appears, so it is not the headline number. Autonomous A2A demo volume is labeled `self_demo_calls` and never counted as external.
 
 ## Pay Cronus in 60 seconds (any funded wallet)
 
@@ -308,20 +308,20 @@ Cronus exposes a real, on-chain-verified paywall at `GET /api/signal` — no dem
 2. The caller pays USDC on Arc, then retries with header `X-PAYMENT: <txHash>`.
 3. The server verifies the payment **on-chain via JSON-RPC** (USDC transfer of the required amount to `payTo`, tx success, within a freshness window) and only then returns a signed signal plus a keccak256 `commitment` of the response.
 
-**Proof — a real, independent wallet paid and consumed (Arc testnet):**
+**Proof — a self-test wallet we controlled paid and consumed (Arc testnet):**
 
-- Payer (external wallet): `0x46213abeca58cc9a89a269fd25a8737c700ca164`
+- Payer (our self-test wallet): `0x46213abeca58cc9a89a269fd25a8737c700ca164`
 - Payment: 0.02 USDC to `0xdc6778c5f8cc74b10aed11c48306d4cfc5737fbd`
 - On-chain tx: https://testnet.arcscan.app/tx/0xfe2764b2b837365ea7cb896fbbe55119ffbf250e51941945bf013a88bb942086
 - Response commitment: `0x993453223b57849b38df20ff050daa54905d53a3ac70c56c8e5460eb6fa77611`
 
-This closes the loop honestly: revenue can be **real external demand, verified on-chain** — not the agent paying itself. Reproduce with `scripts/pay-and-consult.mjs` (set `BUYER_PRIVATE_KEY` to any funded wallet).
+This closes the loop honestly: the paywall verifies a **real on-chain USDC payment** server-side (here from our own self-test wallet) — it is still our own test wallet, not external demand. Reproduce with `scripts/pay-and-consult.mjs` (set `BUYER_PRIVATE_KEY` to any funded wallet).
 
 > Replay protection: payments are accepted only within a freshness window (`SIGNAL_MAX_AGE_SECONDS`, default 1800s). Strict one-time-use can be added with a KV store.
 
 **Two ways to consume the paywall:**
 
-- **From any wallet or agent (CLI):** run `scripts/pay-and-consult.mjs` with a funded `BUYER_PRIVATE_KEY`. Proven with an independent external wallet (tx above).
+- **From any wallet or agent (CLI):** run `scripts/pay-and-consult.mjs` with a funded `BUYER_PRIVATE_KEY`. Exercised with our own self-test wallet (tx above).
 - **From the dashboard (one click):** the **BUY SIGNAL** button runs the full x402 flow in-browser - request `402`, pay 0.02 USDC on Arc, verify on-chain, then render the verdict, the keccak `commitment`, and a link to the payment tx. No setup, no demo bypass.
 
 **Agent discovery (machine-readable):** point any AI agent at the manifest or OpenAPI spec to auto-discover price, network, `payTo`, and the pay-then-retry flow:
@@ -336,7 +336,7 @@ This closes the loop honestly: revenue can be **real external demand, verified o
 
 ## Live traction (real, on-chain, verifiable)
 
-As of the latest build, the Cronus x402 paywall has settled **90+ real USDC payments (~1.9 USDC) on Arc testnet** - every one a genuine on-chain transfer, verifiable in the explorer. The counter is **read live from the Arc block explorer** via `/api/metrics`, value-filtered to the exact 0.02 USDC signal price, so unrelated transfers (such as vault withdrawals) are never counted and the figure updates itself with each new payment.
+As of the latest build, the Cronus x402 paywall has settled **111 real USDC payments (~2.22 USDC) on Arc testnet** - every one a genuine on-chain transfer, verifiable in the explorer. The counter is **read live from the Arc block explorer** via `/api/metrics`, value-filtered to the exact 0.02 USDC signal price, so unrelated transfers (such as vault withdrawals) are never counted and the figure updates itself with each new payment.
 
 **Honest scope:** this volume was self-generated against the live endpoint to prove the paywall handles real settlement at scale - it is **not external customer revenue**. Every payment is a real, auditable on-chain settlement; none of it is mocked or hardcoded.
 
@@ -351,7 +351,7 @@ Cronus also exposes a **NANO tier** at **$0.001/call**, settled **gas-free via C
 - **External-payer leaderboard:** https://cronus-capital.vercel.app/api/leaderboard
 
 **Honest scope (the project's edge):**
-- The buyer-agent is **self-funded**, so its address is registered in `SELF_DEMO_ADDRESSES` and counted as `self_demo_calls` — **never** as `unique_external_payers`. The on-chain leaderboard now ranks **39 real external payer wallets** (none ours); the nano-tier `unique_external_payers` stays `0` until a nano-tier third party pays.
+- The buyer-agent is **self-funded**, so its address is registered in `SELF_DEMO_ADDRESSES` and counted as `self_demo_calls` — **never** as `unique_external_payers`. The on-chain x402 volume is **self-generated test traffic** (labeled `self_generated_*`); the nano-tier `unique_external_payers` stays `0` until a nano-tier third party pays.
 - On Arc testnet, Circle Gateway settles **1:1** (each call gets its own settlement id). N→1 **batching is a Circle Gateway protocol capability at scale**, shown as such in the UI — not claimed as achieved here.
 - Gateway settlement identifiers are labeled `gateway-batch` with on-chain tx **pending**; arcscan `/tx/` links render only for real `0x` on-chain hashes.
 
