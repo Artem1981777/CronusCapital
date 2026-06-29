@@ -9,8 +9,9 @@ import metrics from "../lib/metrics.js"
 import traction from "../lib/traction.js"
 import leaderboard from "../lib/leaderboard.js"
 import settlements from "../lib/gateway.js"
+import spendIntent from "../lib/intents.js"
 
-const ROUTES = { manifest, openapi, receipts, metrics, traction, leaderboard, settlements }
+const ROUTES = { manifest, openapi, receipts, metrics, traction, leaderboard, settlements, "spend-intent": spendIntent }
 
 export default async function handler(req, res) {
 	const kind = String((req.query && req.query.kind) || "").toLowerCase()
