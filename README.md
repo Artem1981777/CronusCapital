@@ -372,6 +372,8 @@ Cronus also exposes a **NANO tier** at **$0.001/call**, settled **gas-free via C
 
 ## What's new (build log)
 
+- **2026-06-29 — live Circle Gateway nano-payment (self-demo, honestly labeled):** the autonomous buyer-agent paid **0.001 USDC gas-free** via EIP-3009 through Circle Gateway. Gateway settlement id `aafeb3ee-056b-4f5a-bc7e-0c77ee808113` (batch; settles 1:1 on Arc testnet — see *Arc testnet deviation*). Signal consumed (verdict SKIP, conviction 58). On-chain ERC-8004 reputation feedback: [`0x87f2c4…cef72c`](https://testnet.arcscan.app/tx/0x87f2c43513371111566ee9a4267ee574cc970369a57ff226b669b215b3cef72c) — seller reputation now count=3, avg 5.00/5. Reproduce: `node scripts/buyer-agent.mjs --dry-run`.
+
 Latest hardening, newest first:
 - **Honest NANO traction + Circle Gateway A2A loop** — autonomous buyer-agent pays gas-free via Circle Gateway; self-funded traffic is labeled `self_demo_calls` and excluded from `unique_external_payers`; batching shown as a protocol capability (Arc testnet settles 1:1). (`e19b361`, `6c83b3d`, `4412f6f`, `1694dbd`)
 
