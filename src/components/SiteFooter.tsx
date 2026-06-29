@@ -37,6 +37,7 @@ export default function SiteFooter() {
 				{ label: "Source on GitHub", href: "https://github.com/Artem1981777/CronusCapital" },
 				{ label: "Buyer-agent (A2A loop)", href: "https://github.com/Artem1981777/CronusCapital/blob/main/scripts/buyer-agent.mjs" },
 				{ label: "Funding audit script", href: "https://github.com/Artem1981777/CronusCapital/blob/main/scripts/audit-funders.mjs" },
+				{ label: "Verify live (no keys)", href: "https://github.com/Artem1981777/CronusCapital/blob/main/scripts/verify-live.mjs" },
 			],
 		},
 	]
