@@ -2,6 +2,13 @@
 
 All changes verified on Arc Testnet (chainId 5042002). Self-funded demo traffic is labeled and excluded from external metrics — we never fake demand.
 
+## External traction verified (2026-06-29)
+
+- `/api/traction` and `/api/leaderboard` now compute external-payer metrics from on-chain USDC receipts (not only the nano KV ledger), excluding treasury + deployer + agent/memo/vault/payout wallets.
+- New fields: `onchain_external_payers`, `onchain_external_txs`, `onchain_external_usdc`, `onchain_leaders`.
+- Snapshot: 39 distinct external payer wallets, 111 payments, 2.22 USDC; full funding audit = 0/39 funded by a Cronus wallet (5 independent funding sources).
+- Added `scripts/audit-funders.mjs` so anyone can reproduce the independent-funding audit.
+
 ## Gateway integration hardening (2026-06-29)
 
 - **Honest NANO settlement labeling** — response now exposes `verification: "eip3009-signature"` and `served: "immediate"`; removed misleading "pending on-chain tx" wording; Arc deviation documented in README. (commit 0658e17)
