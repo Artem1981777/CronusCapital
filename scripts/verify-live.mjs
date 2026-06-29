@@ -101,6 +101,30 @@ console.log("\n[6] on-chain confirmation (Arc RPC, no ABI, no keys)")
 	}
 }
 
+console.log("\n[7] Gateway settlement resolver (GET /api/settlements)")
+{
+	const s = await getJson("/api/settlements?windows=24")
+	ok("HTTP 200", s.status === 200)
+	ok("resolver ok", !!s.body && s.body.ok === true)
+	ok("resolver id is cronus-gateway-settlement", !!s.body && s.body.resolver === "cronus-gateway-settlement")
+	const d = s.body && s.body.rails && s.body.rails.directOnchain
+	const g = s.body && s.body.rails && s.body.rails.gatewayBatched
+	const list = (d && Array.isArray(d.settlements)) ? d.settlements : []
+	const hashRe = /^0x[0-9a-fA-F]{64}$/
+	const addrRe = /^0x[0-9a-fA-F]{40}$/
+	ok("direct rail is x402-exact, 1:1 on-chain", !!d && d.rail === "x402-exact" && d.mapping === "1:1-onchain")
+	ok("direct settlement count is a number", !!d && typeof d.count === "number")
+	ok("every direct settlement has a REAL on-chain tx hash (no fabricated hashes)", list.length > 0 && list.every(function (x) { return hashRe.test(String(x.txHash)) }))
+	ok("every direct settlement links to arcscan", list.length > 0 && list.every(function (x) { return String(x.explorer).indexOf("arcscan.app/tx/0x") !== -1 }))
+	ok("every direct settlement has a payer + USDC amount", list.length > 0 && list.every(function (x) { return addrRe.test(String(x.payer)) && typeof x.amountUsdc === "number" }))
+	ok("gateway rail is circle-gateway-batched (net-batched, honestly labeled)", !!g && g.rail === "circle-gateway-batched" && g.mapping === "net-batched")
+	ok("gateway rail carries an honest batched-mapping note", !!g && typeof g.note === "string" && g.note.length > 0)
+	ok("resolver exposes an honesty statement", !!s.body && typeof s.body.honesty === "string" && s.body.honesty.length > 0)
+	const m = await getJson("/api/metrics")
+	const lastTx = m.body && m.body.lastTx
+	ok("resolver corroborates the metrics settlement tx on-chain", !!lastTx && list.some(function (x) { return String(x.txHash).toLowerCase() === String(lastTx).toLowerCase() }), lastTx || "")
+}
+
 console.log("\n================================================")
 console.log((fail === 0 ? "ALL CHECKS PASSED" : fail + " CHECK(S) FAILED") + " — " + pass + " passed, " + fail + " failed")
 console.log("No private keys were used. Reproduce: npm run verify-live")
