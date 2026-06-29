@@ -4,6 +4,7 @@
   "version": "0.7.2",
   "type": "module",
   "scripts": {
+    "verify-live": "node scripts/verify-live.mjs",
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
