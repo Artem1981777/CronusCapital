@@ -9,7 +9,8 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "test": "node --test test/*.test.mjs"
+    "test": "node --test test/*.test.mjs",
+    "verify-intent": "node scripts/verify-intent.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.95.2",

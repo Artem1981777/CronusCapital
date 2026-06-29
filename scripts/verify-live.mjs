@@ -125,6 +125,24 @@ console.log("\n[7] Gateway settlement resolver (GET /api/settlements)")
 	ok("resolver corroborates the metrics settlement tx on-chain", !!lastTx && list.some(function (x) { return String(x.txHash).toLowerCase() === String(lastTx).toLowerCase() }), lastTx || "")
 }
 
+console.log("\n[8] EIP-712 spend-intent endpoint (no keys: schema + honest rejection)")
+{
+	const s = await getJson("/api/spend-intent")
+	ok("GET HTTP 200", s.status === 200)
+	ok("schema ok", !!s.body && s.body.ok === true)
+	ok("primaryType SpendIntent", !!s.body && s.body.primaryType === "SpendIntent")
+	ok("domain chainId 5042002", !!(s.body && s.body.domain) && s.body.domain.chainId === 5042002)
+	ok("types.SpendIntent has 6 fields", !!(s.body && s.body.types) && Array.isArray(s.body.types.SpendIntent) && s.body.types.SpendIntent.length === 6)
+	ok("binding asset is Arc USDC", !!(s.body && s.body.binding) && String(s.body.binding.asset).toLowerCase() === USDC)
+	ok("binding payTo is treasury", !!(s.body && s.body.binding) && String(s.body.binding.payTo).toLowerCase() === PAY_TO)
+	const ex = await getJson("/api/spend-intent", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ intent: { payer: "0xB8D0054Dd4FE76115E75BF196d89E760bbCD3bc6", payTo: PAY_TO, asset: USDC, maxAmount: "1000", nonce: "1", deadline: "1" }, signature: "0xdeadbeef" }) })
+	ok("expired intent rejected (valid:false)", !!ex.body && ex.body.valid === false, ex.body && ex.body.reason)
+	const bad = await getJson("/api/spend-intent", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ intent: { payer: "0xB8D0054Dd4FE76115E75BF196d89E760bbCD3bc6", payTo: PAY_TO, asset: USDC, maxAmount: "1000", nonce: "1", deadline: "9999999999" }, signature: "0x1234" }) })
+	ok("garbage signature rejected (valid:false)", !!bad.body && bad.body.valid === false, bad.body && bad.body.reason)
+	const wp = await getJson("/api/spend-intent", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ intent: { payer: "0xB8D0054Dd4FE76115E75BF196d89E760bbCD3bc6", payTo: "0x000000000000000000000000000000000000dEaD", asset: USDC, maxAmount: "1000", nonce: "1", deadline: "9999999999" }, signature: "0x1234" }) })
+	ok("wrong payTo rejected (binding enforced)", !!wp.body && wp.body.valid === false, wp.body && wp.body.reason)
+}
+
 console.log("\n================================================")
 console.log((fail === 0 ? "ALL CHECKS PASSED" : fail + " CHECK(S) FAILED") + " — " + pass + " passed, " + fail + " failed")
 console.log("No private keys were used. Reproduce: npm run verify-live")
