@@ -51,6 +51,8 @@ Every headline claim maps to a live endpoint or an on-chain transaction. Nothing
 | Public on-chain receipts | https://cronus-capital.vercel.app/api/receipts |
 | Service manifest / OpenAPI | https://cronus-capital.vercel.app/api/manifest |
 | Aggregate metrics | https://cronus-capital.vercel.app/api/metrics |
+| Gateway settlement resolver (x402-exact 1:1 + batched footprint) | https://cronus-capital.vercel.app/api/settlements |
+| EIP-712 spend-intents + KV replay-protection | https://cronus-capital.vercel.app/api/spend-intent |
 | ERC-8004 Identity (agentId #1) | https://testnet.arcscan.app/address/0x252cAA46b9b0648908000f6C87e0a561DB4dEb6c |
 | ERC-8004 Reputation (live count+avg) | https://testnet.arcscan.app/address/0x2A19ad056EaE83364B0a6420685974cA219c209E |
 | ERC-8183 Escrow | https://testnet.arcscan.app/address/0x64e55De4CbC3CDf981B2c970807129FA61806873 |
@@ -74,6 +76,8 @@ The NANO tier is a real Circle Gateway integration (`@circle-fin/x402-batching`)
 ### Arc testnet deviation (honest)
 
 Per the sell-side quickstart, the EIP-3009 `validBefore` must be at least 7 days out. On Arc testnet, Circle Gateway returns **UUID settlement ids** and settles batches **1:1** (one authorization per settlement at current volume); these batched settlements are **not individually queryable on arcscan** like a normal transaction. We surface the real Gateway settlement id and label it honestly rather than fabricating an on-chain batch-tx link. The PREMIUM $0.02 tier (`/api/signal`) remains a standard on-chain x402 payment with a real arcscan tx.
+
+**Settlement resolver (closes the mapping gap honestly).** `GET /api/settlements` resolves payments to settlements across both rails without inventing anything: the **`x402-exact`** rail lists direct USDC payer->treasury settlements **1:1** with real on-chain tx hashes and arcscan links, while the **`circle-gateway-batched`** rail reports the real on-chain footprint of the Gateway Wallet (settle + burn) and explicitly labels that a single nano-payment UUID does **not** map 1:1 to one on-chain tx (Gateway nets and settles in batches). Anything that cannot be mapped is returned as `null`/labeled — never a fabricated hash; per-transfer facilitator status is available when Circle API credentials are configured. Advertised in `/api/manifest` discovery and checked by `npm run verify-live` (section [7]).
 
 ## Traction (honest): paywall proven with self-generated volume
 
@@ -372,6 +376,10 @@ Cronus also exposes a **NANO tier** at **$0.001/call**, settled **gas-free via C
 
 ## What's new (build log)
 
+- **2026-06-29 — EIP-712 signed spend-intents + KV replay-protection (new):** `GET /api/spend-intent` advertises the EIP-712 schema (domain chainId 5042002, `SpendIntent{payer,payTo,asset,maxAmount,nonce,deadline}`); `POST` recovers the signer with viem, enforces the deadline + binding (payTo=treasury, asset=Arc USDC), and burns the `(payer,nonce)` in Upstash KV (`SET NX`) so a replayed signed intent is rejected. Verification only — no funds move and no on-chain hash is fabricated. Reproduce: `npm run verify-intent` (ephemeral unfunded key, off-chain signature) and `npm run verify-live` (section [8], no keys).
+
+- **2026-06-29 — Gateway settlement resolver (new):** `GET /api/settlements` maps payments to settlements across both rails honestly — `x402-exact` 1:1 with real arcscan tx hashes, `circle-gateway-batched` as the real Gateway-Wallet footprint with a labeled net-batched note; unmappable items are `null`/labeled, never fabricated. Advertised in `/api/manifest` discovery and checked by `npm run verify-live` (section [7]).
+
 - **2026-06-29 — live Circle Gateway nano-payment (self-demo, honestly labeled):** the autonomous buyer-agent paid **0.001 USDC gas-free** via EIP-3009 through Circle Gateway. Gateway settlement id `aafeb3ee-056b-4f5a-bc7e-0c77ee808113` (batch; settles 1:1 on Arc testnet — see *Arc testnet deviation*). Signal consumed (verdict SKIP, conviction 58). On-chain ERC-8004 reputation feedback: [`0x87f2c4…cef72c`](https://testnet.arcscan.app/tx/0x87f2c43513371111566ee9a4267ee574cc970369a57ff226b669b215b3cef72c) — seller reputation now count=3, avg 5.00/5. Reproduce: `node scripts/buyer-agent.mjs --dry-run`.
 
 Latest hardening, newest first:
@@ -396,6 +404,11 @@ Latest hardening, newest first:
 
 Connect a wallet on Arc Testnet (chainId 5042002), grab test USDC from the Circle faucet, then try CONSULT → UNLOCK → PAY UPSTREAM → FORCE EXECUTE.
 
+**No-key live verification (judges).** Reproduce every honesty claim end-to-end against the live deployment:
+
+    npm run verify-live      # zero private keys: paywall, manifest, receipts/metrics, honesty invariants, on-chain confirmation, settlement resolver [7], spend-intent rejection [8]
+    npm run verify-intent    # EIP-712 spend-intent round-trip (ephemeral, unfunded key): valid -> replay rejected -> tamper rejected
+
 ---
 
 **Builder:** Artem Gromov · GitHub @Artem1981777 · ETH gromov7.eth
@@ -405,6 +418,7 @@ Connect a wallet on Arc Testnet (chainId 5042002), grab test USDC from the Circl
 - x402 payment proofs are bound to a 30-minute freshness window — stale proofs return `402 replay window closed`.
 - Accepted proofs are one-time-use (Upstash KV, SET NX + TTL) — replaying a proof returns `402 payment proof already consumed`.
 - Verified end-to-end: fresh paid proof `0x5b1d39b5...2290` -> first call `200`, replay -> `402 already consumed`.
+- **Spend-intent nonce replay-protection.** Off-chain EIP-712 spend-intents (`/api/spend-intent`) reuse the same one-time-use guarantee: each `(payer, nonce)` is burned in Upstash KV (`SET NX` + TTL), so a replayed signed intent returns `valid:false — nonce already used`. Proven live by `npm run verify-intent`.
 
 ## Security deep-dive: the payment-replay attack we closed
 
