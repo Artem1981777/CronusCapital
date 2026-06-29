@@ -28,3 +28,4 @@ seed-traction.mjs
 *.bak.*
 cronus_snapshot.txt
 .env*
+secrets/
