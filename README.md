@@ -75,9 +75,9 @@ The NANO tier is a real Circle Gateway integration (`@circle-fin/x402-batching`)
 
 Per the sell-side quickstart, the EIP-3009 `validBefore` must be at least 7 days out. On Arc testnet, Circle Gateway returns **UUID settlement ids** and settles batches **1:1** (one authorization per settlement at current volume); these batched settlements are **not individually queryable on arcscan** like a normal transaction. We surface the real Gateway settlement id and label it honestly rather than fabricating an on-chain batch-tx link. The PREMIUM $0.02 tier (`/api/signal`) remains a standard on-chain x402 payment with a real arcscan tx.
 
-## Real external traction (independently funded, verifiable)
+## Real external traction (on-chain, verifiable)
 
-Cronus's premium signals are paid on-chain. Excluding our own treasury, deployer, and contract wallets, the live deployment has been paid by **independent third-party wallets** — not faked, not self-funded.
+Cronus's premium signals are paid on-chain. Excluding our own treasury, deployer, and contract wallets, the live deployment has been paid by **39 distinct external wallets** (none of them ours) — not faked, not self-funded.
 
 Snapshot (2026-06-29), straight from the Arc explorer:
 
@@ -85,7 +85,7 @@ Snapshot (2026-06-29), straight from the Arc explorer:
 - **111** settled USDC payments to the treasury
 - **2.22 USDC** total external volume
 - **0 of 39** payers were funded by any Cronus wallet (full funding audit)
-- funding traced to **5 independent sources** (testnet faucet / distributors); we disclose both wallet-count and funder-count for sybil-transparency
+- on a **testnet**, distinct wallets do not equal distinct humans (faucet wallets are cheap), so we claim only what is provable on-chain: **39 distinct payer addresses, 0 traced to our wallets**. Their first USDC came from 5 distinct funding sources, none of them ours.
 
 Verify it yourself (always-current):
 
@@ -95,7 +95,7 @@ curl -s https://cronus-capital.vercel.app/api/traction   | jq '.onchain'
 node scripts/audit-funders.mjs   # re-checks every payer's first USDC funding source
 ```
 
-External-payer metrics exclude our treasury, deployer/buyer-agent, and the agent/memo/vault/payout contracts. The nano-tier `unique_external_payers` is reported separately; autonomous A2A demo volume is labeled `self_demo_calls` and never counted as external.
+The canonical on-chain metric is `external_payers` (top-level in both `/api/traction` and `/api/leaderboard`). External-payer metrics exclude our treasury, deployer/buyer-agent, and the agent/memo/vault/payout contracts. The nano-tier `unique_external_payers` reflects only the separate nano KV ledger and stays `0` until a nano-tier external payer appears, so it is not the headline number. Autonomous A2A demo volume is labeled `self_demo_calls` and never counted as external.
 
 ## Pay Cronus in 60 seconds (any funded wallet)
 
@@ -351,7 +351,7 @@ Cronus also exposes a **NANO tier** at **$0.001/call**, settled **gas-free via C
 - **External-payer leaderboard:** https://cronus-capital.vercel.app/api/leaderboard
 
 **Honest scope (the project's edge):**
-- The buyer-agent is **self-funded**, so its address is registered in `SELF_DEMO_ADDRESSES` and counted as `self_demo_calls` — **never** as `unique_external_payers`. The leaderboard stays empty until a real third party pays.
+- The buyer-agent is **self-funded**, so its address is registered in `SELF_DEMO_ADDRESSES` and counted as `self_demo_calls` — **never** as `unique_external_payers`. The on-chain leaderboard now ranks **39 real external payer wallets** (none ours); the nano-tier `unique_external_payers` stays `0` until a nano-tier third party pays.
 - On Arc testnet, Circle Gateway settles **1:1** (each call gets its own settlement id). N→1 **batching is a Circle Gateway protocol capability at scale**, shown as such in the UI — not claimed as achieved here.
 - Gateway settlement identifiers are labeled `gateway-batch` with on-chain tx **pending**; arcscan `/tx/` links render only for real `0x` on-chain hashes.
 
@@ -366,7 +366,7 @@ Cronus also exposes a **NANO tier** at **$0.001/call**, settled **gas-free via C
 - 🧠 **Historical analog = heuristic:** the MEMORY stage is the LLM's qualitative recall of a similar past regime with a similarity score - an estimate, not a backtested dataset.
 - 🔐 **Non-custodial by design:** unlike autonomous agents that keep a hot private key on the server to self-sign, Cronus reasons autonomously but every settlement is signed in the user wallet - no agent key sits on the server, ever.
 - ⚠️ **Modeled on testnet:** yield magnitudes and EV figures are illustrative — the mechanics, shares, and transactions themselves are real.
-- ℹ️ **x402** here is a real USDC transfer to the agent (pay-per-call) — a pragmatic simplification of the full HTTP-402 + facilitator handshake.
+- ℹ️ **x402** here is a real USDC transfer to the agent (pay-per-call) — a real **HTTP 402** challenge: `/api/signal` returns 402 with payment requirements, the client pays USDC on-chain (pay-per-call), and the server verifies the on-chain tx before serving. Settlement is direct on Arc rather than via a separate third-party facilitator service.
 
 ---
 
