@@ -43,6 +43,10 @@
     {
       "source": "/api/open-stake",
       "destination": "/api/info?kind=open-stake"
+    },
+    {
+      "source": "/api/resolve-stake",
+      "destination": "/api/info?kind=resolve-stake"
     }
   ]
 }
