@@ -59,6 +59,22 @@ Every headline claim maps to a live endpoint or an on-chain transaction. Nothing
 
 All `/api/*` endpoints return HTTP 200 (or 402 for the paywall) — never 500.
 
+## Verify the Gateway integration in 2 minutes
+
+The NANO tier is a real Circle Gateway integration (`@circle-fin/x402-batching`), not an on-chain-tx checker. Verify the actual gas-free flow:
+
+1. **Gateway Wallet deposit (one-time, on-chain).** Buyer deposits USDC into the Gateway Wallet contract `0x0077777d7EBA4688BDeF3E311b846F25870A19B9`.
+   Deposit tx: https://testnet.arcscan.app/tx/0xb817a39ce9a7b5e108831a356027c1e4ac24dabeafcc09ea1766cd8cef02fa7c
+2. **402 + gas-free EIP-3009 authorization (off-chain, zero gas).** `GET /api/nano-signal` returns `402`; the buyer-agent signs an EIP-3009 authorization and retries — no gas, no on-chain tx per call.
+   Reproduce: `node scripts/buyer-agent.mjs --deposit 1 && node scripts/buyer-agent.mjs`
+3. **Verified & served immediately.** The seller middleware (`createGatewayMiddleware`) verifies the signature and returns the signal in the same response — it never waits for settlement. Response shows `payment.verification: "eip3009-signature"` and `served: "immediate"`.
+4. **Batched settlement id.** Gateway settles net positions in batches and returns a settlement id (e.g. `2b381aa2-bb63-4f9c-b76a-663748c9f332`).
+5. **Three billing models, one rail:** per-call `GET /api/nano-signal` ($0.001) · per-second stream ($0.00001/sec) · per-dataset `GET /api/nano-signal?tier=dataset` ($0.05).
+
+### Arc testnet deviation (honest)
+
+Per the sell-side quickstart, the EIP-3009 `validBefore` must be at least 7 days out. On Arc testnet, Circle Gateway returns **UUID settlement ids** and settles batches **1:1** (one authorization per settlement at current volume); these batched settlements are **not individually queryable on arcscan** like a normal transaction. We surface the real Gateway settlement id and label it honestly rather than fabricating an on-chain batch-tx link. The PREMIUM $0.02 tier (`/api/signal`) remains a standard on-chain x402 payment with a real arcscan tx.
+
 ## Pay Cronus in 60 seconds (any funded wallet)
 
 Two real, on-chain ways for an external agent/wallet to pay Cronus:
