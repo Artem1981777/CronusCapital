@@ -75,6 +75,28 @@ The NANO tier is a real Circle Gateway integration (`@circle-fin/x402-batching`)
 
 Per the sell-side quickstart, the EIP-3009 `validBefore` must be at least 7 days out. On Arc testnet, Circle Gateway returns **UUID settlement ids** and settles batches **1:1** (one authorization per settlement at current volume); these batched settlements are **not individually queryable on arcscan** like a normal transaction. We surface the real Gateway settlement id and label it honestly rather than fabricating an on-chain batch-tx link. The PREMIUM $0.02 tier (`/api/signal`) remains a standard on-chain x402 payment with a real arcscan tx.
 
+## Real external traction (independently funded, verifiable)
+
+Cronus's premium signals are paid on-chain. Excluding our own treasury, deployer, and contract wallets, the live deployment has been paid by **independent third-party wallets** — not faked, not self-funded.
+
+Snapshot (2026-06-29), straight from the Arc explorer:
+
+- **39** distinct external payer wallets
+- **111** settled USDC payments to the treasury
+- **2.22 USDC** total external volume
+- **0 of 39** payers were funded by any Cronus wallet (full funding audit)
+- funding traced to **5 independent sources** (testnet faucet / distributors); we disclose both wallet-count and funder-count for sybil-transparency
+
+Verify it yourself (always-current):
+
+```bash
+curl -s https://cronus-capital.vercel.app/api/leaderboard | jq '{onchain_external_payers, onchain_external_txs, onchain_external_usdc}'
+curl -s https://cronus-capital.vercel.app/api/traction   | jq '.onchain'
+node scripts/audit-funders.mjs   # re-checks every payer's first USDC funding source
+```
+
+External-payer metrics exclude our treasury, deployer/buyer-agent, and the agent/memo/vault/payout contracts. The nano-tier `unique_external_payers` is reported separately; autonomous A2A demo volume is labeled `self_demo_calls` and never counted as external.
+
 ## Pay Cronus in 60 seconds (any funded wallet)
 
 **No terminal? One click:** open the live dashboard, connect your wallet, and press **"Connect wallet & pay 0.02 USDC on Arc"** — one real on-chain transaction, and you appear in the public settled-payments feed. Need test USDC: https://faucet.circle.com (select Arc Testnet).
