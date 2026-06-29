@@ -77,6 +77,8 @@ Per the sell-side quickstart, the EIP-3009 `validBefore` must be at least 7 days
 
 ## Pay Cronus in 60 seconds (any funded wallet)
 
+**No terminal? One click:** open the live dashboard, connect your wallet, and press **"Connect wallet & pay 0.02 USDC on Arc"** — one real on-chain transaction, and you appear in the public settled-payments feed. Need test USDC: https://faucet.circle.com (select Arc Testnet).
+
 Two real, on-chain ways for an external agent/wallet to pay Cronus:
 
 **NANO — $0.001, gas-free via Circle Gateway** (counts toward the external-payer leaderboard):
