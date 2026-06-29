@@ -2,12 +2,12 @@
 
 All changes verified on Arc Testnet (chainId 5042002). Self-funded demo traffic is labeled and excluded from external metrics — we never fake demand.
 
-## External traction verified (2026-06-29)
+## Traction correction (2026-06-29): external_payers = 0, self-generated test volume
 
-- `/api/traction` and `/api/leaderboard` now compute external-payer metrics from on-chain USDC receipts (not only the nano KV ledger), excluding treasury + deployer + agent/memo/vault/payout wallets.
-- New fields: `onchain_external_payers`, `onchain_external_txs`, `onchain_external_usdc`, `onchain_leaders`.
-- Snapshot: 39 distinct external payer wallets, 111 payments, 2.22 USDC; full funding audit = 0/39 funded by a Cronus wallet (5 independent funding sources).
-- Added `scripts/audit-funders.mjs` so anyone can reproduce the independent-funding audit.
+- `/api/traction` and `/api/leaderboard` report on-chain x402 settlement volume from receipts as `self_generated_*` (our own dev-session test traffic); canonical `external_payers` stays 0 until a real third party pays.
+- Fields: `external_payers` (= 0, canonical), plus `self_generated_wallets` / `self_generated_txs` / `self_generated_usdc` / `self_generated_leaders`.
+- Snapshot: 0 verified external payers; 111 self-generated test settlements totaling 2.22 USDC across 39 of our own wallets, proving the paywall settles real USDC on Arc end-to-end.
+- Added `scripts/audit-funders.mjs` to audit the on-chain funding source of any payer wallet.
 
 ## Gateway integration hardening (2026-06-29)
 
