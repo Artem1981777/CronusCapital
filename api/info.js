@@ -8,8 +8,9 @@ import receipts from "../lib/receipts.js"
 import metrics from "../lib/metrics.js"
 import traction from "../lib/traction.js"
 import leaderboard from "../lib/leaderboard.js"
+import settlements from "../lib/gateway.js"
 
-const ROUTES = { manifest, openapi, receipts, metrics, traction, leaderboard }
+const ROUTES = { manifest, openapi, receipts, metrics, traction, leaderboard, settlements }
 
 export default async function handler(req, res) {
 	const kind = String((req.query && req.query.kind) || "").toLowerCase()
