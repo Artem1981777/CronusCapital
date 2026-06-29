@@ -9,7 +9,7 @@ const numS: CSSProperties = { fontWeight: 700, color: "#a78bfa" }
 const inputS: CSSProperties = { width: 70, marginLeft: 6, background: "#0b0712", color: "#e5e7eb", border: "1px solid #8b5cf655", borderRadius: 6, padding: "2px 6px" }
 const noteS: CSSProperties = { color: "#fbbf24", fontSize: 10, marginTop: 6 }
 
-const USD_PER_SEC = 0.001
+const USD_PER_SEC = 0.00001
 
 export default function StreamPanel() {
 	const [on, setOn] = useState(false)
