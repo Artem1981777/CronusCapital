@@ -17,6 +17,8 @@ const gateway = createGatewayMiddleware({
   description: "Cronus Capital - NANO micro-signal (Gateway batched, gas-free)",
 })
 const pay = gateway.require(NANO_PRICE)
+const DATASET_PRICE = process.env.DATASET_PRICE_USD || "$0.05"
+const payDataset = gateway.require(DATASET_PRICE)
 
 // Reuse the same oracle the STANDARD x402 path uses.
 async function generateReport(host, topic, instId) {
@@ -54,19 +56,21 @@ async function recordTraction(p) {
 
 // Bridge the Express-shaped Gateway middleware to a Vercel serverless handler.
 // require() returns an async fn: it resolves after sending 402 (no next) OR after next() on success.
-function runGateway(req, res) {
+function runGateway(req, res, mw) {
   let called = false
-  return Promise.resolve(pay(req, res, () => { called = true })).then(() => called)
+  return Promise.resolve(mw(req, res, () => { called = true })).then(() => called)
 }
 
 export default async function handler(req, res) {
   const topic  = String((req.query && req.query.topic) || "BTC-USDC momentum")
   const instId = String((req.query && req.query.instId) || "BTC-USDC")
   const host   = (req.headers && req.headers.host) || "localhost"
+  const tier = (req.query && String(req.query.tier || "")).toLowerCase() === "dataset" ? "dataset" : "nano"
+  const mw = tier === "dataset" ? payDataset : pay
 
   let settled
   try {
-    settled = await runGateway(req, res)
+    settled = await runGateway(req, res, mw)
   } catch (e) {
     if (!res.writableEnded) res.status(500).json({ error: "nano payment error", detail: String((e && e.message) || e) })
     return
@@ -75,6 +79,42 @@ export default async function handler(req, res) {
   if (!settled) return
 
   const payment = req.payment || {}
+  if (tier === "dataset") {
+    const topics = ["BTC-USDC momentum", "ETH-USDC trend", "SOL-USDC breakout"]
+    const rows = []
+    for (const tp of topics) {
+      const rep = await generateReport(host, tp, instId)
+      rows.push({ topic: tp, verdict: rep.verdict || "SKIP", conviction: rep.conviction || 0 })
+    }
+    const settledAt = Date.now()
+    try { await recordTraction({ tier: "DATASET", network: payment.network || NETWORK, payer: payment.payer, amount: payment.amount, transaction: payment.transaction }) } catch (_) {}
+    const isOnchainDs = /^0x[0-9a-fA-F]{64}$/.test(String(payment.transaction || ""))
+    if (!res.writableEnded) {
+      res.status(200).json({
+        paid: true,
+        tier: "DATASET",
+        pricing: { tier: "DATASET", usd: DATASET_PRICE, batched: true, gasFree: true, model: "per-dataset (bulk historical pull)" },
+        payment: {
+          scheme: "exact-batched",
+          verification: "eip3009-signature",
+          served: "immediate",
+          network: payment.network || NETWORK,
+          networkLabel: NETWORK_LABEL,
+          payer: payment.payer || null,
+          amount: payment.amount || null,
+          payTo: PAY_TO,
+          settlement: payment.transaction || null,
+          settlementType: isOnchainDs ? "onchain" : "gateway-batch",
+          settlementNote: isOnchainDs ? null : "EIP-3009 verified, dataset served immediately; Gateway batched settlement id (see README: Arc deviation).",
+          explorer: isOnchainDs ? "https://testnet.arcscan.app/tx/" + payment.transaction : null,
+        },
+        dataset: { count: rows.length, topics, rows },
+        settledAt,
+      })
+    }
+    return
+  }
+
   const report = await generateReport(host, topic, instId)
   const settledAt = Date.now()
   try {
