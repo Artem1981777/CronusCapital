@@ -53,6 +53,7 @@ Every headline claim maps to a live endpoint or an on-chain transaction. Nothing
 | Aggregate metrics | https://cronus-capital.vercel.app/api/metrics |
 | Gateway settlement resolver (x402-exact 1:1 + batched footprint) | https://cronus-capital.vercel.app/api/settlements |
 | EIP-712 spend-intents + KV replay-protection | https://cronus-capital.vercel.app/api/spend-intent |
+| Verifiability scorecard (all claims + how to reproduce) | https://cronus-capital.vercel.app/api/scorecard |
 | ERC-8004 Identity (agentId #1) | https://testnet.arcscan.app/address/0x252cAA46b9b0648908000f6C87e0a561DB4dEb6c |
 | ERC-8004 Reputation (live count+avg) | https://testnet.arcscan.app/address/0x2A19ad056EaE83364B0a6420685974cA219c209E |
 | ERC-8183 Escrow | https://testnet.arcscan.app/address/0x64e55De4CbC3CDf981B2c970807129FA61806873 |
@@ -60,6 +61,16 @@ Every headline claim maps to a live endpoint or an on-chain transaction. Nothing
 | Pay Cronus yourself (NANO) | node scripts/buyer-agent.mjs --deposit 1 && node scripts/buyer-agent.mjs |
 
 All `/api/*` endpoints return HTTP 200 (or 402 for the paywall) — never 500.
+
+### Independently verifiable — not "trust me"
+
+Every number on this page is reproducible by a judge with **zero private keys**. We publish a machine-readable scorecard that, for each claim, returns *how to verify it* — a command or an on-chain link — never a self-graded "passed":
+
+- **Scorecard:** https://cronus-capital.vercel.app/api/scorecard — 4 Sourcify exact-match contracts, live on-chain counts, honest `external_payers: 0`, and the exact reproduce step for each claim.
+- **No-key end-to-end:** `npm run verify-live` (51 checks) and `npm run verify-intent` (EIP-712 round-trip) reproduce the entire honesty surface against the live deployment without any secret.
+- **Source, not bytecode:** every contract links to its verified, exact-match source on Sourcify.
+
+We would rather show a verifiable **0** external payers than an impressive number you cannot independently check.
 
 ## Verify the Gateway integration in 2 minutes
 
