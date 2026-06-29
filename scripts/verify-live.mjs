@@ -159,6 +159,20 @@ try {
 	ok("scorecard reachable", false, String((e && e.message) || e))
 }
 
+console.log("\n[10] agent skin-in-the-game track record (GET /api/track-record)")
+try {
+	const s = await getJson("/api/track-record")
+	const b = (s && s.body) || {}
+	ok("track-record reachable + ok:true", b.ok === true)
+	ok("rules present (gate/base/band)", b.rules && typeof b.rules.conviction_gate === "number" && typeof b.rules.base_usdc === "number" && typeof b.rules.band_usdc === "number")
+	ok("resolved_positions is a number", typeof b.resolved_positions === "number", "resolved=" + b.resolved_positions)
+	ok("accuracy honest (null when none resolved, else 0..1)", b.resolved_positions === 0 ? b.accuracy === null : (typeof b.accuracy === "number" && b.accuracy >= 0 && b.accuracy <= 1), "accuracy=" + b.accuracy)
+	ok("no fabricated slashing when nothing resolved", b.resolved_positions > 0 || b.total_slashed_usdc === 0, "slashed=" + b.total_slashed_usdc)
+	ok("principle states pre-commit before outcome", typeof b.principle === "string" && /before the outcome is known/i.test(b.principle))
+} catch (e) {
+	ok("track-record reachable", false, String((e && e.message) || e))
+}
+
 console.log("\n================================================")
 console.log((fail === 0 ? "ALL CHECKS PASSED" : fail + " CHECK(S) FAILED") + " — " + pass + " passed, " + fail + " failed")
 console.log("No private keys were used. Reproduce: npm run verify-live")

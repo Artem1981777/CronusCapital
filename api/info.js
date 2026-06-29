@@ -11,8 +11,9 @@ import leaderboard from "../lib/leaderboard.js"
 import settlements from "../lib/gateway.js"
 import spendIntent from "../lib/intents.js"
 import scorecard from "../lib/scorecard.js"
+import trackRecord from "../lib/stake.js"
 
-const ROUTES = { manifest, openapi, receipts, metrics, traction, leaderboard, settlements, "spend-intent": spendIntent, scorecard }
+const ROUTES = { manifest, openapi, receipts, metrics, traction, leaderboard, settlements, "spend-intent": spendIntent, scorecard, "track-record": trackRecord }
 
 export default async function handler(req, res) {
 	const kind = String((req.query && req.query.kind) || "").toLowerCase()
