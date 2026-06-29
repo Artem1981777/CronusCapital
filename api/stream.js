@@ -2,7 +2,7 @@
 // Real per-second micropayments are executed by the autonomous buyer-agent (--stream)
 // via Circle Gateway; this endpoint serves the streamed signal frame + economics.
 const TICK_MS      = Number(process.env.STREAM_TICK_MS || 1000)
-const USD_PER_SEC  = Number(process.env.STREAM_USD_PER_SEC || 0.001)
+const USD_PER_SEC  = Number(process.env.STREAM_USD_PER_SEC || 0.00001)
 
 export default async function handler(req, res) {
 	res.setHeader("Access-Control-Allow-Origin", "*")
