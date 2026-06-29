@@ -1,6 +1,16 @@
 export default function SiteFooter() {
 	const cols = [
 		{
+			title: "VERIFIED SOURCE",
+			glyph: "✓",
+			items: [
+				{ label: "Reputation — verified source", href: "https://repo.sourcify.dev/contracts/full_match/5042002/0x2A19ad056EaE83364B0a6420685974cA219c209E/" },
+				{ label: "Identity registry — verified source", href: "https://repo.sourcify.dev/contracts/full_match/5042002/0x252cAA46b9b0648908000f6C87e0a561DB4dEb6c/" },
+				{ label: "Job escrow — verified source", href: "https://repo.sourcify.dev/contracts/full_match/5042002/0x64e55De4CbC3CDf981B2c970807129FA61806873/" },
+				{ label: "Vault — verified source", href: "https://repo.sourcify.dev/contracts/full_match/5042002/0x13B6984357e27dAB17DF44a6396042239e70542C/" },
+			],
+		},
+		{
 			title: "PRODUCT",
 			glyph: "⚡",
 			items: [
