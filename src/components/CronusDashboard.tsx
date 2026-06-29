@@ -1,3 +1,4 @@
+import BillingTiers from "./BillingTiers"
 import PublisherPanel from "./PublisherPanel"
 import StreamPanel from "./StreamPanel"
 import NanoHeadline from "./NanoHeadline"
@@ -602,6 +603,7 @@ export function CronusDashboard() {
 				<div className="cd-panel cd-actions">
 					<div className="cd-panel-title">⚡ ORACLE ACTIONS</div>
 						<NanoHeadline />
+						<BillingTiers />
 						<StreamPanel />
 					<button className="cd-btn cd-btn-primary" onClick={consult} disabled={running}>{running ? "CONSULTING…" : "CONSULT ORACLES"}</button>
 					{consultMsg ? <div className="cd-claim-msg">{consultMsg}</div> : null}
