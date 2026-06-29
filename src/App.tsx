@@ -18,6 +18,7 @@ import { Dashboard, saveDecision } from "./components/Dashboard"
 import { LiveMarkets } from "./components/LiveMarkets"
 import { EgyptTheme } from "./components/EgyptTheme"
 import { CronusDashboard } from "./components/CronusDashboard"
+import SiteFooter from "./components/SiteFooter"
 import EquityCurve from "./EquityCurve"
 import PolicyGuardrails from "./PolicyGuardrails"
 import VerifiableLedger from "./VerifiableLedger"
@@ -362,6 +363,7 @@ export default function App() {
           ))}
         </div>
       )}
+      <SiteFooter />
       <div style={{ borderTop: "1px solid #39e01422", padding: "12px 32px", textAlign: "center" }}><a href="https://obol-theta.vercel.app" target="_blank" rel="noreferrer" style={{ color: "#c9a84c", fontSize: "10px", letterSpacing: "2px", fontFamily: "Cinzel, serif", textDecoration: "none" }}>ALSO BUILT ON ARC - OBOL - x402 PAY-PER-ARTICLE &rarr;</a></div><div style={{ borderTop: "1px solid #39e01422", padding: "16px 32px", display: "flex", justifyContent: "space-between" }}>
         <div style={{ color: "#39e01444", fontSize: "10px", letterSpacing: "3px", fontFamily: "Cinzel, serif" }}>⬡ CRONUS CAPITAL · AGORA AGENTS HACKATHON 2026</div>
         <div style={{ color: "#39e01444", fontSize: "10px", letterSpacing: "3px", fontFamily: "Cinzel, serif" }}>POWERED BY ARC · CIRCLE · USDC ⬡</div>
