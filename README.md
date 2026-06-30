@@ -605,10 +605,22 @@ workflow controls — and goes one step further with verifiable skin-in-the-game
 | **Identity** | ERC-8004 agent registration + on-chain reputation (Sourcify exact_match) | Live |
 | **Settlement** | x402 paid endpoints + Circle Gateway; USDC as payment *and* gas | Live |
 | **Workflow — Escrow** | Conditional escrow: stake returned on correct outcome, burned on wrong | Live |
-| **Workflow — Spending limits** | Policy-gated payouts via spend-intent + per-decision controls | Partial |
+| **Workflow — Spending limits** | Hard daily cap + per-recipient cap, enforced before any USDC leaves the wallet | Live |
 | **Workflow — Subscriptions** | Recurring / metered access to the paid signal API | Planned |
 | **Workflow — Split payments** | Multi-party routing of settled proceeds | Planned |
 
 **Beyond "an agent with a wallet."** Most agentic-payment demos stop at a key that can spend.
 Cronus adds *accountability*: it stakes its own USDC on each conviction call and settles the
 outcome on-chain, so reputation is earned rather than asserted. See **Skin in the Game** above.
+
+
+### Spending Limits (live)
+
+Before any USDC leaves the agent wallet, every payout is checked against two hard caps: a **daily budget** and a **per-recipient cap**. Limits are enforced server-side against a KV-backed daily ledger, so the agent cannot exceed its budget across calls.
+
+- `GET /api/spend-limit` — transparency: current policy, today's spend, remaining budget, recent payouts.
+- `POST /api/spend-limit?action=check` — dry decision for a `{to, amountAtomic}` (no auth, no funds).
+- `POST /api/spend-limit?action=set-policy` — update caps (auth).
+- `POST /api/spend-limit?action=spend` — enforce caps, then execute the USDC transfer on-chain (auth).
+
+Default caps: 1.000000 USDC / day, 0.250000 USDC / recipient.
