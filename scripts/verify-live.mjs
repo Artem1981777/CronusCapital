@@ -173,6 +173,46 @@ try {
 	ok("track-record reachable", false, String((e && e.message) || e))
 }
 
+console.log("\n[11] programmable controls (spend-limit / split-pay / subscription)")
+{
+	const sl = await getJson("/api/spend-limit")
+	ok("spend-limit policy reachable", sl.status === 200 && !!(sl.body && sl.body.policy))
+	const blocked = await getJson("/api/spend-limit?action=check", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ to: PAY_TO, amountAtomic: "400000" }) })
+	ok("blocks 0.4 USDC over per-recipient cap", !!(blocked.body && blocked.body.decision) && blocked.body.decision.allowed === false, blocked.body && blocked.body.decision && (blocked.body.decision.reasons || []).join("|"))
+	const allowed = await getJson("/api/spend-limit?action=check", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ to: PAY_TO, amountAtomic: "100000" }) })
+	ok("allows 0.1 USDC within caps", !!(allowed.body && allowed.body.decision) && allowed.body.decision.allowed === true)
+	const sp = await getJson("/api/split-pay?action=preview", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ amountAtomic: "1000000", recipients: [{ address: PAY_TO, bps: 7000 }, { address: "0x46213abeca58cc9a89a269fd25a8737c700ca164", bps: 3000 }] }) })
+	const allocs = (sp.body && sp.body.allocations) || []
+	let sum = 0n
+	for (const a of allocs) { try { sum += BigInt(a.amountAtomic) } catch (e) {} }
+	ok("split-pay 70/30 allocations sum exactly (no dust)", allocs.length === 2 && sum === 1000000n, "sum=" + sum.toString())
+	const sub = await getJson("/api/subscription")
+	ok("subscription plans listed", sub.status === 200 && !!(sub.body && Array.isArray(sub.body.plans) && sub.body.plans.length >= 1), "plans=" + (sub.body && sub.body.plans ? sub.body.plans.length : 0))
+}
+
+console.log("\n[12] capabilities + machine discovery (manifest / openapi)")
+{
+	const mc = await getJson("/api/manifest")
+	const cap = (mc.body && mc.body.capabilities) || null
+	ok("manifest advertises capabilities", !!cap)
+	ok("capabilities map the Arc workflow stack", !!cap && !!cap.workflow && !!cap.workflow.escrow && !!cap.workflow.spendingLimits && !!cap.workflow.splitPayments && !!cap.workflow.subscriptions)
+	ok("capabilities include skin-in-the-game", !!(cap && cap.skinInTheGame))
+	const disc = (mc.body && mc.body.discovery) || {}
+	ok("discovery lists all live endpoints", !!disc.spendLimit && !!disc.splitPay && !!disc.subscription && !!disc.resolveStake && !!disc.fundEscrow && !!disc.openStake)
+	const oa = await getJson("/api/openapi")
+	const paths = (oa.body && oa.body.paths) ? Object.keys(oa.body.paths) : []
+	ok("openapi documents the new endpoints", ["/api/spend-limit", "/api/split-pay", "/api/subscription", "/api/resolve-stake", "/api/fund-escrow", "/api/open-stake", "/api/track-record"].every(function (p) { return paths.includes(p) }), paths.length + " paths")
+}
+
+console.log("\n[13] money-moving actions are auth-gated (401 without a token)")
+{
+	const gates = [["spend-limit set-policy", "/api/spend-limit?action=set-policy"], ["spend-limit spend", "/api/spend-limit?action=spend"], ["split-pay set-split", "/api/split-pay?action=set-split"], ["split-pay execute", "/api/split-pay?action=execute"], ["subscription subscribe", "/api/subscription?action=subscribe"], ["resolve-stake settle", "/api/resolve-stake"], ["fund-escrow", "/api/fund-escrow"], ["open-stake", "/api/open-stake"]]
+	for (const g of gates) {
+		const r = await getJson(g[1], { method: "POST", headers: { "content-type": "application/json" }, body: "{}" })
+		ok(g[0] + " requires auth (401)", r.status === 401, "status " + r.status)
+	}
+}
+
 console.log("\n================================================")
 console.log((fail === 0 ? "ALL CHECKS PASSED" : fail + " CHECK(S) FAILED") + " — " + pass + " passed, " + fail + " failed")
 console.log("No private keys were used. Reproduce: npm run verify-live")
