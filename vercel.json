@@ -59,6 +59,10 @@
     {
       "source": "/api/split-pay",
       "destination": "/api/info?kind=split-pay"
+    },
+    {
+      "source": "/api/subscription",
+      "destination": "/api/info?kind=subscription"
     }
   ]
 }
