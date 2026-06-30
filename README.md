@@ -646,3 +646,13 @@ Recurring, metered access to the paid signal API. A subscriber holds a plan that
 - `POST /api/subscription?action=access` — meter one call for `{subscriber}` (auth).
 
 Plans: daily (0.5 USDC / 100 calls), weekly (2.5 USDC / 1000 calls), monthly (8 USDC / 5000 calls).
+
+## Verify it yourself
+
+Cronus runs live on Arc testnet — every claim here is independently checkable, no trust required.
+
+Run `node scripts/verify-live.mjs` (no auth, no funds moved): it probes every public endpoint, confirms the x402 paywall returns 402, checks spending-limit and split-payment enforcement (dry runs), and confirms every money-moving action is auth-gated (401 without a token).
+
+Live sources of truth: `GET /api/manifest` (capabilities + discovery), `GET /api/openapi` (machine-readable spec), `GET /api/track-record` (staked positions / skin in the game), `GET /api/receipts` (on-chain x402 receipts).
+
+On-chain (Arc testnet): ERC-8004 identity registry 0x252cAA46b9b0648908000f6C87e0a561DB4dEb6c, ERC-8183 job escrow 0x64e55De4CbC3CDf981B2c970807129FA61806873, reputation registry 0x2A19ad056EaE83364B0a6420685974cA219c209E. Escrow funding tx 0x5895d020c42e6f0b0f162b833a2b566499b4495aeeebc327e6192ef4df9e0b4c. All contracts verified on Sourcify (exact match).
