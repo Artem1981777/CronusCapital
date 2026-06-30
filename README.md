@@ -606,7 +606,7 @@ workflow controls — and goes one step further with verifiable skin-in-the-game
 | **Settlement** | x402 paid endpoints + Circle Gateway; USDC as payment *and* gas | Live |
 | **Workflow — Escrow** | Conditional escrow: stake returned on correct outcome, burned on wrong | Live |
 | **Workflow — Spending limits** | Hard daily cap + per-recipient cap, enforced before any USDC leaves the wallet | Live |
-| **Workflow — Subscriptions** | Recurring / metered access to the paid signal API | Planned |
+| **Workflow — Subscriptions** | Plan-based call quotas with per-call metering | Live |
 | **Workflow — Split payments** | Basis-point fan-out of one payment across counterparties | Live |
 
 **Beyond "an agent with a wallet."** Most agentic-payment demos stop at a key that can spend.
@@ -634,3 +634,15 @@ A single payment can fan out to multiple counterparties by basis-point weights (
 - `POST /api/split-pay?action=preview` — no-funds allocation for `{amountAtomic, recipients?}`.
 - `POST /api/split-pay?action=set-split` — set recipients `[{address, bps}]` (auth).
 - `POST /api/split-pay?action=execute` — route a total across counterparties on-chain (auth).
+
+
+### Subscriptions (live)
+
+Recurring, metered access to the paid signal API. A subscriber holds a plan that grants a call quota for a fixed period; every access is metered against the quota. Payment settles via the existing x402 signal flow.
+
+- `GET /api/subscription` — plans, plus `?subscriber=` status.
+- `POST /api/subscription?action=status` — subscription status for `{subscriber}` (no auth).
+- `POST /api/subscription?action=subscribe` — activate `{subscriber, planId}` (auth).
+- `POST /api/subscription?action=access` — meter one call for `{subscriber}` (auth).
+
+Plans: daily (0.5 USDC / 100 calls), weekly (2.5 USDC / 1000 calls), monthly (8 USDC / 5000 calls).
