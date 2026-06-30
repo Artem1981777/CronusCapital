@@ -47,6 +47,10 @@
     {
       "source": "/api/resolve-stake",
       "destination": "/api/info?kind=resolve-stake"
+    },
+    {
+      "source": "/api/fund-escrow",
+      "destination": "/api/info?kind=fund-escrow"
     }
   ]
 }

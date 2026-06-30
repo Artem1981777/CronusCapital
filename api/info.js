@@ -13,9 +13,10 @@ import spendIntent from "../lib/intents.js"
 import scorecard from "../lib/scorecard.js"
 import trackRecord from "../lib/stake.js"
 import resolveStake from "../lib/resolveStake.js"
+import fundEscrow from "../lib/fundEscrow.js"
 import openStake from "../lib/openStake.js"
 
-const ROUTES = { "resolve-stake": resolveStake, manifest, openapi, receipts, metrics, traction, leaderboard, settlements, "spend-intent": spendIntent, scorecard, "track-record": trackRecord, "open-stake": openStake }
+const ROUTES = { "fund-escrow": fundEscrow, "resolve-stake": resolveStake, manifest, openapi, receipts, metrics, traction, leaderboard, settlements, "spend-intent": spendIntent, scorecard, "track-record": trackRecord, "open-stake": openStake }
 
 export default async function handler(req, res) {
 	const kind = String((req.query && req.query.kind) || "").toLowerCase()
