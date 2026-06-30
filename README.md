@@ -594,3 +594,21 @@ OKX and compares it to the `openPrice` committed at open time:
 `/api/track-record` reports `accuracy = null` until at least one position resolves — we
 never claim a hit rate we haven't earned on-chain. At-risk and external metrics reflect
 real on-chain state only.
+
+## Agentic Finance Stack on Arc
+
+Cronus implements the full agentic-finance stack — identity, settlement, and programmable
+workflow controls — and goes one step further with verifiable skin-in-the-game accountability.
+
+| Layer | Capability | Status |
+|---|---|---|
+| **Identity** | ERC-8004 agent registration + on-chain reputation (Sourcify exact_match) | Live |
+| **Settlement** | x402 paid endpoints + Circle Gateway; USDC as payment *and* gas | Live |
+| **Workflow — Escrow** | Conditional escrow: stake returned on correct outcome, burned on wrong | Live |
+| **Workflow — Spending limits** | Policy-gated payouts via spend-intent + per-decision controls | Partial |
+| **Workflow — Subscriptions** | Recurring / metered access to the paid signal API | Planned |
+| **Workflow — Split payments** | Multi-party routing of settled proceeds | Planned |
+
+**Beyond "an agent with a wallet."** Most agentic-payment demos stop at a key that can spend.
+Cronus adds *accountability*: it stakes its own USDC on each conviction call and settles the
+outcome on-chain, so reputation is earned rather than asserted. See **Skin in the Game** above.
