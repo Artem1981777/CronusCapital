@@ -55,6 +55,10 @@
     {
       "source": "/api/spend-limit",
       "destination": "/api/info?kind=spend-limit"
+    },
+    {
+      "source": "/api/split-pay",
+      "destination": "/api/info?kind=split-pay"
     }
   ]
 }
