@@ -607,7 +607,7 @@ workflow controls — and goes one step further with verifiable skin-in-the-game
 | **Workflow — Escrow** | Conditional escrow: stake returned on correct outcome, burned on wrong | Live |
 | **Workflow — Spending limits** | Hard daily cap + per-recipient cap, enforced before any USDC leaves the wallet | Live |
 | **Workflow — Subscriptions** | Recurring / metered access to the paid signal API | Planned |
-| **Workflow — Split payments** | Multi-party routing of settled proceeds | Planned |
+| **Workflow — Split payments** | Basis-point fan-out of one payment across counterparties | Live |
 
 **Beyond "an agent with a wallet."** Most agentic-payment demos stop at a key that can spend.
 Cronus adds *accountability*: it stakes its own USDC on each conviction call and settles the
@@ -624,3 +624,13 @@ Before any USDC leaves the agent wallet, every payout is checked against two har
 - `POST /api/spend-limit?action=spend` — enforce caps, then execute the USDC transfer on-chain (auth).
 
 Default caps: 1.000000 USDC / day, 0.250000 USDC / recipient.
+
+
+### Split Payments (live)
+
+A single payment can fan out to multiple counterparties by basis-point weights (summing to 10000), with allocations computed exactly (remainder to the last leg, no dust loss).
+
+- `GET /api/split-pay` — transparency: current split config + recent runs.
+- `POST /api/split-pay?action=preview` — no-funds allocation for `{amountAtomic, recipients?}`.
+- `POST /api/split-pay?action=set-split` — set recipients `[{address, bps}]` (auth).
+- `POST /api/split-pay?action=execute` — route a total across counterparties on-chain (auth).
