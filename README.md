@@ -588,10 +588,11 @@ OKX and compares it to the `openPrice` committed at open time:
 - Market `BTC-USDC`, verdict **YES**, conviction `0.82`
 - Committed `openPrice = 60147.1`, stake `0.091 USDC`
 - `openTx` `0x60b3bcb223ecbca4e507c52d44be70416059c3a20d1ebe098722f3ae88cf1003`
-- Resolves ~24h after open via `/api/resolve-stake`.
+- **Resolved 2026-06-30:** outcome **WRONG** (lastPrice 58613.7 vs openPrice 60147.1; BTC fell). Stake forfeited: 0.091 USDC burned to the dead address (provably unrecoverable).
+- `resolveTx` 0xb8b8a6a31370b645800051e66af25804199b53b7c528a417b34b7014e955a255 ([arcscan](https://testnet.arcscan.app/tx/0xb8b8a6a31370b645800051e66af25804199b53b7c528a417b34b7014e955a255))
 
 ### Honesty
-`/api/track-record` reports `accuracy = null` until at least one position resolves — we
+`/api/track-record` reports `accuracy` strictly from on-chain-resolved positions (first resolved 2026-06-30: 1 resolved, 0 correct, 1 wrong, accuracy 0.0, 0.091 USDC slashed, realized P&L -0.091) — we
 never claim a hit rate we haven't earned on-chain. At-risk and external metrics reflect
 real on-chain state only.
 
