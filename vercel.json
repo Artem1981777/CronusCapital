@@ -51,6 +51,10 @@
     {
       "source": "/api/fund-escrow",
       "destination": "/api/info?kind=fund-escrow"
+    },
+    {
+      "source": "/api/spend-limit",
+      "destination": "/api/info?kind=spend-limit"
     }
   ]
 }
