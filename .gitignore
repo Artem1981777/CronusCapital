@@ -29,3 +29,7 @@ seed-traction.mjs
 cronus_snapshot.txt
 .env*
 secrets/
+.env.stake
+
+forge-out/
+cache/

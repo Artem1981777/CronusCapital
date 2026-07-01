@@ -1,0 +1,8 @@
+[profile.default]
+src = "contracts"
+test = "contracts/test"
+out = "forge-out"
+libs = ["contracts/lib"]
+solc = "0.8.20"
+optimizer = true
+optimizer_runs = 200
