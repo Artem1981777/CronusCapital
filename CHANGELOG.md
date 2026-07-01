@@ -2,6 +2,14 @@
 
 All changes verified on Arc Testnet (chainId 5042002). Self-funded demo traffic is labeled and excluded from external metrics — we never fake demand.
 
+## Creator payout layer behind flag (2026-07-01)
+
+- **New `lib/creatorRegistry.js`** - pure, zero-dependency, and OFF by default behind the `CREATOR_LAYER` flag. Sits on top of the existing basis-point split engine (`lib/splitPay.js`) without modifying it.
+  - `resolveCreatorSplit()` - validates an allow-listed creator registry (shares must sum to 10000 bps) and returns a deterministic allocation; the last recipient absorbs rounding so no dust is lost.
+  - `assertAllowListed()` - refuses to pay any address that is not a registered creator.
+  - It only DECIDES a split: it never signs, burns, or moves funds, and is completely inert unless `CREATOR_LAYER` is explicitly turned on.
+- Additive and honest: no fabricated payouts or demand; a foundation to wire into the signed split path later, behind the flag, once real creators exist. Covered by `test/creatorRegistry.test.mjs`.
+
 ## Forkable OSS primitives expanded (2026-07-01)
 
 - **Two new MIT primitives** in `arc-primitives/` (zero-dependency, standalone):
