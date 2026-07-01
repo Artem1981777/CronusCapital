@@ -373,6 +373,19 @@ As of the latest build, the Cronus x402 paywall has settled **111 real USDC paym
 
 ## NANO nanopayments — Circle Gateway (gas-free, sub-cent)
 
+### Popup-free session-key streaming (NANO A2A)
+
+High-frequency agent-to-agent streaming can't ask for a wallet popup on every nano-payment. Cronus solves this with an **ephemeral session key**: fund once, then stream gas-free with no further prompts.
+
+1. **Generate** — the browser creates a fresh session key via `viem`'s `generatePrivateKey()`, kept in memory only (never written to storage, never transmitted).
+2. **Fund once** — the main wallet approves USDC and calls `GatewayWallet.depositFor(USDC, sessionKeyAddress, budget)` a single time, crediting the session key's Circle Gateway balance. This is the **only** on-chain action and the **only** wallet popup.
+3. **Stream popup-free** — a `GatewayClient` built from the session key calls `.pay('/api/nano-signal?...')` about once per second. Each call is a real **EIP-3009** gasless authorization settled through Circle Gateway (default **0.001 USDC/s**) with a real Gateway settlement id. No wallet prompts after funding.
+4. **Bounded by design** — the session key holds **no gas and nothing withdrawable** (only a Gateway spending balance it can authorize), and the client enforces a **hard budget**, a **per-transaction cap**, and a **session TTL**. Stop anytime; unused balance stays in Gateway.
+
+**Trust model:** neither side ever holds the other's private key. The main wallet never exposes its key to the page, and the session key can only sign spend-authorizations up to the funded budget — it cannot move funds elsewhere. Every tick is a genuine Gateway payment; self-run demo traffic is labeled and **never** counted as external demand.
+
+Try it on the [live demo](https://cronus-capital.vercel.app) (**FUND & STREAM**), or run it headless: `node scripts/buyer-agent.mjs --stream --seconds 30`.
+
 Cronus also exposes a **NANO tier** at **$0.001/call**, settled **gas-free via Circle Gateway** (EIP-3009 signed authorizations, USDC on Arc). An autonomous **buyer-agent** (`scripts/buyer-agent.mjs`) discovers the service from `/api/manifest`, enforces a budget, pays gas-free, and consumes the signal — a full agent-to-agent (A2A) loop.
 
 - **Live nano traction:** https://cronus-capital.vercel.app/api/traction
@@ -399,6 +412,8 @@ Cronus also exposes a **NANO tier** at **$0.001/call**, settled **gas-free via C
 ---
 
 ## What's new (build log)
+
+- **2026-07-01 — Popup-free session-key nano-streaming via Circle Gateway (new, hero):** Agent-to-agent pay-per-second streaming with **zero wallet popups after a single funding action**. The browser mints an **ephemeral session key** in memory (never persisted, never sent to any server); the main wallet approves USDC and calls `GatewayWallet.depositFor(USDC, sessionKey, budget)` **once** to credit the session key's Circle Gateway balance. From then on the session key signs **gas-free EIP-3009** nano-authorizations (default 0.001 USDC/s) against `/api/nano-signal` with **no further prompts**, returning real Circle Gateway settlement ids (on-chain / batched honestly labeled). Neither the browser nor the server ever holds the other's private key; the session key carries no gas and can only sign spend-authorizations up to a **hard budget**, with a **per-tx cap** and **session TTL** enforced client-side. New `src/lib/session.ts` + `StreamSession` landing panel (behind the `SHOW_STREAM` flag); `/api/*` and every existing rail untouched. `tsc` + `eslint` + `vite build` + `verify-intent` + `verify-live` (81/0) all green. (`2eed4e2`)
 
 - **2026-07-01 — Verified external-demand path + honest `external_payers` allowlist (new):** `external_payers`/`external_usdc`/`external_leaders` are now derived from on-chain receipts that are BOTH in an explicit `VERIFIED_EXTERNAL_PAYERS` allowlist AND not self, so the count stays a truthful `0` by default and cannot be inflated by faucet-funded throwaways. Shipped a self-serve on-ramp: one-command CLI (`scripts/pay-cronus.mjs`, `DRY_RUN=1` 402 preview), a one-click **Pay Cronus** button on the landing page, `externalPayerHint` in `/api/manifest` for machine discovery, and a live "verified external demand" panel on the traction UI. Hardened `selfAddresses()` so the staking/agent-identity wallet is no longer mistaken for an external payer. Tests + `tsc` + `eslint` + `verify-live` all green. (`ad159fc`, `2ed7e5e`, `6d77855`, `0ef7fd3`)
 
