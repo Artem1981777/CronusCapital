@@ -1,0 +1,31 @@
+name: Publish to MCP Registry
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install mcp-publisher
+        run: |
+          URL=$(curl -sL https://api.github.com/repos/modelcontextprotocol/registry/releases/latest | grep -oE 'https://[^"]+linux_amd64\.tar\.gz' | head -1)
+          echo "asset: $URL"
+          curl -sL "$URL" -o pub.tar.gz
+          tar xzf pub.tar.gz mcp-publisher
+          chmod +x mcp-publisher
+          ./mcp-publisher --version
+
+      - name: Login via GitHub OIDC
+        run: ./mcp-publisher login github-oidc
+
+      - name: Publish server.json
+        working-directory: cronus-mcp
+        run: ../mcp-publisher publish
