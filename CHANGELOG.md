@@ -2,6 +2,13 @@
 
 All changes verified on Arc Testnet (chainId 5042002). Self-funded demo traffic is labeled and excluded from external metrics — we never fake demand.
 
+## Non-custodial co-sign hardened + tested (2026-07-01)
+
+- **Session-EOA co-sign was already live and honest** (`src/lib/session.ts`): a session key is generated in browser memory (never persisted, never sent to the server), the main wallet funds its Gateway balance once, then it signs gas-free EIP-3009 nano-authorizations with no popups - real Circle Gateway settlements.
+- **Hardened the money-safety gate:** the per-tx cap, total budget, session TTL, and user-stop checks were inline in the streaming loop and untested. Extracted them verbatim into pure `src/lib/sessionGuard.ts` (`decideTick()`), unit-tested every stop-condition in `test/sessionGuard.test.mjs`, and wired `streamPay()` to the tested gate - behavior is identical, the critical limits are now verified.
+- **Docs:** `docs/non-custodial-cosign.md` explains the non-custodial design (in-memory ephemeral key, one-popup funding, delegated caps) and the threat model (XSS, replay, over-spend) with mitigations.
+- Only DECIDES whether a tick may proceed - never signs, pays, or touches keys. No live-burn; additive.
+
 ## Creator payout layer behind flag (2026-07-01)
 
 - **New `lib/creatorRegistry.js`** - pure, zero-dependency, and OFF by default behind the `CREATOR_LAYER` flag. Sits on top of the existing basis-point split engine (`lib/splitPay.js`) without modifying it.
