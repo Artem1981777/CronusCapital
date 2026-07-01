@@ -7,6 +7,7 @@ import ProofBanner from "./components/ProofBanner"
 import ReasoningTrace from "./components/ReasoningTrace";
 import TrackRecord from "./components/TrackRecord";
 import X402Integration from "./components/X402Integration"
+import PayCronus from "./components/PayCronus"
 import MoatStrip from "./components/MoatStrip"
 import ComposabilityStrip from "./components/ComposabilityStrip"
 import PositioningStrap from "./components/PositioningStrap"
@@ -165,6 +166,7 @@ function BetCard({ bet }: { bet: BetOpportunity }) {
 }
 
 export default function App() {
+	const SHOW_LEGACY = false
   const [topic, setTopic] = useState("")
   const [loading, setLoading] = useState(false)
   const [state, setState] = useState<AgentState | null>(null)
@@ -291,7 +293,7 @@ export default function App() {
         </div>
       </div>
       <div style={{ padding: "14px 32px 32px", maxWidth: "1100px", margin: "0 auto" }}>
-        {true && (
+        {(
           <>
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "20px" }}>
               <AgentCard name="SCOUT" icon="🔭" role="Market Intelligence" status={getPhaseStatus("scout")}>
@@ -312,7 +314,7 @@ export default function App() {
 				<ReasoningPanel logs={reasoningLogs} />
           </>
         )}
-        {false && (
+        {SHOW_LEGACY && (
           <div style={{ textAlign: "center", padding: "60px 0" }}>
             <div style={{ fontSize: "48px", marginBottom: "16px", color: "#39e01433", textShadow: "0 0 20px #39e01422" }}>⬡</div>
             <div style={{ color: "#39e01444", fontSize: "11px", letterSpacing: "6px", fontFamily: "Cinzel, serif" }}>AWAITING MARKET QUERY</div>
@@ -346,6 +348,7 @@ export default function App() {
 <AgentIdentity />
 <PositioningStrap />
 <X402Integration />
+			<PayCronus />
       <MoatStrip />
       <ComposabilityStrip />
         <PolicyGuardrails />
