@@ -112,6 +112,19 @@ node scripts/audit-funders.mjs   # re-checks every payer's first USDC funding so
 
 The canonical metric is `external_payers`, which is **0** today (top-level in both `/api/traction` and `/api/leaderboard`): no verified third party has paid yet. The `self_generated_*` fields report our own on-chain test volume, labeled honestly and never counted as external. The nano-tier `unique_external_payers` reflects only the separate nano KV ledger and stays `0` until a nano-tier external payer appears, so it is not the headline number. Autonomous A2A demo volume is labeled `self_demo_calls` and never counted as external.
 
+### Verified external demand (how `external_payers` is earned, not claimed)
+
+`external_payers` is deliberately hard to inflate. A payer is counted **only if it is both (a) explicitly allow-listed** in `VERIFIED_EXTERNAL_PAYERS` **and (b) not one of our own wallets** (`selfAddresses()`), with its on-chain payment visible in `/api/receipts`. The allowlist is **empty by default, so the honest count stays `0`** until a real third party pays and is independently verified.
+
+Why an explicit allowlist instead of "any wallet that isn't ours"? On a testnet, throwaway wallets can be faucet-funded to *look* independent, so "not-self" alone is not proof of external demand. A wallet is verified as independently funded (via `scripts/audit-funders.mjs` against `/api/receipts`) before it is added — no address is ever auto-promoted to "external".
+
+Self-serve on-ramp for a real external agent/wallet:
+- **One click:** the landing page mounts a **Pay Cronus** button — connect wallet, one real 0.02 USDC on-chain transfer, and you appear in the public settled-payments feed.
+- **One command:** `CRONUS_URL=https://cronus-capital.vercel.app EXTERNAL_PRIVATE_KEY=0x... node scripts/pay-cronus.mjs` (use a wallet **you** funded; `DRY_RUN=1` shows the live 402 without paying).
+- **Machine discovery:** `/api/manifest` carries `externalPayerHint`, so any agent can find the 402 flow + CLI on its own.
+
+Once a payment lands and independence is verified, the address is added to `VERIFIED_EXTERNAL_PAYERS` and surfaces at the top of `/api/traction` (`external_payers`, `external_usdc`, `external_leaders[]` with arcscan tx links) and on the landing page. Self-generated test traffic is always labeled `self_generated_*` and never counted.
+
 ## Pay Cronus in 60 seconds (any funded wallet)
 
 **No terminal? One click:** open the live dashboard, connect your wallet, and press **"Connect wallet & pay 0.02 USDC on Arc"** — one real on-chain transaction, and you appear in the public settled-payments feed. Need test USDC: https://faucet.circle.com (select Arc Testnet).
@@ -386,6 +399,8 @@ Cronus also exposes a **NANO tier** at **$0.001/call**, settled **gas-free via C
 ---
 
 ## What's new (build log)
+
+- **2026-07-01 — Verified external-demand path + honest `external_payers` allowlist (new):** `external_payers`/`external_usdc`/`external_leaders` are now derived from on-chain receipts that are BOTH in an explicit `VERIFIED_EXTERNAL_PAYERS` allowlist AND not self, so the count stays a truthful `0` by default and cannot be inflated by faucet-funded throwaways. Shipped a self-serve on-ramp: one-command CLI (`scripts/pay-cronus.mjs`, `DRY_RUN=1` 402 preview), a one-click **Pay Cronus** button on the landing page, `externalPayerHint` in `/api/manifest` for machine discovery, and a live "verified external demand" panel on the traction UI. Hardened `selfAddresses()` so the staking/agent-identity wallet is no longer mistaken for an external payer. Tests + `tsc` + `eslint` + `verify-live` all green. (`ad159fc`, `2ed7e5e`, `6d77855`, `0ef7fd3`)
 
 - **2026-06-29 — EIP-712 signed spend-intents + KV replay-protection (new):** `GET /api/spend-intent` advertises the EIP-712 schema (domain chainId 5042002, `SpendIntent{payer,payTo,asset,maxAmount,nonce,deadline}`); `POST` recovers the signer with viem, enforces the deadline + binding (payTo=treasury, asset=Arc USDC), and burns the `(payer,nonce)` in Upstash KV (`SET NX`) so a replayed signed intent is rejected. Verification only — no funds move and no on-chain hash is fabricated. Reproduce: `npm run verify-intent` (ephemeral unfunded key, off-chain signature) and `npm run verify-live` (section [8], no keys).
 
