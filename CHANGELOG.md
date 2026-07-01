@@ -2,6 +2,13 @@
 
 All changes verified on Arc Testnet (chainId 5042002). Self-funded demo traffic is labeled and excluded from external metrics — we never fake demand.
 
+## Forkable OSS primitives expanded (2026-07-01)
+
+- **Two new MIT primitives** in `arc-primitives/` (zero-dependency, standalone):
+  - `spend-breaker.mjs` - pure `decideSpend()` + in-memory `createBreaker()`: money safety enforced in code, not by the model; a hallucinated amount can never exceed the cap. Ships a deterministic `selftest`.
+  - `price-crosscheck.mjs` - `crossCheck()` corroborates a primary price against an independent Coinbase spot, reporting spread and agreement within a tolerance band; advisory and fail-open (never fabricates a price).
+- The package now offers four forkable primitives: prove payment, pay with reconcilable context, cap spend, cross-check price. (`846095b`)
+
 ## Honest on-chain track record (2026-07-01)
 
 - **Removed a fabricated seed from the UI** - `src/components/TrackRecord.tsx` previously computed hit-rate/Brier/calibration from a hard-coded array of made-up predictions. It now fetches `/api/track-record` and `/api/backtest` and renders only real on-chain-resolved stakes.
