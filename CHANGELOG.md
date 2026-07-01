@@ -2,6 +2,13 @@
 
 All changes verified on Arc Testnet (chainId 5042002). Self-funded demo traffic is labeled and excluded from external metrics — we never fake demand.
 
+## MCP distribution - cronus-mcp package (2026-07-01)
+
+- **Published Cronus as MCP tools** - new `cronus-mcp` npm package (thin stdio MCP server) exposes three agent tools over the live API: `cronus_consult` (FREE verdict + deterministic reasoning + re-verifiable `traceHash`), `cronus_signal` (x402-paid, 0.02 USDC on Arc; returns the HTTP 402 quote until paid), and `cronus_nano_signal` (Circle Gateway nanopayment, ~0.001 USDC).
+- **Registry-ready** - package carries `mcpName: io.github.Artem1981777/cronus-mcp` and ships `server.json` (schema 2025-09-29, npm registryType, stdio transport) for the Model Context Protocol registry.
+- **Thin client, no duplicated logic** - every tool proxies the live Cronus HTTP endpoints; override the base with `CRONUS_BASE_URL`. Verified with a live MCP handshake smoke test (listTools + callTool): consult -> 200, signal -> 402.
+- Install: `npx cronus-mcp@latest`.
+
 ## Traction correction (2026-06-29): external_payers = 0, self-generated test volume
 
 - `/api/traction` and `/api/leaderboard` report on-chain x402 settlement volume from receipts as `self_generated_*` (our own dev-session test traffic); canonical `external_payers` stays 0 until a real third party pays.
