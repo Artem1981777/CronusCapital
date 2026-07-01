@@ -2,6 +2,12 @@
 
 All changes verified on Arc Testnet (chainId 5042002). Self-funded demo traffic is labeled and excluded from external metrics — we never fake demand.
 
+## Honest on-chain track record (2026-07-01)
+
+- **Removed a fabricated seed from the UI** - `src/components/TrackRecord.tsx` previously computed hit-rate/Brier/calibration from a hard-coded array of made-up predictions. It now fetches `/api/track-record` and `/api/backtest` and renders only real on-chain-resolved stakes.
+- **Honest even when unflattering** - the sole resolved position so far is a high-conviction BTC call that was wrong; its 0.091 USDC stake was slashed to a burn address (realized P&L -0.091, Brier 0.6724). Each resolved row links to its Arc resolve tx.
+- **Never seeded** - with no resolved positions the feed shows an explicit empty state; nothing is backfilled or cherry-picked. `vite build` green; deployed (`f101b7b`).
+
 ## MCP registry publish + cronus_pay tool & CLI (2026-07-01)
 
 - **Published to the MCP registry** - `cronus-mcp` (`io.github.Artem1981777/cronus-mcp`) is live in the Model Context Protocol registry, published from `server.json` via a GitHub OIDC workflow; npm bumped to `0.2.0` (`npx cronus-mcp@latest`).
