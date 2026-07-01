@@ -283,6 +283,7 @@ Most projects in this space ship **infrastructure** - a wallet, a policy engine,
 - **Spend is non-custodial by construction.** Every *spend* settlement (the x402 buy path) is signed in your own wallet - the agent holds no key on the spend side. The autonomous *payout* path is the one bounded exception: a server-side treasury hot-wallet signs CCTP burns with minimal float, capped at 5 USDC per payout plus a daily circuit breaker (see the threat model). Spend caps, a recipient allowlist, and a pre-flight simulation are enforced on top. A guarantee built on a key the agent never holds is stronger than any policy engine.
 - **Its reasoning is real and honest.** The CONSULT trace is produced live by a real LLM over real OKX market data, and the agent abstains (SKIP) when conviction is below its bar - no scripted animation, no fabricated indicators, no always-YES.
 - **Everything is verifiable in a browser tab.** Live on-chain settlements, a keccak hash-chain ledger of decisions, and the pre-flight simulation are all open to inspection - no trust required.
+- **Its reasoning is verifiable, not just visible.** Each consult runs deterministically (temperature 0 + a fixed seed), so identical inputs reproduce the same trace, and every run is content-addressed by the sha256 of its canonical input+output. Anyone can re-hash a stored trace via `/api/trace` and confirm it was not altered after the fact - honesty you can check, not just read.
 
 **The thesis:** most builders are shipping *parts* of an agent economy. Cronus is a *working agent economy*, end to end, that you can audit yourself.
 
@@ -659,6 +660,7 @@ workflow controls — and goes one step further with verifiable skin-in-the-game
 | **Workflow — Spending limits** | Hard daily cap + per-recipient cap, enforced before any USDC leaves the wallet | Live |
 | **Workflow — Subscriptions** | Plan-based call quotas with per-call metering | Live |
 | **Workflow — Split payments** | Basis-point fan-out of one payment across counterparties | Live |
+| **Accountability — Verifiable reasoning** | Deterministic consult (temperature 0 + fixed seed) content-addressed by sha256; any run re-verifiable via `/api/trace` | Live |
 
 **Beyond "an agent with a wallet."** Most agentic-payment demos stop at a key that can spend.
 Cronus adds *accountability*: it stakes its own USDC on each conviction call and settles the
