@@ -2,6 +2,14 @@
 
 All changes verified on Arc Testnet (chainId 5042002). Self-funded demo traffic is labeled and excluded from external metrics — we never fake demand.
 
+## MCP registry publish + cronus_pay tool & CLI (2026-07-01)
+
+- **Published to the MCP registry** - `cronus-mcp` (`io.github.Artem1981777/cronus-mcp`) is live in the Model Context Protocol registry, published from `server.json` via a GitHub OIDC workflow; npm bumped to `0.2.0` (`npx cronus-mcp@latest`).
+- **New `cronus_pay` tool** - returns the live x402 HTTP 402 quote for a premium signal plus `pay_to`, network, and step-by-step `how_to_pay`, so a wallet or agent can settle USDC on Arc and retry `cronus_signal`. It never moves funds and never fabricates payers: a payment counts as a verified external payer only after on-chain confirmation (`/api/receipts`); self-generated test traffic stays labeled separately.
+- **CLI mode** - `cronus-mcp consult|signal|nano-signal|pay [INSTID]` prints one-shot JSON without an MCP client.
+- **Landing CTA fix** - the become-a-real-external-payer prompt now points to `npx cronus-mcp pay ETH-USDC` (previously an internal self-demo script), reinforcing that self-generated volume is never counted as external.
+- Honest: `external_payers` stays 0 until a real third party pays. Smoke (4 tools) + CLI + build green.
+
 ## MCP distribution - cronus-mcp package (2026-07-01)
 
 - **Published Cronus as MCP tools** - new `cronus-mcp` npm package (thin stdio MCP server) exposes three agent tools over the live API: `cronus_consult` (FREE verdict + deterministic reasoning + re-verifiable `traceHash`), `cronus_signal` (x402-paid, 0.02 USDC on Arc; returns the HTTP 402 quote until paid), and `cronus_nano_signal` (Circle Gateway nanopayment, ~0.001 USDC).
