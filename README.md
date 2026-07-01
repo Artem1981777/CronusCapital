@@ -4,6 +4,7 @@
 
 <p align="center">
   <a href="https://github.com/Artem1981777/CronusCapital/actions/workflows/ci.yml"><img src="https://github.com/Artem1981777/CronusCapital/actions/workflows/ci.yml/badge.svg" alt="CI"/></a>
+<a href="https://registry.modelcontextprotocol.io"><img src="https://img.shields.io/badge/MCP-cronus--mcp-2ea44f" alt="MCP registry"/></a>
 </p>
 
 # 𓂀 Cronus Capital
@@ -18,6 +19,7 @@ Cronus is an autonomous prediction-market oracle agent. It scans markets, scores
 
 - **Live demo:** https://cronus-capital.vercel.app
 - **Repo:** https://github.com/Artem1981777/CronusCapital
+- **Use via MCP:** `npx cronus-mcp@latest` exposes Cronus as agent tools — free verdict + x402-paid signal + Circle Gateway nano.
 - **Explorer:** https://testnet.arcscan.app
 - **Network:** Arc Testnet · chainId 5042002 · native USDC 0x3600...0000 (6 decimals)
 
@@ -413,6 +415,8 @@ Cronus also exposes a **NANO tier** at **$0.001/call**, settled **gas-free via C
 ---
 
 ## What's new (build log)
+
+- **2026-07-01 — MCP distribution: `cronus-mcp` package (new):** Cronus is now installable as MCP tools — `npx cronus-mcp@latest` exposes `cronus_consult` (free verdict + re-verifiable `traceHash`), `cronus_signal` (x402-paid, 0.02 USDC on Arc), and `cronus_nano_signal` (Circle Gateway nano). Registry-ready via `mcpName` + `server.json` (schema 2025-09-29). Thin proxy, no duplicated logic; verified with a live MCP handshake smoke test (consult 200, signal 402). (`6ecbc54`)
 
 - **2026-07-01 — Proof panel: dashboard-visible backtest + live trace verification (new):** The live dashboard now carries a read-only **Proof** panel so anyone (judges included) can *see* the honesty machinery without reading code. It surfaces the signal **backtest** (`/api/backtest` — Brier, skill-vs-base-rate, resolved/open stakes) and the **content-addressed reasoning archive** (`/api/trace` — count + the latest `traceHash`), then **re-verifies that latest trace live**: it re-fetches `/api/trace?hash=<latest>`, the server re-hashes the stored record, and the panel shows a `VERIFIED` badge only when the recomputed address matches. Purely additive React (`src/components/ProofPanel.tsx`), fail-soft on fetch errors, mounted beside the settlements panel. Nothing is backfilled or simulated — the numbers score only Cronus's own on-chain-resolved stakes. `tsc` / `eslint` / `vite build` all green; deployed. (`28ac369`)
 
