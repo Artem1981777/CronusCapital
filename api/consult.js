@@ -2,6 +2,8 @@
 
 // POLISH: универсальный retry с экспоненциальным backoff (OKX/Groq иногда дают 5xx/таймаут).
 // Экспортируется для юнит-тестов (test/consult.test.mjs). Не меняет внешний контракт хендлера.
+import { crossCheck } from "../lib/priceSources.js"
+
 export async function fetchWithRetry(url, init, opts = {}) {
   const retries = Number(opts.retries ?? process.env.CONSULT_RETRIES ?? 2); // 2 ретрая = 3 попытки
   const baseMs = Number(opts.baseMs ?? 250);
@@ -46,6 +48,8 @@ export default async function handler(req, res) {
     }
   } catch (e) { /* market data stays null */ }
 
+  let crossCheckResult = null;
+  try { if (process.env.CONSULT_XCHECK !== "0" && price) crossCheckResult = await crossCheck(instId, price); } catch (_) { crossCheckResult = null; }
   const key = process.env.GROQ_API_KEY;
   if (!key) {
     return res.status(200).json({ ok:false, live:false, price, changePct, trace:["GROQ_API_KEY not configured"], verdict:"SKIP", conviction:0 });
@@ -113,6 +117,7 @@ export default async function handler(req, res) {
     analog: (parsed.analog && typeof parsed.analog === "object") ? parsed.analog : null,
     verdict: parsed.verdict || "SKIP",
     conviction: parsed.conviction || 0,
-    decisions: Array.isArray(parsed.decisions) ? parsed.decisions : []
+    decisions: Array.isArray(parsed.decisions) ? parsed.decisions : [],
+    crossCheck: crossCheckResult
   });
 }
