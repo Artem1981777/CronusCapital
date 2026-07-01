@@ -1,5 +1,6 @@
 import { createWalletClient, createPublicClient, http, defineChain, parseUnits, getAddress } from "viem"
 import { privateKeyToAccount } from "viem/accounts"
+import { checkDaily, recordDaily } from "../lib/breaker.js"
 
 const USDC = "0x3600000000000000000000000000000000000000"
 const CHAIN_ID = 5042002
@@ -40,7 +41,10 @@ export default async function handler(req, res) {
     const bal = await publicClient.readContract({ address: USDC, abi: ERC20_ABI, functionName: "balanceOf", args: [account.address] })
     if (bal < amount) return res.status(400).json({ ok: false, error: "treasury out of USDC: fund " + account.address })
     await publicClient.simulateContract({ account, address: USDC, abi: ERC20_ABI, functionName: "transfer", args: [to, amount] })
+    const gate = await checkDaily(String(amount))
+    if (!gate.allowed && !gate.unavailable) return res.status(429).json({ ok: false, error: "daily spend cap reached", reason: gate.reason, remainingAtomic: gate.remainingAtomic })
     const hash = await walletClient.writeContract({ address: USDC, abi: ERC20_ABI, functionName: "transfer", args: [to, amount] })
+    await recordDaily(String(amount))
     return res.status(200).json({ ok: true, hash, amount: String(amountNum), to, from: account.address })
   } catch (e) {
     return res.status(500).json({ ok: false, error: String((e && e.message) || e) })
