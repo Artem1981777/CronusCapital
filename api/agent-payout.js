@@ -1,6 +1,7 @@
 import { keccak256, toHex } from "viem"
 import { createWalletClient, createPublicClient, http, defineChain } from "viem"
 import { privateKeyToAccount } from "viem/accounts"
+import { checkDaily, recordDaily } from "../lib/breaker.js"
 
 export const config = { maxDuration: 60 }
 
@@ -195,6 +196,15 @@ async function runExecute(req, res, q) {
 
 		const amt = toUnits(d.amount, 6)
 		if (amt <= 0n) { await kvDel(LOCK_KEY); res.status(400).json({ detail: "amount rounds to zero" }); return }
+            if (process.env.PAYOUT_DAILY_BREAKER !== "0") {
+                const br = await checkDaily(String(amt))
+                if (!br.allowed && !br.unavailable) {
+                    await kvDel(LOCK_KEY)
+                    const rec = await appendLedger({ at: new Date().toISOString(), action: "hold", amount: d.amount, available: available, recipientG: policy.recipientG, reason: "daily breaker: " + br.reason, executed: false, trigger: trigger })
+                    res.status(200).json({ decision: rec, executed: false, blockedBy: "daily-breaker", breaker: br })
+                    return
+                }
+            }
 		const fwd = strkeyToBytes32(STELLAR_FORWARDER)
 		const hook = buildHookData(policy.recipientG)
 		const maxFee = amt / 100n
@@ -217,7 +227,8 @@ async function runExecute(req, res, q) {
 
 		const burnHash = await walletClient.writeContract({ address: ARC_TOKEN_MESSENGER, abi: TM_ABI, functionName: "depositForBurnWithHook", args: [amt, STELLAR_DOMAIN, fwd, ARC_USDC, fwd, maxFee, 2000, hook] })
 
-		const remaining = Math.max(0, Math.round((available - d.amount) * 10000) / 10000)
+		if (process.env.PAYOUT_DAILY_BREAKER !== "0") await recordDaily(String(amt)).catch(() => null)
+            const remaining = Math.max(0, Math.round((available - d.amount) * 10000) / 10000)
 		await kvSet(AVAIL_KEY, String(remaining))
 		const rec = await appendLedger({ at: new Date().toISOString(), action: "payout", amount: d.amount, available: available, recipientG: policy.recipientG, reason: d.reason, executed: true, arcBurnTx: burnHash, signer: account.address, trigger: trigger, submitted: true })
 		await kvDel(LOCK_KEY)
