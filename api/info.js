@@ -18,8 +18,9 @@ import spendLimit from "../lib/spendLimit.js"
 import splitPay from "../lib/splitPay.js"
 import subscription from "../lib/subscription.js"
 import openStake from "../lib/openStake.js"
+import agentWithdraw from "../lib/withdrawExec.js"
 
-const ROUTES = { "subscription": subscription, "split-pay": splitPay, "spend-limit": spendLimit, "fund-escrow": fundEscrow, "resolve-stake": resolveStake, manifest, openapi, receipts, metrics, traction, leaderboard, settlements, "spend-intent": spendIntent, scorecard, "track-record": trackRecord, "open-stake": openStake }
+const ROUTES = { "agent-withdraw": agentWithdraw, "subscription": subscription, "split-pay": splitPay, "spend-limit": spendLimit, "fund-escrow": fundEscrow, "resolve-stake": resolveStake, manifest, openapi, receipts, metrics, traction, leaderboard, settlements, "spend-intent": spendIntent, scorecard, "track-record": trackRecord, "open-stake": openStake }
 
 export default async function handler(req, res) {
 	const kind = String((req.query && req.query.kind) || "").toLowerCase()

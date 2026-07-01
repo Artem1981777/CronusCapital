@@ -63,6 +63,10 @@
     {
       "source": "/api/subscription",
       "destination": "/api/info?kind=subscription"
+    },
+    {
+      "source": "/api/agent-withdraw",
+      "destination": "/api/info?kind=agent-withdraw"
     }
   ]
 }
