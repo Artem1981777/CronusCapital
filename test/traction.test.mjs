@@ -53,3 +53,26 @@ test("selfAddresses includes treasury + env demo wallets (deduped, lowercased)",
 	assert.equal(s.filter((a) => a === "0xabc").length, 1, "deduped")
 	delete process.env.SELF_DEMO_ADDRESSES
 })
+
+import { verifiedExternal } from "../lib/traction.js"
+
+test("verifiedExternal counts only allow-listed, non-self receipt payers", () => {
+	const receipts = [
+		{ payer: "0xEXT1", amountAtomic: 20000, txHash: "0x1" },
+		{ payer: "0xEXT1", amountAtomic: 20000, txHash: "0x2" },
+		{ payer: "0xSELF", amountAtomic: 20000, txHash: "0x3" },
+		{ payer: "0xNOTALLOW", amountAtomic: 20000, txHash: "0x4" },
+	]
+	const r = verifiedExternal(receipts, { allowlist: ["0xext1", "0xself"], self: ["0xself"] })
+	assert.equal(r.external_payers, 1)
+	assert.equal(r.external_txs, 2)
+	assert.equal(r.external_usdc, 0.04)
+	assert.equal(r.external_leaders[0].payer, "0xext1")
+})
+
+test("verifiedExternal empty allowlist => zero (honest default)", () => {
+	const r = verifiedExternal([{ payer: "0xEXT1", amountAtomic: 20000, txHash: "0x1" }], { allowlist: [], self: [] })
+	assert.equal(r.external_payers, 0)
+	assert.equal(r.external_txs, 0)
+	assert.equal(r.external_usdc, 0)
+})
