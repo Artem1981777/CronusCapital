@@ -53,7 +53,7 @@ export default function NanoHeadline() {
 				<span>{"\u00B7 batch " + ratio + ":1 (testnet 1:1)"}</span>
 			</div>
 			<div style={honestS}>{self + " self-demo (A2A, honestly labeled) \u00B7 " + ext + " external payers"}</div>
-			<div style={ctaS}>Become a real external payer: <code style={codeS}>node scripts/buyer-agent.mjs --deposit 1</code></div>
+			<div style={ctaS}>Pay as a real external payer: <code style={codeS}>npx cronus-mcp pay ETH-USDC</code> (self-demo above is honestly labeled and never counted as external)</div>
 		</div>
 	)
 }
