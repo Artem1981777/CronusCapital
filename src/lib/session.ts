@@ -3,6 +3,7 @@
 // Gateway balance ONCE via depositFor; afterwards the session key signs gas-free EIP-3009 nano
 // authorizations with NO wallet popups. Honest: real Gateway settlements, hard budget + TTL caps.
 import { generatePrivateKey, privateKeyToAccount } from "viem/accounts"
+import { decideTick } from "./sessionGuard"
 import { GatewayClient } from "@circle-fin/x402-batching/client"
 import type { Address, Hex } from "viem"
 
@@ -101,10 +102,8 @@ export async function streamPay(opts: StreamOpts): Promise<StreamResult> {
   let attempted = 0
   let stoppedReason = "completed"
   for (let i = 1; i <= opts.seconds; i++) {
-    if (opts.shouldStop && opts.shouldStop()) { stoppedReason = "stopped by user"; break }
-    if (Date.now() > deadline) { stoppedReason = "session TTL expired"; break }
-    if (opts.perTickUsd > perTxCapUsd) { stoppedReason = "per-tx cap exceeded"; break }
-    if (spent + opts.perTickUsd > opts.budgetUsd + 1e-9) { stoppedReason = "budget exhausted"; break }
+    const gate = decideTick({ stopped: !!(opts.shouldStop && opts.shouldStop()), now: Date.now(), deadline, perTickUsd: opts.perTickUsd, perTxCapUsd, spentUsd: spent, budgetUsd: opts.budgetUsd })
+      if (!gate.proceed) { stoppedReason = gate.reason; break }
     attempted++
     const t0 = Date.now()
     const tick: StreamTick = { i, ok: false, amountUsd: 0, settlement: null }
