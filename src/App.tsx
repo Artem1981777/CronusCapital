@@ -10,6 +10,7 @@ import X402Integration from "./components/X402Integration"
 import PayCronus from "./components/PayCronus"
 import StreamSession from "./components/StreamSession"
 import GatewaySettlements from "./components/GatewaySettlements"
+import ProofPanel from "./components/ProofPanel"
 import MoatStrip from "./components/MoatStrip"
 import ComposabilityStrip from "./components/ComposabilityStrip"
 import PositioningStrap from "./components/PositioningStrap"
@@ -355,6 +356,7 @@ export default function App() {
 			<PayCronus />
                     {SHOW_STREAM && <StreamSession />}
                     {SHOW_SETTLEMENTS && <GatewaySettlements />}
+                    <ProofPanel />
       <MoatStrip />
       <ComposabilityStrip />
         <PolicyGuardrails />
