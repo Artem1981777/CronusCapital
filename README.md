@@ -462,6 +462,9 @@ Latest hardening, newest first:
 - **Visible agent decision log** - the reasoning `trace` (SCOUT ... EXECUTOR) renders live inside the BUY SIGNAL result. (`e81ce2c`)
 - **Forkable OSS primitives (MIT)** - `arc-primitives/`: a zero-dependency x402 payment verifier (which independently confirmed our own memo payment) plus a pay-with-memo helper. (`8c2c28c`)
 - **Security and honest trade-offs** - `docs/security-threat-model.md` lists verified properties and flagged limitations.
+- **Honest traction** - `TRACTION.md` explains the self-vs-external methodology and gives a live, on-chain-verifiable snapshot (external_payers = 0).
+- **Decision log** - `DECISIONS.md` records the key architecture and economic decisions with their trade-offs.
+- **Known limitations** - `BUGS.md` tracks open issues and honest caveats.
 
 ---
 
