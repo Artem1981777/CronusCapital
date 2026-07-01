@@ -1,89 +1,118 @@
 import { useState, useEffect, type CSSProperties } from "react"
 
 const GREEN = "#39e014", GOLD = "#c9a84c", DIM = "#7e8c6a", BG = "#070b07", RED = "#d4543a"
-const KEY = "cronus_track"
 
-type Call = { topic: string; conf: number; outcome: number }
-
-const SEED: Call[] = [
-  { topic: "BTC > $110k by Jul", conf: 0.82, outcome: 1 },
-  { topic: "ETH ETF net inflow", conf: 0.74, outcome: 1 },
-  { topic: "SOL short squeeze", conf: 0.68, outcome: 0 },
-  { topic: "Fed cut in June", conf: 0.61, outcome: 0 },
-  { topic: "USDC supply ATH", conf: 0.88, outcome: 1 },
-  { topic: "Arc TVL > $50M", conf: 0.71, outcome: 1 },
-  { topic: "DOGE > $0.20", conf: 0.55, outcome: 0 },
-  { topic: "Stables share +2pp", conf: 0.79, outcome: 1 },
-  { topic: "L2 fees -30%", conf: 0.66, outcome: 1 },
-  { topic: "BTC dominance > 58%", conf: 0.77, outcome: 1 },
-]
-
-function loadCalls(): Call[] {
-  try {
-    const raw = localStorage.getItem(KEY)
-    if (raw) { const a = JSON.parse(raw); if (Array.isArray(a) && a.length) return a }
-  } catch { /* noop */ }
-  try { localStorage.setItem(KEY, JSON.stringify(SEED)) } catch { /* noop */ }
-  return SEED
+type Pos = {
+  id?: string
+  marketId?: string
+  verdict?: string
+  conviction?: number
+  stakeUsdc?: number
+  status?: string
+  openTxExplorer?: string
+  resolveTxExplorer?: string
 }
-
-function liveSettled(): number {
-  try {
-    const raw = localStorage.getItem("cronus_decisions")
-    if (raw) { const a = JSON.parse(raw); if (Array.isArray(a)) return a.length }
-  } catch { /* noop */ }
-  return 0
+type TR = {
+  ok?: boolean
+  open_positions?: number
+  resolved_positions?: number
+  accuracy?: number
+  total_staked_usdc?: number
+  total_slashed_usdc?: number
+  total_returned_usdc?: number
+  realized_pnl_usdc?: number
+  positions?: Pos[]
 }
+type BT = { ok?: boolean; brier?: number | null; skill_score?: number | null }
+
+const num = (v: unknown, d = 0): number => (typeof v === "number" && isFinite(v) ? v : d)
 
 export default function TrackRecord() {
-  const [calls, setCalls] = useState<Call[]>([])
-  const [live, setLive] = useState(0)
+  const [tr, setTr] = useState<TR | null>(null)
+  const [bt, setBt] = useState<BT | null>(null)
+  const [err, setErr] = useState("")
+
   useEffect(() => {
-    setCalls(loadCalls()); setLive(liveSettled())
-    const iv = setInterval(() => setLive(liveSettled()), 4000)
-    return () => clearInterval(iv)
+    let alive = true
+    const load = async () => {
+      try {
+        const r = await fetch("/api/track-record")
+        const j = (await r.json()) as TR
+        if (alive) setTr(j)
+      } catch (e) { if (alive) setErr(String((e as Error).message || e)) }
+      try {
+        const r2 = await fetch("/api/backtest")
+        const j2 = (await r2.json()) as BT
+        if (alive) setBt(j2)
+      } catch { /* backtest optional */ }
+    }
+    load()
+    const iv = setInterval(load, 15000)
+    return () => { alive = false; clearInterval(iv) }
   }, [])
 
-  const n = calls.length
-  const hits = calls.filter(c => c.outcome === 1).length
-  const hitRate = n ? (hits / n) * 100 : 0
-  const brier = n ? calls.reduce((acc, c) => acc + Math.pow(c.conf - c.outcome, 2), 0) / n : 0
-  const avgConf = n ? (calls.reduce((acc, c) => acc + c.conf, 0) / n) * 100 : 0
-  const gap = hitRate - avgConf
-  let calib = "CALIBRATED", calibColor = GREEN
-  if (gap < -8) { calib = "OVERCONFIDENT"; calibColor = RED }
+  const positions = (tr && Array.isArray(tr.positions)) ? tr.positions : []
+  const resolvedList = positions.filter(p => p.status === "correct" || p.status === "wrong")
+  const resolved = tr && tr.resolved_positions != null ? tr.resolved_positions : resolvedList.length
+  const open = tr && tr.open_positions != null ? tr.open_positions : positions.filter(p => p.status === "open").length
+  const correct = resolvedList.filter(p => p.status === "correct").length
+  const accuracy = tr && tr.accuracy != null ? tr.accuracy * 100 : (resolved ? (correct / resolved) * 100 : 0)
+  const avgConf = resolvedList.length ? (resolvedList.reduce((a, p) => a + num(p.conviction), 0) / resolvedList.length) * 100 : 0
+  const staked = num(tr && tr.total_staked_usdc)
+  const slashed = num(tr && tr.total_slashed_usdc)
+  const pnl = num(tr && tr.realized_pnl_usdc)
+  const brier = bt && bt.brier != null ? bt.brier : null
+
+  const gap = accuracy - avgConf
+  let calib = "CALIBRATED", calibColor: string = GREEN
+  if (resolved === 0) { calib = "NO RESOLVED CALLS"; calibColor = DIM }
+  else if (gap < -8) { calib = "OVERCONFIDENT"; calibColor = RED }
   else if (gap > 8) { calib = "UNDERCONFIDENT"; calibColor = GOLD }
+
+  const fmtUsd = (v: number) => (v < 0 ? "-" : "") + "$" + Math.abs(v).toFixed(3)
 
   return (
     <div style={panel}>
       <div style={head}>
-        <span style={title}>ORACLE TRACK RECORD {"\u00B7"} SELF-SCORED</span>
+        <span style={title}>ORACLE TRACK RECORD {"\u00B7"} ON-CHAIN, SELF-SCORED</span>
         <span style={badge(calibColor)}>{calib}</span>
       </div>
       <div style={grid}>
-        <Stat k="HIT RATE" v={hitRate.toFixed(0) + "%"} sub={hits + "/" + n + " resolved"} big />
-        <Stat k="BRIER SCORE" v={brier.toFixed(3)} sub="lower is better" />
-        <Stat k="AVG CONFIDENCE" v={avgConf.toFixed(0) + "%"} sub="stated upfront" />
-        <Stat k="LIVE SETTLED" v={String(live)} sub="on-chain decisions" accent />
+        <Stat k="RESOLVED" v={String(resolved)} sub={open + " open"} big />
+        <Stat k="ACCURACY" v={accuracy.toFixed(0) + "%"} sub={correct + "/" + resolved + " correct"} />
+        <Stat k="BRIER SCORE" v={brier != null ? brier.toFixed(3) : "\u2014"} sub="lower is better" />
+        <Stat k="STAKED" v={"$" + staked.toFixed(3)} sub="real USDC at stake" />
+        <Stat k="REALIZED P&L" v={fmtUsd(pnl)} sub={"$" + slashed.toFixed(3) + " slashed"} accent />
       </div>
       <div style={barWrap}>
-        <Bar label="Predicted" pct={avgConf} color={GOLD} />
-        <Bar label="Actual" pct={hitRate} color={GREEN} />
+        <Bar label="Conviction" pct={avgConf} color={GOLD} />
+        <Bar label="Accuracy" pct={accuracy} color={GREEN} />
       </div>
-      <div style={listHead}>RESOLVED CALLS</div>
+      <div style={listHead}>RESOLVED CALLS {"\u00B7"} click to verify on Arc</div>
       <div style={list}>
-        {calls.slice(0, 8).map((c, i) => (
-          <div key={i} style={row}>
-            <span style={mark(c.outcome === 1)}>{c.outcome === 1 ? "\u2713" : "\u2717"}</span>
-            <span style={topicCol}>{c.topic}</span>
-            <span style={confCol}>{(c.conf * 100).toFixed(0) + "%"}</span>
-          </div>
-        ))}
+        {resolvedList.length === 0 ? (
+          <div style={emptyRow}>No resolved positions yet. This feed starts empty and is never seeded {"\u2014"} it fills only as real on-chain stakes resolve.</div>
+        ) : resolvedList.slice(0, 8).map((c, i) => {
+          const ok = c.status === "correct"
+          const link = c.resolveTxExplorer || c.openTxExplorer || ""
+          const body = (
+            <>
+              <span style={mark(ok)}>{ok ? "\u2713" : "\u2717"}</span>
+              <span style={topicCol}>{(c.marketId || "position") + " " + (c.verdict || "")}</span>
+              <span style={confCol}>{(num(c.conviction) * 100).toFixed(0) + "%"}</span>
+              <span style={stakeCol}>{"$" + num(c.stakeUsdc).toFixed(3)}</span>
+            </>
+          )
+          return link
+            ? <a key={i} href={link} target="_blank" rel="noreferrer" style={rowLink}>{body}</a>
+            : <div key={i} style={row}>{body}</div>
+        })}
       </div>
       <div style={note}>
-        Backtested on a sample of resolved prediction markets. Every forecast logs its confidence
-        before resolution, so hit-rate and Brier are auditable {"\u2014"} each settled decision
-        carries a keccak jobHash on Arc and is on-chain verifiable. No cherry-picking.
+        Every position is committed on-chain (keccak256) BEFORE the outcome is known, then resolved verifiably:
+        correct {"\u2192"} stake returned, wrong {"\u2192"} stake slashed to a burn address. Accuracy, Brier and P&L
+        are derived only from real on-chain-resolved stakes {"\u2014"} nothing is seeded, backfilled or cherry-picked.
+        {err ? " (" + err + ")" : ""}
       </div>
     </div>
   )
@@ -114,7 +143,7 @@ const panel: CSSProperties = { marginTop: 14, border: "1px solid " + GREEN + "33
 const head: CSSProperties = { display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 8, marginBottom: 14 }
 const title: CSSProperties = { color: GOLD, fontSize: 12, letterSpacing: 3, fontFamily: "Cinzel, serif" }
 function badge(c: string): CSSProperties { return { fontSize: 10, fontWeight: 700, letterSpacing: 2, color: c, border: "1px solid " + c + "66", padding: "3px 9px" } }
-const grid: CSSProperties = { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: 10, marginBottom: 14 }
+const grid: CSSProperties = { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))", gap: 10, marginBottom: 14 }
 const cell: CSSProperties = { border: "1px solid " + GREEN + "22", background: "#040804", padding: "12px 14px" }
 const cellKey: CSSProperties = { color: DIM, fontSize: 9, letterSpacing: 2, marginBottom: 6, fontFamily: "Cinzel, serif" }
 function cellVal(big: boolean, accent: boolean): CSSProperties { return { color: accent ? GOLD : GREEN, fontSize: big ? 26 : 18, fontWeight: 700, fontFamily: "monospace" } }
@@ -126,8 +155,12 @@ const barTrack: CSSProperties = { flex: 1, height: 8, background: "#0c140c", bor
 const barPct: CSSProperties = { color: "#d4e8c5", fontSize: 11, fontFamily: "monospace", width: 40, textAlign: "right" }
 const listHead: CSSProperties = { color: DIM, fontSize: 9, letterSpacing: 2, margin: "4px 0 6px", fontFamily: "Cinzel, serif" }
 const list: CSSProperties = { border: "1px solid " + GREEN + "1a", background: "#040804", padding: 6 }
-const row: CSSProperties = { display: "flex", alignItems: "center", gap: 10, padding: "5px 8px", borderBottom: "1px solid #15301518", fontSize: 11 }
+const rowBase: CSSProperties = { display: "flex", alignItems: "center", gap: 10, padding: "5px 8px", borderBottom: "1px solid #15301518", fontSize: 11 }
+const row: CSSProperties = { ...rowBase }
+const rowLink: CSSProperties = { ...rowBase, textDecoration: "none", cursor: "pointer" }
+const emptyRow: CSSProperties = { color: DIM, fontSize: 11, padding: "10px 8px", lineHeight: 1.6, fontStyle: "italic" }
 function mark(ok: boolean): CSSProperties { return { color: ok ? GREEN : RED, fontWeight: 700, width: 14 } }
 const topicCol: CSSProperties = { color: "#d4e8c5", flex: 1, fontFamily: "monospace" }
 const confCol: CSSProperties = { color: GOLD, fontFamily: "monospace" }
+const stakeCol: CSSProperties = { color: DIM, fontFamily: "monospace", width: 56, textAlign: "right" }
 const note: CSSProperties = { marginTop: 12, color: "#6a5f45", fontSize: 11, lineHeight: 1.6, borderLeft: "2px solid " + GOLD + "55", paddingLeft: 12, fontStyle: "italic" }
