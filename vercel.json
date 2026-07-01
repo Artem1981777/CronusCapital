@@ -1,6 +1,10 @@
 {
   "rewrites": [
     {
+      "source": "/api/trace",
+      "destination": "/api/info?kind=trace"
+    },
+    {
       "source": "/api/backtest",
       "destination": "/api/info?kind=backtest"
     },

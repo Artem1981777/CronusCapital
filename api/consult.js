@@ -3,6 +3,7 @@
 // POLISH: универсальный retry с экспоненциальным backoff (OKX/Groq иногда дают 5xx/таймаут).
 // Экспортируется для юнит-тестов (test/consult.test.mjs). Не меняет внешний контракт хендлера.
 import { crossCheck } from "../lib/priceSources.js"
+import { buildTraceRecord, contentHash, archiveTrace } from "../lib/traceArchive.js"
 
 export async function fetchWithRetry(url, init, opts = {}) {
   const retries = Number(opts.retries ?? process.env.CONSULT_RETRIES ?? 2); // 2 ретрая = 3 попытки
@@ -50,6 +51,9 @@ export default async function handler(req, res) {
 
   let crossCheckResult = null;
   try { if (process.env.CONSULT_XCHECK !== "0" && price) crossCheckResult = await crossCheck(instId, price); } catch (_) { crossCheckResult = null; }
+  const DET = process.env.CONSULT_DETERMINISTIC !== "0";
+  const SEED = DET ? Number(process.env.CONSULT_SEED || 7) : null;
+  const TEMP = DET ? 0 : 0.5;
   const key = process.env.GROQ_API_KEY;
   if (!key) {
     return res.status(200).json({ ok:false, live:false, price, changePct, trace:["GROQ_API_KEY not configured"], verdict:"SKIP", conviction:0 });
@@ -84,7 +88,8 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         model: "llama-3.3-70b-versatile",
         max_tokens: 1000,
-        temperature: 0.5,
+        temperature: TEMP,
+        seed: SEED === null ? undefined : SEED,
         response_format: { type: "json_object" },
         messages: [{ role: "system", content: sys }, { role: "user", content: user }]
       })
@@ -107,6 +112,12 @@ export default async function handler(req, res) {
     const s = text.indexOf("{"), e = text.lastIndexOf("}");
     if (s >= 0 && e > s) parsed = JSON.parse(text.slice(s, e + 1));
   } catch (err) { parsed = null; }
+  let traceHash = null;
+  if (parsed) {
+    const _rec = buildTraceRecord({ model: "llama-3.3-70b-versatile", seed: SEED, temperature: TEMP, topic, instId, price, changePct, high24h, low24h, vol24h }, { verdict: parsed.verdict, conviction: parsed.conviction, trace: parsed.trace, analog: parsed.analog, decisions: parsed.decisions });
+    traceHash = contentHash(_rec);
+    if (process.env.TRACE_ARCHIVE !== "0") await archiveTrace(_rec).catch(() => null);
+  }
 
   if (!parsed) {
     return res.status(200).json({ ok:true, live:true, price, changePct, trace:["ANALYST raw: " + text.slice(0, 400)], verdict:"SKIP", conviction:0 });
@@ -118,6 +129,8 @@ export default async function handler(req, res) {
     verdict: parsed.verdict || "SKIP",
     conviction: parsed.conviction || 0,
     decisions: Array.isArray(parsed.decisions) ? parsed.decisions : [],
-    crossCheck: crossCheckResult
+    crossCheck: crossCheckResult,
+    reasoning: { deterministic: DET, model: "llama-3.3-70b-versatile", seed: SEED, temperature: TEMP },
+    traceHash
   });
 }
