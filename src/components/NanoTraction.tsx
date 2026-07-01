@@ -10,7 +10,7 @@ type NanoMetrics = {
 	self_demo_calls: number
 }
 type Standard = { payments?: number; totalUsdc?: number; lastTx?: string; source?: string } | null
-type TractionResp = { ok: boolean; network?: string; treasury?: string; nano?: NanoMetrics; standard?: Standard }
+type TractionResp = { ok: boolean; network?: string; treasury?: string; nano?: NanoMetrics; standard?: Standard; external_payers?: number; external_txs?: number; external_usdc?: number; external_leaders?: Array<{ payer: string; txs: number; usdc: number; firstTx?: string | null }>; headline_note?: string }
 type Leader = { payer: string; calls: number; micros: string; usdc: number; settlements: number }
 type LeaderResp = { ok: boolean; count?: number; leaders?: Array<Leader> }
 
@@ -55,6 +55,15 @@ export default function NanoTraction() {
 	const vol = n?.nano_usdc || 0
 	const std = t?.standard || null
 	const lastTx = std?.lastTx || ""
+	const extPayers = Number(t?.external_payers || 0)
+	const extUsdc = Number(t?.external_usdc || 0)
+	const extLeaders = (t && Array.isArray(t.external_leaders)) ? t.external_leaders : []
+	const headline = t?.headline_note || ""
+	const sBox = { margin: "10px 0", padding: "10px 12px", border: "1px solid rgba(120,200,140,0.35)", borderRadius: 8, background: "rgba(40,80,55,0.15)" }
+	const sNum = { fontSize: 22, fontWeight: 800, color: extPayers > 0 ? "#39d98a" : "#c9a84c" }
+	const sNote = { fontSize: 11, color: "#9ca3af", lineHeight: 1.5, marginTop: 4 }
+	const sOl = { marginTop: 8 }
+	const sTx = { color: "#bfe9cb", textDecoration: "underline", marginLeft: 8 }
 
 	return (
 		<section className="cd-nano">
@@ -77,6 +86,12 @@ export default function NanoTraction() {
 				<div className="cd-card-glow"><div className="cd-card-label">Nano volume</div><div className="cd-card-value">${vol.toFixed(6)}</div></div>
 			</div>
 
+			<div style={sBox}>
+				<div className="cd-card-label">VERIFIED EXTERNAL DEMAND · on-chain, allow-listed</div>
+				<div style={sNum}>{extPayers} verified external payer{extPayers === 1 ? "" : "s"}{extUsdc > 0 ? " · " + extUsdc.toFixed(6) + " USDC" : ""}</div>
+				{headline ? <div style={sNote}>{headline}</div> : null}
+				{extLeaders.length > 0 ? (<ol className="cd-nano-lblist" style={sOl}>{extLeaders.map((r) => (<li key={r.payer} className="cd-nano-lbrow"><span className="cd-nano-lbaddr">{short(r.payer)}</span><span className="cd-nano-lbcalls">{r.txs} tx</span><span className="cd-nano-lbusd">{r.usdc.toFixed(6)}</span>{r.firstTx ? <a style={sTx} href={EXPLORER + "/tx/" + r.firstTx} target="_blank" rel="noreferrer">tx</a> : null}</li>))}</ol>) : null}
+			</div>
 			<div className="cd-nano-tiers">
 				<span className="cd-nano-tier cd-nano-tier-on">NANO · $0.001</span>
 				<span className="cd-nano-tier cd-nano-tier-on">STANDARD · $0.02</span>
