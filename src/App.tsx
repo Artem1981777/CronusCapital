@@ -8,6 +8,7 @@ import ReasoningTrace from "./components/ReasoningTrace";
 import TrackRecord from "./components/TrackRecord";
 import X402Integration from "./components/X402Integration"
 import PayCronus from "./components/PayCronus"
+import StreamSession from "./components/StreamSession"
 import MoatStrip from "./components/MoatStrip"
 import ComposabilityStrip from "./components/ComposabilityStrip"
 import PositioningStrap from "./components/PositioningStrap"
@@ -167,6 +168,7 @@ function BetCard({ bet }: { bet: BetOpportunity }) {
 
 export default function App() {
 	const SHOW_LEGACY = false
+    const SHOW_STREAM = true
   const [topic, setTopic] = useState("")
   const [loading, setLoading] = useState(false)
   const [state, setState] = useState<AgentState | null>(null)
@@ -349,6 +351,7 @@ export default function App() {
 <PositioningStrap />
 <X402Integration />
 			<PayCronus />
+                    {SHOW_STREAM && <StreamSession />}
       <MoatStrip />
       <ComposabilityStrip />
         <PolicyGuardrails />
