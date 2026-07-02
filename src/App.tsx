@@ -36,6 +36,7 @@ import type { AgentState, MarketSignal, BetOpportunity } from "./agents/cronusAg
 import { PremiumSignal } from "./components/PremiumSignal"
 import { dashboardV2Enabled, useSection } from "./dashboardV2"
 import { SectionNav, Sec } from "./DashboardV2Nav"
+import { MarketPulse } from "./components/MarketPulse"
 
 const TOPICS = ["crypto markets", "US elections", "Fed interest rates", "AI stocks", "Bitcoin ETF"]
 
@@ -356,7 +357,7 @@ export default function App() {
         </div>
       )}
       <div id="cap-signals" /><PremiumSignal /></Sec>
-      <Sec id="markets" section={secView}><div id="cap-markets" /><LiveMarkets /></Sec>
+      <Sec id="markets" section={secView}><MarketPulse /><div id="cap-markets" /><LiveMarkets /></Sec>
 <Sec id="standards" section={secView}><AgentIdentity /></Sec>
 <Sec id="overview" section={secView}><PositioningStrap /></Sec>
 <Sec id="payments" section={secView}><X402Integration /></Sec>
