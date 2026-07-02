@@ -2,6 +2,10 @@
 
 All changes verified on Arc Testnet (chainId 5042002). Self-funded demo traffic is labeled and excluded from external metrics — we never fake demand.
 
+## Calibration panel (2026-07-03)
+
+Added a read-only Calibration panel to the Track Record section, built from live /api/backtest. Shows a Brier score scale with markers at 0.00 (perfect), 0.25 (coin-flip) and 1.00 (worst) plus a live pointer and an honest BEATS/BELOW coin-flip verdict, and reliability bins (mean predicted conviction vs empirical accuracy per 0.2 band). Values are computed only over real on-chain-resolved positions and carry an explicit small-sample caveat; nothing is backfilled or fabricated. Hand-rolled (no new dependency/function; refreshes every 30s), fail-open. Complements the existing Track Record card; additive, no logic changes. Commit `4cb0eef`.
+
 ## Traction area chart (2026-07-03)
 
 Added a read-only cumulative settled-USDC area chart to the Traction section, built from live on-chain receipts (/api/receipts) with a stat strap (settlement count, total USDC, external payers from /api/traction). Hand-rolled SVG (no new dependency/function; refreshes every 120s). Fail-open (shows 'n/a' / degraded on error). Explicitly labels all charted volume as self-generated test traffic on Arc testnet — external payers = 0, never counted as external demand. Additive, no logic changes. Commit `2e1b153`.
