@@ -2,6 +2,10 @@
 
 All changes verified on Arc Testnet (chainId 5042002). Self-funded demo traffic is labeled and excluded from external metrics — we never fake demand.
 
+## Market regime strip (2026-07-03)
+
+Added a read-only derived market-regime strip to the Overview section. Classifies the regime as uptrend/risk-on, downtrend/risk-off, or range-bound from live CoinGecko data (BTC 24h change and 7d sparkline delta) with Fear & Greed as sentiment context. The classification thresholds are printed inline and the panel is explicitly labeled as derived from live market data, not a proprietary oracle, and illustrative context rather than a trading signal. Hand-rolled, client-side (no new dependency/function; refreshes every 120s), fail-open (shows 'n/a' on error). Additive, no logic changes. Commit `65bda6d`.
+
 ## Claim to proof matrix (2026-07-03)
 
 Added a read-only claim->proof matrix to the Proof section, built from live /api/scorecard. Renders the source-verified contracts (Sourcify exact-match badge with explorer + sourcify source links) and the list of honesty claims, each paired with its verifiable method and a direct verify link where one exists. Hand-rolled (no new dependency/function; refreshes every 60s), fail-open (shows 'n/a' on error). Complements the existing Proof panel/ledger; reports how to verify, never a self-asserted 'passed'. Additive, no logic changes. Commit `9408017`.
