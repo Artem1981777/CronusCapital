@@ -2,6 +2,10 @@
 
 All changes verified on Arc Testnet (chainId 5042002). Self-funded demo traffic is labeled and excluded from external metrics — we never fake demand.
 
+## Illustrative hero data honestly labeled (2026-07-02)
+
+Marked the demo hero visuals in CronusDashboard as illustrative so no fabricated number reads as real trading activity: the sample signals ticker (BTC/ETH/SOL/ARB) is prefixed 'ILLUSTRATIVE - sample signals', and the animated confidence/active-signals card carries an 'illustrative - not live trades' caption. Real KPIs (settled/revenue/paid calls/spend/net flow/ROI) are derived from actual state and were not touched. Additive/presentational only. Commit `27b0869`.
+
 ## Dashboard number/policy consistency audit (2026-07-02)
 
 Audited displayed dashboard numbers against enforced logic while upgrading the dashboard. Prices (x402 premium $0.02 = 20000 atomic, nano $0.001) and risk policy (5% per position, 3% min edge, 20% daily loss, 0.55 conviction gate) are consistent across UI and code. Fixed one overstatement: the Guardrail panel said 'Asset whitelist ... ENFORCED' although no asset whitelist is code-enforced and the real consult topics differ; changed to 'Asset coverage ... CONFIGURED'. Commit `87d5012`.
