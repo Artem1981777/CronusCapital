@@ -662,3 +662,23 @@ html, body { background: linear-gradient(rgba(0,0,0,0.12), rgba(0,0,0,0.22)), ur
 .cd-trac-n { font-family: "Cinzel Decorative", "Cinzel", serif; font-size: 18px; color: var(--gold-bright, #f0d27a); }
 .cd-trac-l { font-family: "Cinzel", serif; font-size: 9px; letter-spacing: 1px; color: #d7ffd0; opacity: 0.7; margin-top: 4px; }
 .cd-trac-note { font-family: "Cinzel", serif; font-size: 9px; letter-spacing: 1px; color: #d7ffd0; opacity: 0.6; line-height: 1.6; }
+/* ===== Calibration / vs coin-flip panel (additive) ===== */
+.cd-cal { margin: 8px 0 18px; padding: 16px 18px; background: rgba(6,12,7,0.5); backdrop-filter: blur(14px) saturate(125%); -webkit-backdrop-filter: blur(14px) saturate(125%); border: 1px solid var(--cd-border, rgba(57,224,20,0.28)); border-radius: 14px; }
+.cd-cal-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
+.cd-cal-title { font-family: "Cinzel", serif; letter-spacing: 2px; color: var(--green, #39e014); font-size: 13px; font-weight: 700; }
+.cd-cal-src { font-family: "Cinzel", serif; font-size: 9px; letter-spacing: 1px; color: var(--green, #39e014); opacity: 0.55; }
+.cd-cal-scale { margin: 6px 0 10px; }
+.cd-cal-track { position: relative; height: 8px; border-radius: 4px; background: linear-gradient(90deg, rgba(57,224,20,0.5), rgba(201,168,76,0.4), rgba(224,86,58,0.5)); }
+.cd-cal-coin { position: absolute; top: -3px; width: 2px; height: 14px; background: #d7ffd0; opacity: 0.8; transform: translateX(-1px); }
+.cd-cal-ptr { position: absolute; top: -5px; width: 10px; height: 18px; border-radius: 3px; transform: translateX(-5px); box-shadow: 0 0 6px rgba(0,0,0,0.5); }
+.cd-cal-scalelabels { display: flex; justify-content: space-between; margin-top: 6px; font-family: "Cinzel", serif; font-size: 8px; letter-spacing: 1px; color: #d7ffd0; opacity: 0.55; }
+.cd-cal-verdict { font-family: "Cinzel", serif; font-size: 11px; letter-spacing: 0.5px; color: #d7ffd0; margin-bottom: 14px; }
+.cd-cal-binhead { font-family: "Cinzel", serif; font-size: 9px; letter-spacing: 2px; color: var(--green, #39e014); opacity: 0.7; margin-bottom: 8px; }
+.cd-cal-bins { display: grid; gap: 6px; }
+.cd-cal-bin { display: grid; grid-template-columns: 54px 1fr 44px; align-items: center; gap: 8px; }
+.cd-cal-binrange { font-family: "Cinzel", serif; font-size: 9px; color: #d7ffd0; opacity: 0.7; }
+.cd-cal-bintrack { position: relative; height: 14px; border-radius: 4px; background: rgba(6,12,7,0.5); border: 1px solid rgba(57,224,20,0.15); overflow: hidden; }
+.cd-cal-binpred { position: absolute; top: 0; left: 0; height: 100%; background: rgba(201,168,76,0.55); }
+.cd-cal-binemp { position: absolute; top: 3px; left: 0; height: 8px; background: var(--green, #39e014); border-radius: 2px; }
+.cd-cal-bincount { font-family: "Cinzel", serif; font-size: 9px; color: #d7ffd0; opacity: 0.6; text-align: right; }
+.cd-cal-note { font-family: "Cinzel", serif; font-size: 9px; letter-spacing: 1px; color: #d7ffd0; opacity: 0.6; line-height: 1.6; margin-top: 12px; }
