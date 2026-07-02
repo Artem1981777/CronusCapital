@@ -2,6 +2,10 @@
 
 All changes verified on Arc Testnet (chainId 5042002). Self-funded demo traffic is labeled and excluded from external metrics — we never fake demand.
 
+## Read-only Vault panel (2026-07-02)
+
+Replaced the Vault section placeholder with a dedicated read-only panel that reads live on-chain data from the Arc-testnet vault: TVL (totalAssets) and, when a wallet is connected, that wallet's position (shares -> convertToAssets). Uses the Arc chain public client, refreshes every 15s, and is fail-open (shows 'n/a' on read errors, '-' when no wallet). Clearly labeled as testnet on-chain reads; deposit/withdraw actions remain in the Overview dashboard. Additive, no logic changes. Commit `fea1424`.
+
 ## Lint-clean dashboard component (2026-07-02)
 
 The vault auto-refresh effect in CronusDashboard triggered two React-hooks lint reports (set-state-in-effect and exhaustive-deps). Both are false positives on a correct async data-fetch interval: state is set only after await (not synchronously), and the effect already lists the exact deps the function closes over (address, publicClient). Added justified eslint-disable-next-line directives so the file lints with zero problems; behavior unchanged. Commit `ba9afac`.
