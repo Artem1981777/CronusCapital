@@ -682,3 +682,25 @@ html, body { background: linear-gradient(rgba(0,0,0,0.12), rgba(0,0,0,0.22)), ur
 .cd-cal-binemp { position: absolute; top: 3px; left: 0; height: 8px; background: var(--green, #39e014); border-radius: 2px; }
 .cd-cal-bincount { font-family: "Cinzel", serif; font-size: 9px; color: #d7ffd0; opacity: 0.6; text-align: right; }
 .cd-cal-note { font-family: "Cinzel", serif; font-size: 9px; letter-spacing: 1px; color: #d7ffd0; opacity: 0.6; line-height: 1.6; margin-top: 12px; }
+/* ===== Proof: claim -> proof matrix (additive) ===== */
+.cd-pm { margin: 8px 0 18px; padding: 16px 18px; background: rgba(6,12,7,0.5); backdrop-filter: blur(14px) saturate(125%); -webkit-backdrop-filter: blur(14px) saturate(125%); border: 1px solid var(--cd-border, rgba(57,224,20,0.28)); border-radius: 14px; }
+.cd-pm-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
+.cd-pm-title { font-family: "Cinzel", serif; letter-spacing: 2px; color: var(--green, #39e014); font-size: 13px; font-weight: 700; }
+.cd-pm-src { font-family: "Cinzel", serif; font-size: 9px; letter-spacing: 1px; color: var(--green, #39e014); opacity: 0.55; }
+.cd-pm-sub { font-family: "Cinzel", serif; font-size: 9px; letter-spacing: 2px; color: var(--green, #39e014); opacity: 0.7; margin: 10px 0 8px; }
+.cd-pm-contracts { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; }
+.cd-pm-c { border: 1px solid var(--cd-border, rgba(57,224,20,0.28)); border-radius: 10px; padding: 10px 12px; background: rgba(6,12,7,0.35); }
+.cd-pm-c-top { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.cd-pm-c-name { font-family: "Cinzel", serif; font-size: 11px; color: #d7ffd0; font-weight: 700; }
+.cd-pm-c-badge { font-family: "Cinzel", serif; font-size: 8px; letter-spacing: 1px; color: var(--green, #39e014); border: 1px solid rgba(57,224,20,0.4); border-radius: 5px; padding: 1px 5px; }
+.cd-pm-c-std { font-family: "Cinzel", serif; font-size: 9px; color: #d7ffd0; opacity: 0.6; margin-top: 3px; }
+.cd-pm-c-links { display: flex; gap: 10px; margin-top: 8px; }
+.cd-pm-c-links a { font-family: "Cinzel", serif; font-size: 9px; letter-spacing: 0.5px; color: var(--gold-bright, #f0d27a); text-decoration: none; opacity: 0.85; }
+.cd-pm-claims { display: grid; gap: 8px; }
+.cd-pm-claim { display: flex; gap: 10px; border-bottom: 1px solid rgba(57,224,20,0.1); padding-bottom: 8px; }
+.cd-pm-mark { color: var(--green, #39e014); font-size: 12px; flex: 0 0 auto; }
+.cd-pm-body { flex: 1; }
+.cd-pm-text { font-family: "Cinzel", serif; font-size: 10px; letter-spacing: 0.3px; color: #d7ffd0; line-height: 1.5; }
+.cd-pm-how { font-family: "Cinzel", serif; font-size: 9px; color: #d7ffd0; opacity: 0.55; margin-top: 3px; line-height: 1.5; }
+.cd-pm-how a { color: var(--gold-bright, #f0d27a); text-decoration: none; opacity: 0.9; }
+.cd-pm-note { font-family: "Cinzel", serif; font-size: 9px; letter-spacing: 1px; color: #d7ffd0; opacity: 0.6; line-height: 1.6; margin-top: 12px; }
