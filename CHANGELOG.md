@@ -2,6 +2,10 @@
 
 All changes verified on Arc Testnet (chainId 5042002). Self-funded demo traffic is labeled and excluded from external metrics — we never fake demand.
 
+## Global wallet in dashboard V2 sidebar (2026-07-02)
+
+Moved the wallet Connect button into the V2 sidebar so it is available on every section; the header keeps it only for the legacy fallback layout to avoid a duplicate. Additive, no logic changes. Commit `27e19cf`.
+
 ## Market Pulse indicators (2026-07-02)
 
 Live Fear & Greed (alternative.me) plus BTC dominance and total market cap (coingecko), fetched client-side directly from each provider (both return permissive CORS), rendered as a MARKET PULSE panel in the Markets section with per-source labels, 2-min refresh, and `n/a`/skeleton fallback on error. No proxy function added (stays under the Hobby 12-function limit); no fabricated data. Commit `f677610`.
