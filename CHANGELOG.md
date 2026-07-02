@@ -2,6 +2,10 @@
 
 All changes verified on Arc Testnet (chainId 5042002). Self-funded demo traffic is labeled and excluded from external metrics — we never fake demand.
 
+## System/manifest panel (2026-07-02)
+
+Added a read-only System panel that fetches the live agent manifest (/api/manifest) and renders protocol/version, network + chain id, settlement asset, payment rails, the ERC-8004 identity, ERC-8183 escrow and ERC-8004 reputation registry addresses (linked to the Arc testnet explorer), and the STANDARD/NANO service prices. Fail-open (shows 'n/a' on fetch errors). Complements ChainBar; additive, no logic changes. Commit `0a06217`.
+
 ## Read-only Vault panel (2026-07-02)
 
 Replaced the Vault section placeholder with a dedicated read-only panel that reads live on-chain data from the Arc-testnet vault: TVL (totalAssets) and, when a wallet is connected, that wallet's position (shares -> convertToAssets). Uses the Arc chain public client, refreshes every 15s, and is fail-open (shows 'n/a' on read errors, '-' when no wallet). Clearly labeled as testnet on-chain reads; deposit/withdraw actions remain in the Overview dashboard. Additive, no logic changes. Commit `fea1424`.
