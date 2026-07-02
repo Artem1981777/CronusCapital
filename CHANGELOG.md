@@ -4,7 +4,7 @@ All changes verified on Arc Testnet (chainId 5042002). Self-funded demo traffic 
 
 ## Market Pulse indicators (2026-07-02)
 
-Added a read-only, fail-open `/api/market` proxy (no secrets, always 200) that fetches live Fear & Greed (alternative.me) plus BTC dominance and total market cap (coingecko). Rendered as a MARKET PULSE panel in the Markets section with per-source labels, 2-min refresh, and `n/a`/skeleton fallback on upstream errors — no fabricated data. Commit `8e2402a`.
+Live Fear & Greed (alternative.me) plus BTC dominance and total market cap (coingecko), fetched client-side directly from each provider (both return permissive CORS), rendered as a MARKET PULSE panel in the Markets section with per-source labels, 2-min refresh, and `n/a`/skeleton fallback on error. No proxy function added (stays under the Hobby 12-function limit); no fabricated data. Commit `f677610`.
 
 ## Dashboard V2 sidebar + section routing (2026-07-02)
 
