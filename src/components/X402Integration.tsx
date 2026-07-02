@@ -1,6 +1,7 @@
 const ENDPOINT = "POST /api/signal"
 const PRICE = "0.02 USDC"
 const NETWORK = "arc-testnet"
+const CURRENCY = "USDC live · EURC-ready (dual-stablecoin)"
 
 const LINES = [
 	"# 1 · client requests a premium signal",
@@ -23,7 +24,7 @@ export default function X402Integration() {
 			<div className="cd-x402-meta">
 				<span>{ENDPOINT}</span>
 				<span className="cd-x402-price">{PRICE}</span>
-				<span>{NETWORK}</span>
+				<span>{NETWORK}</span><span>{CURRENCY}</span>
 			</div>
 			<div className="cd-x402-code">
 				{LINES.map((l, i) => (

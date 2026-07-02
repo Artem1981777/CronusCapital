@@ -416,6 +416,10 @@ Cronus also exposes a **NANO tier** at **$0.001/call**, settled **gas-free via C
 
 ## What's new (build log)
 
+### Dual-stablecoin: EURC-ready paywall (2026-07-02)
+- New lib/fx.js (pure, unit-tested): the x402 paywall is now currency-agnostic. USDC is live today; EURC is accepted behind the EURC_ENABLED flag, converted to USD-equivalent via a clearly-labeled off-chain FX reference (not a price oracle).
+- Manifest advertises acceptedAssets; verifyPayment sums EURC transfers to payTo when enabled. Flag off = byte-identical USDC behavior (verify-live 81/81, verify-intent 5/5). We never claim EURC as live demand until it is enabled.
+
 ### A2A loop live run on Arc testnet (2026-07-02)
 - Executed the full loop live via scripts/agent-loop.mjs --live: buyer deposited to Circle Gateway, paid a 0.001 USDC gas-free nano signal (batched settlement), consumed it (verdict YES, conviction 82), and wrote on-chain ERC-8004 reputation (seller now count=5, avg=5.00/5; feedback tx 0xff56c0e0a20a36bc13349ed3df9aa003c07b14a37f53f020440f8f9b8ad9b653).
 - /api/agent-loop reflects 19 recorded nano settlements; honesty invariant intact — external_payers=0. Every leg is self-operated demo, never counted as external demand.
