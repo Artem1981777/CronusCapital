@@ -651,3 +651,14 @@ html, body { background: linear-gradient(rgba(0,0,0,0.12), rgba(0,0,0,0.22)), ur
 .cd-tk-price { font-family: "Cinzel Decorative", "Cinzel", serif; font-size: 15px; color: var(--gold-bright, #f0d27a); }
 .cd-tk-note { font-family: "Cinzel", serif; font-size: 10px; color: #d7ffd0; opacity: 0.5; }
 .cd-tk-foot { font-family: "Cinzel", serif; font-size: 9px; letter-spacing: 1px; color: #d7ffd0; opacity: 0.5; margin-top: 12px; line-height: 1.5; }
+/* ===== Traction cumulative area chart (additive) ===== */
+.cd-trac { margin: 8px 0 18px; padding: 16px 18px; background: rgba(6,12,7,0.5); backdrop-filter: blur(14px) saturate(125%); -webkit-backdrop-filter: blur(14px) saturate(125%); border: 1px solid var(--cd-border, rgba(57,224,20,0.28)); border-radius: 14px; }
+.cd-trac-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
+.cd-trac-title { font-family: "Cinzel", serif; letter-spacing: 2px; color: var(--green, #39e014); font-size: 13px; font-weight: 700; }
+.cd-trac-src { font-family: "Cinzel", serif; font-size: 9px; letter-spacing: 1px; color: var(--green, #39e014); opacity: 0.55; }
+.cd-trac-svg { display: block; width: 100%; height: 150px; margin: 4px 0 12px; }
+.cd-trac-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(90px, 1fr)); gap: 12px; margin-bottom: 10px; }
+.cd-trac-stat { display: flex; flex-direction: column; align-items: center; border: 1px solid var(--cd-border, rgba(57,224,20,0.28)); border-radius: 10px; padding: 10px; background: rgba(6,12,7,0.35); }
+.cd-trac-n { font-family: "Cinzel Decorative", "Cinzel", serif; font-size: 18px; color: var(--gold-bright, #f0d27a); }
+.cd-trac-l { font-family: "Cinzel", serif; font-size: 9px; letter-spacing: 1px; color: #d7ffd0; opacity: 0.7; margin-top: 4px; }
+.cd-trac-note { font-family: "Cinzel", serif; font-size: 9px; letter-spacing: 1px; color: #d7ffd0; opacity: 0.6; line-height: 1.6; }
