@@ -625,3 +625,15 @@ html, body { background: linear-gradient(rgba(0,0,0,0.12), rgba(0,0,0,0.22)), ur
 .cd-rg-note { font-family: "Cinzel", serif; font-size: 9px; letter-spacing: 1px; color: #d7ffd0; opacity: 0.5; margin-top: 12px; line-height: 1.5; }
 /* ===== illustrative caption (additive) ===== */
 .cd-conf-note { margin-top: 6px; font-family: "Cinzel", serif; font-size: 9px; letter-spacing: 1px; color: #d7ffd0; opacity: 0.45; text-transform: uppercase; }
+/* ===== System / manifest panel (additive) ===== */
+.cd-sys { margin: 8px 0 18px; padding: 16px 18px; background: rgba(6,12,7,0.5); backdrop-filter: blur(14px) saturate(125%); -webkit-backdrop-filter: blur(14px) saturate(125%); border: 1px solid var(--cd-border, rgba(57,224,20,0.28)); border-radius: 14px; }
+.cd-sys-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
+.cd-sys-title { font-family: "Cinzel", serif; letter-spacing: 2px; color: var(--green, #39e014); font-size: 13px; font-weight: 700; }
+.cd-sys-src { font-family: "Cinzel", serif; font-size: 9px; letter-spacing: 1px; color: var(--green, #39e014); opacity: 0.55; text-decoration: none; }
+.cd-sys-grid { display: grid; gap: 8px; }
+.cd-sys-row { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; border-bottom: 1px solid rgba(57,224,20,0.1); padding-bottom: 6px; }
+.cd-sys-k { font-family: "Cinzel", serif; font-size: 10px; letter-spacing: 1px; color: #d7ffd0; opacity: 0.7; }
+.cd-sys-v { font-family: "Cinzel", serif; font-size: 11px; letter-spacing: 0.5px; color: var(--gold-bright, #f0d27a); text-align: right; }
+.cd-sys-link { text-decoration: none; }
+.cd-sys-note, .cd-sys-foot { font-family: "Cinzel", serif; font-size: 9px; letter-spacing: 1px; color: #d7ffd0; opacity: 0.5; }
+.cd-sys-foot { margin-top: 12px; line-height: 1.5; }
