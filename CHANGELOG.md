@@ -2,6 +2,12 @@
 
 All changes verified on Arc Testnet (chainId 5042002). Self-funded demo traffic is labeled and excluded from external metrics — we never fake demand.
 
+## Scorecard surfaces live pay-to-think COGS (2026-07-02)
+
+- `/api/scorecard` now fetches `/api/pay-to-think` and adds a verifiable claim: Cronus autonomously PAYS upstream data providers in real USDC (COGS) on Arc testnet, tracked in a separate ledger that never inflates external demand.
+- Added `live.cogs` (settledAtomic + last COGS tx + explorer) and a `payToThink` discovery endpoint.
+- First live settlement: tx 0xec90b3047a4fc489f0d1bd19d11231356405d480a1ec3061bd1656b1030b9f2a (0.02 USDC, STAKE wallet to a self-operated demo provider). Receipts/external_payers unchanged (127 / 0).
+
 ## Live pay-to-think settlement (2026-07-02)
 
 - Added `lib/payToThink.js` routed as `/api/pay-to-think` via `api/info.js` (no new serverless function). GET = public COGS ledger + config; POST preview = no-funds decision; POST execute (Bearer CRON_SECRET) = real Arc-testnet USDC transfer to an upstream provider.
