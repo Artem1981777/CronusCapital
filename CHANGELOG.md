@@ -2,6 +2,12 @@
 
 All changes verified on Arc Testnet (chainId 5042002). Self-funded demo traffic is labeled and excluded from external metrics — we never fake demand.
 
+## Pay-to-think wired into the live oracle (2026-07-02)
+
+- `api/consult.js`: behind `PAY_TO_THINK`, decides borderline upstream data purchases and embeds them as COGS in the hashed trace via new `withCogs()` helper; adds `economics` to the response. Dry-run only (no funds move); `PAY_TO_THINK_LIVE` reported as settlement:armed.
+- `lib/traceArchive.js`: added pure `withCogs(record, cogs)` — no-op without purchases, so existing trace hashes are byte-identical.
+- Added `test/payToThinkTrace.test.mjs` (3 tests).
+
 ## Pay-to-think data-market primitive (2026-07-02)
 
 - Added `lib/dataMarket.js`: pure decision + COGS accounting for autonomous upstream data purchases. Behind `PAY_TO_THINK` (dry-run) / `PAY_TO_THINK_LIVE` (settlement). Records intended nanopayments as trace COGS; never moves funds; simulated vs settled labeled.
