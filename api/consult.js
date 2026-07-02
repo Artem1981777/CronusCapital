@@ -3,7 +3,8 @@
 // POLISH: универсальный retry с экспоненциальным backoff (OKX/Groq иногда дают 5xx/таймаут).
 // Экспортируется для юнит-тестов (test/consult.test.mjs). Не меняет внешний контракт хендлера.
 import { crossCheck } from "../lib/priceSources.js"
-import { buildTraceRecord, contentHash, archiveTrace } from "../lib/traceArchive.js"
+import { buildTraceRecord, contentHash, archiveTrace, withCogs } from "../lib/traceArchive.js"
+import { dataMarketEnabled, liveSettlementEnabled, parseSources, decideDataPurchase, recordUpstreamPayment, cogsAtomic } from "../lib/dataMarket.js"
 
 export async function fetchWithRetry(url, init, opts = {}) {
   const retries = Number(opts.retries ?? process.env.CONSULT_RETRIES ?? 2); // 2 ретрая = 3 попытки
@@ -112,9 +113,17 @@ export default async function handler(req, res) {
     const s = text.indexOf("{"), e = text.lastIndexOf("}");
     if (s >= 0 && e > s) parsed = JSON.parse(text.slice(s, e + 1));
   } catch (err) { parsed = null; }
+  let economics = null;
+  if (parsed && dataMarketEnabled(process.env)) {
+    const sources = parseSources(process.env.CRONUS_UPSTREAM_SOURCES);
+    const budgetAtomic = Number(process.env.PAY_TO_THINK_BUDGET_ATOMIC || 0) || Infinity;
+    const decision = decideDataPurchase({ enabled: true, conviction: Number(parsed.conviction) || 0, sources, budgetAtomic });
+    const payments = decision.buy && decision.source ? [recordUpstreamPayment(decision.source, { live: false })] : [];
+    economics = { mode: "dry-run", settlement: liveSettlementEnabled(process.env) ? "armed" : "disabled", decision: decision.reason, upstream_payments: payments, cogs_atomic: cogsAtomic(payments) };
+  }
   let traceHash = null;
   if (parsed) {
-    const _rec = buildTraceRecord({ model: "llama-3.3-70b-versatile", seed: SEED, temperature: TEMP, topic, instId, price, changePct, high24h, low24h, vol24h }, { verdict: parsed.verdict, conviction: parsed.conviction, trace: parsed.trace, analog: parsed.analog, decisions: parsed.decisions });
+    const _rec = withCogs(buildTraceRecord({ model: "llama-3.3-70b-versatile", seed: SEED, temperature: TEMP, topic, instId, price, changePct, high24h, low24h, vol24h }, { verdict: parsed.verdict, conviction: parsed.conviction, trace: parsed.trace, analog: parsed.analog, decisions: parsed.decisions }), economics);
     traceHash = contentHash(_rec);
     if (process.env.TRACE_ARCHIVE !== "0") await archiveTrace(_rec).catch(() => null);
   }
@@ -131,6 +140,7 @@ export default async function handler(req, res) {
     decisions: Array.isArray(parsed.decisions) ? parsed.decisions : [],
     crossCheck: crossCheckResult,
     reasoning: { deterministic: DET, model: "llama-3.3-70b-versatile", seed: SEED, temperature: TEMP },
+    economics,
     traceHash
   });
 }
