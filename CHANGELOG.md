@@ -2,6 +2,10 @@
 
 All changes verified on Arc Testnet (chainId 5042002). Self-funded demo traffic is labeled and excluded from external metrics — we never fake demand.
 
+## Market Pulse indicators (2026-07-02)
+
+Added a read-only, fail-open `/api/market` proxy (no secrets, always 200) that fetches live Fear & Greed (alternative.me) plus BTC dominance and total market cap (coingecko). Rendered as a MARKET PULSE panel in the Markets section with per-source labels, 2-min refresh, and `n/a`/skeleton fallback on upstream errors — no fabricated data. Commit `8e2402a`.
+
 ## Dashboard V2 sidebar + section routing (2026-07-02)
 
 Refactored the single-scroll dashboard into a grouped left-sidebar layout (Command / Markets / Economy / Assurance / Ops). All existing panels preserved and relocated into sections; additive behind `VITE_DASHBOARD_V2` (default on) with the old layout as fallback. Deep-linkable via `#/section` hash + localStorage. Commit `8c21e3d`.
