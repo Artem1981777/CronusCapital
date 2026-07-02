@@ -415,6 +415,7 @@ Cronus also exposes a **NANO tier** at **$0.001/call**, settled **gas-free via C
 ---
 
 ## What's new (build log)
+- **2026-07-02 — Pay-to-think data-market primitive (new):** Cronus can decide to PAY upstream x402 data providers when conviction is borderline, recording each purchase as auditable cost-of-goods (COGS) in the decision trace — making it a full economic actor (seller AND buyer). Pure, unit-tested, behind `PAY_TO_THINK` (dry-run by default; real settlement gated behind `PAY_TO_THINK_LIVE`). (`24724ae`)
 
 - **2026-07-01 - Non-custodial co-sign hardened + tested (fix):** the ephemeral browser session-key streamer (`src/lib/session.ts`) already lets a user co-sign gas-free x402 nano-payments from an in-memory session-EOA the server never sees. Its money-safety limits (per-tx cap, total budget, session TTL, user stop) were inline and untested; extracted the exact gate into pure `src/lib/sessionGuard.ts` (`decideTick()`) and covered every stop-condition in `test/sessionGuard.test.mjs`, then wired `streamPay()` to the tested gate (behavior identical). New `docs/non-custodial-cosign.md` documents the design + threat model. (`0a8c5f7`)
 

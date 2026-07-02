@@ -2,6 +2,11 @@
 
 All changes verified on Arc Testnet (chainId 5042002). Self-funded demo traffic is labeled and excluded from external metrics — we never fake demand.
 
+## Pay-to-think data-market primitive (2026-07-02)
+
+- Added `lib/dataMarket.js`: pure decision + COGS accounting for autonomous upstream data purchases. Behind `PAY_TO_THINK` (dry-run) / `PAY_TO_THINK_LIVE` (settlement). Records intended nanopayments as trace COGS; never moves funds; simulated vs settled labeled.
+- Added `test/dataMarket.test.mjs` (13 tests).
+
 ## Non-custodial co-sign hardened + tested (2026-07-01)
 
 - **Session-EOA co-sign was already live and honest** (`src/lib/session.ts`): a session key is generated in browser memory (never persisted, never sent to the server), the main wallet funds its Gateway balance once, then it signs gas-free EIP-3009 nano-authorizations with no popups - real Circle Gateway settlements.
