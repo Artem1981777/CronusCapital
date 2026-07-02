@@ -1,6 +1,7 @@
 // api/signal.js — REAL x402 paywall: pay USDC on Arc, verified on-chain, returns a verifiable signal.
 // Any external agent/wallet can pay and consume. Verification is pure JSON-RPC with multi-endpoint fallback.
 import { keccak256, toBytes } from "viem"
+import { eurcEnabled, toUsdAtomic, EURC_ADDRESS } from "../lib/fx.js"
 
 const X402_VERSION = 1
 const NETWORK    = process.env.X402_NETWORK     || "arc-testnet"
@@ -8,6 +9,7 @@ const USDC_ASSET = (process.env.ARC_USDC_ADDRESS || "0x3600000000000000000000000
 const PAY_TO     = (process.env.CRONUS_PAYTO     || "0xdc6778c5f8cc74b10aed11c48306d4cfc5737fbd").toLowerCase()
 const PRICE      = BigInt(process.env.SIGNAL_PRICE || "20000") // 0.02 USDC (6 decimals)
 const MAX_AGE_SEC = Number(process.env.SIGNAL_MAX_AGE_SECONDS || "1800")
+const EUR_USD_REF = process.env.EUR_USD_REFERENCE || "1.08"
 const TRANSFER_TOPIC = "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"
 const RPC_URLS = ["https://rpc.testnet.arc.network", process.env.SIGNAL_RPC_URL, process.env.VITE_RPC_URL, process.env.RPC_URL].filter(Boolean)
 
@@ -70,13 +72,27 @@ async function verifyPayment(txHash) {
   if (paid < PRICE && tx.to && tx.to.toLowerCase() === PAY_TO) {
     paid += BigInt(tx.value || "0x0")
   }
-  if (paid < PRICE) return { ok: false, reason: "no USDC payment >= " + PRICE.toString() + " to payTo (got " + paid.toString() + ")" }
+  let effectivePaid = paid
+  if (eurcEnabled()) {
+    let eurcPaid = 0n
+    for (const l of (receipt.logs || [])) {
+      if (l.address && l.address.toLowerCase() === EURC_ADDRESS && l.topics && l.topics[0] && l.topics[0].toLowerCase() === TRANSFER_TOPIC && l.topics[2]) {
+        const to = "0x" + l.topics[2].slice(26).toLowerCase()
+        if (to === PAY_TO) { eurcPaid += BigInt(l.data); from = "0x" + l.topics[1].slice(26).toLowerCase() }
+      }
+    }
+    if (eurcPaid > 0n) {
+      const usdEq = toUsdAtomic(eurcPaid.toString(), "EURC", EUR_USD_REF)
+      if (usdEq !== null) effectivePaid = paid + usdEq
+    }
+  }
+  if (effectivePaid < PRICE) return { ok: false, reason: "payment (USD-equiv) below price: got " + effectivePaid.toString() + " need " + PRICE.toString() }
   try {
     const block = await rpc("eth_getBlockByNumber", [receipt.blockNumber, false])
     const age = Math.floor(Date.now() / 1000) - Number(BigInt(block.timestamp))
     if (age > MAX_AGE_SEC) return { ok: false, reason: "payment older than " + MAX_AGE_SEC + "s (replay window closed)" }
   } catch (_) {}
-  return { ok: true, from, amount: paid.toString(), block: receipt.blockNumber }
+  return { ok: true, from, amount: effectivePaid.toString(), block: receipt.blockNumber }
 }
 
 async function markUsedOnce(txHash) {
