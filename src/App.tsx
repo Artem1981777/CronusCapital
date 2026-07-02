@@ -26,6 +26,7 @@ import { CronusDashboard } from "./components/CronusDashboard"
 import SiteFooter from "./components/SiteFooter"
 import EquityCurve from "./EquityCurve"
 import PolicyGuardrails from "./PolicyGuardrails"
+import { RiskGauges } from "./components/RiskGauges"
 import VerifiableLedger from "./VerifiableLedger"
 import { AgentDemoScout, AgentDemoAnalyst, AgentDemoExecutor } from "./AgentDemo"
 import "./demoSeed"
@@ -239,7 +240,7 @@ export default function App() {
     await new Promise(r => setTimeout(r, 300))
     addLog("ANALYST", "Identified " + result.analyst.opportunities.length + " positive EV opportunities.")
     setAgentPhase("executor")
-    addLog("EXECUTOR", "Applying risk management: max 20% bankroll per position...")
+    addLog("EXECUTOR", "Applying risk management: max 5% bankroll per position, min edge 3%, daily loss limit 20%...")
     await new Promise(r => setTimeout(r, 300))
     addLog("EXECUTOR", "Consensus reached. " + result.executor.decisions.length + " decisions finalized. Ready for Arc USDC settlement.")
     setAgentPhase("done"); setState(result)
@@ -368,7 +369,7 @@ export default function App() {
       <Sec id="traction" section={secView}><LoopPanel /></Sec>
       <Sec id="overview" section={secView}><MoatStrip /></Sec>
       <Sec id="standards" section={secView}><ComposabilityStrip /></Sec>
-        <Sec id="risk" section={secView}><PolicyGuardrails /></Sec>
+        <Sec id="risk" section={secView}><PolicyGuardrails /><RiskGauges /></Sec>
 			<Sec id="proof" section={secView}><VerifiableLedger /></Sec>
       <Sec id="traction" section={secView}><div id="cap-settlements" /><Dashboard totalOnChain={sessionTxCount} /></Sec>
       <Sec id="proof" section={secView}><ProofBanner /></Sec><Sec id="standards" section={secView}><div id="cap-stellar" /><StellarWallet /><StellarBurn /><StellarComplete /></Sec>
