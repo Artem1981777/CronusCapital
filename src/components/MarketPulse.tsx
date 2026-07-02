@@ -5,7 +5,6 @@ type Market = {
   btcDominance: number | null
   totalMarketCapUsd: number | null
   marketCapChange24h: number | null
-  sources?: { fearGreed?: string; market?: string }
 }
 
 function fmtUsd(n: number | null): string {
@@ -30,12 +29,27 @@ export function MarketPulse() {
   useEffect(() => {
     let alive = true
     async function load() {
+      const next: Market = { fearGreed: null, btcDominance: null, totalMarketCapUsd: null, marketCapChange24h: null }
+      let failedAny = false
       try {
-        const r = await fetch("/api/market")
-        if (!r.ok) throw new Error("bad status")
-        const j = (await r.json()) as Market
-        if (alive) { setData(j); setFailed(false) }
-      } catch { if (alive) setFailed(true) } finally { if (alive) setLoading(false) }
+        const r = await fetch("https://api.alternative.me/fng/?limit=1")
+        if (!r.ok) throw new Error("fng")
+        const j = (await r.json()) as { data?: Array<{ value?: string | number; value_classification?: string }> }
+        const d = j.data && j.data[0]
+        if (d && d.value != null) next.fearGreed = { value: Number(d.value), classification: String(d.value_classification || "") }
+      } catch { failedAny = true }
+      try {
+        const r = await fetch("https://api.coingecko.com/api/v3/global")
+        if (!r.ok) throw new Error("global")
+        const j = (await r.json()) as { data?: { market_cap_percentage?: Record<string, number>; total_market_cap?: Record<string, number>; market_cap_change_percentage_24h_usd?: number } }
+        const g = j.data
+        if (g) {
+          if (g.market_cap_percentage && g.market_cap_percentage.btc != null) next.btcDominance = Number(g.market_cap_percentage.btc)
+          if (g.total_market_cap && g.total_market_cap.usd != null) next.totalMarketCapUsd = Number(g.total_market_cap.usd)
+          if (g.market_cap_change_percentage_24h_usd != null) next.marketCapChange24h = Number(g.market_cap_change_percentage_24h_usd)
+        }
+      } catch { failedAny = true }
+      if (alive) { setData(next); setFailed(failedAny); setLoading(false) }
     }
     load()
     const id = setInterval(load, 120000)
