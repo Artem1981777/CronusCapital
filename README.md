@@ -205,6 +205,25 @@ The live demo (https://cronus-capital.vercel.app) is a single screen. Here is ev
 
 ---
 
+## Proof Seals — how it works
+
+The **Proof** section includes a gamified "Proof Seals" grid: a row of sealed tomb-boxes, each representing one milestone Cronus has genuinely achieved on-chain. Tap a seal to unseal it and reveal the underlying proof with a direct explorer / verify link.
+
+**The six seals**
+
+| Seal | What it proves | Source | Verify |
+| --- | --- | --- | --- |
+| ◈ Skin in the game | The agent staked real USDC behind its own verdict, committed on-chain before the outcome was known | `/api/track-record` | stake tx on Arc explorer |
+| 𓂀 Verdict resolved | A pre-committed call was resolved verifiably — correct returns the stake, wrong slashes it to a burn address | `/api/track-record` | resolution tx |
+| ⬡ Pays upstream | The agent autonomously paid a data provider in real USDC as cost-of-goods (COGS) | `/api/scorecard` | COGS tx |
+| ◆ Source-verified | Contracts have exact-match verified source on Sourcify — no trust-me bytecode | `/api/scorecard` | Sourcify source |
+| ◎ x402 settlements | x402 payments settled on-chain (self-generated test traffic, always labeled as such) | `/api/metrics` | last settlement tx |
+| ▲ Honest by default | External payers are published openly and stay at 0 until a real third party pays | `/api/scorecard` + `/api/traction` | traction endpoint |
+
+**Design rule (why there are no prizes)**
+
+Proof Seals deliberately give **no random prizes and no rewards for user activity**. Rewarding actions — especially payments — would manufacture traction, the exact thing this project refuses to do. Every seal is read-only, fail-open, and derived from live endpoints; the reward is the proof itself. A seal only unseals when its milestone is genuinely met, otherwise it stays locked (◇).
+
 ## How to use it (step-by-step for judges)
 
 1. **Open the demo** - https://cronus-capital.vercel.app
