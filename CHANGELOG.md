@@ -2,6 +2,10 @@
 
 All changes verified on Arc Testnet (chainId 5042002). Self-funded demo traffic is labeled and excluded from external metrics — we never fake demand.
 
+## Dashboard V2 sidebar + section routing (2026-07-02)
+
+Refactored the single-scroll dashboard into a grouped left-sidebar layout (Command / Markets / Economy / Assurance / Ops). All existing panels preserved and relocated into sections; additive behind `VITE_DASHBOARD_V2` (default on) with the old layout as fallback. Deep-linkable via `#/section` hash + localStorage. Commit `8c21e3d`.
+
 ## Dual-stablecoin: EURC-ready paywall (2026-07-02)
 - Added lib/fx.js multi-currency helpers; x402 paywall accepts EURC behind EURC_ENABLED (USD-equiv via labeled off-chain FX reference). Manifest advertises acceptedAssets.
 - Flag off = unchanged USDC path (verify-live 81/81, verify-intent 5/5). Never claim EURC as live demand until enabled.
