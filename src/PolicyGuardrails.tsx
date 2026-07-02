@@ -44,7 +44,7 @@ export default function PolicyGuardrails() {
 		{ name: "Conviction gate", meta: "min confidence 0.55 before execute", ok: true, val: "ENFORCED" },
 		{ name: "Daily spend cap", meta: "$" + spend.toFixed(2) + " / $" + DAILY_CAP.toFixed(2), ok: spendOk, val: spendOk ? "PASS" : "BLOCK" },
 		{ name: "Per-call price", meta: "x402 \u00b7 $0.02 fixed", ok: true, val: "ENFORCED" },
-		{ name: "Asset whitelist", meta: "BTC \u00b7 ETH \u00b7 SOL \u00b7 ARB", ok: true, val: "ENFORCED" },
+		{ name: "Asset coverage", meta: "signals: BTC \u00b7 ETH \u00b7 SOL \u00b7 ARB", ok: true, val: "CONFIGURED" },
 		{ name: "Non-custodial", meta: "agent never holds user keys", ok: true, val: "PASS" },
 	]
 	const allOk = rules.every((r) => r.ok)
