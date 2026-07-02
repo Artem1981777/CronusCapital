@@ -2,6 +2,10 @@
 
 All changes verified on Arc Testnet (chainId 5042002). Self-funded demo traffic is labeled and excluded from external metrics — we never fake demand.
 
+## Lint-clean dashboard component (2026-07-02)
+
+The vault auto-refresh effect in CronusDashboard triggered two React-hooks lint reports (set-state-in-effect and exhaustive-deps). Both are false positives on a correct async data-fetch interval: state is set only after await (not synchronously), and the effect already lists the exact deps the function closes over (address, publicClient). Added justified eslint-disable-next-line directives so the file lints with zero problems; behavior unchanged. Commit `ba9afac`.
+
 ## Illustrative hero data honestly labeled (2026-07-02)
 
 Marked the demo hero visuals in CronusDashboard as illustrative so no fabricated number reads as real trading activity: the sample signals ticker (BTC/ETH/SOL/ARB) is prefixed 'ILLUSTRATIVE - sample signals', and the animated confidence/active-signals card carries an 'illustrative - not live trades' caption. Real KPIs (settled/revenue/paid calls/spend/net flow/ROI) are derived from actual state and were not touched. Additive/presentational only. Commit `27b0869`.
