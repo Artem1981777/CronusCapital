@@ -2,6 +2,11 @@
 
 All changes verified on Arc Testnet (chainId 5042002). Self-funded demo traffic is labeled and excluded from external metrics — we never fake demand.
 
+## Live A2A loop (2026-07-02)
+- Added scripts/agent-loop.mjs: full A2A loop orchestrator (buyer nano-pay via Circle Gateway -> seller serves -> upstream COGS pay-to-think -> ERC-8004 reputation feedback); dry-run default, --live for real settlements, --json for the loop-receipt.
+- Added read-only /api/agent-loop composing the latest loop-receipt from recorded nano/COGS artifacts + external_payers; LoopPanel renders it on the landing.
+- Additive; every leg labeled self-operated demo. external_payers stays 0 — we never fake demand.
+
 ## Arc OSS primitives guide (2026-07-02)
 
 - Added docs/ARC_OSS.md documenting reusable Arc primitives and a quickstart for other builders (Arc OSS showcase).

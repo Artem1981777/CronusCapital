@@ -415,6 +415,11 @@ Cronus also exposes a **NANO tier** at **$0.001/call**, settled **gas-free via C
 ---
 
 ## What's new (build log)
+
+### Live A2A loop (2026-07-02)
+- New scripts/agent-loop.mjs orchestrates the full agent-to-agent commerce loop end-to-end: buyer pays a nano signal via Circle Gateway -> Cronus serves -> upstream COGS pay-to-think -> ERC-8004 reputation feedback. Dry-run by default; --live for real Arc testnet settlements; --json prints the loop-receipt.
+- New read-only /api/agent-loop composes the latest loop-receipt from already-recorded nano/COGS artifacts + external_payers; LoopPanel (src/components/LoopPanel.tsx) renders it on the landing.
+- Additive; every leg is self-operated demo and honestly labeled. external_payers stays 0 — we never fake demand.
 - **2026-07-02 — Arc OSS primitives guide (new):** Added docs/ARC_OSS.md — a hackable map of the reusable primitives (pay-to-think COGS settlement, honesty/traction separation, content-addressed reasoning traces, x402 + Circle Gateway tiers, ERC-8004 identity/escrow/reputation/vault) with file paths and a quickstart. Docs-only; no runtime or honesty-surface change.
 - **2026-07-02 — Pay-to-think COGS card on the landing (new):** ProofPanel now renders a live "Pays to think" card — settled COGS in USDC plus a link to the on-chain settlement tx on arcscan, honestly labeled self-operated demo (COGS, not external demand). Data is read from `/api/pay-to-think`. Purely additive; receipts=127, external_payers=0 unchanged. (`4a8da8c`)
 - **2026-07-02 — Live pay-to-think settled on-chain + on the scorecard (new):** the deployed agent autonomously settled a real 0.02 USDC upstream-data payment on Arc testnet (tx `0xec90b3047a4fc489f0d1bd19d11231356405d480a1ec3061bd1656b1030b9f2a`), signed by the STAKE wallet (never the treasury payTo). `/api/scorecard` now carries a verifiable COGS claim linking to `/api/pay-to-think`, plus `live.cogs`. Honesty invariants unchanged: receipts=127, external_payers=0. (`ca06ecf`)
