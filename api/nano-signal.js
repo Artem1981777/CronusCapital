@@ -118,7 +118,7 @@ export default async function handler(req, res) {
   const report = await generateReport(host, topic, instId)
   const settledAt = Date.now()
   try {
-    await recordTraction({ tier: "NANO", network: payment.network || NETWORK, payer: payment.payer, amount: payment.amount, transaction: payment.transaction })
+    await recordTraction({ tier: "NANO", network: payment.network || NETWORK, payer: payment.payer, amount: payment.amount, transaction: payment.transaction, verdict: report.verdict || null, conviction: (report.conviction != null ? report.conviction : null) })
   } catch (_) {}
 
   const isOnchainTx = /^0x[0-9a-fA-F]{64}$/.test(String(payment.transaction || ""))
