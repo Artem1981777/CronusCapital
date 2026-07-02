@@ -29,6 +29,7 @@ import PolicyGuardrails from "./PolicyGuardrails"
 import { RiskGauges } from "./components/RiskGauges"
 import { VaultPanel } from "./components/VaultPanel"
 import { SystemPanel } from "./components/SystemPanel"
+import { MarketTickers } from "./components/MarketTickers"
 import VerifiableLedger from "./VerifiableLedger"
 import { AgentDemoScout, AgentDemoAnalyst, AgentDemoExecutor } from "./AgentDemo"
 import "./demoSeed"
@@ -360,7 +361,7 @@ export default function App() {
         </div>
       )}
       <div id="cap-signals" /><PremiumSignal /></Sec>
-      <Sec id="markets" section={secView}><MarketPulse /><div id="cap-markets" /><LiveMarkets /></Sec>
+      <Sec id="markets" section={secView}><MarketPulse /><MarketTickers /><div id="cap-markets" /><LiveMarkets /></Sec>
 <Sec id="standards" section={secView}><AgentIdentity /></Sec>
 <Sec id="overview" section={secView}><PositioningStrap /></Sec>
 <Sec id="payments" section={secView}><X402Integration /></Sec>
