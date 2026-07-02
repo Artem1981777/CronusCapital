@@ -2,6 +2,10 @@
 
 All changes verified on Arc Testnet (chainId 5042002). Self-funded demo traffic is labeled and excluded from external metrics — we never fake demand.
 
+## Dashboard number/policy consistency audit (2026-07-02)
+
+Audited displayed dashboard numbers against enforced logic while upgrading the dashboard. Prices (x402 premium $0.02 = 20000 atomic, nano $0.001) and risk policy (5% per position, 3% min edge, 20% daily loss, 0.55 conviction gate) are consistent across UI and code. Fixed one overstatement: the Guardrail panel said 'Asset whitelist ... ENFORCED' although no asset whitelist is code-enforced and the real consult topics differ; changed to 'Asset coverage ... CONFIGURED'. Commit `87d5012`.
+
 ## Risk Gauges in Risk section (2026-07-02)
 
 Added three ring dials in the Risk section showing the Executor's real policy limits (max 5% bankroll per position, min edge 3%, daily loss limit 20%), labeled as configured limits rather than live exposure — no fabricated drawdown/exposure numbers. Complements the existing Guardrail Policy Engine panel. Also aligned the risk-management console log with the policy (previously said max 20% per position). Additive. Commit `a3431f6`.
