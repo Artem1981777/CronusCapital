@@ -2,6 +2,13 @@
 
 All changes verified on Arc Testnet (chainId 5042002). Self-funded demo traffic is labeled and excluded from external metrics — we never fake demand.
 
+## Live pay-to-think settlement (2026-07-02)
+
+- Added `lib/payToThink.js` routed as `/api/pay-to-think` via `api/info.js` (no new serverless function). GET = public COGS ledger + config; POST preview = no-funds decision; POST execute (Bearer CRON_SECRET) = real Arc-testnet USDC transfer to an upstream provider.
+- Guards: shared daily spend-breaker (`checkDaily`/`recordDaily`), per-tx cap (`PAY_TO_THINK_PER_TX_CAP_ATOMIC`, default 0.05), STAKE signer (not treasury payTo), recipient!=payTo guard, KV lock. COGS in separate `cronus:cogs:*` namespace so receipts/traction honesty invariants are unaffected.
+- Added `scripts/pay-to-think.mjs` (local one-shot live payment with your own funded key).
+- Added `test/payToThinkSettle.test.mjs` (4 tests: handler export, GET config, 401 without auth, no-funds preview).
+
 ## Pay-to-think wired into the live oracle (2026-07-02)
 
 - `api/consult.js`: behind `PAY_TO_THINK`, decides borderline upstream data purchases and embeds them as COGS in the hashed trace via new `withCogs()` helper; adds `economics` to the response. Dry-run only (no funds move); `PAY_TO_THINK_LIVE` reported as settlement:armed.
