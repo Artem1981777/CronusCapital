@@ -2,6 +2,10 @@
 
 All changes verified on Arc Testnet (chainId 5042002). Self-funded demo traffic is labeled and excluded from external metrics — we never fake demand.
 
+## Proof Seals (2026-07-03)
+
+Added a gamified, read-only 'Proof Seals' grid to the Proof section. Each sealed box unseals on tap to reveal a genuinely on-chain-verifiable milestone the agent has achieved — skin-in-the-game stake, resolved verdict, autonomous upstream COGS payment, Sourcify source-verified contracts, x402 settlements, and the honest external-payers metric — each with a direct explorer or verify link. Deliberately designed to reinforce the honesty edge: there are no random prizes and no rewards for user activity (which would manufacture traction); the reward is the proof itself. Built from live /api/track-record, /api/scorecard and /api/metrics. Hand-rolled, client-side interactivity (no new dependency/function; refreshes every 60s), fail-open. Additive, no logic changes. Commit `96e4cab`.
+
 ## Market regime strip (2026-07-03)
 
 Added a read-only derived market-regime strip to the Overview section. Classifies the regime as uptrend/risk-on, downtrend/risk-off, or range-bound from live CoinGecko data (BTC 24h change and 7d sparkline delta) with Fear & Greed as sentiment context. The classification thresholds are printed inline and the panel is explicitly labeled as derived from live market data, not a proprietary oracle, and illustrative context rather than a trading signal. Hand-rolled, client-side (no new dependency/function; refreshes every 120s), fail-open (shows 'n/a' on error). Additive, no logic changes. Commit `65bda6d`.
