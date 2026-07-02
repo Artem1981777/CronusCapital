@@ -608,3 +608,4 @@ html, body { background: linear-gradient(rgba(0,0,0,0.12), rgba(0,0,0,0.22)), ur
 .cd-mp-label { font-family: "Cinzel", serif; font-size: 9px; letter-spacing: 2px; color: #d7ffd0; opacity: 0.6; }
 .cd-mp-value { font-family: "Cinzel Decorative", "Cinzel", serif; font-size: 24px; font-weight: 900; color: var(--gold-bright, #f0d27a); margin-top: 4px; }
 .cd-mp-sub { font-family: "Cinzel", serif; font-size: 10px; letter-spacing: 1px; color: #d7ffd0; opacity: 0.7; margin-top: 2px; }
+.cd2-wallet { padding: 2px 8px 14px; margin-bottom: 6px; border-bottom: 1px solid var(--cd-border, rgba(57,224,20,0.28)); }

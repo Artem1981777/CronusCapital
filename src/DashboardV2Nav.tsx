@@ -3,7 +3,7 @@ import { useState } from "react"
 import type { ReactNode } from "react"
 import { GROUPS } from "./dashboardV2"
 
-export function SectionNav({ section, onSelect }: { section: string; onSelect: (id: string) => void }) {
+export function SectionNav({ section, onSelect, wallet }: { section: string; onSelect: (id: string) => void; wallet?: ReactNode }) {
   const [open, setOpen] = useState(false)
   return (
     <>
@@ -13,6 +13,7 @@ export function SectionNav({ section, onSelect }: { section: string; onSelect: (
           <span className="cd2-brand-glyph">𓂀</span>
           <span className="cd2-brand-name">CRONUS</span>
         </div>
+        {wallet ? <div className="cd2-wallet">{wallet}</div> : null}
         <div className="cd2-groups">
           {GROUPS.map((g) => (
             <div key={g.label} className="cd2-group">

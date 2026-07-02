@@ -275,7 +275,7 @@ export default function App() {
     <div style={{ minHeight: "100vh", background: "transparent", color: "#39e014", fontFamily: "Cinzel, serif" }}>
       <div className="scanline" />
       <EgyptTheme />
-        <div id="cap-top" /><div className={V2 ? "cd2-shell" : ""}>{V2 ? <SectionNav section={sec} onSelect={setSec} /> : null}<div className={V2 ? "cd2-main" : ""}>
+        <div id="cap-top" /><div className={V2 ? "cd2-shell" : ""}>{V2 ? <SectionNav section={sec} onSelect={setSec} wallet={<WalletButton />} /> : null}<div className={V2 ? "cd2-main" : ""}>
         <Sec id="overview" section={secView}><div id="cap-agents" /><CronusDashboard /><EquityCurve /></Sec><Sec id="track" section={secView}><TrackRecord /></Sec><Sec id="system" section={secView}><ChainBar stats={chainStats} /></Sec><Sec id="oracle" section={secView}><ReasoningTrace logs={reasoningLogs} topic={topic} />
       
       <div style={{ borderBottom: "1px solid #39e01422", padding: "20px 32px", display: "flex", alignItems: "center", justifyContent: "space-between", background: "linear-gradient(180deg, #050505 0%, transparent 100%)" }}>
@@ -288,7 +288,7 @@ export default function App() {
             <div style={{ color: "#39e014", fontSize: "12px", letterSpacing: "2px", fontFamily: "Cinzel, serif", fontWeight: 700 }}>SESSION TXS: {sessionTxCount}</div>
             <div style={{ color: "#39e01444", fontSize: "10px", letterSpacing: "2px", marginTop: "2px", fontFamily: "Cinzel, serif" }}>~$0.01 PER TX · USDC</div>
           </div>
-          <WalletButton />
+          {!V2 && <WalletButton />}
         </div>
       </div>
       <div style={{ textAlign: "center", background: "#050805cc", padding: "22px 32px 18px", borderBottom: "1px solid #39e01422" }}>
