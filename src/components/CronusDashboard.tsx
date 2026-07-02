@@ -428,9 +428,11 @@ export function CronusDashboard() {
 		finally { setVaultBusy(false) }
 	}
 	useEffect(() => {
+		// eslint-disable-next-line react-hooks/set-state-in-effect -- async vault read; state is set only after await, not synchronously
 		refreshVault()
 		const id = window.setInterval(() => { refreshVault() }, 12000)
 		return () => window.clearInterval(id)
+	// eslint-disable-next-line react-hooks/exhaustive-deps -- refreshVault only closes over address and publicClient, which are the listed deps
 	}, [address, publicClient])
 	const runStrategy = async () => {
 		setYieldBusy(true); setYieldMsg(""); setYieldTx("")
