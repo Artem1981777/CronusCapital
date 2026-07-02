@@ -1,5 +1,6 @@
 {
   "rewrites": [
+    { "source": "/api/pay-to-think", "destination": "/api/info?kind=pay-to-think" },
     {
       "source": "/api/trace",
       "destination": "/api/info?kind=trace"
