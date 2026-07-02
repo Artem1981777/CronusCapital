@@ -2,6 +2,11 @@
 
 All changes verified on Arc Testnet (chainId 5042002). Self-funded demo traffic is labeled and excluded from external metrics — we never fake demand.
 
+## Arc OSS primitives guide (2026-07-02)
+
+- Added docs/ARC_OSS.md documenting reusable Arc primitives and a quickstart for other builders (Arc OSS showcase).
+- Docs-only; no API, frontend, or honesty-surface changes.
+
 ## Pay-to-think COGS card on the landing (2026-07-02)
 
 - ProofPanel (src/components/ProofPanel.tsx) now fetches /api/pay-to-think and renders a full-width "Pays to think" card: settled COGS in USDC + a link to the on-chain settlement tx, labeled self-operated demo (COGS, not external demand).
