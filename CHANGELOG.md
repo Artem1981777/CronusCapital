@@ -2,6 +2,10 @@
 
 All changes verified on Arc Testnet (chainId 5042002). Self-funded demo traffic is labeled and excluded from external metrics — we never fake demand.
 
+## Traction area chart (2026-07-03)
+
+Added a read-only cumulative settled-USDC area chart to the Traction section, built from live on-chain receipts (/api/receipts) with a stat strap (settlement count, total USDC, external payers from /api/traction). Hand-rolled SVG (no new dependency/function; refreshes every 120s). Fail-open (shows 'n/a' / degraded on error). Explicitly labels all charted volume as self-generated test traffic on Arc testnet — external payers = 0, never counted as external demand. Additive, no logic changes. Commit `2e1b153`.
+
 ## Market tickers panel (2026-07-02)
 
 Added a read-only Market tickers panel to the Markets section: BTC/ETH/SOL/ARB current price, 24h change, and a 7-day SVG sparkline, fetched client-side from the CoinGecko public API (no new serverless function; refreshes every 120s). Fail-open (shows 'n/a' and a degraded flag on error). Clearly labeled as illustrative market context, not trading signals. Complements Market Pulse; additive, no logic changes. Commit `e21ef6f`.
