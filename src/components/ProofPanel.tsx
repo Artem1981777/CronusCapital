@@ -5,6 +5,7 @@ type CalBin = { range: string; count: number; mean_predicted: number | null; emp
 type BacktestResp = { ok: boolean; open_positions?: number; resolved_positions?: number; brier?: number | null; skill_score?: number | null; base_rate?: number | null; accuracy?: number | null; calibration_bins?: CalBin[]; honesty_note?: string }
 type TraceListResp = { ok: boolean; count?: number; recent?: string[] }
 type TraceVerifyResp = { ok: boolean; hash?: string; verified?: boolean; recomputedHash?: string; archivedAt?: string }
+type PayToThinkResp = { ok: boolean; settlement?: string; settled_cogs_atomic?: number; recent?: Array<{ txRef?: string; explorer?: string; amountAtomic?: string; self_operated_demo?: boolean }> }
 
 const short = (h: string) => (h && h.length > 18 ? h.slice(0, 12) + "\u2026" + h.slice(-6) : h)
 
@@ -23,12 +24,14 @@ const S: Record<string, CSSProperties> = {
   note: { fontSize: 11, color: "#9ca3af", lineHeight: 1.5, marginTop: 8 },
   err: { fontSize: 11, color: "#f0a0a0", marginTop: 8 },
   mono: { fontFamily: "ui-monospace, monospace", fontSize: 11, color: "#bfe9cb" },
+  cogsCard: { padding: 12, border: "1px solid rgba(120,200,140,0.35)", borderRadius: 10, background: "rgba(20,28,24,0.5)", gridColumn: "1 / -1", marginTop: 12 },
 }
 
 export default function ProofPanel() {
   const [bt, setBt] = useState<BacktestResp | null>(null)
   const [tr, setTr] = useState<TraceVerifyResp | null>(null)
   const [trCount, setTrCount] = useState<number | null>(null)
+  const [ptt, setPtt] = useState<PayToThinkResp | null>(null)
   const [err, setErr] = useState("")
 
   useEffect(() => {
@@ -52,6 +55,12 @@ export default function ProofPanel() {
           if (!alive) return
           setTr(j3)
         }
+      } catch (e) { if (alive) setErr(String((e as Error).message || e)) }
+      try {
+        const r4 = await fetch("/api/pay-to-think")
+        const j4 = (await r4.json()) as PayToThinkResp
+        if (!alive) return
+        setPtt(j4)
       } catch (e) { if (alive) setErr(String((e as Error).message || e)) }
     }
     load()
@@ -79,6 +88,12 @@ export default function ProofPanel() {
           <div style={S.row}><span>Latest hash</span><span style={S.mono}>{tr && tr.hash ? short(tr.hash) : "\u2014"}</span></div>
           <div style={S.row}><span>Re-hash matches</span><span>{tr ? (tr.verified ? "yes" : "no") : "\u2014"}</span></div>
           <div style={S.row}><span>Archived</span><span>{tr && tr.archivedAt ? tr.archivedAt.slice(0, 19).replace("T", " ") : "\u2014"}</span></div>
+        </div>
+        <div style={S.cogsCard}>
+          <div style={S.label}>Pays to think: upstream data COGS{ptt && ptt.settlement === "armed" ? <span style={S.badge}>LIVE</span> : null}</div>
+          <div style={S.big}>{ptt && typeof ptt.settled_cogs_atomic === "number" ? (ptt.settled_cogs_atomic / 1e6).toFixed(2) : "0.00"}<span style={S.unit}> USDC settled COGS</span></div>
+          <div style={S.row}><span>Last settlement</span><span style={S.mono}>{ptt && ptt.recent && ptt.recent[0] && ptt.recent[0].txRef ? (ptt.recent[0].explorer ? <a href={ptt.recent[0].explorer} target="_blank" rel="noreferrer" style={S.mono}>{short(ptt.recent[0].txRef)}</a> : short(ptt.recent[0].txRef)) : "-"}</span></div>
+          <div style={S.row}><span>Counterparty</span><span>self-operated demo (COGS, not demand)</span></div>
         </div>
       </div>
       <div style={S.note}>Brier and calibration score only Cronus own on-chain-resolved stakes (p = conviction committed before the outcome, o = on-chain resolution). Every reasoning trace is addressed by the sha256 of its canonical input+output; re-hashing the stored record reproduces the address, so tampering is detectable. Nothing is backfilled or simulated.</div>
