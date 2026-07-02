@@ -2,6 +2,10 @@
 
 All changes verified on Arc Testnet (chainId 5042002). Self-funded demo traffic is labeled and excluded from external metrics — we never fake demand.
 
+## A2A loop live run on Arc testnet (2026-07-02)
+- Ran scripts/agent-loop.mjs --live end-to-end: Circle Gateway deposit, 0.001 USDC gas-free nano signal (batched), consumed (verdict YES, conviction 82), on-chain ERC-8004 reputation feedback (tx 0xff56c0e0a20a36bc13349ed3df9aa003c07b14a37f53f020440f8f9b8ad9b653; seller count=5, avg=5.00/5).
+- /api/agent-loop shows 19 nano settlements; external_payers=0 throughout. Every leg self-operated demo — never fake demand.
+
 ## Live A2A loop (2026-07-02)
 - Added scripts/agent-loop.mjs: full A2A loop orchestrator (buyer nano-pay via Circle Gateway -> seller serves -> upstream COGS pay-to-think -> ERC-8004 reputation feedback); dry-run default, --live for real settlements, --json for the loop-receipt.
 - Added read-only /api/agent-loop composing the latest loop-receipt from recorded nano/COGS artifacts + external_payers; LoopPanel renders it on the landing.

@@ -416,6 +416,10 @@ Cronus also exposes a **NANO tier** at **$0.001/call**, settled **gas-free via C
 
 ## What's new (build log)
 
+### A2A loop live run on Arc testnet (2026-07-02)
+- Executed the full loop live via scripts/agent-loop.mjs --live: buyer deposited to Circle Gateway, paid a 0.001 USDC gas-free nano signal (batched settlement), consumed it (verdict YES, conviction 82), and wrote on-chain ERC-8004 reputation (seller now count=5, avg=5.00/5; feedback tx 0xff56c0e0a20a36bc13349ed3df9aa003c07b14a37f53f020440f8f9b8ad9b653).
+- /api/agent-loop reflects 19 recorded nano settlements; honesty invariant intact — external_payers=0. Every leg is self-operated demo, never counted as external demand.
+
 ### Live A2A loop (2026-07-02)
 - New scripts/agent-loop.mjs orchestrates the full agent-to-agent commerce loop end-to-end: buyer pays a nano signal via Circle Gateway -> Cronus serves -> upstream COGS pay-to-think -> ERC-8004 reputation feedback. Dry-run by default; --live for real Arc testnet settlements; --json prints the loop-receipt.
 - New read-only /api/agent-loop composes the latest loop-receipt from already-recorded nano/COGS artifacts + external_payers; LoopPanel (src/components/LoopPanel.tsx) renders it on the landing.
