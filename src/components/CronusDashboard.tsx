@@ -171,7 +171,7 @@ function MarketRadar(props: { blips: Array<{ id: string; x: number; y: number; h
 }
 
 function LiveTicker(props: { signals: Array<Signal> }) {
-	const text = props.signals.map((s) => s.asset + " " + s.action + " · " + s.conf + "% · " + s.time).join("    𓂀    ")
+	const text = "ILLUSTRATIVE - sample signals    " + props.signals.map((s) => s.asset + " " + s.action + " · " + s.conf + "% · " + s.time).join("    𓂀    ")
 	return (
 		<div className="cd-ticker">
 			<div className="cd-ticker-tag">𓆣 LIVE ORACLE FEED</div>
@@ -582,7 +582,7 @@ export function CronusDashboard() {
 					<div className="cd-card cd-accent-green cd-conf-card">
 						<div className="cd-card-label">Confidence Score</div>
 						<ConfidenceRing value={confidence} />
-						<div className="cd-card-sub cd-up"><span className="cd-arrow">▲</span> {activeSignals} active signals</div>
+						<div className="cd-card-sub cd-up"><span className="cd-arrow">▲</span> {activeSignals} active signals</div><div className="cd-conf-note">illustrative - not live trades</div>
 					</div>
 				</div>
 			) : (

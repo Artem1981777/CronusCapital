@@ -623,3 +623,5 @@ html, body { background: linear-gradient(rgba(0,0,0,0.12), rgba(0,0,0,0.22)), ur
 .cd-rg-label { font-family: "Cinzel", serif; font-size: 10px; letter-spacing: 2px; color: #d7ffd0; opacity: 0.75; margin-top: 10px; }
 .cd-rg-cap { font-family: "Cinzel", serif; font-size: 9px; letter-spacing: 1px; color: #d7ffd0; opacity: 0.5; margin-top: 3px; }
 .cd-rg-note { font-family: "Cinzel", serif; font-size: 9px; letter-spacing: 1px; color: #d7ffd0; opacity: 0.5; margin-top: 12px; line-height: 1.5; }
+/* ===== illustrative caption (additive) ===== */
+.cd-conf-note { margin-top: 6px; font-family: "Cinzel", serif; font-size: 9px; letter-spacing: 1px; color: #d7ffd0; opacity: 0.45; text-transform: uppercase; }
