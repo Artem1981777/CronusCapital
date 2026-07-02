@@ -34,6 +34,8 @@ import { useAccount } from "wagmi"
 import { runCronusPipeline, runCronusPipelineLive, setApiKey } from "./agents/cronusAgents"
 import type { AgentState, MarketSignal, BetOpportunity } from "./agents/cronusAgents"
 import { PremiumSignal } from "./components/PremiumSignal"
+import { dashboardV2Enabled, useSection } from "./dashboardV2"
+import { SectionNav, Sec } from "./DashboardV2Nav"
 
 const TOPICS = ["crypto markets", "US elections", "Fed interest rates", "AI stocks", "Bitcoin ETF"]
 
@@ -214,6 +216,10 @@ export default function App() {
     return () => clearInterval(interval)
   }, [])
 
+  const V2 = dashboardV2Enabled()
+  const [sec, setSec] = useSection("overview")
+  const secView = V2 ? sec : "__ALL__"
+
   function addLog(agent: string, thought: string) {
     setReasoningLogs(prev => [...prev, { agent, timestamp: Date.now(), thought }])
   }
@@ -268,8 +274,8 @@ export default function App() {
     <div style={{ minHeight: "100vh", background: "transparent", color: "#39e014", fontFamily: "Cinzel, serif" }}>
       <div className="scanline" />
       <EgyptTheme />
-        <div id="cap-top" />
-        <div id="cap-agents" /><CronusDashboard /><EquityCurve /><ChainBar stats={chainStats} /><TrackRecord /><ReasoningTrace logs={reasoningLogs} topic={topic} />
+        <div id="cap-top" /><div className={V2 ? "cd2-shell" : ""}>{V2 ? <SectionNav section={sec} onSelect={setSec} /> : null}<div className={V2 ? "cd2-main" : ""}>
+        <Sec id="overview" section={secView}><div id="cap-agents" /><CronusDashboard /><EquityCurve /></Sec><Sec id="track" section={secView}><TrackRecord /></Sec><Sec id="system" section={secView}><ChainBar stats={chainStats} /></Sec><Sec id="oracle" section={secView}><ReasoningTrace logs={reasoningLogs} topic={topic} />
       
       <div style={{ borderBottom: "1px solid #39e01422", padding: "20px 32px", display: "flex", alignItems: "center", justifyContent: "space-between", background: "linear-gradient(180deg, #050505 0%, transparent 100%)" }}>
         <div>
@@ -349,23 +355,23 @@ export default function App() {
           </div>
         </div>
       )}
-      <div id="cap-signals" /><PremiumSignal />
-      <div id="cap-markets" /><LiveMarkets />
-<AgentIdentity />
-<PositioningStrap />
-<X402Integration />
-			<PayCronus />
-                    {SHOW_STREAM && <StreamSession />}
-                    {SHOW_SETTLEMENTS && <GatewaySettlements />}
-                    <ProofPanel />
-      <LoopPanel />
-      <MoatStrip />
-      <ComposabilityStrip />
-        <PolicyGuardrails />
-			<VerifiableLedger />
-      <div id="cap-settlements" /><Dashboard totalOnChain={sessionTxCount} />
-      <ProofBanner /><div id="cap-stellar" /><StellarWallet /><StellarBurn /><StellarComplete />
-        <AgentPayout /><StellarBridge />
+      <div id="cap-signals" /><PremiumSignal /></Sec>
+      <Sec id="markets" section={secView}><div id="cap-markets" /><LiveMarkets /></Sec>
+<Sec id="standards" section={secView}><AgentIdentity /></Sec>
+<Sec id="overview" section={secView}><PositioningStrap /></Sec>
+<Sec id="payments" section={secView}><X402Integration /></Sec>
+			<Sec id="payments" section={secView}><PayCronus /></Sec>
+                    <Sec id="payments" section={secView}>{SHOW_STREAM && <StreamSession />}</Sec>
+                    <Sec id="payments" section={secView}>{SHOW_SETTLEMENTS && <GatewaySettlements />}</Sec>
+                    <Sec id="proof" section={secView}><ProofPanel /></Sec>
+      <Sec id="traction" section={secView}><LoopPanel /></Sec>
+      <Sec id="overview" section={secView}><MoatStrip /></Sec>
+      <Sec id="standards" section={secView}><ComposabilityStrip /></Sec>
+        <Sec id="risk" section={secView}><PolicyGuardrails /></Sec>
+			<Sec id="proof" section={secView}><VerifiableLedger /></Sec>
+      <Sec id="traction" section={secView}><div id="cap-settlements" /><Dashboard totalOnChain={sessionTxCount} /></Sec>
+      <Sec id="proof" section={secView}><ProofBanner /></Sec><Sec id="standards" section={secView}><div id="cap-stellar" /><StellarWallet /><StellarBurn /><StellarComplete /></Sec>
+        <Sec id="standards" section={secView}><AgentPayout /><StellarBridge /></Sec><Sec id="vault" section={secView}><div className="cd2-note">Vault metrics (TVL, share price, deposit / withdraw) currently live in the Overview dashboard. A dedicated read-only Vault view is coming next.</div></Sec>
 
       {onChainTxs.length > 0 && (
         <div style={{ padding: "12px 32px", background: "#050505", borderTop: "1px solid #39e01422" }}>
@@ -376,7 +382,7 @@ export default function App() {
           ))}
         </div>
       )}
-      <SiteFooter />
+      </div></div><SiteFooter />
       <div style={{ borderTop: "1px solid #39e01422", padding: "12px 32px", textAlign: "center" }}><a href="https://obol-theta.vercel.app" target="_blank" rel="noreferrer" style={{ color: "#c9a84c", fontSize: "10px", letterSpacing: "2px", fontFamily: "Cinzel, serif", textDecoration: "none" }}>ALSO BUILT ON ARC - OBOL - x402 PAY-PER-ARTICLE &rarr;</a></div><div style={{ borderTop: "1px solid #39e01422", padding: "16px 32px", display: "flex", justifyContent: "space-between" }}>
         <div style={{ color: "#39e01444", fontSize: "10px", letterSpacing: "3px", fontFamily: "Cinzel, serif" }}>⬡ CRONUS CAPITAL · AGORA AGENTS HACKATHON 2026</div>
         <div style={{ color: "#39e01444", fontSize: "10px", letterSpacing: "3px", fontFamily: "Cinzel, serif" }}>POWERED BY ARC · CIRCLE · USDC ⬡</div>

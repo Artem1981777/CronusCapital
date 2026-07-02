@@ -570,3 +570,31 @@ html, body { background: linear-gradient(rgba(0,0,0,0.12), rgba(0,0,0,0.22)), ur
 .cd-nano-links a:hover { text-decoration: underline; }
 .cd-nano-err { margin-top: 10px; font-size: 12px; color: #e08; opacity: .85; }
 @media (max-width: 620px) { .cd-nano-grid { grid-template-columns: repeat(2, 1fr); } .cd-nano-hero-num { font-size: 34px; } }
+
+/* ===== Dashboard V2 sidebar (additive, reuses existing tokens) ===== */
+.cd2-shell { display: flex; align-items: flex-start; min-height: 100vh; }
+.cd2-main { flex: 1 1 auto; min-width: 0; }
+.cd2-nav {
+  position: sticky; top: 0; align-self: flex-start; width: 236px; height: 100vh; overflow-y: auto;
+  background: rgba(6,12,7,0.5); backdrop-filter: blur(14px) saturate(125%); -webkit-backdrop-filter: blur(14px) saturate(125%);
+  border-right: 1px solid var(--cd-border, rgba(57,224,20,0.28)); padding: 18px 12px; box-sizing: border-box; z-index: 40;
+}
+.cd2-brand { display: flex; align-items: center; gap: 10px; padding: 8px 8px 16px; }
+.cd2-brand-glyph { font-family: "Noto Sans Egyptian Hieroglyphs", serif; color: var(--gold-bright, #f0d27a); font-size: 22px; }
+.cd2-brand-name { font-family: "Cinzel Decorative", "Cinzel", serif; letter-spacing: 4px; color: var(--green, #39e014); font-size: 15px; font-weight: 900; }
+.cd2-group { margin-bottom: 14px; }
+.cd2-group-label { font-family: "Cinzel", serif; font-size: 9px; letter-spacing: 3px; color: var(--green, #39e014); opacity: 0.45; padding: 4px 10px; }
+.cd2-item { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; background: transparent; border: 1px solid transparent; color: #d7ffd0; font-family: "Cinzel", serif; font-size: 12.5px; letter-spacing: 1px; padding: 8px 10px; border-radius: 9px; cursor: pointer; transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease; }
+.cd2-item:hover { background: rgba(57,224,20,0.08); }
+.cd2-item-active { background: linear-gradient(90deg, rgba(57,224,20,0.16), rgba(57,224,20,0.03)); border-color: var(--cd-border, rgba(57,224,20,0.28)); color: var(--gold-bright, #f0d27a); }
+.cd2-item-glyph { width: 18px; text-align: center; opacity: 0.9; }
+.cd2-item-label { white-space: nowrap; }
+.cd2-main .cd2-section { padding: 8px 0 44px; }
+.cd2-burger { display: none; }
+@media (max-width: 860px) {
+  .cd2-shell { display: block; }
+  .cd2-nav { position: fixed; left: 0; top: 0; width: 220px; transform: translateX(-100%); transition: transform 0.2s ease; }
+  .cd2-nav-open { transform: translateX(0); }
+  .cd2-burger { display: inline-flex; align-items: center; justify-content: center; position: fixed; top: 10px; left: 10px; z-index: 60; width: 40px; height: 40px; border-radius: 9px; border: 1px solid var(--cd-border, rgba(57,224,20,0.28)); background: rgba(6,12,7,0.75); color: var(--green, #39e014); font-size: 18px; cursor: pointer; }
+}
+.cd2-note { font-family: "Cinzel", serif; color: #d7ffd0; opacity: 0.72; padding: 22px 24px; border: 1px dashed var(--cd-border, rgba(57,224,20,0.28)); border-radius: 12px; line-height: 1.5; }
