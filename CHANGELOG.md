@@ -2,6 +2,11 @@
 
 All changes verified on Arc Testnet (chainId 5042002). Self-funded demo traffic is labeled and excluded from external metrics — we never fake demand.
 
+## Pay-to-think COGS card on the landing (2026-07-02)
+
+- ProofPanel (src/components/ProofPanel.tsx) now fetches /api/pay-to-think and renders a full-width "Pays to think" card: settled COGS in USDC + a link to the on-chain settlement tx, labeled self-operated demo (COGS, not external demand).
+- Purely additive frontend; no API or honesty-surface changes. Receipts/external_payers still 127 / 0.
+
 ## Scorecard surfaces live pay-to-think COGS (2026-07-02)
 
 - `/api/scorecard` now fetches `/api/pay-to-think` and adds a verifiable claim: Cronus autonomously PAYS upstream data providers in real USDC (COGS) on Arc testnet, tracked in a separate ledger that never inflates external demand.
