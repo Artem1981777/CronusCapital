@@ -27,6 +27,7 @@ import SiteFooter from "./components/SiteFooter"
 import EquityCurve from "./EquityCurve"
 import PolicyGuardrails from "./PolicyGuardrails"
 import { RiskGauges } from "./components/RiskGauges"
+import { VaultPanel } from "./components/VaultPanel"
 import VerifiableLedger from "./VerifiableLedger"
 import { AgentDemoScout, AgentDemoAnalyst, AgentDemoExecutor } from "./AgentDemo"
 import "./demoSeed"
@@ -373,7 +374,7 @@ export default function App() {
 			<Sec id="proof" section={secView}><VerifiableLedger /></Sec>
       <Sec id="traction" section={secView}><div id="cap-settlements" /><Dashboard totalOnChain={sessionTxCount} /></Sec>
       <Sec id="proof" section={secView}><ProofBanner /></Sec><Sec id="standards" section={secView}><div id="cap-stellar" /><StellarWallet /><StellarBurn /><StellarComplete /></Sec>
-        <Sec id="standards" section={secView}><AgentPayout /><StellarBridge /></Sec><Sec id="vault" section={secView}><div className="cd2-note">Vault metrics (TVL, share price, deposit / withdraw) currently live in the Overview dashboard. A dedicated read-only Vault view is coming next.</div></Sec>
+        <Sec id="standards" section={secView}><AgentPayout /><StellarBridge /></Sec><Sec id="vault" section={secView}><VaultPanel /></Sec>
 
       {onChainTxs.length > 0 && (
         <div style={{ padding: "12px 32px", background: "#050505", borderTop: "1px solid #39e01422" }}>
