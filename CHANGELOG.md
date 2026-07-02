@@ -2,6 +2,10 @@
 
 All changes verified on Arc Testnet (chainId 5042002). Self-funded demo traffic is labeled and excluded from external metrics — we never fake demand.
 
+## Market tickers panel (2026-07-02)
+
+Added a read-only Market tickers panel to the Markets section: BTC/ETH/SOL/ARB current price, 24h change, and a 7-day SVG sparkline, fetched client-side from the CoinGecko public API (no new serverless function; refreshes every 120s). Fail-open (shows 'n/a' and a degraded flag on error). Clearly labeled as illustrative market context, not trading signals. Complements Market Pulse; additive, no logic changes. Commit `e21ef6f`.
+
 ## System/manifest panel (2026-07-02)
 
 Added a read-only System panel that fetches the live agent manifest (/api/manifest) and renders protocol/version, network + chain id, settlement asset, payment rails, the ERC-8004 identity, ERC-8183 escrow and ERC-8004 reputation registry addresses (linked to the Arc testnet explorer), and the STANDARD/NANO service prices. Fail-open (shows 'n/a' on fetch errors). Complements ChainBar; additive, no logic changes. Commit `0a06217`.
