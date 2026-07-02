@@ -2,6 +2,10 @@
 
 All changes verified on Arc Testnet (chainId 5042002). Self-funded demo traffic is labeled and excluded from external metrics — we never fake demand.
 
+## Risk Gauges in Risk section (2026-07-02)
+
+Added three ring dials in the Risk section showing the Executor's real policy limits (max 5% bankroll per position, min edge 3%, daily loss limit 20%), labeled as configured limits rather than live exposure — no fabricated drawdown/exposure numbers. Complements the existing Guardrail Policy Engine panel. Also aligned the risk-management console log with the policy (previously said max 20% per position). Additive. Commit `a3431f6`.
+
 ## Global wallet in dashboard V2 sidebar (2026-07-02)
 
 Moved the wallet Connect button into the V2 sidebar so it is available on every section; the header keeps it only for the legacy fallback layout to avoid a duplicate. Additive, no logic changes. Commit `27e19cf`.
