@@ -11,6 +11,7 @@ import PayCronus from "./components/PayCronus"
 import StreamSession from "./components/StreamSession"
 import GatewaySettlements from "./components/GatewaySettlements"
 import ProofPanel from "./components/ProofPanel"
+import LoopPanel from "./components/LoopPanel"
 import MoatStrip from "./components/MoatStrip"
 import ComposabilityStrip from "./components/ComposabilityStrip"
 import PositioningStrap from "./components/PositioningStrap"
@@ -357,6 +358,7 @@ export default function App() {
                     {SHOW_STREAM && <StreamSession />}
                     {SHOW_SETTLEMENTS && <GatewaySettlements />}
                     <ProofPanel />
+      <LoopPanel />
       <MoatStrip />
       <ComposabilityStrip />
         <PolicyGuardrails />
