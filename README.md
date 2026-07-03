@@ -25,6 +25,18 @@ Cronus is an autonomous prediction-market oracle agent. It scans markets, scores
 
 ---
 
+## TL;DR (for judges)
+
+Cronus is an autonomous AI agent that runs a real, honest business on Arc: it **earns** via x402 paid calls, **pays** upstream data costs, **stakes its own USDC** on its own verdicts, and **settles every step on-chain** — all independently verifiable in a browser, with zero private keys.
+
+- **Live demo:** https://cronus-capital.vercel.app
+- **Verify in 2 min (no keys):** run **npm run verify-live** (81 checks) or open **/api/scorecard**
+- **Honest by default:** external_payers = **0** — every x402 payment so far is our own self-generated test traffic, always labeled as such. We never fake demand.
+- **Real on-chain:** x402 revenue, upstream COGS, skin-in-the-game stakes, live vault NAV, ERC-8004 identity/reputation + ERC-8183 escrow.
+- **Visual tour:** 11 annotated dashboard screenshots at the bottom of this README (and in docs/dashboard-v2.md).
+
+---
+
 ## Built for the Circle Gateway nanopayments round (Canteen × Circle · Arc)
 
 This submission centers **Circle Gateway nanopayments**: a sub-cent ($0.001) agent-to-agent tier where an autonomous buyer-agent discovers, budgets, and pays **gas-free** (EIP-3009) for Cronus signals, with **honest, self-labeled traction** — no faked external demand. Details in [NANO nanopayments — Circle Gateway](#nano-nanopayments--circle-gateway-gas-free-sub-cent).
@@ -69,7 +81,7 @@ All `/api/*` endpoints return HTTP 200 (or 402 for the paywall) — never 500.
 Every number on this page is reproducible by a judge with **zero private keys**. We publish a machine-readable scorecard that, for each claim, returns *how to verify it* — a command or an on-chain link — never a self-graded "passed":
 
 - **Scorecard:** https://cronus-capital.vercel.app/api/scorecard — 4 Sourcify exact-match contracts, live on-chain counts, honest `external_payers: 0`, and the exact reproduce step for each claim.
-- **No-key end-to-end:** `npm run verify-live` (51 checks) and `npm run verify-intent` (EIP-712 round-trip) reproduce the entire honesty surface against the live deployment without any secret.
+- **No-key end-to-end:** `npm run verify-live` (81 checks) and `npm run verify-intent` (EIP-712 round-trip) reproduce the entire honesty surface against the live deployment without any secret.
 - **Source, not bytecode:** every contract links to its verified, exact-match source on Sourcify.
 
 We would rather show a verifiable **0** external payers than an impressive number you cannot independently check.
@@ -94,13 +106,13 @@ Per the sell-side quickstart, the EIP-3009 `validBefore` must be at least 7 days
 
 ## Traction (honest): paywall proven with self-generated volume
 
-Cronus's premium signals are paid on-chain. To prove the paywall settles real USDC end-to-end, we drove the live deployment from **39 distinct self-test wallets** (all ours, across dev sessions) — not faked, but self-generated; no external customer has paid yet.
+Cronus's premium signals are paid on-chain. To prove the paywall settles real USDC end-to-end, we drove the live deployment from **44 distinct self-test wallets** (all ours, across dev sessions) — not faked, but self-generated; no external customer has paid yet.
 
-Snapshot (2026-06-29), straight from the Arc explorer:
+Snapshot (2026-07-03), straight from the Arc explorer:
 
 - **39** distinct self-test wallets (all ours, used across dev sessions)
-- **111** settled on-chain USDC payments (all self-generated test traffic)
-- **2.22 USDC** total self-generated test volume
+- **140** settled on-chain USDC payments (all self-generated test traffic)
+- **2.80 USDC** total self-generated test volume
 - **0** verified external (non-self) payers so far
 - on a **testnet** these are wallets **we** controlled to exercise the paywall, so we do **not** present them as external demand; the honest external-payer count is **0** until a real third party pays.
 
@@ -386,7 +398,7 @@ This closes the loop honestly: the paywall verifies a **real on-chain USDC payme
 
 ## Live traction (real, on-chain, verifiable)
 
-As of the latest build, the Cronus x402 paywall has settled **111 real USDC payments (~2.22 USDC) on Arc testnet** - every one a genuine on-chain transfer, verifiable in the explorer. The counter is **read live from the Arc block explorer** via `/api/metrics`, value-filtered to the exact 0.02 USDC signal price, so unrelated transfers (such as vault withdrawals) are never counted and the figure updates itself with each new payment.
+As of the latest build, the Cronus x402 paywall has settled **140 real USDC payments (~2.80 USDC) on Arc testnet** - every one a genuine on-chain transfer, verifiable in the explorer. The counter is **read live from the Arc block explorer** via `/api/metrics`, value-filtered to the exact 0.02 USDC signal price, so unrelated transfers (such as vault withdrawals) are never counted and the figure updates itself with each new payment.
 
 **Honest scope:** this volume was self-generated against the live endpoint to prove the paywall handles real settlement at scale - it is **not external customer revenue**. Every payment is a real, auditable on-chain settlement; none of it is mocked or hardcoded.
 
