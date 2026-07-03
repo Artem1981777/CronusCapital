@@ -5,6 +5,7 @@
 import manifest from "../lib/manifest.js"
 import openapi from "../lib/openapi.js"
 import receipts from "../lib/receipts.js"
+import receipt from "../lib/receipt.js"
 import metrics from "../lib/metrics.js"
 import traction from "../lib/traction.js"
 import leaderboard from "../lib/leaderboard.js"
@@ -24,7 +25,7 @@ import trace from "../lib/traceArchive.js"
 import payToThink from "../lib/payToThink.js"
 import vaultNav from "../lib/vaultNav.js"
 
-const ROUTES = { "backtest": backtest, "trace": trace, "agent-withdraw": agentWithdraw, "subscription": subscription, "split-pay": splitPay, "spend-limit": spendLimit, "fund-escrow": fundEscrow, "resolve-stake": resolveStake, manifest, openapi, receipts, metrics, traction, leaderboard, settlements, "spend-intent": spendIntent, scorecard, "track-record": trackRecord, "open-stake": openStake, "pay-to-think": payToThink, "vault-nav": vaultNav }
+const ROUTES = { "backtest": backtest, "trace": trace, "agent-withdraw": agentWithdraw, "subscription": subscription, "split-pay": splitPay, "spend-limit": spendLimit, "fund-escrow": fundEscrow, "resolve-stake": resolveStake, manifest, openapi, receipts, receipt, metrics, traction, leaderboard, settlements, "spend-intent": spendIntent, scorecard, "track-record": trackRecord, "open-stake": openStake, "pay-to-think": payToThink, "vault-nav": vaultNav }
 
 export default async function handler(req, res) {
 	const kind = String((req.query && req.query.kind) || "").toLowerCase()

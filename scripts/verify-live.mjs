@@ -214,6 +214,20 @@ console.log("\n[13] money-moving actions are auth-gated (401 without a token)")
 }
 
 console.log("\n================================================")
+console.log("\n[R] verifiable receipt (GET /api/info?kind=receipt)")
+{
+	const bad = await getJson("/api/info?kind=receipt")
+	ok("missing tx -> HTTP 400", bad.status === 400, "got " + bad.status)
+	const m = await getJson("/api/metrics")
+	const tx = m.body && m.body.lastTx
+	ok("metrics exposes a lastTx to resolve", !!tx)
+	const r = await getJson("/api/info?kind=receipt&tx=" + tx)
+	ok("known payment tx resolves (200, ok)", r.status === 200 && !!r.body && r.body.ok === true)
+	ok("receipt is verified on-chain", !!r.body && r.body.verified === true, "verified=" + (r.body && r.body.verified))
+	ok("binds x402 price 20000 atomic", !!(r.body && r.body.http402) && r.body.http402.priceAtomic === "20000")
+	ok("settles to the treasury", !!r.body && String(r.body.payTo).toLowerCase() === PAY_TO)
+	ok("declares non-custodial spend path", !!r.body && r.body.nonCustodial === true)
+}
 console.log((fail === 0 ? "ALL CHECKS PASSED" : fail + " CHECK(S) FAILED") + " — " + pass + " passed, " + fail + " failed")
 console.log("No private keys were used. Reproduce: npm run verify-live")
 process.exit(fail === 0 ? 0 : 1)
