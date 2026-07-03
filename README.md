@@ -269,6 +269,44 @@ The whole loop in one screen: **reason -> earn (x402) -> spend (upstream) -> set
 
 ---
 
+## Judge walkthrough — the Overview screen, button by button
+
+The **Overview** tab is the control panel for the whole agent business. It is taller than one screen, so both halves are shown below with every control explained. Anything marked **real** is a genuine on-chain transaction on **Arc Testnet** (chainId 5042002), independently verifiable in the block explorer. Read-only buttons need no wallet — you can just watch.
+
+### Part 1 — agent actions & vault
+
+![Overview — agent action buttons and vault controls](assets/screenshots/overview-actions.png)
+
+**Before you start (optional):** connect a wallet via the top-right chip and switch to **Arc Testnet**. Need test USDC? Get it free at faucet.circle.com (select Arc Testnet).
+
+1. **CONSULT ORACLES** — *free, no wallet.* Runs the full reasoning pipeline (SCOUT → DECOMPOSE → DISCOVER → DECIDE → SUFFICIENCY → EXECUTOR → MEMORY → CONSENSUS) on live BTC data. **Look at:** the agent decision log streaming in. It often returns **SKIP** — the agent abstains when expected value is below its bar. That is honesty by design, not a failure.
+2. **FORCE EXECUTE** — *free.* Forces a full verdict even when the agent would normally SKIP, so you can see a decision on demand. **Look at:** the verdict and conviction score.
+3. **PREMIUM SIGNAL — $0.02 (on-chain x402)** — *real payment.* The live paywall. Approve the 0.02 USDC transfer; the server verifies the on-chain payment (HTTP 402 → pay → 200) and unlocks the signal with verdict, conviction and a **commitment** hash. **Look at:** the VIEW TX link (real settlement with a Memo event on the Arc explorer) and the Payments (x402) counter ticking up.
+4. **PREMIUM (DEMO) — $0.02 (x402)** — *demo, clearly labeled.* The same unlock flow without a live transfer, for judges who prefer not to fund a wallet. Honest: this does **not** settle on-chain and is **never** counted in traction numbers.
+5. **PAY UPSTREAM — $0.005 (agent buys data)** — *real payment.* The cost side of the business: the agent itself pays a data provider on-chain. **Look at:** NET FLOW staying positive (0.02 in vs 0.005 out) — the unit economics are real, not modeled.
+6. **DEPOSIT / WITHDRAW** — *real, vault.* Enter an amount (e.g. 0.1) and deposit into the ERC-4626-style vault. **Look at:** "Your position" and "Vault TVL" (463.61 USDC at capture) updating with real share accounting; withdraw to reverse it.
+7. **RUN AGENT STRATEGY** — *free.* Triggers a full autonomous pass (reason → act) so you can watch the agent operate on its own.
+8. **RISK ADJUST** — *free.* Cycles the risk regime; watch the risk gauges and position sizing respond.
+9. **VIEW ON ARC ↗** — opens the agent/treasury address on the Arc explorer so you can audit every transfer yourself.
+10. **+ DEPLOY NEW AGENT** — shows the multi-agent surface for deploying another agent instance.
+
+### Part 2 — pay Cronus & nano-streaming
+
+![Overview — Support Cronus one-click pay and nano-stream](assets/screenshots/overview-pay-stream.png)
+
+Everything here settles through **@circle-fin/x402-batching**: gas-free EIP-3009 authorizations, verified and served immediately, settled in Circle Gateway batches.
+
+11. **PAY 0.02 USDC ON ARC** (Support Cronus) — *real, and the one that matters most for judging.* Connect any funded wallet and make one real 0.02 USDC transfer. You will appear in the **public settled-payments feed** — and because our honest **external_payers** count is currently **0**, a judge who pays here becomes the **first verified external payer**. **Look at:** /api/receipts and the Traction tab right after.
+12. **START STREAM** (Stream signals) — *real per-second micropayments.* Set a budget (e.g. 0.05 USDC) and stream at 0.00001 USDC/sec via Circle Gateway until the budget runs out. **Look at:** the SECONDS / SPENT / SIGNALS counters incrementing live. Honest note: the real per-second on-chain micropayments are executed by the autonomous buyer-agent (**--stream**); the on-screen burn animation is projected at the same rate.
+
+**Verify all of it independently (no wallet, ~2 min):**
+- Public receipts — https://cronus-capital.vercel.app/api/receipts (append ?format=csv to export)
+- Live metrics — https://cronus-capital.vercel.app/api/metrics
+- Honest traction — https://cronus-capital.vercel.app/api/traction (external_payers, self_generated_*)
+- One-command replay — **npm run verify-live** (81 checks)
+
+---
+
 ## How it works — 3 oracles
 
 1. **Scout** — scans prediction markets, gathers signals.
