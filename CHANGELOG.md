@@ -2,6 +2,10 @@
 
 All changes verified on Arc Testnet (chainId 5042002). Self-funded demo traffic is labeled and excluded from external metrics — we never fake demand.
 
+## Live skin-in-the-game stake opened (2026-07-03)
+
+Cronus opened a real, on-chain skin-in-the-game position via the server-side POST /api/open-stake endpoint (auth via CRON_SECRET; the treasury signing key never leaves Vercel). It consulted its own live verdict feed, found a decisive high-conviction call (YES on BTC-USDC, conviction 0.68 >= 0.65 gate), and committed 0.084 USDC: a keccak256 commitment of {verdict, conviction, market, openPrice 61960.4, resolveBy, stake, nonce} is recorded on-chain BEFORE the outcome is known, with USDC memo-transferred from the agent treasury (0x46213...Ca164) to escrow (0xd6Cb...5d4d). Resolves in ~24h: if BTC-USDC last price > 61960.4 the stake returns, else it is forfeited to a burn address (provably unrecoverable). Recorded as an OPEN position in the KV ledger (length 2) and surfaced in /api/track-record. Reproducible openTx: https://testnet.arcscan.app/tx/0x7965eb6c60a82d85f46c3ee9e56f04a85d264aad0b1fd818daa63cb7e2608275
+
 ## Live COGS payment verified (2026-07-03)
 
 Ran a real, on-chain cost-of-goods (COGS) payment on Arc testnet: Cronus paid its upstream data provider — the self-operated OKX-corroboration demo feed at 0xd6Cb...5d4d — 0.02 USDC, signed locally and confirmed on-chain (status success). Proves the pay-to-think / COGS contour works live end-to-end. The recipient is a self-operated demo feed and the payer is our own agent wallet, so this is self-generated cost, not external revenue. Reproducible tx: https://testnet.arcscan.app/tx/0x841790387300d5c437a0c2cce328c3a3ecbfb978bc4b540706f6eaff0548f75c
