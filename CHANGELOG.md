@@ -2,6 +2,10 @@
 
 All changes verified on Arc Testnet (chainId 5042002). Self-funded demo traffic is labeled and excluded from external metrics — we never fake demand.
 
+## Vault NAV live series (2026-07-03)
+
+A new read-only VAULT NAV · LIVE panel reads the real on-chain vault totalAssets() (Arc testnet) and records timestamped NAV snapshots into KV (cronus:vault:nav, throttled to ~2 min behind an NX lock, capped at 500 points), then renders a hand-rolled SVG curve. The series NEVER backfills or fabricates history: it starts empty and fills only with genuine live on-chain readings over time (first real point recorded on deploy at NAV 463.61 USDC). Exposed read-only via GET /api/info?kind=vault-nav (new router entry, no new serverless function, respecting the 12/12 function cap). Additive and fail-open, mounted behind the V2 dashboard next to the vault panel. Yield accruals remain self-funded testnet demo, not external trading profit.
+
 ## Live skin-in-the-game stake opened (2026-07-03)
 
 Cronus opened a real, on-chain skin-in-the-game position via the server-side POST /api/open-stake endpoint (auth via CRON_SECRET; the treasury signing key never leaves Vercel). It consulted its own live verdict feed, found a decisive high-conviction call (YES on BTC-USDC, conviction 0.68 >= 0.65 gate), and committed 0.084 USDC: a keccak256 commitment of {verdict, conviction, market, openPrice 61960.4, resolveBy, stake, nonce} is recorded on-chain BEFORE the outcome is known, with USDC memo-transferred from the agent treasury (0x46213...Ca164) to escrow (0xd6Cb...5d4d). Resolves in ~24h: if BTC-USDC last price > 61960.4 the stake returns, else it is forfeited to a burn address (provably unrecoverable). Recorded as an OPEN position in the KV ledger (length 2) and surfaced in /api/track-record. Reproducible openTx: https://testnet.arcscan.app/tx/0x7965eb6c60a82d85f46c3ee9e56f04a85d264aad0b1fd818daa63cb7e2608275
