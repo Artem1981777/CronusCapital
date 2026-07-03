@@ -37,6 +37,21 @@ Cronus is an autonomous AI agent that runs a real, honest business on Arc: it **
 
 ---
 
+## Contents
+
+- [Verify in 2 minutes (judges)](#verify-in-2-minutes-judges)
+- [Traction — honest, self vs external](#traction-honest-paywall-proven-with-self-generated-volume)
+- [Dashboard guide](#dashboard-guide-what-you-are-looking-at)
+- [How to use it (step-by-step for judges)](#how-to-use-it-step-by-step-for-judges)
+- [Skin in the Game — conviction staking](#skin-in-the-game--conviction-staking)
+- [Standards & composability](#standards--composability)
+- [Agentic Finance Stack on Arc](#agentic-finance-stack-on-arc)
+- [Verify it yourself](#verify-it-yourself)
+- [Dashboard V2 — screenshots](#dashboard-v2--visual-tour)
+- [Full build log (CHANGELOG)](CHANGELOG.md)
+
+---
+
 ## Built for the Circle Gateway nanopayments round (Canteen × Circle · Arc)
 
 This submission centers **Circle Gateway nanopayments**: a sub-cent ($0.001) agent-to-agent tier where an autonomous buyer-agent discovers, budgets, and pays **gas-free** (EIP-3009) for Cronus signals, with **honest, self-labeled traction** — no faked external demand. Details in [NANO nanopayments — Circle Gateway](#nano-nanopayments--circle-gateway-gas-free-sub-cent).
