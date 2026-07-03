@@ -34,6 +34,7 @@ import { MarketTickers } from "./components/MarketTickers"
 import { TractionChart } from "./components/TractionChart"
 import { CalibrationPanel } from "./components/CalibrationPanel"
 import { AdjudicationReceipt } from "./components/AdjudicationReceipt"
+import { RationalSpend } from "./components/RationalSpend"
 import { ProofMatrix } from "./components/ProofMatrix"
 import { RegimeStrip } from "./components/RegimeStrip"
 import { ProofBoxes } from "./components/ProofBoxes"
@@ -376,6 +377,7 @@ export default function App() {
 <Sec id="overview" section={secView}><PositioningStrap /></Sec>
 <Sec id="payments" section={secView}><X402Integration /></Sec>
 <Sec id="payments" section={secView}><PaymentsSeries /></Sec>
+<Sec id="payments" section={secView}><RationalSpend /></Sec>
 			<Sec id="payments" section={secView}><PayCronus /></Sec>
                     <Sec id="payments" section={secView}>{SHOW_STREAM && <StreamSession />}</Sec>
                     <Sec id="payments" section={secView}>{SHOW_SETTLEMENTS && <GatewaySettlements />}</Sec>

@@ -245,6 +245,15 @@ console.log("\n[J] agent adjudication (GET /api/track-record)")
 	ok("commits rule + stake BEFORE the outcome (keccak256)", String(rules.commitment || "").toLowerCase().includes("before"))
 	ok("wrong verdicts burned to a provably-unrecoverable address", String(rules.slash || "").toLowerCase().includes("burn"))
 }
+console.log("\n[K] rational spend / pay-to-think (GET /api/pay-to-think)")
+{
+	const r = await getJson("/api/pay-to-think")
+	ok("HTTP 200 pay-to-think", r.status === 200 && !!r.body && r.body.ok === true)
+	ok("COGS tracked separately, never counted as external revenue", String((r.body && r.body.honesty) || "").toLowerCase().includes("never counted as external"))
+	const rec = Array.isArray(r.body && r.body.recent) ? r.body.recent : []
+	const settled = rec.filter((e) => e && e.mode === "settled")
+	ok("settled COGS entries labeled self-operated demo (not external)", settled.every((e) => e.self_operated_demo === true), "settled=" + settled.length)
+}
 console.log((fail === 0 ? "ALL CHECKS PASSED" : fail + " CHECK(S) FAILED") + " — " + pass + " passed, " + fail + " failed")
 console.log("No private keys were used. Reproduce: npm run verify-live")
 process.exit(fail === 0 ? 0 : 1)
