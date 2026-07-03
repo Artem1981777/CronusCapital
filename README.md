@@ -784,46 +784,70 @@ See [docs/dashboard-v2.md](docs/dashboard-v2.md) for an annotated screenshot gal
 
 ### Dashboard V2 — screenshots
 
+Each screenshot below is one sidebar section of the live dashboard, captured from https://cronus-capital.vercel.app. Honest note: all x402 payment volume shown is self-generated test traffic (external payers remain 0); stakes, COGS and vault NAV are real on-chain on Arc testnet.
+
 **1. Overview**
 
 ![Overview](assets/screenshots/01-overview.png)
+
+The control panel for the whole business: live metric cards (revenue, payments, net flow), the three-oracle agent pipeline, and every action button. This is where the full loop runs — a detailed button-by-button walkthrough is earlier in this README. Every metric is derived from real on-chain activity on Arc.
 
 **2. Oracle / Signals**
 
 ![Oracle / Signals](assets/screenshots/02-oracle-signals.png)
 
+The three reasoning oracles and their live output: current verdict, conviction score, and the step-by-step decision log (SCOUT → DECOMPOSE → DISCOVER → DECIDE → SUFFICIENCY → EXECUTOR → MEMORY → CONSENSUS). Shows exactly how the agent reaches — or deliberately abstains from — a call.
+
 **3. Markets / Intel**
 
 ![Markets / Intel](assets/screenshots/03-markets-intel.png)
+
+The live market context the agent reasons over: BTC price and regime plus macro indicators (Fear & Greed, dominance, global market data) pulled from public feeds in real time.
 
 **4. Payments (x402)**
 
 ![Payments (x402)](assets/screenshots/04-payments-x402.png)
 
+The revenue side: the live x402 settlement feed with payment count and total USDC, read straight from the Arc block explorer via /api/metrics and value-filtered to the exact 0.02 USDC signal price. Every row is a genuine on-chain transfer.
+
 **5. Traction**
 
 ![Traction](assets/screenshots/05-traction.png)
+
+The honesty centerpiece: external_payers = 0 is shown plainly, right next to self-generated test volume (44 distinct wallets, 140 payments, ~2.80 USDC). We never present our own test traffic as external demand.
 
 **6. Vault**
 
 ![Vault](assets/screenshots/06-vault.png)
 
+The ERC-4626-style on-chain vault: total assets (NAV), share accounting, and the live NAV history curve that fills only with genuine on-chain readings over time — never backfilled or fabricated.
+
 **7. Track Record**
 
 ![Track Record](assets/screenshots/07-track-record.png)
+
+The agent's skin-in-the-game staking history: each conviction stake with its on-chain commitment hash and resolution (correct → stake returned, wrong → forfeited to burn). Real stakes, all verifiable on Arc.
 
 **8. Proof / Verify**
 
 ![Proof / Verify](assets/screenshots/08-proof-verify.png)
 
+The verification hub: proof seals plus direct links to public receipts, /api/scorecard, and the one-command replay (npm run verify-live, 81 checks) so anyone can reproduce the entire honesty surface with no keys.
+
 **9. Standards**
 
 ![Standards](assets/screenshots/09-standards.png)
+
+Composability: the ERC-8004 identity/reputation and ERC-8183 escrow standards the agent implements on-chain, with the live contract addresses judges can inspect.
 
 **10. Risk / SecOps**
 
 ![Risk / SecOps](assets/screenshots/10-risk-secops.png)
 
+The risk and security posture: risk gauges and position sizing on one side, operational safeguards on the other — replay protection, server-side key custody, and guarded autonomous execution.
+
 **11. System**
 
 ![System](assets/screenshots/11-system.png)
+
+The system health panel: live status of the API endpoints, data sources, and integrations, so judges can confirm the whole stack is up and reporting in real time.
