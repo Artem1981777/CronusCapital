@@ -776,3 +776,7 @@ html, body { background: linear-gradient(rgba(0,0,0,0.12), rgba(0,0,0,0.22)), ur
 .cd-rcpt-k { font-family: "Cinzel", serif; font-size: 9px; letter-spacing: 1px; color: var(--green, #39e014); opacity: 0.7; }
 .cd-rcpt-v { font-family: "Cinzel", serif; font-size: 10px; color: #d7ffd0; text-align: right; word-break: break-word; }
 .cd-rcpt-vok { color: var(--gold-bright, #f0d27a); }
+/* ===== Guardrail proof (additive) ===== */
+.cd-gr-checks { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 12px 0; }
+.cd-gr-check { border: 1px solid var(--cd-border, rgba(57,224,20,0.18)); border-radius: 10px; padding: 12px; background: rgba(6,12,7,0.4); }
+.cd-gr-desc { font-family: "Cinzel", serif; font-size: 9px; line-height: 1.5; color: #d7ffd0; opacity: 0.8; margin-top: 6px; }

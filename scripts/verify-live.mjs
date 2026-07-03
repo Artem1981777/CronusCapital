@@ -228,6 +228,15 @@ console.log("\n[R] verifiable receipt (GET /api/info?kind=receipt)")
 	ok("settles to the treasury", !!r.body && String(r.body.payTo).toLowerCase() === PAY_TO)
 	ok("declares non-custodial spend path", !!r.body && r.body.nonCustodial === true)
 }
+console.log("\n[I] spend-intent authorization (GET /api/spend-intent)")
+{
+	const r = await getJson("/api/spend-intent")
+	ok("HTTP 200 EIP-712 schema", r.status === 200 && !!r.body && r.body.ok === true)
+	const t = r.body && r.body.types && r.body.types.SpendIntent
+	const names = Array.isArray(t) ? t.map(f => f.name) : []
+	ok("SpendIntent has payer/payTo/asset/maxAmount/nonce/deadline", ["payer", "payTo", "asset", "maxAmount", "nonce", "deadline"].every(n => names.includes(n)), names.join(","))
+	ok("binds payTo to the treasury", !!(r.body && r.body.binding) && String(r.body.binding.payTo).toLowerCase() === PAY_TO)
+}
 console.log((fail === 0 ? "ALL CHECKS PASSED" : fail + " CHECK(S) FAILED") + " — " + pass + " passed, " + fail + " failed")
 console.log("No private keys were used. Reproduce: npm run verify-live")
 process.exit(fail === 0 ? 0 : 1)
