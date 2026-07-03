@@ -36,6 +36,7 @@ import { ProofMatrix } from "./components/ProofMatrix"
 import { RegimeStrip } from "./components/RegimeStrip"
 import { ProofBoxes } from "./components/ProofBoxes"
 import { PaymentsSeries } from "./components/PaymentsSeries"
+import { VaultNavHistory } from "./components/VaultNavHistory"
 import VerifiableLedger from "./VerifiableLedger"
 import { AgentDemoScout, AgentDemoAnalyst, AgentDemoExecutor } from "./AgentDemo"
 import "./demoSeed"
@@ -383,7 +384,7 @@ export default function App() {
 			<Sec id="proof" section={secView}><VerifiableLedger /></Sec>
       <Sec id="traction" section={secView}><div id="cap-settlements" /><Dashboard totalOnChain={sessionTxCount} /></Sec>
       <Sec id="proof" section={secView}><ProofBanner /></Sec><Sec id="standards" section={secView}><div id="cap-stellar" /><StellarWallet /><StellarBurn /><StellarComplete /></Sec>
-        <Sec id="standards" section={secView}><AgentPayout /><StellarBridge /></Sec><Sec id="vault" section={secView}><VaultPanel /></Sec>
+        <Sec id="standards" section={secView}><AgentPayout /><StellarBridge /></Sec><Sec id="vault" section={secView}><VaultPanel /><VaultNavHistory /></Sec>
 
       {onChainTxs.length > 0 && (
         <div style={{ padding: "12px 32px", background: "#050505", borderTop: "1px solid #39e01422" }}>
