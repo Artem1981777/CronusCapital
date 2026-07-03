@@ -775,3 +775,7 @@ Run `node scripts/verify-live.mjs` (no auth, no funds moved): it probes every pu
 Live sources of truth: `GET /api/manifest` (capabilities + discovery), `GET /api/openapi` (machine-readable spec), `GET /api/track-record` (staked positions / skin in the game), `GET /api/receipts` (on-chain x402 receipts).
 
 On-chain (Arc testnet): ERC-8004 identity registry 0x252cAA46b9b0648908000f6C87e0a561DB4dEb6c, ERC-8183 job escrow 0x64e55De4CbC3CDf981B2c970807129FA61806873, reputation registry 0x2A19ad056EaE83364B0a6420685974cA219c209E. Escrow funding tx 0x5895d020c42e6f0b0f162b833a2b566499b4495aeeebc327e6192ef4df9e0b4c. All contracts verified on Sourcify (exact match).
+
+## Dashboard V2 — visual tour
+
+See [docs/dashboard-v2.md](docs/dashboard-v2.md) for an annotated screenshot gallery (one image per sidebar section), captured from https://cronus-capital.vercel.app. All payment volume shown is self-generated test traffic (external payers remain 0); stakes, COGS and vault NAV are real on-chain on Arc testnet.
