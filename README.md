@@ -779,3 +779,49 @@ On-chain (Arc testnet): ERC-8004 identity registry 0x252cAA46b9b0648908000f6C87e
 ## Dashboard V2 — visual tour
 
 See [docs/dashboard-v2.md](docs/dashboard-v2.md) for an annotated screenshot gallery (one image per sidebar section), captured from https://cronus-capital.vercel.app. All payment volume shown is self-generated test traffic (external payers remain 0); stakes, COGS and vault NAV are real on-chain on Arc testnet.
+
+### Dashboard V2 — screenshots
+
+**1. Overview**
+
+![Overview](assets/screenshots/01-overview.png)
+
+**2. Oracle / Signals**
+
+![Oracle / Signals](assets/screenshots/02-oracle-signals.png)
+
+**3. Markets / Intel**
+
+![Markets / Intel](assets/screenshots/03-markets-intel.png)
+
+**4. Payments (x402)**
+
+![Payments (x402)](assets/screenshots/04-payments-x402.png)
+
+**5. Traction**
+
+![Traction](assets/screenshots/05-traction.png)
+
+**6. Vault**
+
+![Vault](assets/screenshots/06-vault.png)
+
+**7. Track Record**
+
+![Track Record](assets/screenshots/07-track-record.png)
+
+**8. Proof / Verify**
+
+![Proof / Verify](assets/screenshots/08-proof-verify.png)
+
+**9. Standards**
+
+![Standards](assets/screenshots/09-standards.png)
+
+**10. Risk / SecOps**
+
+![Risk / SecOps](assets/screenshots/10-risk-secops.png)
+
+**11. System**
+
+![System](assets/screenshots/11-system.png)
