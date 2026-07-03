@@ -237,6 +237,14 @@ console.log("\n[I] spend-intent authorization (GET /api/spend-intent)")
 	ok("SpendIntent has payer/payTo/asset/maxAmount/nonce/deadline", ["payer", "payTo", "asset", "maxAmount", "nonce", "deadline"].every(n => names.includes(n)), names.join(","))
 	ok("binds payTo to the treasury", !!(r.body && r.body.binding) && String(r.body.binding.payTo).toLowerCase() === PAY_TO)
 }
+console.log("\n[J] agent adjudication (GET /api/track-record)")
+{
+	const r = await getJson("/api/track-record")
+	ok("HTTP 200 track-record", r.status === 200 && !!r.body && r.body.ok === true)
+	const rules = (r.body && r.body.rules) || {}
+	ok("commits rule + stake BEFORE the outcome (keccak256)", String(rules.commitment || "").toLowerCase().includes("before"))
+	ok("wrong verdicts burned to a provably-unrecoverable address", String(rules.slash || "").toLowerCase().includes("burn"))
+}
 console.log((fail === 0 ? "ALL CHECKS PASSED" : fail + " CHECK(S) FAILED") + " — " + pass + " passed, " + fail + " failed")
 console.log("No private keys were used. Reproduce: npm run verify-live")
 process.exit(fail === 0 ? 0 : 1)

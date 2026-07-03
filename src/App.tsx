@@ -33,6 +33,7 @@ import { SystemPanel } from "./components/SystemPanel"
 import { MarketTickers } from "./components/MarketTickers"
 import { TractionChart } from "./components/TractionChart"
 import { CalibrationPanel } from "./components/CalibrationPanel"
+import { AdjudicationReceipt } from "./components/AdjudicationReceipt"
 import { ProofMatrix } from "./components/ProofMatrix"
 import { RegimeStrip } from "./components/RegimeStrip"
 import { ProofBoxes } from "./components/ProofBoxes"
@@ -289,7 +290,7 @@ export default function App() {
       <div className="scanline" />
       <EgyptTheme />
         <div id="cap-top" /><div className={V2 ? "cd2-shell" : ""}>{V2 ? <SectionNav section={sec} onSelect={setSec} wallet={<WalletButton />} /> : null}<div className={V2 ? "cd2-main" : ""}>
-        <Sec id="overview" section={secView}><div id="cap-agents" /><RegimeStrip /><CronusDashboard /><EquityCurve /></Sec><Sec id="track" section={secView}><TrackRecord /><CalibrationPanel /></Sec><Sec id="system" section={secView}><ChainBar stats={chainStats} /><SystemPanel /></Sec><Sec id="oracle" section={secView}><ReasoningTrace logs={reasoningLogs} topic={topic} />
+        <Sec id="overview" section={secView}><div id="cap-agents" /><RegimeStrip /><CronusDashboard /><EquityCurve /></Sec><Sec id="track" section={secView}><TrackRecord /><CalibrationPanel /><AdjudicationReceipt /></Sec><Sec id="system" section={secView}><ChainBar stats={chainStats} /><SystemPanel /></Sec><Sec id="oracle" section={secView}><ReasoningTrace logs={reasoningLogs} topic={topic} />
       
       <div style={{ borderBottom: "1px solid #39e01422", padding: "20px 32px", display: "flex", alignItems: "center", justifyContent: "space-between", background: "linear-gradient(180deg, #050505 0%, transparent 100%)" }}>
         <div>

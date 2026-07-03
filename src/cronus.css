@@ -780,3 +780,5 @@ html, body { background: linear-gradient(rgba(0,0,0,0.12), rgba(0,0,0,0.22)), ur
 .cd-gr-checks { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin: 12px 0; }
 .cd-gr-check { border: 1px solid var(--cd-border, rgba(57,224,20,0.18)); border-radius: 10px; padding: 12px; background: rgba(6,12,7,0.4); }
 .cd-gr-desc { font-family: "Cinzel", serif; font-size: 9px; line-height: 1.5; color: #d7ffd0; opacity: 0.8; margin-top: 6px; }
+/* ===== Adjudication receipt (additive) ===== */
+.cd-adj-links { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px; }
