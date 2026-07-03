@@ -355,6 +355,9 @@ Take away USDC-as-gas or native x402 and Cronus stops being a self-contained bus
 
 ## Unit economics & treasury solvency
 
+<details><summary>Click to expand</summary>
+
+
 Cronus is built to be self-sustaining, not subsidized. Each signal it sells through the x402 paywall earns more than the data it buys to produce that signal costs:
 
 - **Revenue** — 0.02 USDC per paid call (x402, settled on-chain)
@@ -367,7 +370,12 @@ The dashboard surfaces this in real time: Revenue (x402), Agent Spend, Net Flow,
 
 **Honest scope.** Sustained profit requires real external demand for the agent's calls. On Arc testnet these figures are demo/modeled volume — they prove the *mechanism* is net-positive per call, not that the agent is already a profitable production business. The path to real solvency is more external x402 payers (and ecosystem grants such as the Arc Builders Fund), never raising money from new buyers to backfill the treasury.
 
+</details>
+
 ## Mainnet funding model
+
+<details><summary>Click to expand</summary>
+
 
 Who funds the treasury in production, in order of priority:
 
@@ -376,6 +384,8 @@ Who funds the treasury in production, in order of priority:
 3. **LP vault (optional, capital-efficient).** LPs can deposit USDC as working capital and receive a share of the agent's *realized* on-chain profit — fully transparent and withdrawable. Returns are paid only from real P&L, never from new deposits.
 
 There is no token sale and no "buy-in" to backfill the treasury. Sustained solvency depends on real external demand, which we do not fake; on testnet these volumes are modeled.
+
+</details>
 
 ## Verifiable x402 paywall (anyone can pay Cronus)
 
@@ -489,6 +499,9 @@ Connect a wallet on Arc Testnet (chainId 5042002), grab test USDC from the Circl
 
 ## Security deep-dive: the payment-replay attack we closed
 
+<details><summary>Click to expand</summary>
+
+
 **The threat.** In x402, a buyer proves payment by sending a transaction hash. But tx hashes are PUBLIC on the block explorer. With no extra protection, anyone could copy someone else's payment hash and replay it to get paid signals for free, unlimited times. One real payment would unlock infinite free access -- so the "monetization" would be fake.
 
 **The fix (two layers).**
@@ -503,7 +516,12 @@ Connect a wallet on Arc Testnet (chainId 5042002), grab test USDC from the Circl
 
 **Why it matters here.** This track is about REAL API/agent monetization. Replay-able payments mean there is no monetization. Cronus enforces exactly one paid access per proof -- and proves it end-to-end on-chain.
 
+</details>
+
 ## Stellar Integration: canonical USDC across Arc and Stellar (Circle CCTP)
+
+<details><summary>Click to expand</summary>
+
 
 Cronus moves canonical USDC between Arc (CCTP domain 26) and Stellar (domain 27)
 using Circle Cross-Chain Transfer Protocol (CCTP V2) and the official Stellar
@@ -557,7 +575,12 @@ Stellar mint, and the recipient USDC balance read live from Stellar Horizon.
 - src/components/StellarBridge.tsx - Iris attestation status
 - api/complete-stellar.js - serverless mint_and_forward completer
 
+</details>
+
 ## Autonomous payouts and security (Arc -> Stellar)
+
+<details><summary>Click to expand</summary>
+
 
 Built on top of the proven bridge+proof, two depth upgrades, both live in production.
 
@@ -614,6 +637,8 @@ An external scheduler (cron-job.org) pings the execute endpoint every 15 minutes
 Trigger (secret redacted): GET /api/agent-payout?action=execute&secret=REDACTED
 
 On each tick the agent re-reads its policy, decides the amount (30 percent of available, min threshold 1 USDC, per-payout cap 5 USDC), and either holds (nothing to pay) or submits a server-signed CCTP burn on Arc. Payouts are fully autonomous: the treasury pays out on a schedule, by itself, only when the policy allows.
+
+</details>
 
 ## Skin in the Game — Conviction Staking
 
