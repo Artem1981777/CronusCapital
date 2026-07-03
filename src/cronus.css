@@ -732,3 +732,17 @@ html, body { background: linear-gradient(rgba(0,0,0,0.12), rgba(0,0,0,0.22)), ur
 .cd-box-desc { font-family: "Cinzel", serif; font-size: 9px; line-height: 1.5; color: #d7ffd0; opacity: 0.75; }
 .cd-box-link { font-family: "Cinzel", serif; font-size: 9px; letter-spacing: 0.5px; color: var(--gold-bright, #f0d27a); text-decoration: none; }
 .cd-box-note { font-family: "Cinzel", serif; font-size: 9px; letter-spacing: 1px; color: #d7ffd0; opacity: 0.6; line-height: 1.6; margin-top: 12px; }
+/* ===== Payments settlement cadence (read-only, honest) ===== */
+.cd-ps { margin: 8px 0 18px; padding: 16px 18px; background: rgba(6,12,7,0.5); backdrop-filter: blur(14px) saturate(125%); -webkit-backdrop-filter: blur(14px) saturate(125%); border: 1px solid var(--cd-border, rgba(57,224,20,0.28)); border-radius: 14px; }
+.cd-ps-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
+.cd-ps-title { font-family: "Cinzel", serif; letter-spacing: 2px; color: var(--green, #39e014); font-size: 13px; font-weight: 700; }
+.cd-ps-src { font-family: "Cinzel", serif; font-size: 9px; letter-spacing: 1px; color: var(--green, #39e014); opacity: 0.55; }
+.cd-ps-stats { display: flex; flex-wrap: wrap; gap: 18px; margin-bottom: 12px; }
+.cd-ps-stat { display: flex; flex-direction: column; gap: 2px; }
+.cd-ps-k { font-family: "Cinzel", serif; font-size: 8px; letter-spacing: 1.5px; color: #d7ffd0; opacity: 0.6; text-transform: uppercase; }
+.cd-ps-v { font-family: "Cinzel", serif; font-size: 15px; font-weight: 700; color: var(--gold-bright, #f0d27a); }
+.cd-ps-svg { display: block; width: 100%; height: 60px; }
+.cd-ps-bar { fill: var(--green, #39e014); opacity: 0.8; }
+.cd-ps-bar-0 { fill: #7e8c6a; opacity: 0.25; }
+.cd-ps-axis { display: flex; justify-content: space-between; margin-top: 4px; font-family: "Cinzel", serif; font-size: 8px; letter-spacing: 1px; color: #d7ffd0; opacity: 0.5; }
+.cd-ps-note { font-family: "Cinzel", serif; font-size: 9px; letter-spacing: 1px; color: #d7ffd0; opacity: 0.6; line-height: 1.6; margin-top: 12px; }

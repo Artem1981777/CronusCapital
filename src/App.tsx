@@ -35,6 +35,7 @@ import { CalibrationPanel } from "./components/CalibrationPanel"
 import { ProofMatrix } from "./components/ProofMatrix"
 import { RegimeStrip } from "./components/RegimeStrip"
 import { ProofBoxes } from "./components/ProofBoxes"
+import { PaymentsSeries } from "./components/PaymentsSeries"
 import VerifiableLedger from "./VerifiableLedger"
 import { AgentDemoScout, AgentDemoAnalyst, AgentDemoExecutor } from "./AgentDemo"
 import "./demoSeed"
@@ -370,6 +371,7 @@ export default function App() {
 <Sec id="standards" section={secView}><AgentIdentity /></Sec>
 <Sec id="overview" section={secView}><PositioningStrap /></Sec>
 <Sec id="payments" section={secView}><X402Integration /></Sec>
+<Sec id="payments" section={secView}><PaymentsSeries /></Sec>
 			<Sec id="payments" section={secView}><PayCronus /></Sec>
                     <Sec id="payments" section={secView}>{SHOW_STREAM && <StreamSession />}</Sec>
                     <Sec id="payments" section={secView}>{SHOW_SETTLEMENTS && <GatewaySettlements />}</Sec>
