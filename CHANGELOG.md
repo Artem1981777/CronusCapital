@@ -2,6 +2,10 @@
 
 All changes verified on Arc Testnet (chainId 5042002). Self-funded demo traffic is labeled and excluded from external metrics — we never fake demand.
 
+## Payments settlement cadence (2026-07-03)
+
+Added an honest per-day x402 settlement-volume chart to the Payments section. Volume is bucketed by day client-side from the real on-chain `/api/receipts` feed (using each receipt's `settledAt` timestamp and `amountUsdc`), rendered as hand-rolled SVG bars with summary stats (payments, total, active days, busiest day). No new serverless function and no KV access. Deliberately labeled self-generated test traffic — `external_payers` remains 0. Read-only, fail-open, additive, no logic changes. Commit `5c5a71b`.
+
 ## Live paywall verified end-to-end (2026-07-03)
 
 Executed a real, on-chain x402 payment on Arc testnet to prove the paid contour works live: an HTTP 402 payment-required challenge, a $0.02 USDC transfer signed locally, then the signal claimed back with the tx hash as on-chain proof (HTTP 200, verdict YES, conviction 72). This is deliberately self-generated test traffic — the payer is our own agent wallet — so it is NOT counted as external demand: external_payers remains 0 and the payment is recorded only in the honest /api/metrics counter (payments 127 -> 128, total 2.54 -> 2.56 USDC). Reproducible tx: https://testnet.arcscan.app/tx/0x58e68d40d41e5a42b3f9ebc79a6115edb638cab4d7993fd6dc4eeb094d628d8c
