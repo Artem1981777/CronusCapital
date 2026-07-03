@@ -759,3 +759,20 @@ html, body { background: linear-gradient(rgba(0,0,0,0.12), rgba(0,0,0,0.22)), ur
 .cd-nav-line { fill: none; stroke: var(--green, #39e014); stroke-width: 1.5; vector-effect: non-scaling-stroke; }
 .cd-nav-axis { display: flex; justify-content: space-between; margin-top: 4px; font-family: "Cinzel", serif; font-size: 8px; letter-spacing: 1px; color: #d7ffd0; opacity: 0.5; }
 .cd-nav-note { font-family: "Cinzel", serif; font-size: 9px; letter-spacing: 1px; color: #d7ffd0; opacity: 0.6; line-height: 1.6; margin-top: 12px; }
+/* ===== Verifiable receipt (additive) ===== */
+.cd-rcpt-form { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0 8px; }
+.cd-rcpt-in { flex: 1 1 260px; min-width: 0; font-family: "Cinzel", serif; font-size: 11px; letter-spacing: 0.5px; color: #d7ffd0; background: rgba(6,12,7,0.6); border: 1px solid var(--cd-border, rgba(57,224,20,0.28)); border-radius: 10px; padding: 9px 12px; outline: none; }
+.cd-rcpt-in:focus { border-color: rgba(201,168,76,0.6); }
+.cd-rcpt-btn { font-family: "Cinzel", serif; font-size: 10px; font-weight: 700; letter-spacing: 1px; color: #02040a; background: var(--gold-bright, #f0d27a); border: none; border-radius: 10px; padding: 9px 16px; cursor: pointer; transition: opacity .15s; }
+.cd-rcpt-btn:disabled { opacity: 0.55; cursor: default; }
+.cd-rcpt-err { font-family: "Cinzel", serif; font-size: 9px; color: #ff8a8a; opacity: 0.9; margin-top: 6px; }
+.cd-rcpt-out { margin-top: 12px; }
+.cd-rcpt-badge { display: inline-block; font-family: "Cinzel", serif; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; padding: 5px 12px; border-radius: 8px; margin-bottom: 10px; }
+.cd-rcpt-ok { color: #02040a; background: var(--green, #39e014); }
+.cd-rcpt-bad { color: #d7ffd0; background: rgba(201,168,76,0.25); border: 1px solid rgba(201,168,76,0.5); }
+.cd-rcpt-note { font-family: "Cinzel", serif; font-size: 9px; color: #d7ffd0; opacity: 0.7; margin-bottom: 8px; line-height: 1.5; }
+.cd-rcpt-rows { display: grid; grid-template-columns: 1fr; gap: 4px; }
+.cd-rcpt-row { display: flex; justify-content: space-between; gap: 12px; padding: 6px 10px; background: rgba(6,12,7,0.4); border: 1px solid var(--cd-border, rgba(57,224,20,0.18)); border-radius: 8px; }
+.cd-rcpt-k { font-family: "Cinzel", serif; font-size: 9px; letter-spacing: 1px; color: var(--green, #39e014); opacity: 0.7; }
+.cd-rcpt-v { font-family: "Cinzel", serif; font-size: 10px; color: #d7ffd0; text-align: right; word-break: break-word; }
+.cd-rcpt-vok { color: var(--gold-bright, #f0d27a); }

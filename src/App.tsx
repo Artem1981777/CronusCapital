@@ -35,6 +35,7 @@ import { CalibrationPanel } from "./components/CalibrationPanel"
 import { ProofMatrix } from "./components/ProofMatrix"
 import { RegimeStrip } from "./components/RegimeStrip"
 import { ProofBoxes } from "./components/ProofBoxes"
+import { ReceiptCard } from "./components/ReceiptCard"
 import { PaymentsSeries } from "./components/PaymentsSeries"
 import { VaultNavHistory } from "./components/VaultNavHistory"
 import VerifiableLedger from "./VerifiableLedger"
@@ -376,7 +377,7 @@ export default function App() {
 			<Sec id="payments" section={secView}><PayCronus /></Sec>
                     <Sec id="payments" section={secView}>{SHOW_STREAM && <StreamSession />}</Sec>
                     <Sec id="payments" section={secView}>{SHOW_SETTLEMENTS && <GatewaySettlements />}</Sec>
-                    <Sec id="proof" section={secView}><ProofPanel /><ProofMatrix /><ProofBoxes /></Sec>
+                    <Sec id="proof" section={secView}><ProofPanel /><ProofMatrix /><ProofBoxes /><ReceiptCard /></Sec>
       <Sec id="traction" section={secView}><LoopPanel /><TractionChart /></Sec>
       <Sec id="overview" section={secView}><MoatStrip /></Sec>
       <Sec id="standards" section={secView}><ComposabilityStrip /></Sec>
