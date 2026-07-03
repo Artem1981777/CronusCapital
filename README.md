@@ -30,9 +30,10 @@ Cronus is an autonomous prediction-market oracle agent. It scans markets, scores
 Cronus is an autonomous AI agent that runs a real, honest business on Arc: it **earns** via x402 paid calls, **pays** upstream data costs, **stakes its own USDC** on its own verdicts, and **settles every step on-chain** — all independently verifiable in a browser, with zero private keys.
 
 - **Live demo:** https://cronus-capital.vercel.app
-- **Verify in 2 min (no keys):** run **npm run verify-live** (91 checks) or open **/api/scorecard**
+- **Verify in 2 min (no keys):** run **npm run verify-live** (94 checks) or open **/api/scorecard**
 - **Verifiable receipt (new):** paste any payment tx into the **Verifiable Receipt** card on the **Proof / Verify** tab (or call **/api/info?kind=receipt&tx=0x…**) — Cronus re-checks it live on the Arc explorer and binds payer -> amount -> the exact x402 price -> the on-chain commitment, with a non-custodial note. No keys.
 - **Guardrail proof (new):** the **Risk / SecOps** tab live-runs the real spending policy — an oversized payout is **blocked** (no funds move) while an in-budget one clears — plus the EIP-712 **SpendIntent** fields every autonomous spend must carry (signer, payTo, asset, maxAmount, nonce, deadline). Verify via **/api/spend-limit** and **/api/spend-intent**.
+- **Agent adjudication receipt (new):** the **Track Record** tab shows Cronus judging its own verdicts against **objective on-chain outcomes** — rule + stake committed (keccak256) **before** the result, then settled verifiably (correct → returned, wrong → **burned**), with commit/settle explorer links. Verify via **/api/track-record**.
 - **Honest by default:** external_payers = **0** — every x402 payment so far is our own self-generated test traffic, always labeled as such. We never fake demand.
 - **Real on-chain:** x402 revenue, upstream COGS, skin-in-the-game stakes, live vault NAV, ERC-8004 identity/reputation + ERC-8183 escrow.
 - **Visual tour:** 11 annotated dashboard screenshots at the bottom of this README (and in docs/dashboard-v2.md).
@@ -98,7 +99,7 @@ All `/api/*` endpoints return HTTP 200 (or 402 for the paywall) — never 500.
 Every number on this page is reproducible by a judge with **zero private keys**. We publish a machine-readable scorecard that, for each claim, returns *how to verify it* — a command or an on-chain link — never a self-graded "passed":
 
 - **Scorecard:** https://cronus-capital.vercel.app/api/scorecard — 4 Sourcify exact-match contracts, live on-chain counts, honest `external_payers: 0`, and the exact reproduce step for each claim.
-- **No-key end-to-end:** `npm run verify-live` (91 checks) and `npm run verify-intent` (EIP-712 round-trip) reproduce the entire honesty surface against the live deployment without any secret.
+- **No-key end-to-end:** `npm run verify-live` (94 checks) and `npm run verify-intent` (EIP-712 round-trip) reproduce the entire honesty surface against the live deployment without any secret.
 - **Source, not bytecode:** every contract links to its verified, exact-match source on Sourcify.
 
 We would rather show a verifiable **0** external payers than an impressive number you cannot independently check.
@@ -305,7 +306,7 @@ Everything here settles through **@circle-fin/x402-batching**: gas-free EIP-3009
 - Public receipts — https://cronus-capital.vercel.app/api/receipts (append ?format=csv to export)
 - Live metrics — https://cronus-capital.vercel.app/api/metrics
 - Honest traction — https://cronus-capital.vercel.app/api/traction (external_payers, self_generated_*)
-- One-command replay — **npm run verify-live** (91 checks)
+- One-command replay — **npm run verify-live** (94 checks)
 
 ---
 
@@ -834,7 +835,7 @@ The agent's skin-in-the-game staking history: each conviction stake with its on-
 
 ![Proof / Verify](assets/screenshots/08-proof-verify.png)
 
-The verification hub: proof seals plus direct links to public receipts, /api/scorecard, and the one-command replay (npm run verify-live, 91 checks) so anyone can reproduce the entire honesty surface with no keys.
+The verification hub: proof seals plus direct links to public receipts, /api/scorecard, and the one-command replay (npm run verify-live, 94 checks) so anyone can reproduce the entire honesty surface with no keys.
 
 **9. Standards**
 
