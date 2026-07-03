@@ -2,6 +2,10 @@
 
 All changes verified on Arc Testnet (chainId 5042002). Self-funded demo traffic is labeled and excluded from external metrics — we never fake demand.
 
+## Live COGS payment verified (2026-07-03)
+
+Ran a real, on-chain cost-of-goods (COGS) payment on Arc testnet: Cronus paid its upstream data provider — the self-operated OKX-corroboration demo feed at 0xd6Cb...5d4d — 0.02 USDC, signed locally and confirmed on-chain (status success). Proves the pay-to-think / COGS contour works live end-to-end. The recipient is a self-operated demo feed and the payer is our own agent wallet, so this is self-generated cost, not external revenue. Reproducible tx: https://testnet.arcscan.app/tx/0x841790387300d5c437a0c2cce328c3a3ecbfb978bc4b540706f6eaff0548f75c
+
 ## Payments settlement cadence (2026-07-03)
 
 Added an honest per-day x402 settlement-volume chart to the Payments section. Volume is bucketed by day client-side from the real on-chain `/api/receipts` feed (using each receipt's `settledAt` timestamp and `amountUsdc`), rendered as hand-rolled SVG bars with summary stats (payments, total, active days, busiest day). No new serverless function and no KV access. Deliberately labeled self-generated test traffic — `external_payers` remains 0. Read-only, fail-open, additive, no logic changes. Commit `5c5a71b`.
