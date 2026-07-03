@@ -9,6 +9,7 @@ export default function PositioningStrap() {
 				<span className="cd-pos-pill">PAYS · per upstream call</span>
 				<span className="cd-pos-pill">SETTLES · on-chain USDC</span>
 				<span className="cd-pos-pill">REPORTS · live revenue</span>
+					<span className="cd-pos-pill">VERIFIABLE · every number live</span>
 			</div>
 		</div>
 	)
