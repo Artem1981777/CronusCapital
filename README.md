@@ -130,7 +130,7 @@ Cronus's premium signals are paid on-chain. To prove the paywall settles real US
 
 Snapshot (2026-07-03), straight from the Arc explorer:
 
-- **39** distinct self-test wallets (all ours, used across dev sessions)
+- **44** distinct self-test wallets (all ours, used across dev sessions)
 - **140** settled on-chain USDC payments (all self-generated test traffic)
 - **2.80 USDC** total self-generated test volume
 - **0** verified external (non-self) payers so far
@@ -331,7 +331,7 @@ Pressing **CONSULT ORACLES** calls the agent's own serverless endpoint `/api/con
     MEMORY: nearest regime Bull -> continued upward (similarity 0.70)
     CONSENSUS: SKIP - conviction 58% (below 65 bar)
 
-Note the verdict: **SKIP at 58% conviction**. Cronus abstains when its own confidence bar is not met - it is not a YES-machine. That discipline, plus the MEMORY analog stage, is what a pay-per-query data vendor (e.g. QMA) lacks: Cronus does not just sell a report - it reasons, decides, abstains, and runs the full on-chain economic loop.
+Note the verdict: **SKIP at 58% conviction**. Cronus abstains when its own confidence bar is not met - it is not a YES-machine. That discipline, plus the MEMORY analog stage, is what a typical pay-per-query data vendor lacks: Cronus does not just sell a report - it reasons, decides, abstains, and runs the full on-chain economic loop.
 
 ---
 
@@ -708,15 +708,21 @@ OKX and compares it to the `openPrice` committed at open time:
 - **Stake escrow:** `0xd6Cb6BfA4e922A30a244473ddb2fd3ABA39D5d4D`
 - **Burn sink:** `0x000000000000000000000000000000000000dEaD`
 
-### First live stake
+### Live stakes
 - Market `BTC-USDC`, verdict **YES**, conviction `0.82`
 - Committed `openPrice = 60147.1`, stake `0.091 USDC`
 - `openTx` `0x60b3bcb223ecbca4e507c52d44be70416059c3a20d1ebe098722f3ae88cf1003`
 - **Resolved 2026-06-30:** outcome **WRONG** (lastPrice 58613.7 vs openPrice 60147.1; BTC fell). Stake forfeited: 0.091 USDC burned to the dead address (provably unrecoverable).
 - `resolveTx` 0xb8b8a6a31370b645800051e66af25804199b53b7c528a417b34b7014e955a255 ([arcscan](https://testnet.arcscan.app/tx/0xb8b8a6a31370b645800051e66af25804199b53b7c528a417b34b7014e955a255))
 
+**Second stake — resolved CORRECT (first on-chain win):**
+- Market `BTC-USDC:2026-07-03`, verdict **YES** (conviction above the 0.65 open gate)
+- Committed `openPrice = 61960.4`, stake `0.084 USDC` (commitment + openTx in `/api/track-record`)
+- **Resolved 2026-07-05:** outcome **CORRECT** (lastPrice 62450.4 vs openPrice 61960.4; BTC rose). Stake **returned** to the staking wallet — nothing burned.
+- `resolveTx` 0xadfaf07b9af44b831ba970878ca53f5ca76714b8edb264d3a74eef4580a49a75 ([arcscan](https://testnet.arcscan.app/tx/0xadfaf07b9af44b831ba970878ca53f5ca76714b8edb264d3a74eef4580a49a75))
+
 ### Honesty
-`/api/track-record` reports `accuracy` strictly from on-chain-resolved positions (first resolved 2026-06-30: 1 resolved, 0 correct, 1 wrong, accuracy 0.0, 0.091 USDC slashed, realized P&L -0.091) — we
+`/api/track-record` reports `accuracy` strictly from on-chain-resolved positions (as of 2026-07-05: 2 resolved, 1 correct, 1 wrong, accuracy 0.5, 0.091 USDC slashed, 0.084 USDC returned, realized P&L -0.091 — slash-only: a wrong verdict burns the stake, a correct one returns principal) — we
 never claim a hit rate we haven't earned on-chain. At-risk and external metrics reflect
 real on-chain state only.
 
