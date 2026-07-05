@@ -888,3 +888,9 @@ The risk and security posture: risk gauges and position sizing on one side, oper
 ![System](assets/screenshots/11-system.png)
 
 The system health panel: live status of the API endpoints, data sources, and integrations, so judges can confirm the whole stack is up and reporting in real time.
+
+---
+
+## License
+
+Released under the MIT License — see [LICENSE](LICENSE).
