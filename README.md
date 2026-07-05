@@ -146,6 +146,32 @@ node scripts/audit-funders.mjs   # re-checks every payer's first USDC funding so
 
 The canonical metric is `external_payers`, which is **0** today (top-level in both `/api/traction` and `/api/leaderboard`): no verified third party has paid yet. The `self_generated_*` fields report our own on-chain test volume, labeled honestly and never counted as external. The nano-tier `unique_external_payers` reflects only the separate nano KV ledger and stays `0` until a nano-tier external payer appears, so it is not the headline number. Autonomous A2A demo volume is labeled `self_demo_calls` and never counted as external.
 
+> **Live on-chain activity — counter map (self-generated · Arc testnet · treasury `0xdc6778c5f8cc74b10aed11c48306d4cfc5737fbd`).** Every figure below is real and independently on-chain-verifiable — [scan the treasury on arcscan](https://testnet.arcscan.app/address/0xdc6778c5f8cc74b10aed11c48306d4cfc5737fbd). External payers stay **0** on purpose: this is testnet self-demo, and we never count our own volume as external demand.
+
+| Counter | Value | What it actually measures | Source |
+|---|---|---|---|
+| External payers | **0** | Verified independent third-party payers (none yet, by design) | `/api/traction` |
+| Self-generated wallets | 44 | Distinct wallets we used to drive the live paywall | `/api/traction` |
+| Self-generated txs | 96 | On-chain x402 txs from those wallets | `/api/traction` |
+| Self-generated USDC | 1.92 | USDC moved by that self-generated traffic | `/api/traction` |
+| On-chain payments (explorer scan) | 140 | All USDC transfers that hit the treasury | `/api/metrics` |
+| USDC settled (explorer scan) | 2.80 | Total USDC settled to the treasury | `/api/metrics` |
+| NANO A2A calls | 20 | Autonomous gas-free $0.001 nano calls (self-demo) | `/api/traction` |
+| Gateway-batched transfers | 132 | Real Circle Gateway settlement transfers/burns on-chain | `/api/settlements` |
+| Direct on-chain x402 anchors | 3 | Individually openable 0.02 USDC settlement txs | `/api/settlements` |
+| Cost-of-goods (COGS) | 0.02 | Self-operated demo data spend — never counted as revenue | `/api/pay-to-think` |
+
+**How to read these numbers** — they come from different live counters and measure different things (this is transparency, not a contradiction):
+- **Explorer scan** (140 / 2.80 USDC) counts *every* USDC transfer that reached the treasury address.
+- **App-tracked paid calls** (the Overview KPI cards below) count signal calls served through our own x402 paywall — a narrower operational counter than the raw explorer scan.
+- **Direct on-chain anchors** (3) are individual x402 settlement txs you can open one-by-one on arcscan.
+- **Gateway-batched** (132) reflects that Circle Gateway nets nano-payments and settles them in batches, so one nano call does not map 1:1 to one on-chain tx.
+
+![Overview — live KPI cards](assets/screenshots/overview-kpis.jpg)
+
+*Overview KPI cards from the live dashboard — app-tracked counters (paid calls, revenue, settled, net flow, data ROI, confidence). This is a self-demo operational view, distinct from the raw explorer scan above; all volume is self-generated and external payers = 0.*
+
+
 ### Verified external demand (how `external_payers` is earned, not claimed)
 
 `external_payers` is deliberately hard to inflate. A payer is counted **only if it is both (a) explicitly allow-listed** in `VERIFIED_EXTERNAL_PAYERS` **and (b) not one of our own wallets** (`selfAddresses()`), with its on-chain payment visible in `/api/receipts`. The allowlist is **empty by default, so the honest count stays `0`** until a real third party pays and is independently verified.
