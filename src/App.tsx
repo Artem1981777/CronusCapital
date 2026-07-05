@@ -268,7 +268,7 @@ export default function App() {
       })
     } else {
       result.executor.decisions.forEach((decision) => {
-        saveDecision(topic, decision, "0x" + Math.random().toString(16).slice(2))
+        saveDecision(topic, decision, "")
       })
     }
     setSessionTxCount(prev => prev + result.executor.decisions.length)

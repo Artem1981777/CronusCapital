@@ -21,6 +21,7 @@ const VAULT_ABI = [
 
 export default async function handler(req, res) {
   if (req.method !== "POST") { res.status(405).json( { ok: false, error: "method not allowed" } ); return }
+  if (process.env.ALLOW_SYNTHETIC_YIELD !== "1") { res.status(410).json({ ok: false, disabled: true, error: "synthetic yield accrual disabled; vault yield must reflect real strategy P&L" }); return }
   const pk = process.env.TREASURY_PRIVATE_KEY
   if (!pk) { res.status(500).json( { ok: false, error: "treasury not configured" } ); return }
   try {
