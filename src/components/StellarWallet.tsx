@@ -71,6 +71,7 @@ export default function StellarWallet() {
     }
     setAddr(a)
     try { window.localStorage.setItem(KEY, a) } catch {}
+    try { window.dispatchEvent(new CustomEvent("cronus:stellar-addr", { detail: a })) } catch {}
     loadBalances(a)
   }
 
@@ -81,6 +82,7 @@ export default function StellarWallet() {
     setXlm(null)
     setStatus("")
     try { window.localStorage.removeItem(KEY) } catch {}
+    try { window.dispatchEvent(new CustomEvent("cronus:stellar-addr", { detail: "" })) } catch {}
   }
 
   const wrap: any = { border: "1px solid #39e01455", borderRadius: 14, padding: "18px 16px", margin: "18px 0", background: "rgba(5,12,5,.55)" }

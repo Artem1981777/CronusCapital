@@ -95,6 +95,14 @@ export default function StellarBurn() {
       const saved = window.localStorage.getItem(KEY) || ""
       if (saved) setDest(saved)
     } catch {}
+    function onAddr(e: Event) { setDest((e as CustomEvent<string>).detail || "") }
+    function onStorage(e: StorageEvent) { if (e.key === KEY) setDest(e.newValue || "") }
+    window.addEventListener("cronus:stellar-addr", onAddr)
+    window.addEventListener("storage", onStorage)
+    return () => {
+      window.removeEventListener("cronus:stellar-addr", onAddr)
+      window.removeEventListener("storage", onStorage)
+    }
   }, [])
 
   async function bridge() {
