@@ -27,7 +27,7 @@ Traction over time, labelled as self-generated test traffic.
 
 ## 6. Vault
 On-chain vault panel plus the VAULT NAV · LIVE curve (recorded from deploy onward, never backfilled).
-![Vault](../assets/screenshots/06-vault.png)
+![Vault](../assets/screenshots/06-vault.jpg)
 
 ## 7. Track Record
 Real on-chain skin-in-the-game positions, committed (keccak256) before the outcome is known.

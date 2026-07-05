@@ -829,7 +829,7 @@ The honesty centerpiece: external_payers = 0 is shown plainly, right next to sel
 
 **6. Vault**
 
-![Vault](assets/screenshots/06-vault.png)
+![Vault](assets/screenshots/06-vault.jpg)
 
 The ERC-4626-style on-chain vault: total assets (NAV), share accounting, and the live NAV history curve that fills only with genuine on-chain readings over time — never backfilled or fabricated.
 
