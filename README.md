@@ -451,6 +451,7 @@ Who funds the treasury in production, in order of priority:
 1. **Paying customers (primary).** Other agents, trading systems, and apps pay per call over x402. At a ~4× gross margin per call (0.02 USDC in vs 0.005 USDC cost), revenue covers inference, data, infra, and gas at volume. The treasury grows from operations, not from new entrants.
 2. **Runway capital (one-time).** Ecosystem grants such as the Arc Builders Fund, plus the founder's own USDC, cover gas and data before revenue scales. Gas on Arc is USDC-denominated and sub-cent, so bootstrap cost is small.
 3. **LP vault (optional, capital-efficient).** LPs can deposit USDC as working capital and receive a share of the agent's *realized* on-chain profit — fully transparent and withdrawable. Returns are paid only from real P&L, never from new deposits.
+4. **Indexed analytics (Goldsky subgraph).** Index Arc events (x402 payments, stakes/resolutions, vault deposit/withdraw/addYield) into a Goldsky subgraph — an official Arc ecosystem indexer — for faster, more reliable analytics and webhook-driven notifications, replacing today's hand-rolled RPC/explorer polling. Additive; the direct on-chain reads remain the source of truth.
 
 There is no token sale and no "buy-in" to backfill the treasury. Sustained solvency depends on real external demand, which we do not fake; on testnet these volumes are modeled.
 
