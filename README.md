@@ -316,7 +316,8 @@ The **Overview** tab is the control panel for the whole agent business. It is ta
 4. **PREMIUM (DEMO) — $0.02 (x402)** — *demo, clearly labeled.* The same unlock flow without a live transfer, for judges who prefer not to fund a wallet. Honest: this does **not** settle on-chain and is **never** counted in traction numbers.
 5. **PAY UPSTREAM — $0.005 (agent buys data)** — *real payment.* The cost side of the business: the agent itself pays a data provider on-chain. **Look at:** NET FLOW staying positive (0.02 in vs 0.005 out) — the unit economics are real, not modeled.
 6. **DEPOSIT / WITHDRAW** — *real, vault.* Enter an amount (e.g. 0.1) and deposit into the ERC-4626-style vault. **Look at:** "Your position" and "Vault TVL" (463.61 USDC at capture) updating with real share accounting; withdraw to reverse it.
-7. **RUN AGENT STRATEGY** — *free.* Triggers a full autonomous pass (reason → act) so you can watch the agent operate on its own.
+7. **RUN AGENT STRATEGY** — *free.* Triggers one full autonomous pass (reason → act) so you can watch the agent operate on its own: it runs the live reasoning pipeline (SCOUT → DECOMPOSE → DISCOVER → DECIDE → SUFFICIENCY → EXECUTOR → MEMORY → CONSENSUS) on live BTC data, then runs its guardrail-checked treasury executor. **Look at:** the decision log streaming in, ending with either **ACT: PAYOUT** (a real CCTP burn to Stellar, with a VIEW TX link) or **ACT: HOLD** — the agent withholds funds when the guardrail policy (conviction/threshold/daily cap) isn't cleared. A HOLD is honesty by design, not a failure.
+
 8. **RISK ADJUST** — *free.* Cycles the risk regime; watch the risk gauges and position sizing respond.
 9. **VIEW ON ARC ↗** — opens the agent/treasury address on the Arc explorer so you can audit every transfer yourself.
 10. **+ DEPLOY NEW AGENT** — shows the multi-agent surface for deploying another agent instance.
