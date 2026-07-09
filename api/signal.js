@@ -116,6 +116,19 @@ async function generateReport(host, topic, instId) {
   return { ok: false, verdict: "SKIP", conviction: 0, trace: ["oracle unavailable"] }
 }
 
+const REVENUE_CREDIT_USDC = process.env.SIGNAL_REVENUE_CREDIT_USDC || String(Number(PRICE) / 1e6) // real x402 revenue credited to payout available per fresh verified payment
+
+async function creditPayoutAvailable(usdc) {
+  const base = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL
+  const token = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN
+  if (!base || !token) return null
+  try {
+    const r = await fetch(base, { method: "POST", headers: { Authorization: "Bearer " + token, "content-type": "application/json" }, body: JSON.stringify(["INCRBYFLOAT", "cronus:payout:available", String(usdc)]) })
+    const j = await r.json()
+    return j && j.result
+  } catch (e) { return null }
+}
+
 export default async function handler(req, res) {
   const topic = String((req.query && req.query.topic) || "BTC-USDC momentum")
   const instId = String((req.query && req.query.instId) || "BTC-USDC")
@@ -138,6 +151,8 @@ export default async function handler(req, res) {
     res.status(402).json({ ...requirements(resource), error: "payment proof already consumed (one-time-use)", txHash })
     return
   }
+  // Credit real, on-chain-verified, one-time x402 revenue into the payout available pool (demo calls never reach here).
+  await creditPayoutAvailable(REVENUE_CREDIT_USDC).catch(function () { return null })
   const report = await generateReport(host, topic, instId)
   const settledAt = Date.now()
   const commitment = keccak256(toBytes("CRONUS-SIGNAL|" + txHash + "|" + topic + "|" + (report.verdict || "SKIP") + "|" + (report.conviction || 0) + "|" + settledAt))
