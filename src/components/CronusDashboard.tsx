@@ -435,24 +435,54 @@ export function CronusDashboard() {
 	// eslint-disable-next-line react-hooks/exhaustive-deps -- refreshVault only closes over address and publicClient, which are the listed deps
 	}, [address, publicClient])
 	const runStrategy = async () => {
+    if (running) return
     setYieldBusy(true); setYieldMsg(""); setYieldTx("")
+    setRunning(true); setTrace([]); setConsultMsg(""); setConsultPhase("scout")
+    const push = (line: string) => setTrace((t) => [...t, line])
+    const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
+    const instId = "BTC-USDC"
+    let verdict = "SKIP", conv = 0
+    push("AUTONOMOUS PASS - agent reasons, then acts on its own")
+    push("SCOUT - querying live oracle (" + instId + ") + LLM...")
     try {
+      const res = await fetch("/api/consult?instId=" + instId + "&topic=" + encodeURIComponent(instId + " momentum"))
+      const data = await res.json()
+      if (data && data.price != null) push("LIVE - " + instId + " = " + data.price + (data.changePct != null ? " (" + Number(data.changePct).toFixed(2) + "% 24h)" : ""))
+      const lines = (data && Array.isArray(data.trace)) ? data.trace : []
+      setConsultPhase("analyst")
+      for (let k = 0; k < lines.length; k++) {
+        if (k === Math.floor(lines.length * 0.7)) setConsultPhase("executor")
+        await sleep(340)
+        push(" - " + lines[k])
+      }
+      const an = data && data.analog
+      if (an && an.regime) { await sleep(340); push("MEMORY - nearest regime: " + an.regime + (an.outcome ? " -> " + an.outcome : "") + (an.similarity != null ? " (similarity " + Number(an.similarity).toFixed(2) + ")" : "")) }
+      verdict = (data && data.verdict) ? data.verdict : "SKIP"
+      conv = (data && typeof data.conviction === "number") ? data.conviction : 0
+      setBoost(Math.max(0, Math.min(15, Math.round(conv / 7))))
+      await sleep(240)
+      push("CONSENSUS - " + verdict + " - conviction " + conv + "% (live LLM)")
+    } catch (e) { push("reason step failed - " + String((e as Error).message || e).slice(0, 80)) }
+    try {
+      push("EXECUTOR - autonomous treasury pass (guardrail-checked)...")
       const r = await fetch("/api/agent-payout?action=execute", { method: "POST" })
       const j = await r.json()
       if (r.ok && j && j.decision) {
         const dec = j.decision
         if (j.executed && j.arcBurnTx) {
           setYieldTx(j.arcBurnTx)
-          setYieldMsg("⚙ Autonomous executor ran · PAYOUT " + (dec.amount || "") + " USDC → CCTP burn to Stellar · " + (dec.reason || ""))
+          push("ACT - PAYOUT " + (dec.amount || "") + " USDC -> CCTP burn to Stellar")
+          setYieldMsg("⚙ Autonomous pass complete · reason " + verdict + " (" + conv + "%) → act PAYOUT " + (dec.amount || "") + " USDC via CCTP")
         } else {
-          setYieldMsg("⚙ Autonomous executor ran · HOLD · guardrail policy: " + (dec.reason || "below threshold") + (j.blockedBy ? " (" + j.blockedBy + ")" : ""))
+          push("ACT - HOLD (" + (dec.reason || "policy threshold") + ")")
+          setYieldMsg("⚙ Autonomous pass complete · reason " + verdict + " (" + conv + "%) → act HOLD · " + (dec.reason || "guardrail policy") + (j.blockedBy ? " (" + j.blockedBy + ")" : ""))
         }
         await refreshVault()
       } else {
         setYieldMsg("Strategy run failed: " + ((j && (j.detail || j.error)) || ("HTTP " + r.status)))
       }
     } catch (e) { setYieldMsg("Strategy run failed: " + String((e as Error).message || e)) }
-    finally { setYieldBusy(false) }
+    finally { setConsultPhase("idle"); setRunning(false); setYieldBusy(false) }
   }
 
   const payX402 = async () => {
