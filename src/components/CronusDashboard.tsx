@@ -435,21 +435,27 @@ export function CronusDashboard() {
 	// eslint-disable-next-line react-hooks/exhaustive-deps -- refreshVault only closes over address and publicClient, which are the listed deps
 	}, [address, publicClient])
 	const runStrategy = async () => {
-		setYieldBusy(true); setYieldMsg(""); setYieldTx("")
-		try {
-			const r = await fetch("/api/accrue-yield", { method: "POST" })
-			const j = await r.json()
-			if (j && j.ok) {
-				if (j.hash) setYieldTx(j.hash)
-				setYieldMsg("📈 Executor settled a trade · realized +" + (j.amount || "") + " USDC P&L → vault")
-				await refreshVault()
-			} else {
-				setYieldMsg("Strategy run failed: " + ((j && j.error) || ("HTTP " + r.status)))
-			}
-		} catch (e) { setYieldMsg("Strategy run failed: " + String((e as Error).message || e)) }
-		finally { setYieldBusy(false) }
-	}
-		const payX402 = async () => {
+    setYieldBusy(true); setYieldMsg(""); setYieldTx("")
+    try {
+      const r = await fetch("/api/agent-payout?action=execute", { method: "POST" })
+      const j = await r.json()
+      if (r.ok && j && j.decision) {
+        const dec = j.decision
+        if (j.executed && j.arcBurnTx) {
+          setYieldTx(j.arcBurnTx)
+          setYieldMsg("⚙ Autonomous executor ran · PAYOUT " + (dec.amount || "") + " USDC → CCTP burn to Stellar · " + (dec.reason || ""))
+        } else {
+          setYieldMsg("⚙ Autonomous executor ran · HOLD · guardrail policy: " + (dec.reason || "below threshold") + (j.blockedBy ? " (" + j.blockedBy + ")" : ""))
+        }
+        await refreshVault()
+      } else {
+        setYieldMsg("Strategy run failed: " + ((j && (j.detail || j.error)) || ("HTTP " + r.status)))
+      }
+    } catch (e) { setYieldMsg("Strategy run failed: " + String((e as Error).message || e)) }
+    finally { setYieldBusy(false) }
+  }
+
+  const payX402 = async () => {
 		txMeta.current = { topic: "x402 revenue", decision: "x402 payment - +0.02 USDC received on Arc", agentId: "executor" }
 		if (!isConnected || !address) { setWalletOpen(true); return }
 		setX402Busy(true); setX402Msg(""); setX402Tx("")
