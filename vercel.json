@@ -1,6 +1,13 @@
 {
   "rewrites": [
-    { "source": "/api/pay-to-think", "destination": "/api/info?kind=pay-to-think" },
+    {
+      "source": "/api/signal-x402",
+      "destination": "/api/info?kind=signal-x402"
+    },
+    {
+      "source": "/api/pay-to-think",
+      "destination": "/api/info?kind=pay-to-think"
+    },
     {
       "source": "/api/trace",
       "destination": "/api/info?kind=trace"
