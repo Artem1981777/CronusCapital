@@ -37,7 +37,18 @@ export default function handler(req, res) {
         "HTTP 200 -> { paid, payment, commitment, report }"
       ],
       verification: "on-chain via JSON-RPC: USDC transfer >= price to payTo, tx success, within freshness window",
-    }],
+    },{
+  resource: origin + "/api/signal-x402",
+  method: "GET",
+  title: "Verifiable +EV signal (X Layer / USDT0)",
+  description: "Pay per call in USDT0 on OKX X Layer eip155:196. API-key-free on-chain verification.",
+  price: { amount: process.env.OKX_SIGNAL_PRICE||"20000", display:"0.02 USDT0", asset: process.env.XLAYER_USDT0_ADDRESS||"0x779Ded0c9e1022225f8E0630b35a9b54bE713736", decimals:6, symbol:"USDT0" },
+  scheme: "exact",
+  payTo: process.env.OKX_ASP_PAYTO||"0xfdd1a3f50dfe522dd430a574d652dd84137ffe8b",
+  network: { name:"eip155:196", chainId:196, symbol:"USDT0" },
+  builderCode: process.env.OKX_BUILDER_CODE||"0m014j21zgfw1r53",
+  flow: ["GET /api/signal-x402 -> 402","pay USDT0 on X Layer (chainId 196)","retry with X-PAYMENT: txHash","200 OK"],
+}],
     agentHint: "To buy: GET the resource, read accepts[0], pay maxAmountRequired USDC to payTo on the given network, then retry the GET with header X-PAYMENT set to your txHash.",
   })
 }
