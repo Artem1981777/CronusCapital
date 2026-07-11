@@ -896,3 +896,37 @@ The system health panel: live status of the API endpoints, data sources, and int
 ## License
 
 Released under the MIT License — see [LICENSE](LICENSE).
+
+---
+
+## 🔷 OKX X Layer Integration (Build X Hackathon)
+
+Cronus Capital supports dual-protocol x402 payment gating:
+
+### X Layer Endpoint
+- **URL:** `https://cronus-capital.vercel.app/api/signal-x402`
+- **Network:** X Layer (`eip155:196`)
+- **Token:** USDT0 (`0x779Ded0c9e1022225f8E0630b35a9b54bE713736`)
+- **Price:** 0.02 USDT0 (20000 atomic units)
+- **Builder Code:** `0m014j21zgfw1r53`
+- **payTo:** `0xfdd1a3f50dfe522dd430a574d652dd84137ffe8b`
+
+### How it works
+1. Client calls `/api/signal-x402`
+2. Server returns `HTTP 402` with x402v1 payload
+3. Client pays 0.02 USDT0 on X Layer via EIP-3009
+4. Client retries with `X-PAYMENT: <txHash>` header
+5. Server verifies on-chain and returns signal data
+
+### Verified by OKX AI Agent
+Endpoint verified via Purr-Fect Claw (OKX AI) — all x402 fields confirmed correct.
+
+### MCP Tool
+`cronus_signal_xlayer` — available in `cronus-mcp/index.mjs`
+
+---
+
+## ⚡ Arc / Lepton Integration
+- **URL:** `https://cronus-capital.vercel.app/api/signal`
+- **Network:** `arc-testnet`
+- **Token:** USDC
