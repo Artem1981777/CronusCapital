@@ -59,9 +59,26 @@ const TOOLS = [
       },
     },
   },
+  {
+    name: "cronus_signal_xlayer",
+    description: "Cronus premium trading signal on OKX X Layer (eip155:196), paid via x402 in USDT0 (~0.02 USDT0). API-key-free on-chain verification. Returns 402 payment quote without payment, or signal report with X-PAYMENT txHash.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        instId: { type: "string", description: "Instrument id, e.g. BTC-USDC. Defaults to BTC-USDC." },
+        topic:  { type: "string", description: "Market topic, e.g. 'BTC-USDC momentum'." },
+      },
+    },
+  },
 ];
 
 async function callTool(name, instId) {
+  if (name === "cronus_signal_xlayer") {
+    const topic = typeof args.topic === "string" && args.topic ? args.topic : instId + " momentum";
+    const path = "/api/signal-x402?topic=" + encodeURIComponent(topic) + "&instId=" + encodeURIComponent(instId);
+    const r = await apiGet(path);
+    return { endpoint: path, httpStatus: r.status, payment_required: r.status === 402, network: "eip155:196", asset: "USDT0", builderCode: "0m014j21zgfw1r53", quote: r.body };
+  }
   if (name === "cronus_pay" || name === "pay") {
     const path = "/api/signal?instId=" + encodeURIComponent(instId);
     const r = await apiGet(path);
