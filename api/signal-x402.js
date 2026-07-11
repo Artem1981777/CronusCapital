@@ -90,7 +90,6 @@ export default async function handler(req, res) {
   const paymentRequirements = xlayerAccept(resource)
   const facBody = { x402Version: X402_VERSION, paymentPayload: payload, paymentRequirements }
 
-  // 1) verify
   let ver
   try { ver = await okxCall("/verify", facBody) }
   catch (e) { res.status(502).json({ error: "okx verify failed", detail: String((e && e.message) || e) }); return }
@@ -98,7 +97,6 @@ export default async function handler(req, res) {
   const isValid = (typeof vb.isValid !== "undefined") ? vb.isValid : vb.valid
   if (!isValid) { res.status(402).json({ ...requirements(resource), error: "okx payment not valid: " + (vb.invalidReason || vb.reason || "unknown") }); return }
 
-  // 2) settle
   let set
   try { set = await okxCall("/settle", facBody) }
   catch (e) { res.status(502).json({ error: "okx settle failed", detail: String((e && e.message) || e) }); return }
