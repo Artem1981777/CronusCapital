@@ -303,7 +303,7 @@ export default function App() {
             <div style={{ color: "#39e014", fontSize: "12px", letterSpacing: "2px", fontFamily: "Cinzel, serif", fontWeight: 700 }}>SESSION TXS: {sessionTxCount}</div>
             <div style={{ color: "#39e01444", fontSize: "10px", letterSpacing: "2px", marginTop: "2px", fontFamily: "Cinzel, serif" }}>~$0.01 PER TX · USDC</div>
           </div>
-          {!V2 && <WalletButton />}
+          
         </div>
       </div>
       <div style={{ textAlign: "center", background: "#050805cc", padding: "22px 32px 18px", borderBottom: "1px solid #39e01422" }}>
