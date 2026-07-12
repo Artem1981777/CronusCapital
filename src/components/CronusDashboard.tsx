@@ -641,8 +641,6 @@ export function CronusDashboard() {
 					{agents.map((a) => <AgentRow key={a.id} a={a} />)}
 					{extraAgents.map((a) => <AgentRow key={a.id} a={a} />)}
 				</div>
-					<MarketRadar blips={blips} />
-				</div>
 				<div className="cd-panel cd-actions">
 					<div className="cd-panel-title">⚡ ORACLE ACTIONS</div>
 						<NanoHeadline />
