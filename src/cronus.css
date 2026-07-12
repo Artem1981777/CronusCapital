@@ -1142,3 +1142,33 @@ html, body { background: linear-gradient(rgba(0,0,0,0.12), rgba(0,0,0,0.22)), ur
     width: 100%;
   }
 }
+
+/* ===== RADAR FORCE SHOW — overrides all previous ===== */
+.cd-kpi-radar-row {
+  display: flex !important;
+  flex-direction: column !important;
+  width: 100% !important;
+  gap: 12px !important;
+}
+.cd-kpi-radar-row .cd-panel.cd-radar-panel {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  min-height: 280px !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  overflow: visible !important;
+}
+.cd-kpi-radar-row .cd-radar {
+  display: block !important;
+  position: relative !important;
+  width: 260px !important;
+  height: 260px !important;
+  max-width: 260px !important;
+  max-height: 260px !important;
+  aspect-ratio: 1 / 1 !important;
+  visibility: visible !important;
+  overflow: hidden !important;
+}
