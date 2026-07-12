@@ -1262,3 +1262,13 @@ html, body { background: linear-gradient(rgba(0,0,0,0.12), rgba(0,0,0,0.22)), ur
   overflow: visible !important;
   line-height: 1.3 !important;
 }
+
+/* ===== SIDEBAR ITEMS — полные названия ===== */
+.cd-sb-item {
+  font-size: 11px !important;
+  letter-spacing: 0 !important;
+  padding: 10px 8px !important;
+}
+.cd-sb-nav {
+  padding: 0 8px !important;
+}
