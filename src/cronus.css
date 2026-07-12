@@ -1272,3 +1272,22 @@ html, body { background: linear-gradient(rgba(0,0,0,0.12), rgba(0,0,0,0.22)), ur
 .cd-sb-nav {
   padding: 0 8px !important;
 }
+
+/* ===== SIDEBAR — компактный шрифт для пунктов ===== */
+.cd-sb-item {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
+  font-size: 12px !important;
+  letter-spacing: 0.8px !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  max-width: 100% !important;
+}
+.cd-sb {
+  width: 260px !important;
+  overflow: hidden !important;
+}
+.cd-sb-nav {
+  padding: 0 6px !important;
+  overflow: hidden !important;
+}
