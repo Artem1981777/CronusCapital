@@ -1172,3 +1172,30 @@ html, body { background: linear-gradient(rgba(0,0,0,0.12), rgba(0,0,0,0.22)), ur
   visibility: visible !important;
   overflow: hidden !important;
 }
+
+/* ===== FIX KPI HORIZONTAL + AGENT OVERLAP ===== */
+
+/* 1. KPI карточки обратно горизонтально */
+.cd-kpi-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)) !important;
+  gap: 8px !important;
+  width: 100% !important;
+}
+
+/* 2. cd-mid — агенты и actions рядом, без overlap */
+.cd-mid {
+  display: grid !important;
+  grid-template-columns: 1fr 2fr !important;
+  gap: 14px !important;
+  align-items: start !important;
+  width: 100% !important;
+  margin-top: 12px !important;
+}
+
+/* 3. На мобильном агенты в колонку */
+@media (max-width: 700px) {
+  .cd-mid {
+    grid-template-columns: 1fr !important;
+  }
+}
