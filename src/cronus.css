@@ -1249,3 +1249,7 @@ html, body { background: linear-gradient(rgba(0,0,0,0.12), rgba(0,0,0,0.22)), ur
 .cd-sb {
   width: 310px !important;
 }
+
+/* ===== SIDEBAR FINAL WIDTH ===== */
+.cd-sb { width: 340px !important; }
+.cd-sb-item { overflow: visible !important; }
