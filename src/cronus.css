@@ -1232,3 +1232,8 @@ html, body { background: linear-gradient(rgba(0,0,0,0.12), rgba(0,0,0,0.22)), ur
   align-self: flex-start !important;
   margin-left: auto !important;
 }
+
+/* ===== SIDEBAR WIDER — текст не обрезается ===== */
+.cd-sb {
+  width: 300px !important;
+}
