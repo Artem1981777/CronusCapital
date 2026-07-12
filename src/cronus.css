@@ -894,3 +894,103 @@ html, body { background: linear-gradient(rgba(0,0,0,0.12), rgba(0,0,0,0.22)), ur
 
 /* Oracle Actions: убираем space-between, кнопки flex-start чтобы не тянуло */
 .cd-panel.cd-actions { justify-content: flex-start !important; gap: 7px !important; }
+
+/* ===== FILL v4 — timeline + wide confidence ===== */
+
+/* 1. CONFIDENCE CARD: занять всю оставшуюся ширину строки, кольцо слева */
+.cd-kpi-grid {
+  grid-template-columns: repeat(3, 1fr) repeat(1, 1fr) !important;
+}
+.cd-conf-card {
+  grid-column: span 2 !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 28px !important;
+  padding: 20px 24px !important;
+  justify-content: flex-start !important;
+}
+.cd-conf-card .cd-ring-wrap {
+  flex-shrink: 0;
+  width: 140px !important;
+  height: 140px !important;
+}
+/* Блок подписей справа от кольца */
+.cd-conf-card::after {
+  content: "ORACLE CONFIDENCE\A━━━━━━━━━━━━━━━━━\A✦  Active Signals\A✦  Cooperative Mode\A✦  Not Live Trades";
+  white-space: pre;
+  font-family: "Cinzel", serif;
+  font-size: 11px;
+  letter-spacing: 0.10em;
+  line-height: 2.0;
+  color: rgba(57,224,20,0.65);
+  flex: 1;
+}
+
+/* 2. AGENT PIPELINE TIMELINE: вертикальная линия между агентами */
+.cd-panel.cd-agents {
+  position: relative !important;
+}
+.cd-panel.cd-agents::before {
+  content: "";
+  position: absolute;
+  left: 33px;
+  top: 80px;
+  bottom: 80px;
+  width: 2px;
+  background: linear-gradient(
+    180deg,
+    rgba(57,224,20,0.7) 0%,
+    rgba(201,168,76,0.5) 50%,
+    rgba(57,224,20,0.7) 100%
+  );
+  border-radius: 2px;
+  z-index: 0;
+}
+/* Агентские узлы выше линии */
+.cd-panel.cd-agents .cd-agent {
+  position: relative;
+  z-index: 1;
+  flex: 1 !important;
+  min-height: 0 !important;
+  padding: 16px 14px !important;
+  background: rgba(4,10,6,0.55) !important;
+}
+/* Точка-коннектор на линии */
+.cd-panel.cd-agents .cd-agent::before {
+  content: "◆";
+  position: absolute;
+  left: -23px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 8px;
+  color: var(--cd-green);
+  text-shadow: 0 0 6px rgba(57,224,20,0.8);
+  z-index: 2;
+}
+
+/* 3. РАДАР: максимально заполнить панель */
+.cd-panel.cd-radar-panel {
+  justify-content: center !important;
+  align-items: center !important;
+}
+.cd-radar {
+  width: 92% !important;
+  max-width: 92% !important;
+  flex-shrink: 0;
+}
+
+/* 4. KPI строка — равная высота всех карточек */
+.cd-kpi-grid > .cd-card {
+  min-height: 115px !important;
+}
+
+/* Мобильный: conf-card на всю ширину */
+@media (max-width: 640px) {
+  .cd-conf-card {
+    grid-column: 1 / -1 !important;
+    flex-direction: column !important;
+  }
+  .cd-kpi-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
