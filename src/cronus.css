@@ -994,3 +994,45 @@ html, body { background: linear-gradient(rgba(0,0,0,0.12), rgba(0,0,0,0.22)), ur
     grid-template-columns: repeat(2, 1fr) !important;
   }
 }
+
+/* ===== FILL v5 — ФИНАЛЬНОЕ ИСПРАВЛЕНИЕ ===== */
+
+/* ГЛАВНЫЙ ФИК: панели cd-mid НЕ растягиваются по высоте Oracle Actions */
+.cd-mid {
+  align-items: flex-start !important;
+}
+
+/* Агенты — нормальный размер без растяжки */
+.cd-panel.cd-agents .cd-agent {
+  flex: 0 0 auto !important;
+  padding: 14px 14px !important;
+  min-height: 64px !important;
+}
+
+/* Radar panel — высота по контенту */
+.cd-panel.cd-radar-panel {
+  min-height: unset !important;
+}
+
+/* ОТКАТ v4 confidence — убираем span:2 который сломал KPI ряд */
+.cd-conf-card {
+  grid-column: span 1 !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  padding: 16px 18px !important;
+}
+.cd-conf-card::after {
+  content: none !important;
+}
+
+/* Confidence card — нормальный размер кольца */
+.cd-conf-card .cd-ring-wrap,
+.cd-ring-wrap {
+  width: 130px !important;
+  height: 130px !important;
+}
+
+/* KPI grid — стабильная сетка */
+.cd-kpi-grid {
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)) !important;
+}
