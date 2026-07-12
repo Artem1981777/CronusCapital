@@ -620,7 +620,7 @@ export function CronusDashboard() {
 					{kpis.map((k) => <KpiCard key={k.id} kpi={k} />)}
 			  <div className="cd-panel cd-radar-panel">
 			    <div className="cd-panel-title">𓂀 MARKET INTELLIGENCE</div>
-			    <MarketRadar blips=blips />
+			    <MarketRadar blips={blips} />
 			  </div>
 			</div>
 					<div className="cd-card cd-accent-green cd-conf-card">
@@ -642,7 +642,6 @@ export function CronusDashboard() {
 					{extraAgents.map((a) => <AgentRow key={a.id} a={a} />)}
 				</div>
 
-					<MarketRadar blips={blips} />
 				</div>
 				<div className="cd-panel cd-actions">
 					<div className="cd-panel-title">⚡ ORACLE ACTIONS</div>
