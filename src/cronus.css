@@ -1291,3 +1291,6 @@ html, body { background: linear-gradient(rgba(0,0,0,0.12), rgba(0,0,0,0.22)), ur
   padding: 0 6px !important;
   overflow: hidden !important;
 }
+
+/* ===== SIDEBAR WIDER ===== */
+.cd-sb { width: 310px !important; }
