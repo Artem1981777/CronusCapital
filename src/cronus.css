@@ -1118,3 +1118,27 @@ html, body { background: linear-gradient(rgba(0,0,0,0.12), rgba(0,0,0,0.22)), ur
     flex-direction: column !important;
   }
 }
+
+/* ===== KPI + RADAR рядом ===== */
+.cd-kpi-radar-row {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+.cd-kpi-radar-row > .cd-grid {
+  flex: 1;
+  min-width: 0;
+}
+.cd-kpi-radar-row > .cd-panel.cd-radar-panel {
+  width: 260px;
+  flex-shrink: 0;
+  min-height: 200px;
+}
+@media (max-width: 700px) {
+  .cd-kpi-radar-row {
+    flex-direction: column;
+  }
+  .cd-kpi-radar-row > .cd-panel.cd-radar-panel {
+    width: 100%;
+  }
+}

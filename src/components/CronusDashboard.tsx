@@ -614,9 +614,15 @@ export function CronusDashboard() {
 				<button className={"cd-ankh" + (isConnected ? " cd-ankh-on" : "")} title="Connect Wallet" onClick={() => setWalletOpen(true)}>{walletLabel}</button>
 			</header>
 
+			<div className="cd-kpi-radar-row">
 			{ready ? (
 				<div className="cd-grid cd-kpi-grid">
 					{kpis.map((k) => <KpiCard key={k.id} kpi={k} />)}
+			  <div className="cd-panel cd-radar-panel">
+			    <div className="cd-panel-title">𓂀 MARKET INTELLIGENCE</div>
+			    <MarketRadar blips=blips />
+			  </div>
+			</div>
 					<div className="cd-card cd-accent-green cd-conf-card">
 						<div className="cd-card-label">Confidence Score</div>
 						<ConfidenceRing value={confidence} />
@@ -635,8 +641,7 @@ export function CronusDashboard() {
 					{agents.map((a) => <AgentRow key={a.id} a={a} />)}
 					{extraAgents.map((a) => <AgentRow key={a.id} a={a} />)}
 				</div>
-				<div className="cd-panel cd-radar-panel">
-					<div className="cd-panel-title">𓂀 MARKET INTELLIGENCE</div>
+
 					<MarketRadar blips={blips} />
 				</div>
 				<div className="cd-panel cd-actions">
