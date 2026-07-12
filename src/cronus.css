@@ -782,3 +782,38 @@ html, body { background: linear-gradient(rgba(0,0,0,0.12), rgba(0,0,0,0.22)), ur
 .cd-gr-desc { font-family: "Cinzel", serif; font-size: 9px; line-height: 1.5; color: #d7ffd0; opacity: 0.8; margin-top: 6px; }
 /* ===== Adjudication receipt (additive) ===== */
 .cd-adj-links { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px; }
+
+/* ===== DESKTOP LAYOUT POLISH — additive only ===== */
+
+@media (min-width: 1024px) {
+  .cd-root { max-width: 1440px; padding: 24px 36px; }
+  .cd-kpi-grid { grid-template-columns: repeat(3, 1fr) 200px; align-items: stretch; }
+  .cd-conf-card { min-height: 140px; }
+  .cd-mid { grid-template-columns: 1fr 300px 340px; align-items: stretch; }
+  .cd-radar { max-width: 260px; width: 100%; }
+  .cd-radar-panel { align-items: center; justify-content: space-between; }
+  .cd-actions { justify-content: flex-start; }
+  .cd-roadmap-grid { grid-template-columns: repeat(4, 1fr); }
+  .cd-nano-grid { grid-template-columns: repeat(4, 1fr); }
+  .cd-feed-wrap { padding: 20px 28px; }
+  .cd-pm-contracts { grid-template-columns: repeat(3, 1fr); }
+  .cd-rg-grid { grid-template-columns: repeat(4, 1fr); }
+  .cd-mp-grid { grid-template-columns: repeat(4, 1fr); }
+  .cd-tk-grid { grid-template-columns: repeat(4, 1fr); }
+  .cd-panel.cd-radar-panel { min-height: 320px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; }
+  .cd-radar-panel .cd-panel-title { align-self: flex-start; width: 100%; }
+  .cd-panel.cd-agents { min-height: 320px; }
+  .cd-panel.cd-actions { min-height: 320px; gap: 8px; }
+}
+
+@media (min-width: 1280px) {
+  .cd-kpi-grid { grid-template-columns: repeat(4, 1fr) 200px; }
+  .cd-mid { grid-template-columns: 1fr 320px 360px; }
+  .cd-radar { max-width: 280px; }
+}
+
+@media (min-width: 1600px) {
+  .cd-root { max-width: 1600px; padding: 28px 48px; }
+  .cd-kpi-grid { grid-template-columns: repeat(6, 1fr); }
+  .cd-mid { grid-template-columns: 1fr 360px 400px; }
+}
