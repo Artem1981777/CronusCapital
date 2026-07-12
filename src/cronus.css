@@ -817,3 +817,44 @@ html, body { background: linear-gradient(rgba(0,0,0,0.12), rgba(0,0,0,0.22)), ur
   .cd-kpi-grid { grid-template-columns: repeat(6, 1fr); }
   .cd-mid { grid-template-columns: 1fr 360px 400px; }
 }
+
+/* ===== FILL EMPTY SPACE — v2 ===== */
+
+/* 1. AGENT PIPELINE: агенты растягиваются на всю высоту */
+.cd-panel.cd-agents { justify-content: space-between; }
+.cd-panel.cd-agents .cd-agent { flex: 1; min-height: 56px; padding: 14px 12px; align-items: center; }
+.cd-panel.cd-agents .cd-agent-glyph { font-size: 32px; width: 40px; }
+.cd-panel.cd-agents .cd-agent-name { font-size: 14px; }
+.cd-panel.cd-agents .cd-agent-role { font-size: 11px; margin-top: 3px; }
+.cd-panel.cd-agents .cd-agent-state { font-size: 11px; }
+
+/* 2. RADAR: большой, заполняет панель */
+.cd-radar { max-width: none !important; width: min(90%, 340px) !important; margin: 0 auto; }
+.cd-panel.cd-radar-panel { justify-content: center; gap: 18px; }
+.cd-radar-panel > * { width: 100%; }
+
+/* 3. KPI КАРТОЧКИ: выше, значения крупнее */
+.cd-card { padding: 20px 20px !important; min-height: 110px; display: flex; flex-direction: column; justify-content: space-between; }
+.cd-card-value { font-size: clamp(26px, 4.8vw, 38px) !important; }
+.cd-bar { margin-top: auto; }
+.cd-kpi-grid { align-items: stretch; }
+.cd-kpi-grid > .cd-card, .cd-kpi-grid > .cd-conf-card { min-height: 120px; }
+
+/* 4. CONFIDENCE RING: кольцо крупнее */
+.cd-ring-wrap { width: 148px !important; height: 148px !important; }
+.cd-ring-num { font-size: 36px !important; }
+.cd-conf-card { padding: 24px 18px !important; justify-content: center; gap: 12px; }
+
+/* 5. ORACLE ACTIONS: кнопки равномерно */
+.cd-panel.cd-actions { justify-content: space-between; gap: 6px; }
+.cd-panel.cd-actions .cd-btn { padding: 14px 16px; font-size: 13px; }
+
+/* 6. Все cd-mid панели — минимальная высота */
+.cd-mid > .cd-panel { min-height: 380px; }
+
+/* 7. Vault: input растягивается */
+.cd-vault-input { flex: 1; width: auto; min-width: 70px; }
+.cd-vault-stats { font-size: 13px; padding: 6px 0; }
+
+/* 8. Panel title крупнее */
+.cd-panel-title { font-size: 13px !important; margin-bottom: 4px; }
