@@ -1036,3 +1036,85 @@ html, body { background: linear-gradient(rgba(0,0,0,0.12), rgba(0,0,0,0.22)), ur
 .cd-kpi-grid {
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)) !important;
 }
+
+/* ===== v6 — ЕДИНЫЙ СТИЛЬ: всё в одну колонку как нижние секции ===== */
+
+/* cd-mid: одна колонка, каждая панель на всю ширину */
+.cd-mid {
+  grid-template-columns: 1fr !important;
+  align-items: stretch !important;
+}
+
+/* Панели внутри cd-mid — стиль как у нижних секций */
+.cd-mid > .cd-panel {
+  min-height: unset !important;
+  width: 100% !important;
+}
+
+/* Oracle Actions кнопки — в 2 колонки (иначе растянется в 1 длинный столбец) */
+.cd-panel.cd-actions {
+  display: grid !important;
+  grid-template-columns: repeat(2, 1fr) !important;
+  gap: 8px !important;
+}
+.cd-panel.cd-actions .cd-panel-title {
+  grid-column: 1 / -1;
+}
+.cd-panel.cd-actions .cd-aid,
+.cd-panel.cd-actions .cd-pos,
+.cd-panel.cd-actions .cd-x402,
+.cd-panel.cd-actions .cd-claim-msg,
+.cd-panel.cd-actions .cd-vault {
+  grid-column: 1 / -1;
+}
+
+/* Agent Pipeline — агенты в ряд горизонтально */
+.cd-panel.cd-agents .cd-agent {
+  flex: 0 0 auto !important;
+}
+.cd-panel.cd-agents {
+  flex-direction: row !important;
+  flex-wrap: wrap !important;
+  gap: 12px !important;
+  align-items: stretch !important;
+}
+.cd-panel.cd-agents > .cd-panel-title {
+  flex: 0 0 100% !important;
+}
+.cd-panel.cd-agents .cd-agent {
+  flex: 1 1 220px !important;
+  min-height: 80px !important;
+}
+
+/* Радар + контент рядом */
+.cd-panel.cd-radar-panel {
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 24px !important;
+  flex-wrap: wrap !important;
+}
+.cd-panel.cd-radar-panel > .cd-panel-title {
+  flex: 0 0 100% !important;
+}
+.cd-radar {
+  flex: 0 0 auto !important;
+  width: min(280px, 45%) !important;
+  max-width: min(280px, 45%) !important;
+}
+
+/* На десктопе cd-mid обратно 3 колонки */
+@media (min-width: 1024px) {
+  .cd-mid {
+    grid-template-columns: 1fr 1fr 1.2fr !important;
+  }
+  .cd-panel.cd-agents {
+    flex-direction: column !important;
+  }
+  .cd-panel.cd-radar-panel {
+    flex-direction: column !important;
+  }
+  .cd-panel.cd-actions {
+    display: flex !important;
+    flex-direction: column !important;
+  }
+}
