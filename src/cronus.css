@@ -858,3 +858,39 @@ html, body { background: linear-gradient(rgba(0,0,0,0.12), rgba(0,0,0,0.22)), ur
 
 /* 8. Panel title крупнее */
 .cd-panel-title { font-size: 13px !important; margin-bottom: 4px; }
+
+/* ===== FILL EMPTY SPACE — v3 (правильный подход) ===== */
+
+/* ОТМЕНЯЕМ space-between из v2 (создавал пустые промежутки) */
+.cd-panel.cd-agents { justify-content: flex-start !important; }
+
+/* АГЕНТЫ: каждая карточка растягивается чтобы заполнить панель */
+.cd-panel.cd-agents .cd-agent {
+  flex: 1 !important;
+  min-height: 0 !important;
+  padding: 18px 16px !important;
+}
+.cd-panel.cd-agents .cd-agent-glyph { font-size: 34px !important; }
+.cd-panel.cd-agents .cd-agent-name  { font-size: 15px !important; }
+.cd-panel.cd-agents .cd-agent-role  { font-size: 11px !important; margin-top: 4px; }
+.cd-panel.cd-agents .cd-agent-state { font-size: 12px !important; margin-top: 4px; }
+
+/* РАДАР: заполнить всю ширину панели */
+.cd-radar {
+  width: 88% !important;
+  max-width: 88% !important;
+}
+/* Панель радара: растянуть радар по высоте */
+.cd-panel.cd-radar-panel {
+  justify-content: flex-start !important;
+  gap: 14px !important;
+}
+.cd-panel.cd-radar-panel .cd-radar {
+  flex: 1;
+  width: 100% !important;
+  max-width: 100% !important;
+  max-height: 450px;
+}
+
+/* Oracle Actions: убираем space-between, кнопки flex-start чтобы не тянуло */
+.cd-panel.cd-actions { justify-content: flex-start !important; gap: 7px !important; }
