@@ -120,7 +120,6 @@ export function CronusSidebar() {
 							<span className="cd-sb-bal">{usdc.toFixed(2)} USDC</span>
 						</div>
 					)}
-					<WalletButton />
 					<div className="cd-sb-note">Wallet required for oracle actions</div>
 				</div>
 			</aside>
