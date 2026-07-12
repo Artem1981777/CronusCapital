@@ -614,29 +614,33 @@ export function CronusDashboard() {
 				<button className={"cd-ankh" + (isConnected ? " cd-ankh-on" : "")} title="Connect Wallet" onClick={() => setWalletOpen(true)}>{walletLabel}</button>
 			</header>
 
-			{ready ? (
-				<div className="cd-grid cd-kpi-grid">
-					{kpis.map((k) => <KpiCard key={k.id} kpi={k} />)}
-					<div className="cd-card cd-accent-green cd-conf-card">
-						<div className="cd-card-label">Confidence Score</div>
-						<ConfidenceRing value={confidence} />
-						<div className="cd-card-sub cd-up"><span className="cd-arrow">▲</span> {activeSignals} active signals</div><div className="cd-conf-note">illustrative - not live trades</div>
+						<div className="cd-kpi-radar-row">
+				{ready ? (
+					<div className="cd-grid cd-kpi-grid">
+						{kpis.map((k) => <KpiCard key=k.id kpi=k />)}
+						<div className="cd-card cd-accent-green cd-conf-card">
+							<div className="cd-card-label">Confidence Score</div>
+							<ConfidenceRing value=confidence />
+							<div className="cd-card-sub cd-up"><span className="cd-arrow">▲</span> activeSignals active signals</div>
+							<div className="cd-conf-note">illustrative - not live trades</div>
+						</div>
 					</div>
+				) : (
+					<div className="cd-grid cd-kpi-grid">
+						{skeletons.map((s) => <div key=s className="cd-card cd-skel" />)}
+					</div>
+				)}
+				<div className="cd-panel cd-radar-panel">
+					<div className="cd-panel-title">𓂀 MARKET INTELLIGENCE</div>
+					<MarketRadar blips=blips />
 				</div>
-			) : (
-				<div className="cd-grid cd-kpi-grid">
-					{skeletons.map((s) => <div key={s} className="cd-card cd-skel" />)}
-				</div>
-			)}
-
+			</div>
 			<div className="cd-mid">
 				<div className="cd-panel cd-agents">
 					<div className="cd-panel-title">𓀭 AGENT PIPELINE</div>
 					{agents.map((a) => <AgentRow key={a.id} a={a} />)}
 					{extraAgents.map((a) => <AgentRow key={a.id} a={a} />)}
 				</div>
-				<div className="cd-panel cd-radar-panel">
-					<div className="cd-panel-title">𓂀 MARKET INTELLIGENCE</div>
 					<MarketRadar blips={blips} />
 				</div>
 				<div className="cd-panel cd-actions">
