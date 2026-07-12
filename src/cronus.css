@@ -1199,3 +1199,19 @@ html, body { background: linear-gradient(rgba(0,0,0,0.12), rgba(0,0,0,0.22)), ur
     grid-template-columns: 1fr !important;
   }
 }
+
+/* ===== HEADER BADGES HORIZONTAL ===== */
+.cd-head-text {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: wrap !important;
+  align-items: center !important;
+  gap: 6px !important;
+}
+.cd-head-title,
+.cd-head-sub {
+  flex: 0 0 100% !important;
+}
+.cd-badge {
+  flex-shrink: 0 !important;
+}
