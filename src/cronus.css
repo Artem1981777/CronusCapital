@@ -1237,3 +1237,15 @@ html, body { background: linear-gradient(rgba(0,0,0,0.12), rgba(0,0,0,0.22)), ur
 .cd-sb {
   width: 300px !important;
 }
+
+/* ===== SIDEBAR ITEMS — убрать обрезку текста ===== */
+.cd-sb-item {
+  letter-spacing: 1px !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: clip !important;
+  width: 100% !important;
+}
+.cd-sb {
+  width: 310px !important;
+}
