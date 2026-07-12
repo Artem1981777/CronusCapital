@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react"
 import { createPortal } from "react-dom"
 import { useAccount, useChainId, useSwitchChain, useReadContract } from "wagmi"
-import { WalletButton } from "./WalletButton"
 
 const ARC_CHAIN_ID = 5042002
 const USDC = "0x3600000000000000000000000000000000000000" as const
