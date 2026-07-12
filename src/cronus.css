@@ -1215,3 +1215,20 @@ html, body { background: linear-gradient(rgba(0,0,0,0.12), rgba(0,0,0,0.22)), ur
 .cd-badge {
   flex-shrink: 0 !important;
 }
+
+/* ===== HEADER LAYOUT FIX — button не overlap ===== */
+.cd-header {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  align-items: flex-start !important;
+  gap: 8px !important;
+}
+.cd-head-text {
+  flex: 1 1 200px !important;
+  min-width: 0 !important;
+}
+.cd-ankh {
+  flex-shrink: 0 !important;
+  align-self: flex-start !important;
+  margin-left: auto !important;
+}
