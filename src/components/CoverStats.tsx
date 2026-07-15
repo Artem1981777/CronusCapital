@@ -39,10 +39,10 @@ export default function CoverStats() {
   const paid = list.filter((p) => st(p).indexOf("PAID") === 0)
   const expired = list.filter((p) => st(p) === "EXPIRED")
   const real = list.filter(isReal)
-  const premiums = list.reduce((s, p) => s + num(p.premium), 0)
-  const realPremiums = real.reduce((s, p) => s + num(p.premium), 0)
-  const payouts = paid.reduce((s, p) => s + num(p.payout), 0)
-  const exposure = open.reduce((s, p) => s + num(p.payout), 0)
+  const premiums = list.reduce((s, p) => s + num(p.premiumUsdc), 0)
+  const realPremiums = real.reduce((s, p) => s + num(p.premiumUsdc), 0)
+  const payouts = paid.reduce((s, p) => s + num(p.payoutUsdc), 0)
+  const exposure = open.reduce((s, p) => s + num(p.payoutUsdc), 0)
   const pnl = premiums - payouts
   const resolved = expired.length + paid.length
   const keepRate = resolved > 0 ? (expired.length / resolved) * 100 : 100
