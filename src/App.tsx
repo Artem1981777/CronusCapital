@@ -372,7 +372,7 @@ export default function App() {
         </div>
       )}
       <div id="cap-signals" /><PremiumSignal /></Sec>
-      <Sec id="markets" section={secView}><MarketPulse /><MarketTickers /><div id="cap-markets" /><LiveMarkets /><CoverPanel /></Sec>
+      <Sec id="markets" section={secView}><MarketPulse /><MarketTickers /><div id="cap-markets" /><LiveMarkets /></Sec><Sec id="cover" section={secView}><div id="cap-cover-sec" /><CoverPanel /></Sec>
 <Sec id="standards" section={secView}><AgentIdentity /></Sec>
 <Sec id="overview" section={secView}><PositioningStrap /></Sec>
 <Sec id="payments" section={secView}><X402Integration /></Sec>
