@@ -25,8 +25,9 @@ import trace from "../lib/traceArchive.js"
 import payToThink from "../lib/payToThink.js"
 import vaultNav from "../lib/vaultNav.js"
 import signalX402 from "../lib/signalX402.js"
+import cover from "../lib/cover.js"
 
-const ROUTES = { "backtest": backtest, "trace": trace, "agent-withdraw": agentWithdraw, "subscription": subscription, "split-pay": splitPay, "spend-limit": spendLimit, "fund-escrow": fundEscrow, "resolve-stake": resolveStake, manifest, openapi, receipts, receipt, metrics, traction, leaderboard, settlements, "spend-intent": spendIntent, scorecard, "track-record": trackRecord, "open-stake": openStake, "pay-to-think": payToThink, "vault-nav": vaultNav, "signal-x402": signalX402 }
+const ROUTES = { cover, "backtest": backtest, "trace": trace, "agent-withdraw": agentWithdraw, "subscription": subscription, "split-pay": splitPay, "spend-limit": spendLimit, "fund-escrow": fundEscrow, "resolve-stake": resolveStake, manifest, openapi, receipts, receipt, metrics, traction, leaderboard, settlements, "spend-intent": spendIntent, scorecard, "track-record": trackRecord, "open-stake": openStake, "pay-to-think": payToThink, "vault-nav": vaultNav, "signal-x402": signalX402 }
 
 export default async function handler(req, res) {
 	const kind = String((req.query && req.query.kind) || "").toLowerCase()

@@ -1,6 +1,10 @@
 {
   "rewrites": [
     {
+      "source": "/api/cover",
+      "destination": "/api/info?kind=cover"
+    },
+    {
       "source": "/api/signal-x402",
       "destination": "/api/info?kind=signal-x402"
     },
