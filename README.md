@@ -946,5 +946,8 @@ automated (cron hits the resolver every 15 min; payouts are capped and verifiabl
 
 - Policy: BTC-USDC, drop>=2%, open \$64771, payout 0.05 USDC, premium 0.007726 USDC (1h horizon)
 - Premium tx: https://testnet.arcscan.app/tx/0x9dbb83b0d6c9dd826572966a3e2dca20708e84efe7d1cfe8357bd2710054076c
+- **First fully autonomous cycle completed (Jul 15, 2026):** the scheduled resolver (cron, every 15 min) auto-resolved both live policies at expiry with zero human involvement. BTC stayed above the trigger, so the policies expired worthless and the premiums were kept as agent underwriting revenue — the agent earned its first insurance income on its own.
+- **Full loop proven on Arc Testnet:** quote -> USDC premium payment -> on-chain keccak256 commitment BEFORE the outcome -> autonomous resolution at expiry. Every step is independently verifiable in the public ledger at `/api/cover`.
+- **Keeper pattern:** `GET /api/cover?action=resolve` is a public dry-run preview; real execution requires `CRON_SECRET` (Authorization header or `secret` query param) — the same battle-tested pattern as the agent's autonomous payout loop.
 - Commitment: 0x8d85e121d6c8f3d8b6a282c18eec2510cc734b1f679c81c8bb1b26e62501901e
 - Live ledger: https://cronus-capital-git-hackathon-cover-artem7.vercel.app/api/cover
