@@ -1,7 +1,7 @@
 // CoverPanel.tsx — Cronus Cover: parametric price-drop micro-insurance (additive hackathon module).
 // Quote -> buy (real USDC premium via wallet on Arc Testnet, or labeled demo) -> live policy feed with explorer links.
 import { useEffect, useState } from "react"
-import { useAccount, useWriteContract, usePublicClient, useSwitchChain, useChainId } from "wagmi"
+import { useAccount, useWriteContract, usePublicClient, useSwitchChain } from "wagmi"
 import type { CSSProperties } from "react"
 
 type Quote = { ok: boolean; market?: string; openPrice?: number; thresholdPct?: number; payoutUsdc?: number; premiumUsdc?: number; probEstimate?: number; error?: string }
@@ -23,7 +23,6 @@ export function CoverPanel() {
   const { address, isConnected } = useAccount()
   const { writeContractAsync } = useWriteContract()
   const { switchChainAsync } = useSwitchChain()
-  const chainId = useChainId()
   const publicClient = usePublicClient({ chainId: ARC_CHAIN_ID })
   const [market, setMarket] = useState("BTC-USDC")
   const [threshold, setThreshold] = useState("2")
@@ -72,10 +71,8 @@ export function CoverPanel() {
     if (!isConnected || !address) { setNote("Connect wallet first (top of page)"); return }
     setBusy(true); setLastTx("")
     try {
-      if (chainId !== ARC_CHAIN_ID) {
-        setNote("Switching wallet to Arc Testnet…")
-        await switchChainAsync({ chainId: ARC_CHAIN_ID })
-      }
+      setNote("Requesting Arc Testnet in wallet…")
+      try { await switchChainAsync({ chainId: ARC_CHAIN_ID }) } catch { /* wallet may already be on Arc */ }
       const amount = BigInt(Math.round(quote.premiumUsdc * 1.05 * 1e6)) // +5% buffer vs price drift
       setNote("Paying premium " + quote.premiumUsdc + " USDC to treasury on Arc Testnet…")
       const hash = await writeContractAsync({ chainId: ARC_CHAIN_ID, address: USDC, abi: ERC20_ABI, functionName: "transfer", args: [TREASURY, amount] })
