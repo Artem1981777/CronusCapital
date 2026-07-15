@@ -1,22 +1,28 @@
 // CoverPanel.tsx — Cronus Cover: parametric price-drop micro-insurance (additive hackathon module).
-// Quote -> buy (demo, labeled) -> live policy feed. Backed by /api/cover (lib/cover.js).
+// Quote -> buy (real USDC premium via wallet, or labeled demo) -> live policy feed. Backed by /api/cover.
 import { useEffect, useState } from "react"
-import { useAccount } from "wagmi"
+import { useAccount, useWriteContract, usePublicClient } from "wagmi"
 import type { CSSProperties } from "react"
 
 type Quote = { ok: boolean; market?: string; openPrice?: number; thresholdPct?: number; payoutUsdc?: number; premiumUsdc?: number; probEstimate?: number; error?: string }
 type Policy = { id: string; market: string; rule: string; openPrice: number; payoutUsdc: number; premiumUsdc: number; status: string; demo: boolean; resolveBy: number }
 
 const MARKETS = ["BTC-USDC", "ETH-USDC", "SOL-USDC", "BNB-USDC"]
+const USDC = "0x3600000000000000000000000000000000000000" as const
+const TREASURY = "0xdc6778c5f8cc74b10aed11c48306d4cfc5737fbd" as const
+const ERC20_ABI = [{ type: "function", name: "transfer", stateMutability: "nonpayable", inputs: [{ name: "to", type: "address" }, { name: "value", type: "uint256" }], outputs: [{ type: "bool" }] }] as const
 const gold = "#d4b26a"
 const card: CSSProperties = { border: "1px solid rgba(212,178,106,0.35)", borderRadius: 12, padding: 16, background: "rgba(10,20,12,0.72)", marginBottom: 12 }
 const btn: CSSProperties = { background: "transparent", border: "1px solid " + gold, color: gold, borderRadius: 8, padding: "8px 14px", cursor: "pointer", letterSpacing: 1 }
 const inp: CSSProperties = { background: "rgba(0,0,0,0.4)", border: "1px solid rgba(212,178,106,0.35)", color: "#cfe8cf", borderRadius: 8, padding: "8px 10px" }
 
 export function CoverPanel() {
-  const { address } = useAccount()
+  const { address, isConnected } = useAccount()
+  const { writeContractAsync } = useWriteContract()
+  const publicClient = usePublicClient()
   const [market, setMarket] = useState("BTC-USDC")
   const [threshold, setThreshold] = useState("2")
+  const [horizon, setHorizon] = useState(3600)
   const [quote, setQuote] = useState<Quote | null>(null)
   const [busy, setBusy] = useState(false)
   const [note, setNote] = useState("")
@@ -30,24 +36,44 @@ export function CoverPanel() {
   async function getQuote() {
     setBusy(true); setNote(""); setQuote(null)
     try {
-      const r = await fetch("/api/cover?action=quote&market=" + market + "&threshold=" + threshold + "&payout=0.05&horizon=86400")
+      const r = await fetch("/api/cover?action=quote&market=" + market + "&threshold=" + threshold + "&payout=0.05&horizon=" + horizon)
       setQuote(await r.json())
     } catch (e) { setNote(String(e)) }
     setBusy(false)
   }
 
+  async function submitBuy(paymentTx?: string) {
+    const headers: Record<string, string> = { "content-type": "application/json" }
+    if (paymentTx) headers["X-PAYMENT"] = paymentTx
+    const r = await fetch("/api/cover?action=buy", {
+      method: "POST", headers,
+      body: JSON.stringify({ buyer: address || "0x46213abeca58cc9a89a269fd25a8737c700ca164", market, thresholdPct: Number(threshold), payoutUsdc: 0.05, horizonSec: horizon }),
+    })
+    const j = await r.json()
+    setNote(j.ok ? (paymentTx ? "✅ REAL policy opened · premium paid on-chain · " : "Policy opened (DEMO) · ") + "commitment " + String(j.policy?.commitment || "").slice(0, 18) + "…" : "Error: " + j.error)
+    loadPolicies()
+  }
+
   async function buyDemo() {
     if (!quote || !quote.ok) return
     setBusy(true); setNote("")
+    try { await submitBuy() } catch (e) { setNote(String(e)) }
+    setBusy(false)
+  }
+
+  async function buyReal() {
+    if (!quote || !quote.ok || !quote.premiumUsdc) return
+    if (!isConnected || !address) { setNote("Connect wallet first (top of page)"); return }
+    setBusy(true)
     try {
-      const r = await fetch("/api/cover?action=buy", {
-        method: "POST", headers: { "content-type": "application/json" },
-        body: JSON.stringify({ buyer: address || "0x46213abeca58cc9a89a269fd25a8737c700ca164", market, thresholdPct: Number(threshold), payoutUsdc: 0.05, horizonSec: 86400 }),
-      })
-      const j = await r.json()
-      setNote(j.ok ? "Policy opened (DEMO) · commitment " + String(j.policy?.commitment || "").slice(0, 18) + "…" : "Error: " + j.error)
-      loadPolicies()
-    } catch (e) { setNote(String(e)) }
+      const amount = BigInt(Math.round(quote.premiumUsdc * 1.05 * 1e6)) // +5% buffer vs price drift
+      setNote("Paying premium " + quote.premiumUsdc + " USDC to treasury…")
+      const hash = await writeContractAsync({ address: USDC, abi: ERC20_ABI, functionName: "transfer", args: [TREASURY, amount] })
+      setNote("Premium tx sent, waiting for confirmation…")
+      if (publicClient) await publicClient.waitForTransactionReceipt({ hash })
+      setNote("Confirmed. Opening policy…")
+      await submitBuy(hash)
+    } catch (e) { setNote("Payment failed: " + String((e as Error)?.message || e).slice(0, 120)) }
     setBusy(false)
   }
 
@@ -66,12 +92,17 @@ export function CoverPanel() {
           <label style={{ color: "#9fbf9f" }}>drop ≥
             <input value={threshold} onChange={(e) => setThreshold(e.target.value)} style={{ ...inp, width: 56, margin: "0 6px" }} />%
           </label>
+          <select value={horizon} onChange={(e) => setHorizon(Number(e.target.value))} style={inp}>
+            <option value={3600}>1 hour</option>
+            <option value={86400}>24 hours</option>
+          </select>
           <button style={btn} disabled={busy} onClick={getQuote}>{busy ? "…" : "GET QUOTE"}</button>
-          {quote && quote.ok && <button style={{ ...btn, borderColor: "#7fd77f", color: "#7fd77f" }} disabled={busy} onClick={buyDemo}>BUY (DEMO)</button>}
+          {quote && quote.ok && <button style={{ ...btn, borderColor: "#7fd77f", color: "#7fd77f" }} disabled={busy} onClick={buyReal}>BUY · PAY USDC</button>}
+          {quote && quote.ok && <button style={{ ...btn, opacity: 0.7 }} disabled={busy} onClick={buyDemo}>DEMO</button>}
         </div>
         {quote && quote.ok && (
           <div style={{ marginTop: 12, color: "#cfe8cf" }}>
-            Open price <b>${quote.openPrice}</b> · payout <b>{quote.payoutUsdc} USDC</b> · premium <b style={{ color: gold }}>{quote.premiumUsdc} USDC</b> · est. prob {Math.round((quote.probEstimate || 0) * 100)}% · 24h horizon
+            Open price <b>${quote.openPrice}</b> · payout <b>{quote.payoutUsdc} USDC</b> · premium <b style={{ color: gold }}>{quote.premiumUsdc} USDC</b> · est. prob {Math.round((quote.probEstimate || 0) * 100)}% · {horizon === 3600 ? "1h" : "24h"} horizon
           </div>
         )}
         {quote && !quote.ok && <div style={{ marginTop: 12, color: "#e08080" }}>{quote.error}</div>}
@@ -84,7 +115,7 @@ export function CoverPanel() {
           <div key={p.id} style={{ display: "flex", gap: 10, flexWrap: "wrap", borderTop: "1px solid rgba(212,178,106,0.15)", padding: "6px 0", color: "#cfe8cf", fontSize: 13 }}>
             <span>{p.market}</span><span>{p.rule}</span><span>open ${p.openPrice}</span>
             <span>payout {p.payoutUsdc}</span><span>premium {p.premiumUsdc}</span>
-            <span style={{ color: p.status === "PAID" ? "#7fd77f" : p.status === "OPEN" ? gold : "#9fbf9f" }}>{p.status}{p.demo ? " · DEMO" : ""}</span>
+            <span style={{ color: p.status === "PAID" ? "#7fd77f" : p.status === "OPEN" ? gold : "#9fbf9f" }}>{p.status}{p.demo ? " · DEMO" : " · REAL"}</span>
           </div>
         ))}
       </div>
