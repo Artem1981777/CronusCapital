@@ -937,3 +937,14 @@ Autonomous insurance agent built additively on top of Cronus: the oracle prices 
 live market data, sells price-drop protection for USDC micro-premiums (x402-style), commits
 every policy on-chain (keccak256) **before** the outcome, and pays out automatically at
 expiry under hard spending caps. UI: `#/cover` · API: `/api/cover` · Docs: [docs/cover.md](docs/cover.md)
+
+### ✅ Live proof (Arc Testnet)
+
+First REAL policies sold on 2026-07-15: the buyer paid the premium in USDC on-chain,
+the policy was committed (keccak256) BEFORE the outcome, and resolution is fully
+automated (cron hits the resolver every 15 min; payouts are capped and verifiable).
+
+- Policy: BTC-USDC, drop>=2%, open \$64771, payout 0.05 USDC, premium 0.007726 USDC (1h horizon)
+- Premium tx: https://testnet.arcscan.app/tx/0x9dbb83b0d6c9dd826572966a3e2dca20708e84efe7d1cfe8357bd2710054076c
+- Commitment: 0x8d85e121d6c8f3d8b6a282c18eec2510cc734b1f679c81c8bb1b26e62501901e
+- Live ledger: https://cronus-capital-git-hackathon-cover-artem7.vercel.app/api/cover
