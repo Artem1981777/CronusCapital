@@ -13,6 +13,7 @@ const NAV: NavItem[] = [
 	{ id: "cap-agents", glyph: "☥", label: "Oracle Agents", badge: "LIVE" },
 	{ id: "cap-signals", glyph: "📡", label: "Premium Signals", badge: "x402" },
 	{ id: "cap-markets", glyph: "📈", label: "Markets" },
+	{ id: "cap-cover", glyph: "🛡", label: "Cover", badge: "NEW" },
 	{ id: "cap-settlements", glyph: "⚡", label: "Settlements" },
 	{ id: "cap-stellar", glyph: "✦", label: "Stellar Hub", badge: "CCTP" },
 	{ id: "cap-bridge", glyph: "⇄", label: "CCTP Bridge", badge: "Arc-XLM" },
