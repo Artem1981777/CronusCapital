@@ -930,3 +930,10 @@ Endpoint verified via Purr-Fect Claw (OKX AI) — all x402 fields confirmed corr
 - **URL:** `https://cronus-capital.vercel.app/api/signal`
 - **Network:** `arc-testnet`
 - **Token:** USDC
+
+## 🛡 Cronus Cover — parametric micro-insurance (NEW, hackathon module)
+
+Autonomous insurance agent built additively on top of Cronus: the oracle prices risk from
+live market data, sells price-drop protection for USDC micro-premiums (x402-style), commits
+every policy on-chain (keccak256) **before** the outcome, and pays out automatically at
+expiry under hard spending caps. UI: `#/cover` · API: `/api/cover` · Docs: [docs/cover.md](docs/cover.md)
