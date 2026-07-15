@@ -951,3 +951,4 @@ automated (cron hits the resolver every 15 min; payouts are capped and verifiabl
 - **Keeper pattern:** `GET /api/cover?action=resolve` is a public dry-run preview; real execution requires `CRON_SECRET` (Authorization header or `secret` query param) — the same battle-tested pattern as the agent's autonomous payout loop.
 - Commitment: 0x8d85e121d6c8f3d8b6a282c18eec2510cc734b1f679c81c8bb1b26e62501901e
 - Live ledger: https://cronus-capital-git-hackathon-cover-artem7.vercel.app/api/cover
+- **Live underwriting metrics** — the Cover tab renders a real-time metrics card computed purely from the public policy ledger (GET /api/cover): policies sold (real vs demo), open exposure, premiums collected, payouts paid, underwriting P&L, keep rate, daily payout cap utilization and loss ratio. Auto-refreshes every 15s — every number is independently reproducible from the same public endpoint.
