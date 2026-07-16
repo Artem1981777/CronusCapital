@@ -1,14 +1,14 @@
-// Cronus comfort-theme toggle — additive, self-contained.
-// Injects a floating control that tunes neon intensity via a CSS filter on the
-// app root. Touches no existing component. Remove = delete this file + its
-// import line in the entry file.
-type Mode = "signature" | "soft" | "night"
+// Cronus theme toggle — additive, self-contained.
+// Switches ONLY the decorative full-screen background (egypt-bg on
+// html/body/.egypt-bg) between the original Egyptian photo and pure black.
+// All content, panels, neon and gold stay exactly as-is.
+// Remove = delete this file + its import line in the entry file.
+type Mode = "original" | "black"
 const KEY = "cronus:theme"
-const MODES: Mode[] = ["signature", "soft", "night"]
+const MODES: Mode[] = ["original", "black"]
 const META: Record<Mode, { label: string; icon: string; title: string }> = {
-  signature: { label: "SIG", icon: "◉", title: "Signature — original neon theme" },
-  soft: { label: "SOFT", icon: "◐", title: "Soft — dimmed, easy on the eyes" },
-  night: { label: "NIGHT", icon: "🌙", title: "Night — calmest, low light" },
+  original: { label: "ORIGINAL", icon: "◉", title: "Original — Egyptian background" },
+  black: { label: "BLACK", icon: "●", title: "Black — pure black background" },
 }
 
 function apply(mode: Mode) {
@@ -24,31 +24,35 @@ function apply(mode: Mode) {
 
 function init() {
   if (document.getElementById("cronus-theme-style")) return
-  const root =
-    document.getElementById("root") ||
-    (document.body.firstElementChild as HTMLElement | null)
-  if (root) root.classList.add("cronus-fx-root")
-
   const style = document.createElement("style")
   style.id = "cronus-theme-style"
   style.textContent = `
-    .cronus-fx-root { transition: filter .45s ease; }
-    html[data-cronus-theme="soft"] .cronus-fx-root { filter: brightness(.9) saturate(.65) contrast(.98); }
-    html[data-cronus-theme="night"] .cronus-fx-root { filter: brightness(.78) saturate(.5) contrast(.96); }
+    html[data-cronus-theme="black"],
+    html[data-cronus-theme="black"] body {
+      background: #000 !important;
+      background-image: none !important;
+    }
+    html[data-cronus-theme="black"] .egypt-bg {
+      background: #000 !important;
+      background-image: none !important;
+      filter: none !important;
+    }
+    html[data-cronus-theme="black"] .egypt-bg::before,
+    html[data-cronus-theme="black"] .egypt-bg::after {
+      display: none !important;
+      background: none !important;
+      background-image: none !important;
+    }
     #cronus-theme-toggle { position: fixed; top: 10px; right: 10px; z-index: 2147483000;
       display: flex; gap: 2px; padding: 3px; border-radius: 999px;
-      background: rgba(6,20,12,.72); backdrop-filter: blur(8px);
-      border: 1px solid rgba(212,175,55,.35); box-shadow: 0 2px 12px rgba(0,0,0,.45);
+      background: rgba(6,20,12,.75); backdrop-filter: blur(8px);
+      border: 1px solid rgba(212,175,55,.4); box-shadow: 0 2px 12px rgba(0,0,0,.45);
       font-family: inherit; }
     #cronus-theme-toggle button { border: 0; cursor: pointer; border-radius: 999px;
-      padding: 5px 9px; font-size: 11px; letter-spacing: .5px; line-height: 1;
-      display: flex; align-items: center; gap: 4px; transition: all .2s ease;
-      background: transparent; color: rgba(232,212,139,.8); }
+      padding: 6px 11px; font-size: 11px; letter-spacing: .5px; line-height: 1;
+      display: flex; align-items: center; gap: 5px; transition: all .2s ease;
+      background: transparent; color: rgba(232,212,139,.8); white-space: nowrap; }
     #cronus-theme-toggle button:hover { color: #fff; }
-    @media (max-width: 600px) {
-      #cronus-theme-toggle button span.lbl { display: none; }
-      #cronus-theme-toggle button { padding: 6px 9px; font-size: 14px; }
-    }
   `
   document.head.appendChild(style)
 
@@ -66,7 +70,7 @@ function init() {
   })
   document.body.appendChild(bar)
 
-  let saved: Mode = "signature"
+  let saved: Mode = "original"
   try {
     const s = localStorage.getItem(KEY) as Mode | null
     if (s && MODES.indexOf(s) >= 0) saved = s
