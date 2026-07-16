@@ -1,22 +1,23 @@
 // Cronus Matrix rain — additive, self-contained.
-// Classic green digital rain on a fixed canvas BEHIND all content.
-// Visible ONLY in the BLACK theme; auto-pauses when the tab is hidden or the
-// theme is not black. The pure-black background stays; rain lives on top of it,
-// behind every panel. Remove = delete this file + its import in main.tsx.
+// Renders classic green digital rain INSIDE the existing full-screen background
+// layer (.egypt-bg), so it sits exactly where the background shows: behind all
+// panels/content. Visible ONLY in BLACK theme; auto-pauses when hidden or when
+// theme != black. Remove = delete this file + its import in main.tsx.
 const GREEN = "#39e014"
 const HEAD = "#d6ffcf"
 const CHARS =
   "アイウエオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワヲン0123456789=+-*<>¦｜:.".split("")
 
-function start() {
+function mount(host: HTMLElement) {
   if (document.getElementById("cronus-matrix")) return
+  const asBg = host !== document.body
   const canvas = document.createElement("canvas")
   canvas.id = "cronus-matrix"
-  canvas.style.cssText =
-    "position:fixed;inset:0;width:100vw;height:100vh;z-index:-1;pointer-events:none;display:none;"
-  document.body.appendChild(canvas)
-  const ctx = canvas.getContext("2d")
-  if (!ctx) return
+  canvas.style.cssText = asBg
+    ? "position:absolute;inset:0;width:100%;height:100%;pointer-events:none;display:none;"
+    : "position:fixed;inset:0;width:100vw;height:100vh;z-index:-1;pointer-events:none;display:none;"
+  host.appendChild(canvas)
+  const ctx = canvas.getContext("2d") as CanvasRenderingContext2D
 
   let cols = 0
   let drops: number[] = []
@@ -25,10 +26,12 @@ function start() {
 
   function resize() {
     dpr = Math.min(window.devicePixelRatio || 1, 2)
-    canvas.width = Math.floor(window.innerWidth * dpr)
-    canvas.height = Math.floor(window.innerHeight * dpr)
-    fontSize = window.innerWidth < 600 ? 14 : 18
-    cols = Math.max(1, Math.floor(window.innerWidth / fontSize))
+    const w = window.innerWidth
+    const h = window.innerHeight
+    canvas.width = Math.floor(w * dpr)
+    canvas.height = Math.floor(h * dpr)
+    fontSize = w < 600 ? 14 : 18
+    cols = Math.max(1, Math.floor(w / fontSize))
     drops = new Array(cols).fill(0).map(() => Math.random() * -60)
   }
   resize()
@@ -59,7 +62,6 @@ function start() {
     }
     if (t - last < stepMs) return
     last = t
-
     ctx.fillStyle = "rgba(0,0,0,0.09)"
     ctx.fillRect(0, 0, canvas.width, canvas.height)
     const fs = fontSize * dpr
@@ -78,9 +80,21 @@ function start() {
   requestAnimationFrame(frame)
 }
 
+function boot() {
+  const now = document.querySelector(".egypt-bg") as HTMLElement | null
+  if (now) { mount(now); return }
+  let tries = 0
+  const timer = window.setInterval(() => {
+    tries++
+    const host = document.querySelector(".egypt-bg") as HTMLElement | null
+    if (host) { window.clearInterval(timer); mount(host) }
+    else if (tries >= 40) { window.clearInterval(timer); mount(document.body) }
+  }, 150)
+}
+
 if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", start)
+  document.addEventListener("DOMContentLoaded", boot)
 } else {
-  start()
+  boot()
 }
 export {}
