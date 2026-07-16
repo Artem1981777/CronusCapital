@@ -1,14 +1,18 @@
 // Cronus theme toggle — additive, self-contained.
-// Switches ONLY the decorative full-screen background (egypt-bg on
-// html/body/.egypt-bg) between the original Egyptian photo and pure black.
-// All content, panels, neon and gold stay exactly as-is.
+// Three modes: ORIGINAL (Egyptian photo), BLACK (pure black), MATRIX (black +
+// live digital rain, drawn by matrix-bg.ts inside the .egypt-bg layer).
+// Layering note: the visible photo is the BODY background (html,body rule in
+// cronus.css). The .egypt-bg div paints BELOW body (z-index:-2), so dark modes
+// set html to #000 and body to TRANSPARENT — this lets the background layer
+// (and the matrix canvas inside it) show through. Content is untouched.
 // Remove = delete this file + its import line in the entry file.
-type Mode = "original" | "black"
+type Mode = "original" | "black" | "matrix"
 const KEY = "cronus:theme"
-const MODES: Mode[] = ["original", "black"]
+const MODES: Mode[] = ["original", "black", "matrix"]
 const META: Record<Mode, { label: string; icon: string; title: string }> = {
   original: { label: "ORIGINAL", icon: "◉", title: "Original — Egyptian background" },
   black: { label: "BLACK", icon: "●", title: "Black — pure black background" },
+  matrix: { label: "MATRIX", icon: "▦", title: "Matrix — black + digital rain" },
 }
 
 function apply(mode: Mode) {
@@ -28,20 +32,30 @@ function init() {
   style.id = "cronus-theme-style"
   style.textContent = `
     html[data-cronus-theme="black"],
-    html[data-cronus-theme="black"] body {
+    html[data-cronus-theme="matrix"] {
       background: #000 !important;
       background-image: none !important;
     }
-    html[data-cronus-theme="black"] .egypt-bg {
+    html[data-cronus-theme="black"] body,
+    html[data-cronus-theme="matrix"] body {
+      background: transparent !important;
+      background-image: none !important;
+    }
+    html[data-cronus-theme="black"] .egypt-bg,
+    html[data-cronus-theme="matrix"] .egypt-bg {
       background: #000 !important;
       background-image: none !important;
       filter: none !important;
     }
     html[data-cronus-theme="black"] .egypt-bg::before,
-    html[data-cronus-theme="black"] .egypt-bg::after {
+    html[data-cronus-theme="black"] .egypt-bg::after,
+    html[data-cronus-theme="matrix"] .egypt-bg::before,
+    html[data-cronus-theme="matrix"] .egypt-bg::after {
       display: none !important;
-      background: none !important;
-      background-image: none !important;
+    }
+    html[data-cronus-theme="black"] .egypt-bg > :not(#cronus-matrix),
+    html[data-cronus-theme="matrix"] .egypt-bg > :not(#cronus-matrix) {
+      display: none !important;
     }
     #cronus-theme-toggle { position: fixed; top: 10px; right: 10px; z-index: 2147483000;
       display: flex; gap: 2px; padding: 3px; border-radius: 999px;

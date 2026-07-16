@@ -39,7 +39,7 @@ function mount(host: HTMLElement) {
 
   function isOn() {
     return (
-      document.documentElement.getAttribute("data-cronus-theme") === "black" &&
+      document.documentElement.getAttribute("data-cronus-theme") === "matrix" &&
       document.visibilityState === "visible"
     )
   }
