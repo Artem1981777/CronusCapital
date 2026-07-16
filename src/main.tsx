@@ -1,3 +1,4 @@
+import "./oracle-terminal"
 import "./matrix-bg"
 import "./theme-toggle"
 import "./buffer-polyfill"
