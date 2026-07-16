@@ -46,6 +46,7 @@ Cronus is an autonomous AI agent that runs a real, honest business on Arc: it **
 
 - [Verify in 2 minutes (judges)](#verify-in-2-minutes-judges)
 - [Traction — honest, self vs external](#traction-honest-paywall-proven-with-self-generated-volume)
+- [UI: theme modes & live oracle terminal](#ui-theme-modes--live-oracle-terminal)
 - [Dashboard guide](#dashboard-guide-what-you-are-looking-at)
 - [How to use it (step-by-step for judges)](#how-to-use-it-step-by-step-for-judges)
 - [Skin in the Game — conviction staking](#skin-in-the-game--conviction-staking)
@@ -224,6 +225,16 @@ Demo frame: UNLOCK **+\$0.02** → PAY UPSTREAM **−\$0.005** → **Net Flow +\
 
 ---
 
+## UI: theme modes & live oracle terminal
+
+The dashboard ships with a 3-mode theme switch (top-right pill) and a live agent log — all additive, zero changes to existing components (self-contained modules: `src/theme-toggle.ts`, `src/matrix-bg.ts`, `src/oracle-terminal.ts`).
+
+- **◉ ORIGINAL** — the original cyber-Egyptian look with the temple background.
+- **● BLACK** — eye-friendly pure-black mode, no animation.
+- **▦ MATRIX** — pure black + live Matrix digital rain (canvas in the background layer; DPR-capped, pauses when the tab is hidden). A dark veil plus near-opaque cards keep every panel readable above the rain. **Default for new visitors**; a returning visitor keeps their saved choice (`localStorage`).
+- **Live oracle terminal** — the hero card streams a typewriter log of the agent loop (SCOUT / ANALYST / EXECUTOR / x402 / COVER / LEDGER), typing top-down; `pointer-events: none`, so it never blocks clicks.
+
+---
 ## Dashboard guide (what you are looking at)
 
 The live demo (https://cronus-capital.vercel.app) is a single screen. Here is every panel, top to bottom.
