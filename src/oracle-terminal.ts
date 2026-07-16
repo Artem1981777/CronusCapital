@@ -31,7 +31,7 @@ function typeLine(box: HTMLDivElement, text: string) {
   for (let i = 0; i < box.children.length; i++) {
     const c = box.children[i] as HTMLElement
     const age = box.children.length - 1 - i
-    c.style.opacity = String(Math.max(0.18, 1 - age * 0.11))
+    c.style.opacity = String(Math.max(0.55, 1 - age * 0.05))
   }
   let i = 0
   const t = setInterval(() => {
@@ -46,7 +46,7 @@ function mount(host: HTMLElement) {
   if (window.getComputedStyle(host).position === "static") host.style.position = "relative"
   const box = document.createElement("div")
   box.id = "cronus-oracle-terminal"
-  box.style.cssText = "position:absolute;left:18px;top:60px;bottom:16px;width:min(50%,520px);overflow:hidden;pointer-events:none;z-index:0;display:flex;flex-direction:column;justify-content:flex-end;gap:3px;font-family:'Courier New',monospace;font-size:11px;line-height:1.45;letter-spacing:0.4px;text-align:left;"
+  box.style.cssText = "position:absolute;left:18px;top:60px;bottom:16px;width:min(50%,520px);overflow:hidden;pointer-events:none;z-index:0;display:flex;flex-direction:column;justify-content:flex-start;gap:3px;font-family:'Courier New',monospace;font-size:11px;line-height:1.45;letter-spacing:0.4px;text-align:left;"
   host.appendChild(box)
   let idx = 0
   const emit = () => {
