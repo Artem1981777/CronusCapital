@@ -1,3 +1,4 @@
+import "./matrix-bg"
 import "./theme-toggle"
 import "./buffer-polyfill"
 import { StrictMode } from "react"
