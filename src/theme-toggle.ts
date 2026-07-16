@@ -93,7 +93,7 @@ function init() {
   })
   document.body.appendChild(bar)
 
-  let saved: Mode = "original"
+  let saved: Mode = "matrix"
   try {
     const s = localStorage.getItem(KEY) as Mode | null
     if (s && MODES.indexOf(s) >= 0) saved = s
