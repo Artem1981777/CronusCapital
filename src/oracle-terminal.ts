@@ -1,7 +1,8 @@
-// Cronus oracle terminal — additive, self-contained.
+// Cronus oracle terminal — additive, self-contained. v2
 // Typewriter agent log that fills the empty area of the hero card.
-// Mounts into the .cd-card containing "ORACLE DASHBOARD"; pointer-events:none
-// so it never blocks clicks. Remove = delete this file + its import line.
+// Anchors to .cd-head-title ("CRONUS ORACLE DASHBOARD"), mounts into its hero
+// container; pointer-events:none so it never blocks clicks.
+// Remove = delete this file + its import line in the entry file.
 const MAX_LINES = 9
 
 function pad(n: number): string { return n < 10 ? "0" + n : String(n) }
@@ -40,12 +41,13 @@ function typeLine(box: HTMLDivElement, text: string) {
   }, 18)
 }
 
-function mount(card: Element) {
+function mount(host: HTMLElement) {
   if (document.getElementById("cronus-oracle-terminal")) return
+  if (window.getComputedStyle(host).position === "static") host.style.position = "relative"
   const box = document.createElement("div")
   box.id = "cronus-oracle-terminal"
   box.style.cssText = "position:absolute;left:18px;top:60px;bottom:16px;width:min(50%,520px);overflow:hidden;pointer-events:none;z-index:0;display:flex;flex-direction:column;justify-content:flex-end;gap:3px;font-family:'Courier New',monospace;font-size:11px;line-height:1.45;letter-spacing:0.4px;text-align:left;"
-  card.appendChild(box)
+  host.appendChild(box)
   let idx = 0
   const emit = () => {
     const mk = LINES[idx % LINES.length]
@@ -59,19 +61,22 @@ function mount(card: Element) {
   }, 3200)
 }
 
+function findHost(): HTMLElement | null {
+  const title = document.querySelector(".cd-head-title")
+  if (!title) return null
+  const card = title.closest("header, .cd-card, .cd-panel")
+  return (card as HTMLElement | null) || (title.parentElement as HTMLElement | null)
+}
+
 function boot() {
-  const find = () =>
-    Array.from(document.querySelectorAll(".cd-card")).find(
-      (el) => (el.textContent || "").indexOf("ORACLE DASHBOARD") >= 0,
-    )
-  const first = find()
+  const first = findHost()
   if (first) { mount(first); return }
   let tries = 0
   const timer = setInterval(() => {
     tries++
-    const host = find()
+    const host = findHost()
     if (host) { clearInterval(timer); mount(host) }
-    else if (tries > 60) clearInterval(timer)
+    else if (tries > 80) clearInterval(timer)
   }, 250)
 }
 
