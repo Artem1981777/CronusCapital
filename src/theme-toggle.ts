@@ -36,10 +36,19 @@ function init() {
       background: #000 !important;
       background-image: none !important;
     }
-    html[data-cronus-theme="black"] body,
-    html[data-cronus-theme="matrix"] body {
+    html[data-cronus-theme="black"] body {
       background: transparent !important;
       background-image: none !important;
+    }
+    html[data-cronus-theme="matrix"] body {
+      background: rgba(0,0,0,0.55) !important;
+      background-image: none !important;
+    }
+    html[data-cronus-theme="matrix"] .cd-root {
+      --cd-panel-bg: rgba(2,7,3,0.93);
+    }
+    html[data-cronus-theme="matrix"] .cd-root header {
+      background-color: rgba(2,7,3,0.9) !important;
     }
     html[data-cronus-theme="black"] .egypt-bg,
     html[data-cronus-theme="matrix"] .egypt-bg {
