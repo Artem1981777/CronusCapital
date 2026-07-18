@@ -1291,3 +1291,11 @@ html, body { background: linear-gradient(rgba(0,0,0,0.12), rgba(0,0,0,0.22)), ur
   .cd2-nav { display: none !important; }
   .cd2-shell { display: block !important; }
 }
+
+/* ===== Full-width layout + sidebar fixes (additive overrides) ===== */
+.cd-root { max-width: none; }
+.cd-feed-wrap { max-width: none; }
+.cd2-nav { width: 300px; overflow-x: hidden; scrollbar-width: none; -ms-overflow-style: none; }
+.cd2-nav::-webkit-scrollbar { display: none; width: 0; height: 0; }
+.cd2-item-label { white-space: normal; line-height: 1.35; }
+@media (max-width: 860px) { .cd2-nav { width: 264px; } }
