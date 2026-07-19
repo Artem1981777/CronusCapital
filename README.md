@@ -963,3 +963,17 @@ automated (cron hits the resolver every 15 min; payouts are capped and verifiabl
 - Commitment: 0x8d85e121d6c8f3d8b6a282c18eec2510cc734b1f679c81c8bb1b26e62501901e
 - Live ledger: https://cronus-capital.vercel.app/api/cover
 - **Live underwriting metrics** — the Cover tab renders a real-time metrics card computed purely from the public policy ledger (GET /api/cover): policies sold (real vs demo), open exposure, premiums collected, payouts paid, underwriting P&L, keep rate, daily payout cap utilization and loss ratio. Auto-refreshes every 15s — every number is independently reproducible from the same public endpoint.
+
+### 🖥 Live Cover dashboard + fresh on-chain proof
+
+![Cronus Cover dashboard — live](assets/screenshots/12-cover-live.jpg)
+
+**For judges — reproduce this in 60 seconds on the [live demo](https://cronus-capital.vercel.app):**
+
+1. Open the **Cover** tab in the sidebar (`#/cover`).
+2. Click **GET QUOTE** — the oracle prices a BTC-USDC drop>=2% policy from live market data (payout 0.05 USDC, ~0.003 USDC premium, 1h horizon).
+3. Click **BUY · PAY USDC** and confirm the wallet transaction — the premium is a real USDC transfer on Arc Testnet, and the policy is committed on-chain (keccak256) BEFORE the outcome.
+4. Watch the **Policy Ledger** and the **Live Underwriting Metrics** card update in real time — every number is recomputed from the public ledger at [`/api/cover`](https://cronus-capital.vercel.app/api/cover).
+5. At expiry the cron-driven resolver settles the policy autonomously — no human in the loop.
+
+Latest REAL premium payment (confirmed in <1s on Arc): [View the premium tx on ArcScan ↗](https://testnet.arcscan.app/tx/0xae8d45b4da3e240ad745aa829623b8751ad6e7105bea0f73b90303176791ad4b)
