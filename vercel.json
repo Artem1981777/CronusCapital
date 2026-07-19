@@ -1,6 +1,10 @@
 {
   "rewrites": [
     {
+      "source": "/api/alerts",
+      "destination": "/api/info?kind=alerts"
+    },
+    {
       "source": "/api/cover",
       "destination": "/api/info?kind=cover"
     },

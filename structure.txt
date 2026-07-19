@@ -1,0 +1,243 @@
+.
+├── BUGS.md
+├── CHANGELOG.md
+├── CronusCapital
+│   ├── BUGS.md
+│   ├── CHANGELOG.md
+│   ├── DECISIONS.md
+│   ├── LICENSE
+│   ├── README.md
+│   ├── SKILL.md
+│   ├── TRACTION.md
+│   ├── abi
+│   ├── add-yield.mjs
+│   ├── api
+│   ├── arc-primitives
+│   ├── arc_context.txt
+│   ├── assets
+│   ├── contracts
+│   ├── cronus-mcp
+│   ├── deploy-escrow.mjs
+│   ├── deploy-identity.mjs
+│   ├── deploy-vault.mjs
+│   ├── docs
+│   ├── escrow-abi.json
+│   ├── escrow-address.txt
+│   ├── eslint.config.js
+│   ├── foundry.toml
+│   ├── identity-abi.json
+│   ├── identity-address.txt
+│   ├── index.html
+│   ├── lib
+│   ├── metadata.CronusReputation.json
+│   ├── package-lock.json
+│   ├── package.json
+│   ├── public
+│   ├── register-agent.mjs
+│   ├── scripts
+│   ├── src
+│   ├── test
+│   ├── tsconfig.app.json
+│   ├── tsconfig.json
+│   ├── tsconfig.node.json
+│   ├── vault-abi.json
+│   ├── vault-address.txt
+│   ├── vercel.json
+│   └── vite.config.ts
+├── DECISIONS.md
+├── LICENSE
+├── README.md
+├── SKILL.md
+├── TRACTION.md
+├── _g_lint.log
+├── abi
+│   └── CronusReputation.json
+├── add-yield.mjs
+├── api
+│   ├── accrue-yield.js
+│   ├── agent-loop.js
+│   ├── agent-payout.js
+│   ├── claim.js
+│   ├── complete-stellar.js
+│   ├── consult.js
+│   ├── info.js
+│   ├── manifest.js.bak.1782620833
+│   ├── manifest.js.disabled
+│   ├── nano-signal.js
+│   ├── polymarket.js
+│   ├── rpc.js
+│   ├── signal.js
+│   └── stream.js
+├── arc-primitives
+│   ├── LICENSE
+│   ├── README.md
+│   ├── pay-with-memo.mjs
+│   ├── price-crosscheck.mjs
+│   ├── spend-breaker.mjs
+│   └── verify-x402-payment.mjs
+├── arc_context.txt
+├── assets
+│   ├── banner.svg
+│   └── screenshots
+├── cache
+│   └── solidity-files-cache.json
+├── contracts
+│   ├── CronusDecisions.sol
+│   ├── CronusIdentityRegistry.sol
+│   ├── CronusJobEscrow.sol
+│   ├── CronusReputation.sol
+│   ├── CronusVault.sol
+│   └── test
+├── cronus-mcp
+│   ├── README.md
+│   ├── index.mjs
+│   ├── package-lock.json
+│   ├── package.json
+│   ├── server.json
+│   └── smoke.mjs
+├── cronus_snapshot.txt
+├── deploy-escrow.mjs
+├── deploy-identity.mjs
+├── deploy-vault.mjs
+├── dist
+│   ├── assets
+│   ├── egypt-bg.jpg
+│   ├── favicon.svg
+│   ├── icons.svg
+│   └── index.html
+├── docs
+│   ├── ARC_OSS.md
+│   ├── CIRCLE_FEEDBACK.md
+│   ├── dashboard-v2.md
+│   ├── demo-script.md
+│   ├── non-custodial-cosign.md
+│   ├── security-threat-model.md
+│   └── submission.md
+├── escrow-abi.json
+├── escrow-address.txt
+├── eslint.config.js
+├── forge-out
+│   ├── CronusDecisions.sol
+│   ├── CronusIdentityRegistry.sol
+│   ├── CronusJobEscrow.sol
+│   ├── CronusReputation.sol
+│   ├── CronusVault.sol
+│   ├── Harness.sol
+│   ├── IdentityRegistry.t.sol
+│   ├── JobEscrow.t.sol
+│   ├── Reputation.t.sol
+│   ├── Vault.t.sol
+│   └── build-info
+├── foundry.toml
+├── identity-abi.json
+├── identity-address.txt
+├── index.html
+├── lib
+│   ├── backtest.js
+│   ├── breaker.js
+│   ├── creatorRegistry.js
+│   ├── dataMarket.js
+│   ├── fundEscrow.js
+│   ├── fx.js
+│   ├── gateway.js
+│   ├── intents.js
+│   ├── leaderboard.js
+│   ├── manifest.js
+│   ├── metrics.js
+│   ├── openStake.js
+│   ├── openapi.js
+│   ├── payToThink.js
+│   ├── priceSources.js
+│   ├── receipt.js
+│   ├── receipts.js
+│   ├── resolveStake.js
+│   ├── scorecard.js
+│   ├── signalX402.js
+│   ├── spendLimit.js
+│   ├── splitPay.js
+│   ├── stake.js
+│   ├── subscription.js
+│   ├── traceArchive.js
+│   ├── traction.js
+│   ├── vaultNav.js
+│   ├── withdraw.js
+│   └── withdrawExec.js
+├── metadata.CronusReputation.json
+├── package-lock.json
+├── package.json
+├── public
+│   ├── egypt-bg.jpg
+│   ├── favicon.svg
+│   └── icons.svg
+├── register-agent.mjs
+├── scripts
+│   ├── agent-loop.mjs
+│   ├── audit-funders.mjs
+│   ├── buyer-agent.mjs
+│   ├── deploy-reputation.mjs
+│   ├── new-wallet.mjs
+│   ├── open-stake.mjs
+│   ├── pay-and-consult.mjs
+│   ├── pay-cronus.mjs
+│   ├── pay-to-think.mjs
+│   ├── pay-with-memo.mjs
+│   ├── verify-intent.mjs
+│   └── verify-live.mjs
+├── secrets
+│   └── escrow.key
+├── seed-traction.mjs
+├── src
+│   ├── AgentDemo.tsx
+│   ├── App.css
+│   ├── App.tsx
+│   ├── DashboardV2Nav.tsx
+│   ├── EquityCurve.tsx
+│   ├── MarketBoard.tsx
+│   ├── PolicyGuardrails.tsx
+│   ├── SecurityPanel.tsx
+│   ├── VerifiableLedger.tsx
+│   ├── agents
+│   ├── assets
+│   ├── buffer-polyfill.ts
+│   ├── components
+│   ├── contracts.ts
+│   ├── cronus.css
+│   ├── dashboardV2.ts
+│   ├── demoSeed.ts
+│   ├── hooks
+│   ├── index.css
+│   ├── lib
+│   ├── main.tsx
+│   └── wagmiConfig.ts
+├── structure.txt
+├── test
+│   ├── backtest.test.mjs
+│   ├── breaker.test.mjs
+│   ├── cctp.test.mjs
+│   ├── consult.test.mjs
+│   ├── creatorRegistry.test.mjs
+│   ├── dataMarket.test.mjs
+│   ├── escrow.test.mjs
+│   ├── fx.test.mjs
+│   ├── identity.test.mjs
+│   ├── nano.test.mjs
+│   ├── payToThinkSettle.test.mjs
+│   ├── payToThinkTrace.test.mjs
+│   ├── payout.test.mjs
+│   ├── priceSources.test.mjs
+│   ├── sessionGuard.test.mjs
+│   ├── signal.test.mjs
+│   ├── traceArchive.test.mjs
+│   ├── traction.test.mjs
+│   ├── vault.test.mjs
+│   └── withdraw.test.mjs
+├── test.log
+├── tsconfig.app.json
+├── tsconfig.json
+├── tsconfig.node.json
+├── vault-abi.json
+├── vault-address.txt
+├── vercel.json
+└── vite.config.ts
+
+49 directories, 192 files
