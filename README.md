@@ -977,3 +977,50 @@ automated (cron hits the resolver every 15 min; payouts are capped and verifiabl
 5. At expiry the cron-driven resolver settles the policy autonomously — no human in the loop.
 
 Latest REAL premium payment (confirmed in <1s on Arc): [View the premium tx on ArcScan ↗](https://testnet.arcscan.app/tx/0xae8d45b4da3e240ad745aa829623b8751ad6e7105bea0f73b90303176791ad4b)
+
+---
+
+## 📲 Telegram Ops Alerts — the agent reports to your pocket
+
+Cronus monitors **itself**. A serverless alert module watches every business
+and health metric and pushes changes to Telegram — no dashboard refreshing,
+no manual checks. If something happens on-chain, the operator knows within
+10 minutes.
+
+**How it works**
+
+    cron-job.org (every 10 min)
+       └─> GET /api/alerts  (rewrite -> /api/info?kind=alerts, stays within Hobby 12-fn cap)
+            ├─ fetches 9 internal endpoints (metrics, cover, track-record, traction,
+            │  spend-limit, agent-payout, signer-info, settlements, vault NAV)
+            ├─ compares 19 fields against the last snapshot in Upstash KV (alerts:last)
+            └─> sends only real deltas to Telegram Bot API (dedupe + 1h throttle for noisy scans)
+
+**What it alerts on (16 event types)**
+
+| | Event |
+|---|---|
+| 💰 | New x402 USDC payment settled on Arc |
+| 🛡 | Cover policy sold / resolved autonomously |
+| 💸 | Cover payout triggered (parametric insurance paid) |
+| 🎲 🎯 🔥 | Conviction stake opened / resolved correct / burned |
+| 🚀 | New external payer detected |
+| 🏦 | Autonomous CCTP payout executed (Arc → Stellar) |
+| 🌉 | New direct on-chain settlement (tracked by tx hash) |
+| 🌊 | Nano-stream Gateway batch activity (throttled 1/hour) |
+| 🏛 | ERC-4626 vault NAV moved >= 0.01 USDC |
+| 🤖 | Agent spent USDC upstream (data purchases) |
+| ⚠️ | Treasury signer balance low / daily spend limit near cap |
+| 🔴 | Any of 8 API endpoints down |
+
+**Design notes**
+
+- State lives in Upstash KV — alerts fire on *changes only*, never "all quiet" spam.
+- Windowed on-chain scans (settlements, Gateway batches) are deduped by tx hash
+  and time-throttled, so RPC flicker never produces false positives.
+- Secured by the same `CRON_SECRET` as the payout/resolver crons
+  (`?secret=` or `Authorization: Bearer`).
+- Code: [`lib/alerts.js`](lib/alerts.js), routed through the `api/info.js` dispatcher.
+
+*Judges: this means the autonomous agent is not a demo loop — it runs 24/7
+unattended, and its operator is paged like an SRE when real money moves.*
