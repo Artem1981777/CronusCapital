@@ -36,3 +36,4 @@ cache/
 .env
 structure.txt
 CronusCapital/
+*.bak
