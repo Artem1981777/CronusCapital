@@ -982,6 +982,8 @@ Latest REAL premium payment (confirmed in <1s on Arc): [View the premium tx on A
 
 ## 📲 Telegram Ops Alerts — the agent reports to your pocket
 
+> **Live instance:** this deployment reports to [@cronus_capital_bot](https://t.me/cronus_capital_bot) (private ops channel — push-only, it does not respond to messages). To get the same alerts for your fork, create your own bot via @BotFather and set `TELEGRAM_BOT_TOKEN` / `TELEGRAM_CHAT_ID`.
+
 Cronus monitors **itself**. A serverless alert module watches every business
 and health metric and pushes changes to Telegram — no dashboard refreshing,
 no manual checks. If something happens on-chain, the operator knows within
