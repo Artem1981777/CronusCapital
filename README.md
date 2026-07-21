@@ -980,6 +980,14 @@ Latest REAL premium payment (confirmed in <1s on Arc): [View the premium tx on A
 
 ---
 
+## ⛓ On-chain Activity — Full System Snapshot
+
+Latest transactions of the treasury and **every deployed contract** — with clickable ArcScan proofs, including the autonomous CCTP payouts that ran overnight: [docs/onchain-activity.md](docs/onchain-activity.md)
+
+Regenerate anytime (public API only, zero private keys):
+
+    node scripts/traction-snapshot.mjs
+
 ## 📲 Telegram Ops Alerts — the agent reports to your pocket
 
 > **Live instance:** this deployment reports to [@cronus_capital_bot](https://t.me/cronus_capital_bot) (private ops channel — push-only, it does not respond to messages). To get the same alerts for your fork, create your own bot via @BotFather and set `TELEGRAM_BOT_TOKEN` / `TELEGRAM_CHAT_ID`.
