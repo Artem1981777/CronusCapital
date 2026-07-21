@@ -1,0 +1,31 @@
+name: Refresh on-chain activity snapshot
+
+on:
+  schedule:
+    - cron: "0 5 * * *"   # daily at 05:00 UTC (08:00 MSK)
+  workflow_dispatch: {}    # manual run button
+
+permissions:
+  contents: write
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Generate snapshot from ArcScan (public API, no keys)
+        run: node scripts/traction-snapshot.mjs
+
+      - name: Commit if changed
+        run: |
+          git config user.name "cronus-snapshot-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add docs/onchain-activity.md
+          git diff --cached --quiet && echo "No changes" && exit 0
+          git commit -m "chore: refresh on-chain activity snapshot (automated)"
+          git push
