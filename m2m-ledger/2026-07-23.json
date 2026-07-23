@@ -48,5 +48,164 @@
       "verdict": "SKIP",
       "conviction": 42
     }
+  },
+  {
+    "agent": "rhea",
+    "ts": "2026-07-23T07:23:09.012Z",
+    "topic": "BTC-USDC momentum",
+    "quote": {
+      "tier": "nano",
+      "price": "$0.001"
+    },
+    "purchases": 2,
+    "loyal": false,
+    "action": "BUY",
+    "paidUsd": 0.001,
+    "settlement": "5d5170de-cd36-4870-bbed-2fe4ed3ceac5",
+    "quality": {
+      "delivered": true,
+      "verdict": "SKIP",
+      "conviction": 58
+    }
+  },
+  {
+    "agent": "rhea",
+    "ts": "2026-07-23T07:23:18.819Z",
+    "topic": "BTC-USDC momentum",
+    "quote": {
+      "tier": "nano",
+      "price": "$0.001"
+    },
+    "purchases": 3,
+    "loyal": false,
+    "action": "BUY",
+    "paidUsd": 0.001,
+    "settlement": "9091c77d-687b-4dc0-82aa-db35ab7c117d",
+    "quality": {
+      "delivered": true,
+      "verdict": "NO",
+      "conviction": 72
+    }
+  },
+  {
+    "agent": "rhea",
+    "ts": "2026-07-23T07:23:25.701Z",
+    "topic": "BTC-USDC momentum",
+    "quote": {
+      "tier": "nano",
+      "price": "$0.001"
+    },
+    "purchases": 4,
+    "loyal": false,
+    "action": "BUY",
+    "paidUsd": 0.001,
+    "settlement": "379eda14-e8a7-4508-9c42-0b93122a3bd6",
+    "quality": {
+      "delivered": true,
+      "verdict": "SKIP",
+      "conviction": 42
+    }
+  },
+  {
+    "agent": "rhea",
+    "ts": "2026-07-23T07:23:32.487Z",
+    "topic": "BTC-USDC momentum",
+    "quote": {
+      "tier": "nano",
+      "price": "$0.001"
+    },
+    "purchases": 5,
+    "loyal": false,
+    "action": "BUY",
+    "paidUsd": 0.001,
+    "settlement": "78f7d8bc-6547-489a-8012-3db81d03cf42",
+    "quality": {
+      "delivered": true,
+      "verdict": "SKIP",
+      "conviction": 58
+    }
+  },
+  {
+    "agent": "rhea",
+    "ts": "2026-07-23T07:23:39.367Z",
+    "topic": "BTC-USDC momentum",
+    "quote": {
+      "tier": "nano",
+      "price": "$0.001"
+    },
+    "purchases": 6,
+    "loyal": false,
+    "action": "BUY",
+    "paidUsd": 0.001,
+    "settlement": "fb00f1ae-dae3-4448-b730-af259022324f",
+    "quality": {
+      "delivered": true,
+      "verdict": "SKIP",
+      "conviction": 58
+    }
+  },
+  {
+    "agent": "rhea",
+    "ts": "2026-07-23T07:23:46.001Z",
+    "topic": "BTC-USDC momentum",
+    "quote": {
+      "tier": "nano",
+      "price": "$0.001"
+    },
+    "purchases": 7,
+    "loyal": false,
+    "action": "BUY",
+    "paidUsd": 0.001,
+    "settlement": "e4403a6c-b488-43d1-ab23-4da03f068c78",
+    "quality": {
+      "delivered": true,
+      "verdict": "SKIP",
+      "conviction": 42
+    }
+  },
+  {
+    "agent": "rhea",
+    "ts": "2026-07-23T07:23:52.635Z",
+    "topic": "BTC-USDC momentum",
+    "quote": {
+      "tier": "nano",
+      "price": "$0.001"
+    },
+    "purchases": 8,
+    "loyal": false,
+    "action": "BUY",
+    "paidUsd": 0.001,
+    "settlement": "4522cd2e-3656-4553-a398-4820e56a294d",
+    "quality": {
+      "delivered": true,
+      "verdict": "SKIP",
+      "conviction": 58
+    }
+  },
+  {
+    "agent": "rhea",
+    "ts": "2026-07-23T07:23:59.628Z",
+    "topic": "BTC-USDC momentum",
+    "quote": {
+      "tier": "nano",
+      "price": "$0.001"
+    },
+    "purchases": 9,
+    "loyal": false,
+    "action": "DEFER",
+    "reason": "daily budget exhausted"
+  },
+  {
+    "agent": "rhea",
+    "ts": "2026-07-23T07:24:31.390Z",
+    "topic": "BTC-USDC momentum",
+    "quote": {
+      "tier": "nano",
+      "price": "$0.001"
+    },
+    "purchases": 9,
+    "loyal": false,
+    "action": "DEFER",
+    "reason": "daily budget exhausted"
   }
 ]
