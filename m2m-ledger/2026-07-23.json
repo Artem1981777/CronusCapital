@@ -258,5 +258,18 @@
     "loyal": true,
     "action": "DEFER",
     "reason": "daily budget exhausted"
+  },
+  {
+    "agent": "rhea",
+    "ts": "2026-07-23T16:13:22.983Z",
+    "topic": "BTC-USDC momentum",
+    "quote": {
+      "tier": "nano",
+      "price": "$0.0007"
+    },
+    "purchases": 11,
+    "loyal": true,
+    "action": "DEFER",
+    "reason": "daily budget exhausted"
   }
 ]
