@@ -29,5 +29,24 @@
       "verdict": "SKIP",
       "conviction": 58
     }
+  },
+  {
+    "agent": "rhea",
+    "ts": "2026-07-23T06:17:00.993Z",
+    "topic": "BTC-USDC momentum",
+    "quote": {
+      "tier": "nano",
+      "price": "$0.001"
+    },
+    "purchases": 1,
+    "loyal": false,
+    "action": "BUY",
+    "paidUsd": 0.001,
+    "settlement": "aea7c729-7a7f-4b96-8158-bbf948a062f7",
+    "quality": {
+      "delivered": true,
+      "verdict": "SKIP",
+      "conviction": 42
+    }
   }
 ]
