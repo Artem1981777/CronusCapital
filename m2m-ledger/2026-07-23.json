@@ -1,0 +1,33 @@
+[
+  {
+    "agent": "rhea",
+    "ts": "2026-07-23T05:46:43.357Z",
+    "topic": "BTC-USDC momentum",
+    "quote": {
+      "tier": "nano",
+      "price": "$0.001"
+    },
+    "purchases": 0,
+    "loyal": false,
+    "action": "DRY_RUN"
+  },
+  {
+    "agent": "rhea",
+    "ts": "2026-07-23T06:05:31.526Z",
+    "topic": "BTC-USDC momentum",
+    "quote": {
+      "tier": "nano",
+      "price": "$0.001"
+    },
+    "purchases": 0,
+    "loyal": false,
+    "action": "BUY",
+    "paidUsd": 0.001,
+    "settlement": "692480e8-7de7-4508-a4c6-8ddd7d187c8c",
+    "quality": {
+      "delivered": true,
+      "verdict": "SKIP",
+      "conviction": 58
+    }
+  }
+]

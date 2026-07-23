@@ -63,7 +63,7 @@ async function main() {
   if (!PK) throw new Error("BUYER_PRIVATE_KEY env required for live payment (or pass --dry-run)")
 
   step(3, "Init Gateway buyer client")
-  const gateway = new GatewayClient({ chain: CHAIN, privateKey: PK.startsWith("0x") ? PK : "0x" + PK })
+  const gateway = new GatewayClient({ chain: CHAIN, privateKey: PK.startsWith("0x") ? PK : "0x" + PK, ...(process.env.ARC_RPC ? { rpcUrl: process.env.ARC_RPC } : {}) })
   log("    agent address:", gateway.address, "| chain:", CHAIN)
 
   step(4, "Check balances")

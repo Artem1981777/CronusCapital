@@ -17,6 +17,7 @@ jobs:
       - name: Rhea negotiates and buys
         env:
           RHEA_PRIVATE_KEY: ${{ secrets.RHEA_PRIVATE_KEY }}
+          ARC_RPC: https://rpc.blockdaemon.testnet.arc.network
         run: node scripts/rhea-agent.mjs
       - name: Commit m2m ledger
         run: |

@@ -38,7 +38,7 @@ const parseUsd = (s) => Number(String(s || "").replace("$", "")) || 0
 async function main() {
   const entry = { agent: "rhea", ts: new Date().toISOString(), topic: TOPIC }
   let gateway = null, address = null
-  if (PK) { gateway = new GatewayClient({ chain: CHAIN, privateKey: PK.startsWith("0x") ? PK : "0x" + PK }); address = gateway.address }
+  if (PK) { gateway = new GatewayClient({ chain: CHAIN, privateKey: PK.startsWith("0x") ? PK : "0x" + PK, ...(process.env.ARC_RPC ? { rpcUrl: process.env.ARC_RPC } : {}) }); address = gateway.address }
 
   log("[1] requesting personalized quote" + (address ? " as " + address : " (anonymous)"))
   const qr = await fetch(BASE + "/api/nano-signal?quote=1" + (address ? "&payer=" + address : ""))
