@@ -19,6 +19,9 @@ const gateway = createGatewayMiddleware({
 const pay = gateway.require(NANO_PRICE)
 const DATASET_PRICE = process.env.DATASET_PRICE_USD || "$0.05"
 const payDataset = gateway.require(DATASET_PRICE)
+const LOYAL_PRICE  = process.env.NANO_LOYAL_PRICE_USD || "$0.0007"
+const payLoyal     = gateway.require(LOYAL_PRICE)
+const LOYALTY_MIN  = Number(process.env.LOYALTY_MIN_PURCHASES || "10")
 
 // Reuse the same oracle the STANDARD x402 path uses.
 async function generateReport(host, topic, instId) {
@@ -42,11 +45,18 @@ async function kv(cmd) {
   } catch (_) { return null }
 }
 
+async function payerPurchases(addr) {
+  if (!addr) return 0
+  const n = await kv(["GET", "cronus:nano:count:" + String(addr).toLowerCase()])
+  return Number(n || 0)
+}
+
 async function recordTraction(p) {
   const ts = Date.now()
   await Promise.all([
     kv(["INCR", "cronus:nano:calls"]),
     p.payer ? kv(["SADD", "cronus:nano:payers", String(p.payer).toLowerCase()]) : null,
+    p.payer ? kv(["INCR", "cronus:nano:count:" + String(p.payer).toLowerCase()]) : null,
     p.amount ? kv(["INCRBY", "cronus:nano:micros", String(p.amount)]) : null,
     p.transaction ? kv(["SADD", "cronus:nano:settlements", p.transaction]) : null,
     kv(["LPUSH", "cronus:nano:ledger", JSON.stringify({ ...p, ts })]),
@@ -66,7 +76,22 @@ export default async function handler(req, res) {
   const instId = String((req.query && req.query.instId) || "BTC-USDC")
   const host   = (req.headers && req.headers.host) || "localhost"
   const tier = (req.query && String(req.query.tier || "")).toLowerCase() === "dataset" ? "dataset" : "nano"
-  const mw = tier === "dataset" ? payDataset : pay
+  const payerAddr = String((req.query && req.query.payer) || "").toLowerCase()
+  const purchases = await payerPurchases(payerAddr)
+  const loyal = !!payerAddr && purchases >= LOYALTY_MIN
+
+  // m2m negotiation: free personalized quote (no payment required)
+  if (req.query && req.query.quote) {
+    return res.status(200).json({
+      ok: true, negotiation: "cronus-quote-v1",
+      payer: payerAddr || null, purchases, loyal, loyaltyThreshold: LOYALTY_MIN,
+      prices: { nano: NANO_PRICE, nanoLoyal: LOYAL_PRICE, dataset: DATASET_PRICE },
+      offered: { tier: tier, price: tier === "dataset" ? DATASET_PRICE : (loyal ? LOYAL_PRICE : NANO_PRICE) },
+      note: "loyalty discount at " + LOYALTY_MIN + "+ purchases, tracked per payer address"
+    })
+  }
+
+  const mw = tier === "dataset" ? payDataset : (loyal ? payLoyal : pay)
 
   let settled
   try {
