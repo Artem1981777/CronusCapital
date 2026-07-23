@@ -186,6 +186,32 @@ Self-serve on-ramp for a real external agent/wallet:
 
 Once a payment lands and independence is verified, the address is added to `VERIFIED_EXTERNAL_PAYERS` and surfaces at the top of `/api/traction` (`external_payers`, `external_usdc`, `external_leaders[]` with arcscan tx links) and on the landing page. Self-generated test traffic is always labeled `self_generated_*` and never counted.
 
+## Rhea — autonomous buyer with m2m price negotiation
+
+![Rhea / M2M — negotiation dashboard](assets/screenshots/rhea-m2m.jpg)
+
+Machine-to-machine **price discovery, live**: Cronus (seller) publishes a free personalized quote endpoint; Rhea (buyer agent) pays only when the price clears her policy. No human in the loop — she runs twice a day from GitHub Actions (`.github/workflows/rhea-buyer.yml`).
+
+How a trade happens:
+
+1. **Quote** — `GET /api/nano-signal?quote=1&payer=0x...` returns the price grid and a personalized offer (free, no payment required)
+2. **Negotiate** — Rhea checks the offer against her reserve price (`RHEA_RESERVE_PRICE`) and daily budget (`RHEA_DAILY_BUDGET`)
+3. **Decide** — `BUY` (gas-free via Circle Gateway) / `WALK_AWAY` (offer above reserve) / `DEFER` (daily budget exhausted)
+4. **Score** — delivery quality is recorded (delivered / verdict / conviction)
+5. **Publish** — every decision is committed to a public git ledger: [`m2m-ledger/`](m2m-ledger/)
+
+Loyalty pricing (seller side): first 10 purchases at $0.001, from the 11th the personalized quote drops to **$0.0007** — the discount is earned by on-record purchase history, not promised in words.
+
+Verify in 1 minute:
+
+```bash
+curl "https://cronus-capital.vercel.app/api/nano-signal?quote=1"
+```
+
+...then browse [`m2m-ledger/`](m2m-ledger/) in this repo and the **Rhea / M2M** section on the live dashboard.
+
+**HONEST LABEL:** Rhea is our own buyer agent — an A2A demo between two project wallets, disclosed everywhere. The quote `payer` is self-declared; binding quotes to on-chain identity (ERC-8004) is the next step.
+
 ## Pay Cronus in 60 seconds (any funded wallet)
 
 **No terminal? One click:** open the live dashboard, connect your wallet, and press **"Connect wallet & pay 0.02 USDC on Arc"** — one real on-chain transaction, and you appear in the public settled-payments feed. Need test USDC: https://faucet.circle.com (select Arc Testnet).
