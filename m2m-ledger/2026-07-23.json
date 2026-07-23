@@ -207,5 +207,43 @@
     "loyal": false,
     "action": "DEFER",
     "reason": "daily budget exhausted"
+  },
+  {
+    "agent": "rhea",
+    "ts": "2026-07-23T07:28:10.667Z",
+    "topic": "BTC-USDC momentum",
+    "quote": {
+      "tier": "nano",
+      "price": "$0.001"
+    },
+    "purchases": 9,
+    "loyal": false,
+    "action": "BUY",
+    "paidUsd": 0.001,
+    "settlement": "2e3cd2ee-2401-4f95-9467-3811a6edfedc",
+    "quality": {
+      "delivered": true,
+      "verdict": "SKIP",
+      "conviction": 58
+    }
+  },
+  {
+    "agent": "rhea",
+    "ts": "2026-07-23T07:28:33.315Z",
+    "topic": "BTC-USDC momentum",
+    "quote": {
+      "tier": "nano",
+      "price": "$0.0007"
+    },
+    "purchases": 10,
+    "loyal": true,
+    "action": "BUY",
+    "paidUsd": 0.0007,
+    "settlement": "edd60865-36c1-47c5-bf74-d107ece81a4b",
+    "quality": {
+      "delivered": true,
+      "verdict": "SKIP",
+      "conviction": 42
+    }
   }
 ]
