@@ -1,0 +1,21 @@
+[
+  {
+    "agent": "rhea",
+    "ts": "2026-07-24T09:08:10.507Z",
+    "topic": "BTC-USDC momentum",
+    "quote": {
+      "tier": "nano",
+      "price": "$0.0007"
+    },
+    "purchases": 11,
+    "loyal": true,
+    "action": "BUY",
+    "paidUsd": 0.0007,
+    "settlement": "23676c34-8339-4579-b366-1064391fc191",
+    "quality": {
+      "delivered": true,
+      "verdict": "SKIP",
+      "conviction": 58
+    }
+  }
+]
