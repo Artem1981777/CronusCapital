@@ -212,6 +212,17 @@ curl "https://cronus-capital.vercel.app/api/nano-signal?quote=1"
 
 **HONEST LABEL:** Rhea is our own buyer agent — an A2A demo between two project wallets, disclosed everywhere. The quote `payer` is self-declared; binding quotes to on-chain identity (ERC-8004) is the next step.
 
+### ERC-8004 identity gate (July 24)
+
+Loyal pricing is bound to on-chain identity, not just purchase history. The quote endpoint calls isRegistered(payer) on the CronusIdentityRegistry (0x252cAA46b9b0648908000f6C87e0a561DB4dEb6c); unregistered addresses are offered list price ($0.001) no matter how many purchases they have on record.
+
+Rhea registered her own identity on-chain — tx 0x2efa5292a357e00ac32461486a831c1401b6966310d0b9187299636c1a2f7cdb: the record is owned by her wallet, and the metadataURI points to her public trade ledger (m2m-ledger/). One-off registration script: scripts/register-rhea.mjs.
+
+Verify with zero keys:
+
+    curl "https://cronus-capital.vercel.app/api/nano-signal?quote=1&payer=0xbe3a16bD4137A8a293aCBcaA75cCE3420919D21d"   # registered agent -> identity.registered=true, offered $0.0007
+    curl "https://cronus-capital.vercel.app/api/nano-signal?quote=1&payer=0xdc6778c5f8cc74b10aed11c48306d4cfc5737fbd"   # unregistered -> identity.registered=false, offered $0.001
+
 ## Pay Cronus in 60 seconds (any funded wallet)
 
 **No terminal? One click:** open the live dashboard, connect your wallet, and press **"Connect wallet & pay 0.02 USDC on Arc"** — one real on-chain transaction, and you appear in the public settled-payments feed. Need test USDC: https://faucet.circle.com (select Arc Testnet).
