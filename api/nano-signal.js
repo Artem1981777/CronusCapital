@@ -4,6 +4,26 @@
 // addresses are fetched live from Circle's facilitator (no hardcoded Gateway address).
 import { createGatewayMiddleware } from "@circle-fin/x402-batching/server"
 
+// --- ERC-8004 identity gate: the loyal tier requires a registered on-chain identity ---
+const IDENTITY_REGISTRY = process.env.IDENTITY_REGISTRY || "0x252cAA46b9b0648908000f6C87e0a561DB4dEb6c"
+const ARC_RPC_URL = process.env.ARC_RPC || "https://rpc.blockdaemon.testnet.arc.network"
+const _idCache = new Map() // registration is permanent -> cache positives per instance
+async function payerRegistered(addr) {
+  if (!addr) return false
+  if (_idCache.get(addr)) return true
+  try {
+    const { toFunctionSelector } = await import("viem")
+    const data = toFunctionSelector("function isRegistered(address)") + addr.replace(/^0x/, "").toLowerCase().padStart(64, "0")
+    const res = await fetch(ARC_RPC_URL, { method: "POST", headers: { "content-type": "application/json" },
+      body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "eth_call", params: [{ to: IDENTITY_REGISTRY, data: data }, "latest"] }) })
+    const j = await res.json()
+    if (!j || typeof j.result !== "string") return null
+    const reg = BigInt(j.result) !== 0n
+    if (reg) _idCache.set(addr, true)
+    return reg
+  } catch (_) { return null } // RPC hiccup: identity unknown, fail open so sales never break
+}
+
 const PAY_TO        = (process.env.CRONUS_PAYTO || "0xdc6778c5f8cc74b10aed11c48306d4cfc5737fbd")
 const NETWORK       = process.env.GATEWAY_NETWORK || "eip155:5042002"            // Arc testnet
 const FAC_URL       = process.env.GATEWAY_FACILITATOR_URL || "https://gateway-api-testnet.circle.com"
@@ -78,16 +98,18 @@ export default async function handler(req, res) {
   const tier = (req.query && String(req.query.tier || "")).toLowerCase() === "dataset" ? "dataset" : "nano"
   const payerAddr = String((req.query && req.query.payer) || "").toLowerCase()
   const purchases = await payerPurchases(payerAddr)
-  const loyal = !!payerAddr && purchases >= LOYALTY_MIN
+  const registered = await payerRegistered(payerAddr)
+  const loyal = !!payerAddr && purchases >= LOYALTY_MIN && registered !== false
 
   // m2m negotiation: free personalized quote (no payment required)
   if (req.query && req.query.quote) {
     return res.status(200).json({
       ok: true, negotiation: "cronus-quote-v1",
       payer: payerAddr || null, purchases, loyal, loyaltyThreshold: LOYALTY_MIN,
+      identity: { standard: "ERC-8004", registry: IDENTITY_REGISTRY, registered: registered === null ? "unknown" : registered },
       prices: { nano: NANO_PRICE, nanoLoyal: LOYAL_PRICE, dataset: DATASET_PRICE },
       offered: { tier: tier, price: tier === "dataset" ? DATASET_PRICE : (loyal ? LOYAL_PRICE : NANO_PRICE) },
-      note: "loyalty discount at " + LOYALTY_MIN + "+ purchases, tracked per payer address"
+      note: "loyalty discount at " + LOYALTY_MIN + "+ purchases; loyal tier requires an ERC-8004 registered identity"
     })
   }
 

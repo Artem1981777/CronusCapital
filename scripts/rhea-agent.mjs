@@ -30,7 +30,7 @@ function appendLedger(entry) {
 function spentToday() {
   try {
     const arr = JSON.parse(fs.readFileSync(ledgerPath(), "utf8"))
-    return arr.filter(e => e.action === "BUY").reduce((s, e) => s + Number(e.paidUsd || 0), 0)
+    return Math.round(arr.filter(e => e.action === "BUY").reduce((s, e) => s + Number(e.paidUsd || 0), 0) * 1e6) / 1e6
   } catch (_) { return 0 }
 }
 const parseUsd = (s) => Number(String(s || "").replace("$", "")) || 0
