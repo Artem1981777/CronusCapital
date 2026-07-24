@@ -210,7 +210,7 @@ curl "https://cronus-capital.vercel.app/api/nano-signal?quote=1"
 
 ...then browse [`m2m-ledger/`](m2m-ledger/) in this repo and the **Rhea / M2M** section on the live dashboard.
 
-**HONEST LABEL:** Rhea is our own buyer agent — an A2A demo between two project wallets, disclosed everywhere. The quote `payer` is self-declared; binding quotes to on-chain identity (ERC-8004) is the next step.
+**HONEST LABEL:** Rhea is our own buyer agent — an A2A demo between two project wallets, disclosed everywhere. The quote `payer` was self-declared at launch; since July 24 the loyal tier is bound to on-chain identity — see the ERC-8004 identity gate below.
 
 ### ERC-8004 identity gate (July 24)
 
