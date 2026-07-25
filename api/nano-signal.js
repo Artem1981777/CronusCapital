@@ -148,6 +148,14 @@ async function creditUnits(addr) {
   return Math.max(0, Number(n || 0))
 }
 
+// --- conviction stake: every paid signal is backed by a stake; the market-graded track record is the only judge ---
+async function stakeStatus() {
+  const s = await trackRecord()
+  const misses = s ? Math.max(0, Number(s.graded || 0) - Number(s.hits || 0)) : 0
+  const redeemed = Number(await kv(["SCARD", "cronus:stake:redeemed"]) || 0)
+  return { model: "conviction-stake", stakePerSignal: LOYAL_PRICE, judge: "market-graded track record, no LLM", misses: misses, redeemed: redeemed, owedMakeGoods: Math.max(0, misses - redeemed) }
+}
+
 async function payerPurchases(addr) {
   if (!addr) return 0
   const n = await kv(["GET", "cronus:nano:count:" + String(addr).toLowerCase()])
@@ -213,6 +221,7 @@ export default async function handler(req, res) {
       signalAccuracy: await trackRecord(),
       sellerReputation: { standard: "ERC-8004", registry: REPUTATION_REGISTRY, agentId: SELLER_AGENT_ID, feedbacks: sellerRep ? sellerRep.count : null, avg: sellerRep ? sellerRep.avg : null },
       credit: { eligible: creditEligible, unitPrice: LOYAL_PRICE, unitsOutstanding: creditDebt, limit: CREDIT_LIMIT_UNITS, note: "loyal buyers can take a signal on credit and repay at the loyal price on a later run" },
+      stake: await stakeStatus(),
       prices: { nano: NANO_PRICE, nanoLoyal: LOYAL_PRICE, dataset: DATASET_PRICE },
       offered: { tier: tier, price: tier === "dataset" ? DATASET_PRICE : (loyal ? lb.price : NANO_PRICE) },
       convictionPricing: loyal ? { model: "conviction-pegged", conviction: conv, band: lb.band, bands: { discount: LOYAL_LOW, standard: LOYAL_PRICE, premium: LOYAL_HIGH }, note: "loyal price floats with live oracle confidence, hard-clamped to the band range" } : null,
@@ -241,6 +250,19 @@ export default async function handler(req, res) {
     await kv(["INCR", "cronus:credit:units:" + payerAddr])
     try { await recordTraction({ tier: "NANO_CREDIT", payer: payerAddr, verdict: creditReport.verdict || null }) } catch (_) {}
     return res.status(200).json({ paid: false, credit: true, creditStatus: { unitsOutstanding: creditDebt + 1, limit: CREDIT_LIMIT_UNITS, unitPrice: LOYAL_PRICE }, report: creditReport })
+  }
+  // conviction stake: a market-graded MISS entitles the buyer to one free make-good unit
+  if (req.query && req.query.makegood) {
+    const mgKey = String(req.query.makegood)
+    if (!loyal) return res.status(402).json({ error: "make-good refused", reason: "make-goods are for loyal, ERC-8004 registered buyers" })
+    const st = await stakeStatus()
+    if (st.owedMakeGoods <= 0) return res.status(409).json({ error: "make-good refused", reason: "no unredeemed market-graded misses", stake: st })
+    const already = await kv(["SISMEMBER", "cronus:stake:redeemed", mgKey])
+    if (Number(already || 0) > 0) return res.status(409).json({ error: "make-good refused", reason: "this miss was already redeemed", key: mgKey })
+    const mgReport = await generateReport(host, topic, instId)
+    await kv(["SADD", "cronus:stake:redeemed", mgKey])
+    try { await recordTraction({ tier: "STAKE_MAKEGOOD", payer: payerAddr, verdict: mgReport.verdict || null }) } catch (_) {}
+    return res.status(200).json({ paid: false, makeGood: true, key: mgKey, stake: { model: st.model, misses: st.misses, redeemed: st.redeemed + 1, owedMakeGoods: st.owedMakeGoods - 1 }, report: mgReport })
   }
   const mw = tier === "dataset" ? payDataset : (negoMw || (loyal ? lb.mw : pay))
 
@@ -323,6 +345,7 @@ export default async function handler(req, res) {
       settledAt,
       report,
       deliveryReceipt: deliveryReceipt,
+        stake: { model: "conviction-stake", note: "if the market grades this signal a MISS within 24h, the buyer is owed one free make-good unit" },
     })
   }
 }

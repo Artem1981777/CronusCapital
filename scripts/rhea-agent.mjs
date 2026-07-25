@@ -117,6 +117,26 @@ async function main() {
     } catch (e) { log("  repay failed (non-fatal): " + (e.message || e)) }
   }
   if (quote.convictionPricing) { entry.convictionPricing = quote.convictionPricing; log("  conviction-pegged: band " + quote.convictionPricing.band + " | oracle confidence " + quote.convictionPricing.conviction) }
+  if (gateway && quote.stake && Number(quote.stake.owedMakeGoods) > 0) {
+    try {
+      log("[1c] conviction stake: seller owes " + quote.stake.owedMakeGoods + " make-good unit(s) for market-graded misses")
+      let missKeys = []
+      try {
+        const trj = JSON.parse(fs.readFileSync(path.join("m2m-ledger", "track-record.json"), "utf8"))
+        missKeys = (trj.records || []).filter((r) => r.result === "GRADED" && r.hit === false).map((r) => r.key).reverse()
+      } catch (_) {}
+      for (const mk of missKeys.slice(0, 3)) {
+        const mr = await fetch(BASE + "/api/nano-signal?makegood=" + encodeURIComponent(mk) + "&topic=" + encodeURIComponent(TOPIC) + "&payer=" + address)
+        const mj = await mr.json()
+        if (mr.ok && mj && mj.makeGood) {
+          appendLedger({ agent: "rhea", ts: new Date().toISOString(), action: "MAKE_GOOD", topic: TOPIC, key: mk, paidUsd: 0, quality: { delivered: !!(mj.report && mj.report.verdict), verdict: (mj.report && mj.report.verdict) || null, conviction: mj.report && mj.report.conviction != null ? mj.report.conviction : null } })
+          log("  make-good redeemed for miss " + mk + " (free unit, stake slashed)")
+          break
+        }
+        if (mr.status !== 409) { log("  make-good refused: HTTP " + mr.status); break }
+      }
+    } catch (e) { log("  make-good attempt failed (non-fatal): " + (e.message || e)) }
+  }
   if (gateway && quote.convictionPricing && quote.convictionPricing.band === "premium" && quote.convictionPricing.bands) {
     try {
       const target = quote.convictionPricing.bands.standard
