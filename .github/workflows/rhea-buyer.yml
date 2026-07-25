@@ -19,6 +19,12 @@ jobs:
           RHEA_PRIVATE_KEY: ${{ secrets.RHEA_PRIVATE_KEY }}
           ARC_RPC: https://rpc.blockdaemon.testnet.arc.network
         run: node scripts/rhea-agent.mjs
+      - name: Anchor previous-day ledger on-chain
+        continue-on-error: true
+        env:
+          RHEA_PRIVATE_KEY: ${{ secrets.RHEA_PRIVATE_KEY }}
+          ARC_RPC: https://rpc.blockdaemon.testnet.arc.network
+        run: node scripts/anchor-ledger.mjs
       - name: Commit m2m ledger
         run: |
           git config user.name "rhea-agent"
