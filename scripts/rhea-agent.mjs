@@ -69,6 +69,16 @@ async function main() {
   log("    prices: " + JSON.stringify(quote.prices))
   log("    offered: " + (quote.offered && quote.offered.price) + " | purchases: " + quote.purchases + " | loyal: " + quote.loyal)
   if (quote.convictionPricing) { entry.convictionPricing = quote.convictionPricing; log("  conviction-pegged: band " + quote.convictionPricing.band + " | oracle confidence " + quote.convictionPricing.conviction) }
+  if (gateway && quote.convictionPricing && quote.convictionPricing.band === "premium" && quote.convictionPricing.bands) {
+    try {
+      const target = quote.convictionPricing.bands.standard
+      log("[2a] haggling: premium band offered, countering at " + target)
+      const cr = await fetch(BASE + "/api/nano-signal?quote=1&counter=" + encodeURIComponent(target) + "&payer=" + address)
+      const cj = await cr.json()
+      if (cj && cj.accepted) { entry.negotiation = { countered: quote.offered && quote.offered.price, agreed: cj.price, band: cj.band }; log("  counteroffer ACCEPTED: " + cj.price + " (" + cj.band + ")") }
+      else { entry.negotiation = { countered: quote.offered && quote.offered.price, agreed: null, reason: (cj && cj.reason) || null }; log("  counteroffer rejected: " + ((cj && cj.reason) || "-")) }
+    } catch (e) { log("  haggling failed (non-fatal): " + (e.message || e)) }
+  }
 
   // trust gate: reputation is not decoration - Rhea refuses to buy from a badly rated seller
   const MIN_SELLER_AVG = Number(process.env.RHEA_MIN_SELLER_AVG || "4")

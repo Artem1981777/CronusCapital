@@ -180,6 +180,21 @@ export default async function handler(req, res) {
 
   // m2m negotiation: free personalized quote (no payment required)
   if (req.query && req.query.quote) {
+    // m2m haggling: deterministic counteroffer rule, no LLM in the loop
+    const counterRaw = String(req.query.counter || "")
+    if (counterRaw) {
+      const order = ["discount", "standard", "premium"]
+      const want = counterRaw === LOYAL_LOW ? "discount" : counterRaw === LOYAL_PRICE ? "standard" : counterRaw === LOYAL_HIGH ? "premium" : null
+      const ok = !!(loyal && want !== null && order.indexOf(want) === order.indexOf(lb.band) - 1)
+      if (ok) await kv(["SET", "cronus:nego:" + payerAddr, want, "EX", "600"])
+      return res.status(200).json({
+        ok: true, negotiation: "cronus-counter-v1", accepted: ok,
+        band: ok ? want : lb.band, price: ok ? counterRaw : (loyal ? lb.price : NANO_PRICE),
+        rule: "deterministic: a loyal buyer can talk the price exactly one band down; the discount floor is never crossed",
+        expiresInSec: ok ? 600 : null,
+        reason: ok ? "accepted: loyalty earned one concession step" : "rejected: current band is " + lb.band + "; only one band down is negotiable for loyal buyers"
+      })
+    }
     const sellerRep = await sellerReputation()
     return res.status(200).json({
       ok: true, negotiation: "cronus-quote-v1",
@@ -194,7 +209,9 @@ export default async function handler(req, res) {
     })
   }
 
-  const mw = tier === "dataset" ? payDataset : (loyal ? lb.mw : pay)
+  const negoBand = loyal ? await kv(["GET", "cronus:nego:" + payerAddr]) : null
+  const negoMw = negoBand === "discount" ? payLoyalLow : negoBand === "standard" ? payLoyal : negoBand === "premium" ? payLoyalHigh : null
+  const mw = tier === "dataset" ? payDataset : (negoMw || (loyal ? lb.mw : pay))
 
   let settled
   try {
@@ -244,6 +261,7 @@ export default async function handler(req, res) {
   }
 
   const report = await generateReport(host, topic, instId)
+  if (negoBand) { try { await kv(["DEL", "cronus:nego:" + payerAddr]) } catch (_) {} } // one negotiated deal per handshake
   const settledAt = Date.now()
   try {
     await recordTraction({ tier: "NANO", network: payment.network || NETWORK, payer: payment.payer, amount: payment.amount, transaction: payment.transaction, verdict: report.verdict || null, conviction: (report.conviction != null ? report.conviction : null) })
@@ -256,7 +274,7 @@ export default async function handler(req, res) {
     res.status(200).json({
       paid: true,
       tier: "NANO",
-      pricing: { tier: "NANO", usd: NANO_PRICE, batched: true, gasFree: true },
+        pricing: { tier: "NANO", usd: NANO_PRICE, batched: true, gasFree: true, negotiatedBand: negoBand || null },
       payment: {
         scheme: "exact-batched",
         network: payment.network || NETWORK,
