@@ -143,5 +143,26 @@
       "prev": "sha256:8ab8b21909bfd991ea6d1745626c2aaf3386083bc4dfb72880208055492e57a3"
     },
     "policyHash": "sha256:bb92e518a455c943e284069ca8ed9db14e07e3cc1bd5c40fddddf3bc82c0d936"
+  },
+  {
+    "agent": "rhea",
+    "ts": "2026-07-25T09:03:25.474Z",
+    "topic": "BTC-USDC momentum",
+    "bandit": {
+      "mode": "exploit",
+      "epsilon": 0.2
+    },
+    "quote": {
+      "tier": "nano",
+      "price": "$0.001"
+    },
+    "purchases": 0,
+    "loyal": false,
+    "action": "DRY_RUN",
+    "chain": {
+      "standard": "cronus-hashchain-v1",
+      "prev": "sha256:2ef129db8a5e921d586d3236104f3df99d7ed6ac11bfa132f5e855033458f9ae"
+    },
+    "policyHash": "sha256:fa6496db7611aeb26710b34b3401992704cc21891df021a9262bd9c13ffdeb38"
   }
 ]

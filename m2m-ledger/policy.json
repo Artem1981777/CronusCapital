@@ -13,8 +13,9 @@
   "trustRule": "refuse to buy when the seller on-chain avg rating is below minSellerAvg",
   "hagglingRule": "counter exactly one band down when offered premium; never chase below the discount floor",
   "creditRule": "take trade credit only when the daily budget is exhausted; repay first on the next run",
+  "sessionRule": "prefer prepaid sessions: open a bundle when the per-unit price beats the current offer and the daily budget allows; consume prepaid units before any new spend",
   "makeGoodRule": "redeem at most one market-graded miss per run",
   "verify": "policyHash = sha256 over JSON.stringify of this object minus policyHash and publishedAt",
-  "policyHash": "sha256:bb92e518a455c943e284069ca8ed9db14e07e3cc1bd5c40fddddf3bc82c0d936",
-  "publishedAt": "2026-07-25T07:18:45.174Z"
+  "policyHash": "sha256:fa6496db7611aeb26710b34b3401992704cc21891df021a9262bd9c13ffdeb38",
+  "publishedAt": "2026-07-25T09:03:25.510Z"
 }
