@@ -81,6 +81,7 @@ async function convictionNow(host, topic, instId) {
 }
 function loyalBand(c) {
   if (c === null || c === undefined) return { band: "standard", price: LOYAL_PRICE, mw: payLoyal }
+  c = Number(c) > 1 ? Number(c) / 100 : Number(c) // oracle reports 0-100; normalize to 0-1
   if (c >= 0.8) return { band: "premium", price: LOYAL_HIGH, mw: payLoyalHigh }
   if (c < 0.5) return { band: "discount", price: LOYAL_LOW, mw: payLoyalLow }
   return { band: "standard", price: LOYAL_PRICE, mw: payLoyal }
