@@ -50,6 +50,29 @@ function chooseTopic() {
 }
 const _pick = chooseTopic()
 const TOPIC = _pick.topic
+// --- policy envelope: the buyer spending mandate is public and deterministic; every ledger entry pins its hash ---
+const POLICY = {
+  standard: "cronus-policy-envelope-v1",
+  agent: "rhea",
+  dailyBudgetUsd: DAILY_BUDGET,
+  reservePriceUsd: RESERVE_PRICE,
+  minSellerAvg: Number(process.env.RHEA_MIN_SELLER_AVG || "4"),
+  banditEpsilon: EPSILON,
+  topics: TOPICS,
+  trustRule: "refuse to buy when the seller on-chain avg rating is below minSellerAvg",
+  hagglingRule: "counter exactly one band down when offered premium; never chase below the discount floor",
+  creditRule: "take trade credit only when the daily budget is exhausted; repay first on the next run",
+  makeGoodRule: "redeem at most one market-graded miss per run",
+  verify: "policyHash = sha256 over JSON.stringify of this object minus policyHash and publishedAt",
+}
+const POLICY_HASH = "sha256:" + crypto.createHash("sha256").update(JSON.stringify(POLICY)).digest("hex")
+function publishPolicy() {
+  fs.mkdirSync("m2m-ledger", { recursive: true })
+  const p = path.join("m2m-ledger", "policy.json")
+  try { const cur = JSON.parse(fs.readFileSync(p, "utf8")); if (cur.policyHash === POLICY_HASH) return p } catch (_) {}
+  fs.writeFileSync(p, JSON.stringify({ ...POLICY, policyHash: POLICY_HASH, publishedAt: new Date().toISOString() }, null, 2))
+  return p
+}
 const DRY = process.argv.includes("--dry-run")
 const log = (...a) => console.log(...a)
 
@@ -76,6 +99,7 @@ function appendLedger(entry) {
   let arr = []
   try { arr = JSON.parse(fs.readFileSync(p, "utf8")) } catch (_) {}
   entry.chain = { standard: "cronus-hashchain-v1", prev: lastChainHash() }
+  entry.policyHash = POLICY_HASH
   arr.push(entry)
   fs.writeFileSync(p, JSON.stringify(arr, null, 2))
   return p
@@ -112,6 +136,7 @@ async function main() {
   const entry = { agent: "rhea", ts: new Date().toISOString(), topic: TOPIC }
   entry.bandit = { mode: _pick.mode, epsilon: EPSILON }
   log("[0] bandit topic selection: " + TOPIC + " (" + _pick.mode + ")")
+  log("[0a] policy envelope: " + POLICY_HASH + " | " + publishPolicy())
   let gateway = null, address = null
   if (PK) { gateway = new GatewayClient({ chain: CHAIN, privateKey: PK.startsWith("0x") ? PK : "0x" + PK, ...(process.env.ARC_RPC ? { rpcUrl: process.env.ARC_RPC } : {}) }); address = gateway.address }
 

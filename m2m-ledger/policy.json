@@ -1,0 +1,20 @@
+{
+  "standard": "cronus-policy-envelope-v1",
+  "agent": "rhea",
+  "dailyBudgetUsd": 0.01,
+  "reservePriceUsd": 0.002,
+  "minSellerAvg": 4,
+  "banditEpsilon": 0.2,
+  "topics": [
+    "BTC-USDC momentum",
+    "ETH-USDC trend",
+    "SOL-USDC breakout"
+  ],
+  "trustRule": "refuse to buy when the seller on-chain avg rating is below minSellerAvg",
+  "hagglingRule": "counter exactly one band down when offered premium; never chase below the discount floor",
+  "creditRule": "take trade credit only when the daily budget is exhausted; repay first on the next run",
+  "makeGoodRule": "redeem at most one market-graded miss per run",
+  "verify": "policyHash = sha256 over JSON.stringify of this object minus policyHash and publishedAt",
+  "policyHash": "sha256:bb92e518a455c943e284069ca8ed9db14e07e3cc1bd5c40fddddf3bc82c0d936",
+  "publishedAt": "2026-07-25T07:18:45.174Z"
+}

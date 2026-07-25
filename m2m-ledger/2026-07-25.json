@@ -47,5 +47,26 @@
       "jobRef": "0x42ed9c0a0449e4783f993dcb24182cecfcc25748400f53b1037fd4e5151095fc",
       "tx": "0x43ccdfab841ed34e72f449677e08f4251fc743ad824a30b76d3acc0e13b4e23d"
     }
+  },
+  {
+    "agent": "rhea",
+    "ts": "2026-07-25T07:18:45.143Z",
+    "topic": "SOL-USDC breakout",
+    "bandit": {
+      "mode": "explore-untried",
+      "epsilon": 0.2
+    },
+    "quote": {
+      "tier": "nano",
+      "price": "$0.001"
+    },
+    "purchases": 0,
+    "loyal": false,
+    "action": "DRY_RUN",
+    "chain": {
+      "standard": "cronus-hashchain-v1",
+      "prev": "sha256:4703d508c1f643ef5c489902081ed7de8b7baf618d26accc71dfc3c80cc9df55"
+    },
+    "policyHash": "sha256:bb92e518a455c943e284069ca8ed9db14e07e3cc1bd5c40fddddf3bc82c0d936"
   }
 ]
