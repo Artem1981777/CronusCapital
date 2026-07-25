@@ -46,7 +46,7 @@ for (const f of files) {
     if (!ts || Date.now() - ts < HORIZON) continue
     const key = String(e.settlement || e.ts)
     if (done.has(key)) continue
-    candidates.push({ key, ts, topic: e.topic || "", verdict: String(e.quality.verdict).toUpperCase() })
+    candidates.push({ key, ts, topic: e.topic || "", verdict: String(e.quality.verdict).toUpperCase(), conviction: e.quality.conviction != null ? Number(e.quality.conviction) : null })
   }
 }
 console.log("[grade] candidates: " + candidates.length)
@@ -74,7 +74,9 @@ for (const c of candidates) {
     await sleep(1500)
     const movePct = Math.round(((p1 - p0) / p0) * 10000) / 100
     const hit = dir * (p1 - p0) > 0
-    tr.records.push({ key: c.key, ts: new Date(c.ts).toISOString(), topic: c.topic, verdict: c.verdict, result: "GRADED", priceAtSignal: p0, priceAfter24h: p1, movePct: movePct, hit: hit, gradedAt: new Date().toISOString() })
+    const pConf = c.conviction == null ? null : Math.min(1, Math.max(0, Number(c.conviction) > 1 ? Number(c.conviction) / 100 : Number(c.conviction)))
+    const brier = pConf == null ? null : Math.round(Math.pow(pConf - (hit ? 1 : 0), 2) * 1000) / 1000
+    tr.records.push({ key: c.key, ts: new Date(c.ts).toISOString(), topic: c.topic, verdict: c.verdict, result: "GRADED", conviction: c.conviction, brier: brier, priceAtSignal: p0, priceAfter24h: p1, movePct: movePct, hit: hit, gradedAt: new Date().toISOString() })
     console.log("[grade] " + c.verdict + " on " + c.topic + " -> move " + movePct + "% -> " + (hit ? "HIT" : "MISS"))
   } catch (e) {
     console.log("[grade] skipped " + c.key + ": " + String((e && e.message) || e))
@@ -83,11 +85,13 @@ for (const c of candidates) {
 
 const gradedArr = tr.records.filter((r) => r.result === "GRADED")
 const hits = gradedArr.filter((r) => r.hit).length
+const briers = gradedArr.filter((r) => r.brier != null).map((r) => r.brier)
 tr.stats = {
   graded: gradedArr.length,
   hits: hits,
   hitRate: gradedArr.length ? Math.round((hits / gradedArr.length) * 100) + "%" : null,
   abstained: tr.records.filter((r) => r.result === "ABSTAIN").length,
+  calibration: briers.length ? { standard: "cronus-calibration-v1", scored: briers.length, brierAvg: Math.round((briers.reduce((s, b) => s + b, 0) / briers.length) * 1000) / 1000, note: "Brier = (conviction - outcome)^2: 0 perfect, 0.25 coin-flip; market outcomes judge the stated confidence" } : null,
   updatedAt: new Date().toISOString(),
 }
 fs.writeFileSync(TR, JSON.stringify(tr, null, 2))

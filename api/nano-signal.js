@@ -135,9 +135,22 @@ async function trackRecord() {
     if (!r.ok) throw new Error("HTTP " + r.status)
     const j = await r.json()
     const s = (j && j.stats) || null
-    _trCache = { t: Date.now(), v: s && s.updatedAt ? { standard: "cronus-track-record-v1", judge: "market outcomes, not self-review", graded: s.graded, hits: s.hits, hitRate: s.hitRate, abstained: s.abstained, proof: "receipts pin each reportHash; ledger files are keccak-anchored on-chain" } : null }
+    _trCache = { t: Date.now(), v: s && s.updatedAt ? { standard: "cronus-track-record-v1", judge: "market outcomes, not self-review", graded: s.graded, hits: s.hits, hitRate: s.hitRate, abstained: s.abstained, calibration: s.calibration || null, proof: "receipts pin each reportHash; ledger files are keccak-anchored on-chain" } : null }
   } catch (_) { _trCache = { t: Date.now(), v: null } } // fail open
   return _trCache.v
+}
+
+// --- calibration gate: the premium band must be earned; the market Brier score judges the seller confidence ---
+const CAL_MAX_BRIER = Number(process.env.CAL_MAX_BRIER || "0.35")
+const CAL_MIN_GRADED = Number(process.env.CAL_MIN_GRADED || "3")
+async function calibrationGate() {
+  try {
+    const s = await trackRecord()
+    const cal = s && s.calibration ? s.calibration : null
+    if (!cal || cal.brierAvg == null || Number(cal.scored || 0) < CAL_MIN_GRADED) return { ok: true, reason: "not enough market-graded signals yet (fail open)", cal: cal }
+    const ok = Number(cal.brierAvg) <= CAL_MAX_BRIER
+    return { ok: ok, reason: ok ? "well-calibrated: brierAvg " + cal.brierAvg + " within " + CAL_MAX_BRIER : "overconfident: brierAvg " + cal.brierAvg + " above " + CAL_MAX_BRIER + " -> premium band demoted", cal: cal }
+  } catch (_) { return { ok: true, reason: "calibration unavailable (fail open)", cal: null } }
 }
 
 // --- trade credit: deterministic credit line for loyal ERC-8004 buyers; the buyer repays on later runs ---
@@ -194,7 +207,9 @@ export default async function handler(req, res) {
   const creditDebt = await creditUnits(payerAddr)
   const creditEligible = !!(loyal && creditDebt < CREDIT_LIMIT_UNITS)
   const conv = loyal ? await convictionNow(host, topic, instId) : null
-  const lb = loyalBand(conv)
+  const lbRaw = loyalBand(conv)
+  const calGate = loyal ? await calibrationGate() : { ok: true, reason: null, cal: null }
+  const lb = lbRaw.band === "premium" && !calGate.ok ? loyalBand(0.7) : lbRaw
 
   // m2m negotiation: free personalized quote (no payment required)
   if (req.query && req.query.quote) {
@@ -222,6 +237,7 @@ export default async function handler(req, res) {
       sellerReputation: { standard: "ERC-8004", registry: REPUTATION_REGISTRY, agentId: SELLER_AGENT_ID, feedbacks: sellerRep ? sellerRep.count : null, avg: sellerRep ? sellerRep.avg : null },
       credit: { eligible: creditEligible, unitPrice: LOYAL_PRICE, unitsOutstanding: creditDebt, limit: CREDIT_LIMIT_UNITS, note: "loyal buyers can take a signal on credit and repay at the loyal price on a later run" },
       stake: await stakeStatus(),
+      calibration: { standard: "cronus-calibration-v1", judge: "Brier score vs market outcomes, no self-review", rule: "premium band requires brierAvg within " + CAL_MAX_BRIER + " over " + CAL_MIN_GRADED + "+ graded signals", status: calGate.ok ? "pass" : "premium-demoted", detail: calGate.reason, stats: calGate.cal },
       prices: { nano: NANO_PRICE, nanoLoyal: LOYAL_PRICE, dataset: DATASET_PRICE },
       offered: { tier: tier, price: tier === "dataset" ? DATASET_PRICE : (loyal ? lb.price : NANO_PRICE) },
       convictionPricing: loyal ? { model: "conviction-pegged", conviction: conv, band: lb.band, bands: { discount: LOYAL_LOW, standard: LOYAL_PRICE, premium: LOYAL_HIGH }, note: "loyal price floats with live oracle confidence, hard-clamped to the band range" } : null,
