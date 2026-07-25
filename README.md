@@ -223,6 +223,41 @@ Verify with zero keys:
     curl "https://cronus-capital.vercel.app/api/nano-signal?quote=1&payer=0xbe3a16bD4137A8a293aCBcaA75cCE3420919D21d"   # registered agent -> identity.registered=true, offered $0.0007
     curl "https://cronus-capital.vercel.app/api/nano-signal?quote=1&payer=0xdc6778c5f8cc74b10aed11c48306d4cfc5737fbd"   # unregistered -> identity.registered=false, offered $0.001
 
+### The m2m economy stack (July 25)
+
+Thirteen interlocking mechanisms turn two agents into a working micro-economy: prices are negotiated, credit is extended, stakes are slashed - and the only judge is the market. Everything below is verifiable with zero keys.
+
+| # | Mechanism | What it does |
+|---|-----------|--------------|
+| 1 | Reputation loop | after every settled trade Rhea rates the seller on-chain (ERC-8004 giveFeedback) |
+| 2 | Ledger anchors | daily ledger files are keccak-anchored on Arc testnet |
+| 3 | Buyer trust gate | Rhea refuses to buy from a seller rated below 4/5 on-chain |
+| 4 | Signed delivery receipts | an EIP-191 receipt pins the report hash at delivery time, before the outcome is known |
+| 5 | Conviction-pegged pricing | the loyal price floats with live oracle confidence, hard-clamped to a band |
+| 6 | Market-graded track record | real price moves grade every directional signal 24h later; no self-review |
+| 7 | Deterministic haggling | a loyal buyer can talk the price exactly one band down; no LLM in the loop |
+| 8 | Bandit budget allocation | epsilon-greedy topic selection rewarded by the market-graded record |
+| 9 | Trade credit | loyal registered buyers take a signal on credit and repay on a later run |
+| 10 | Conviction stake | every market-graded MISS entitles the buyer to a free make-good unit |
+| 11 | Brier calibration gate | the premium band must be earned: average Brier within 0.35 over graded signals |
+| 12 | Hash-chained ledger | every entry pins the sha256 of the previous one; CI publicly re-verifies the chain each run |
+| 13 | Policy envelope | the buyer spending mandate is public; its sha256 is pinned in every ledger entry |
+
+Verify in one minute:
+
+```bash
+# live quote: reputation, track record, credit, stake and calibration in one response
+curl -s "https://cronus-capital.vercel.app/api/nano-signal?quote=1&payer=0xbe3a16bD4137A8a293aCBcaA75cCE3420919D21d"
+
+# audit the hash-chained ledger, zero keys required
+git clone https://github.com/Artem1981777/CronusCapital && cd CronusCapital && node scripts/verify-chain.mjs
+
+# read the buyer public spending mandate (its sha256 is pinned in every ledger entry)
+cat m2m-ledger/policy.json
+```
+
+> **HONEST LABEL.** Rhea and Cronus are two wallets of the same project: an agent-to-agent demo, clearly disclosed. The mechanisms are real; the counterparty is not a stranger.
+
 ## Pay Cronus in 60 seconds (any funded wallet)
 
 **No terminal? One click:** open the live dashboard, connect your wallet, and press **"Connect wallet & pay 0.02 USDC on Arc"** — one real on-chain transaction, and you appear in the public settled-payments feed. Need test USDC: https://faucet.circle.com (select Arc Testnet).
