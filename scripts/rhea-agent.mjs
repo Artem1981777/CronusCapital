@@ -69,6 +69,17 @@ async function main() {
   log("    prices: " + JSON.stringify(quote.prices))
   log("    offered: " + (quote.offered && quote.offered.price) + " | purchases: " + quote.purchases + " | loyal: " + quote.loyal)
 
+  // trust gate: reputation is not decoration - Rhea refuses to buy from a badly rated seller
+  const MIN_SELLER_AVG = Number(process.env.RHEA_MIN_SELLER_AVG || "4")
+  const rep8004 = quote.sellerReputation || null
+  if (rep8004 && rep8004.feedbacks > 0 && rep8004.avg !== null && rep8004.avg < MIN_SELLER_AVG) {
+    const dentry = { agent: "rhea", ts: new Date().toISOString(), action: "DISTRUST", reason: "seller rated " + rep8004.avg + "/5 over " + rep8004.feedbacks + " on-chain feedbacks, below threshold " + MIN_SELLER_AVG, sellerReputation: rep8004 }
+    log("  DISTRUST: " + dentry.reason)
+    log("  ledger: " + appendLedger(dentry))
+    return
+  }
+  log("  seller reputation: " + (rep8004 && rep8004.feedbacks ? rep8004.avg + "/5 over " + rep8004.feedbacks + " feedbacks" : "none yet") + " | trust threshold: " + MIN_SELLER_AVG + "/5")
+
   const spent = spentToday()
   const remaining = Math.max(0, DAILY_BUDGET - spent)
   log("[2] negotiate: reserve " + RESERVE_PRICE + " | daily budget " + DAILY_BUDGET + " | spent " + spent.toFixed(6) + " | left " + remaining.toFixed(6))
