@@ -24,6 +24,28 @@ async function payerRegistered(addr) {
   } catch (_) { return null } // RPC hiccup: identity unknown, fail open so sales never break
 }
 
+// --- ERC-8004 reputation: expose the seller live on-chain rating in every quote ---
+const REPUTATION_REGISTRY = process.env.REPUTATION_REGISTRY || "0x2A19ad056EaE83364B0a6420685974cA219c209E"
+const SELLER_AGENT_ID = Number(process.env.SELLER_AGENT_ID || "1")
+let _repCache = { at: 0, value: null } // 60s TTL; feedback is append-only so staleness is harmless
+async function sellerReputation() {
+  if (Date.now() - _repCache.at < 60000) return _repCache.value
+  try {
+    const { toFunctionSelector } = await import("viem")
+    const data = toFunctionSelector("function getReputation(uint256)") + SELLER_AGENT_ID.toString(16).padStart(64, "0")
+    const res = await fetch(ARC_RPC_URL, { method: "POST", headers: { "content-type": "application/json" },
+      body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "eth_call", params: [{ to: REPUTATION_REGISTRY, data: data }, "latest"] }) })
+    const j = await res.json()
+    if (!j || typeof j.result !== "string" || j.result.replace(/^0x/, "").length < 192) return null
+    const w = j.result.replace(/^0x/, "")
+    const count = Number(BigInt("0x" + w.slice(0, 64)))
+    const avgX100 = Number(BigInt("0x" + w.slice(128, 192)))
+    const value = { count: count, avg: count ? Math.round(avgX100) / 100 : null }
+    _repCache = { at: Date.now(), value: value }
+    return value
+  } catch (_) { return null } // fail open: reputation unknown, quotes never break
+}
+
 const PAY_TO        = (process.env.CRONUS_PAYTO || "0xdc6778c5f8cc74b10aed11c48306d4cfc5737fbd")
 const NETWORK       = process.env.GATEWAY_NETWORK || "eip155:5042002"            // Arc testnet
 const FAC_URL       = process.env.GATEWAY_FACILITATOR_URL || "https://gateway-api-testnet.circle.com"
@@ -103,10 +125,12 @@ export default async function handler(req, res) {
 
   // m2m negotiation: free personalized quote (no payment required)
   if (req.query && req.query.quote) {
+    const sellerRep = await sellerReputation()
     return res.status(200).json({
       ok: true, negotiation: "cronus-quote-v1",
       payer: payerAddr || null, purchases, loyal, loyaltyThreshold: LOYALTY_MIN,
       identity: { standard: "ERC-8004", registry: IDENTITY_REGISTRY, registered: registered === null ? "unknown" : registered },
+      sellerReputation: { standard: "ERC-8004", registry: REPUTATION_REGISTRY, agentId: SELLER_AGENT_ID, feedbacks: sellerRep ? sellerRep.count : null, avg: sellerRep ? sellerRep.avg : null },
       prices: { nano: NANO_PRICE, nanoLoyal: LOYAL_PRICE, dataset: DATASET_PRICE },
       offered: { tier: tier, price: tier === "dataset" ? DATASET_PRICE : (loyal ? LOYAL_PRICE : NANO_PRICE) },
       note: "loyalty discount at " + LOYALTY_MIN + "+ purchases; loyal tier requires an ERC-8004 registered identity"

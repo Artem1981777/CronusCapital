@@ -35,6 +35,26 @@ function spentToday() {
 }
 const parseUsd = (s) => Number(String(s || "").replace("$", "")) || 0
 
+// [5] reputation loop: after a settled trade, Rhea rates the seller on-chain (ERC-8004 reputation).
+const REPUTATION_REGISTRY = process.env.REPUTATION_REGISTRY || "0x2A19ad056EaE83364B0a6420685974cA219c209E"
+const SELLER_AGENT_ID = Number(process.env.SELLER_AGENT_ID || "1")
+const ARC_RPC_URL = process.env.ARC_RPC || ("https:" + "//rpc.blockdaemon.testnet.arc.network")
+async function leaveFeedback(settlement, quality) {
+  const { createWalletClient, createPublicClient, http, defineChain, keccak256, stringToHex } = await import("viem")
+  const { privateKeyToAccount } = await import("viem/accounts")
+  const chain = defineChain({ id: 5042002, name: "arc-testnet", nativeCurrency: { name: "USDC", symbol: "USDC", decimals: 18 }, rpcUrls: { default: { http: [ARC_RPC_URL] } } })
+  const account = privateKeyToAccount(PK.startsWith("0x") ? PK : "0x" + PK)
+  const wallet = createWalletClient({ account: account, chain: chain, transport: http(ARC_RPC_URL) })
+  const pub = createPublicClient({ chain: chain, transport: http(ARC_RPC_URL) })
+  const abi = [{ type: "function", name: "giveFeedback", stateMutability: "nonpayable", inputs: [{ type: "uint256" }, { type: "uint8" }, { type: "bytes32" }, { type: "string" }], outputs: [{ type: "uint256" }] }]
+  const score = quality && quality.delivered ? 5 : 2
+  const jobRef = keccak256(stringToHex("m2m:" + String(settlement)))
+  const uri = "https:" + "//github.com/Artem1981777/CronusCapital/blob/main/" + ledgerPath()
+  const hash = await wallet.writeContract({ address: REPUTATION_REGISTRY, abi: abi, functionName: "giveFeedback", args: [BigInt(SELLER_AGENT_ID), score, jobRef, uri] })
+  await pub.waitForTransactionReceipt({ hash: hash })
+  return { standard: "ERC-8004", agentId: SELLER_AGENT_ID, score: score, jobRef: jobRef, tx: hash }
+}
+
 async function main() {
   const entry = { agent: "rhea", ts: new Date().toISOString(), topic: TOPIC }
   let gateway = null, address = null
@@ -77,6 +97,14 @@ async function main() {
   const delivered = !!(rep.verdict && rep.conviction != null)
   entry.quality = { delivered, verdict: rep.verdict || null, conviction: rep.conviction == null ? null : rep.conviction }
   log("[4] quality: delivered=" + delivered + " | verdict=" + (rep.verdict || "-"))
+  try {
+    log("[5] reputation: rating the seller on-chain (ERC-8004 giveFeedback)")
+    entry.feedback = await leaveFeedback(entry.settlement, entry.quality)
+    log("    feedback tx: " + entry.feedback.tx + " | score " + entry.feedback.score + "/5")
+  } catch (e) {
+    entry.feedback = { error: String((e && e.message) || e).slice(0, 200) }
+    log("    feedback failed (non-fatal): " + entry.feedback.error)
+  }
   log("[OK] m2m trade recorded -> " + appendLedger(entry))
 }
 
