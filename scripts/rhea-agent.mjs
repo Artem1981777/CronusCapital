@@ -68,6 +68,7 @@ async function main() {
   entry.quote = quote.offered; entry.purchases = quote.purchases; entry.loyal = !!quote.loyal
   log("    prices: " + JSON.stringify(quote.prices))
   log("    offered: " + (quote.offered && quote.offered.price) + " | purchases: " + quote.purchases + " | loyal: " + quote.loyal)
+  if (quote.convictionPricing) { entry.convictionPricing = quote.convictionPricing; log("  conviction-pegged: band " + quote.convictionPricing.band + " | oracle confidence " + quote.convictionPricing.conviction) }
 
   // trust gate: reputation is not decoration - Rhea refuses to buy from a badly rated seller
   const MIN_SELLER_AVG = Number(process.env.RHEA_MIN_SELLER_AVG || "4")

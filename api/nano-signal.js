@@ -63,6 +63,29 @@ const DATASET_PRICE = process.env.DATASET_PRICE_USD || "$0.05"
 const payDataset = gateway.require(DATASET_PRICE)
 const LOYAL_PRICE  = process.env.NANO_LOYAL_PRICE_USD || "$0.0007"
 const payLoyal     = gateway.require(LOYAL_PRICE)
+// --- conviction-pegged pricing: the loyal price floats with live oracle confidence, hard-clamped to a band ---
+const LOYAL_LOW = process.env.NANO_LOYAL_LOW_USD || "$0.0005"
+const LOYAL_HIGH = process.env.NANO_LOYAL_HIGH_USD || "$0.0009"
+const payLoyalLow = gateway.require(LOYAL_LOW)
+const payLoyalHigh = gateway.require(LOYAL_HIGH)
+async function convictionNow(host, topic, instId) {
+  try {
+    const key = "cronus:conv:" + topic
+    const cached = await kv(["GET", key])
+    if (cached) { const j = JSON.parse(cached); if (Date.now() - j.ts < 600000) return j.c }
+    const rep = await generateReport(host, topic, instId)
+    const c = rep && rep.conviction != null ? Number(rep.conviction) : null
+    if (c !== null) await kv(["SET", key, JSON.stringify({ c: c, ts: Date.now() })])
+    return c
+  } catch (_) { return null } // fail open: unknown conviction -> standard price
+}
+function loyalBand(c) {
+  if (c === null || c === undefined) return { band: "standard", price: LOYAL_PRICE, mw: payLoyal }
+  if (c >= 0.8) return { band: "premium", price: LOYAL_HIGH, mw: payLoyalHigh }
+  if (c < 0.5) return { band: "discount", price: LOYAL_LOW, mw: payLoyalLow }
+  return { band: "standard", price: LOYAL_PRICE, mw: payLoyal }
+}
+
 const LOYALTY_MIN  = Number(process.env.LOYALTY_MIN_PURCHASES || "10")
 
 // Reuse the same oracle the STANDARD x402 path uses.
@@ -136,6 +159,8 @@ export default async function handler(req, res) {
   const purchases = await payerPurchases(payerAddr)
   const registered = await payerRegistered(payerAddr)
   const loyal = !!payerAddr && purchases >= LOYALTY_MIN && registered !== false
+  const conv = loyal ? await convictionNow(host, topic, instId) : null
+  const lb = loyalBand(conv)
 
   // m2m negotiation: free personalized quote (no payment required)
   if (req.query && req.query.quote) {
@@ -146,12 +171,13 @@ export default async function handler(req, res) {
       identity: { standard: "ERC-8004", registry: IDENTITY_REGISTRY, registered: registered === null ? "unknown" : registered },
       sellerReputation: { standard: "ERC-8004", registry: REPUTATION_REGISTRY, agentId: SELLER_AGENT_ID, feedbacks: sellerRep ? sellerRep.count : null, avg: sellerRep ? sellerRep.avg : null },
       prices: { nano: NANO_PRICE, nanoLoyal: LOYAL_PRICE, dataset: DATASET_PRICE },
-      offered: { tier: tier, price: tier === "dataset" ? DATASET_PRICE : (loyal ? LOYAL_PRICE : NANO_PRICE) },
+      offered: { tier: tier, price: tier === "dataset" ? DATASET_PRICE : (loyal ? lb.price : NANO_PRICE) },
+      convictionPricing: loyal ? { model: "conviction-pegged", conviction: conv, band: lb.band, bands: { discount: LOYAL_LOW, standard: LOYAL_PRICE, premium: LOYAL_HIGH }, note: "loyal price floats with live oracle confidence, hard-clamped to the band range" } : null,
       note: "loyalty discount at " + LOYALTY_MIN + "+ purchases; loyal tier requires an ERC-8004 registered identity"
     })
   }
 
-  const mw = tier === "dataset" ? payDataset : (loyal ? payLoyal : pay)
+  const mw = tier === "dataset" ? payDataset : (loyal ? lb.mw : pay)
 
   let settled
   try {
