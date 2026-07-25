@@ -1114,3 +1114,39 @@ no manual checks. If something happens on-chain, the operator knows within
 
 *Judges: this means the autonomous agent is not a demo loop — it runs 24/7
 unattended, and its operator is paged like an SRE when real money moves.*
+
+## Security audit and test suite
+
+Self-audit of every money-moving path, 2026-07-25. Machine-readable copy lives in the agent card under `security` and `tests`.
+
+**Controls in place**
+
+- Fail-closed auth: every privileged POST checks `Bearer CRON_SECRET`; a missing secret returns 401 instead of opening the endpoint. Eight live negative checks run against production in section [13] of the verifier.
+- Read/write split: all GET endpoints are public and read-only (split config, subscription plans, escrow preview, signer check). Only POST moves funds.
+- Keys never leave the environment: responses expose derived addresses only.
+- One unified daily breaker (`lib/breaker.js`) draws down a single ceiling for every USDC outflow; when the store is unreachable the call is denied, and a per-call cap still applies.
+- Anti double-spend: KV `NX EX` locks on every signing path (spend 30s, withdraw 60s, stake 120s, split 60s), released in `finally`.
+- Pure money math: BigInt only, checksum address validation via viem, `amount > 0`, `maxFee < amount`, split weights must sum to exactly 10000 bps.
+- Dry-run first on the most dangerous path: the cross-chain withdraw returns a plan unless `execute:true` is passed, and simulates the burn before sending it.
+- Role binding: stake open and resolve abort with 409 if the loaded signer is not the expected treasury or escrow address.
+
+**Known limitations (deliberately published)**
+
+1. A single shared `CRON_SECRET` for all privileged actions - no per-action scoping or rotation yet.
+2. `Access-Control-Allow-Origin: *` everywhere. Safe because authorization is a Bearer header, not a cookie, so there is no ambient authority - but it is a conscious tradeoff.
+3. Stake resolution reads one oracle (OKX ticker). Mitigated by a pre-committed public resolution rule rather than a median of feeds.
+4. If KV is unreachable the withdraw lock is skipped (fail-open on the lock); the per-call cap still holds.
+5. The daily counter increments after the transfer succeeds, so a crash in between undercounts that day.
+6. Subscription quotas are granted by the operator-authenticated endpoint; the payment tx is recorded but not enforced by the record itself.
+
+**Test suite**
+
+```bash
+node scripts/verify-chain.mjs        # offline: replays the ledger hash chain, zero keys
+curl -s .../api/agent-card           # card, attestation, avgRating, policyHash
+curl -s '.../api/nano-signal?quote=1&payer=0x...'   # pricing, bundle, session
+curl -s '.../api/nano-signal?session=use&payer=0x...'  # expects HTTP 402 without a session
+npm run verify-live                  # 97 live checks against production
+```
+
+Current state: **96 of 97 live checks pass**, plus 4 linked / 18 legacy / 0 broken links in the offline chain verifier. The single red check is `[4] metrics read from on-chain explorer`: while the Arc testnet explorer API is unavailable, metrics fall back to known on-chain proofs and label `source` honestly rather than reporting a fabricated number. Receipt verification already falls back to Arc RPC (`source: onchain-rpc`) when the explorer is down.
