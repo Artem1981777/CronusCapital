@@ -225,6 +225,7 @@ export default async function handler(req, res) {
         repay: cardBase + "/api/nano-signal?repay=1&payer=YOUR_ADDRESS",
         makeGood: cardBase + "/api/nano-signal?makegood=MISS_KEY&payer=YOUR_ADDRESS",
         dataset: cardBase + "/api/nano-signal?tier=dataset",
+        traction: cardBase + "/api/traction",
       },
       pricing: { nano: NANO_PRICE, loyalBands: { discount: LOYAL_LOW, standard: LOYAL_PRICE, premium: LOYAL_HIGH }, dataset: DATASET_PRICE, model: "conviction-pegged: the loyal price floats with live oracle confidence, hard-clamped to the band range" },
       rules: {
@@ -240,6 +241,7 @@ export default async function handler(req, res) {
         ledger: "https://github.com/Artem1981777/CronusCapital/tree/main/m2m-ledger",
         hashChain: "clone the repo and run: node scripts/verify-chain.mjs (zero keys required)",
         deliveryReceipts: "every paid delivery returns an EIP-191 receipt pinning the report hash before the outcome is known",
+        honestTraction: "live external vs self-generated demand at " + cardBase + "/api/traction - external_payers is the only headline number",
         referenceBuyerMandate: policyCard,
       },
       honestLabel: "our reference buyer (Rhea) is a second wallet of this project - a disclosed self-demo; this card exists so stranger agents can trade with Cronus too",

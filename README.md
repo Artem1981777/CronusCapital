@@ -129,11 +129,11 @@ Per the sell-side quickstart, the EIP-3009 `validBefore` must be at least 7 days
 
 Cronus's premium signals are paid on-chain. To prove the paywall settles real USDC end-to-end, we drove the live deployment from **44 distinct self-test wallets** (all ours, across dev sessions) — not faked, but self-generated; no external customer has paid yet.
 
-Snapshot (2026-07-03), straight from the Arc explorer:
+Snapshot (2026-07-25), straight from the live `/api/traction` endpoint:
 
-- **44** distinct self-test wallets (all ours, used across dev sessions)
-- **140** settled on-chain USDC payments (all self-generated test traffic)
-- **2.80 USDC** total self-generated test volume
+- **49** distinct self-test wallets (all ours, used across dev sessions)
+- **193** settled on-chain x402 payments (all self-generated test traffic)
+- **3.86 USDC** total self-generated test volume
 - **0** verified external (non-self) payers so far
 - on a **testnet** these are wallets **we** controlled to exercise the paywall, so we do **not** present them as external demand; the honest external-payer count is **0** until a real third party pays.
 
@@ -152,9 +152,9 @@ The canonical metric is `external_payers`, which is **0** today (top-level in bo
 | Counter | Value | What it actually measures | Source |
 |---|---|---|---|
 | External payers | **0** | Verified independent third-party payers (none yet, by design) | `/api/traction` |
-| Self-generated wallets | 44 | Distinct wallets we used to drive the live paywall | `/api/traction` |
-| Self-generated txs | 96 | On-chain x402 txs from those wallets | `/api/traction` |
-| Self-generated USDC | 1.92 | USDC moved by that self-generated traffic | `/api/traction` |
+| Self-generated wallets | 49 | Distinct wallets we used to drive the live paywall | `/api/traction` |
+| Self-generated txs | 193 | On-chain x402 txs from those wallets | `/api/traction` |
+| Self-generated USDC | 3.86 | USDC moved by that self-generated traffic | `/api/traction` |
 | On-chain payments (explorer scan) | 140 | All USDC transfers that hit the treasury | `/api/metrics` |
 | USDC settled (explorer scan) | 2.80 | Total USDC settled to the treasury | `/api/metrics` |
 | NANO A2A calls | 20 | Autonomous gas-free $0.001 nano calls (self-demo) | `/api/traction` |
@@ -254,6 +254,9 @@ git clone https://github.com/Artem1981777/CronusCapital && cd CronusCapital && n
 
 # discover the storefront as a machine: the EIP-191 signed agent card
 curl -s "https://cronus-capital.vercel.app/api/agent-card"
+
+# honest live traction: external vs self-generated, external_payers is the only headline
+curl -s "https://cronus-capital.vercel.app/api/traction"
 
 # read the buyer public spending mandate (its sha256 is pinned in every ledger entry)
 cat m2m-ledger/policy.json
