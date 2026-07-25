@@ -89,5 +89,59 @@
       "prev": "sha256:93498d84f8eb255bef0954fbc065b36e63bebebaf85be8b15ca7e77e6c7f9f5e"
     },
     "policyHash": "sha256:bb92e518a455c943e284069ca8ed9db14e07e3cc1bd5c40fddddf3bc82c0d936"
+  },
+  {
+    "agent": "rhea",
+    "ts": "2026-07-25T08:35:50.184Z",
+    "topic": "SOL-USDC breakout",
+    "bandit": {
+      "mode": "explore-untried",
+      "epsilon": 0.2
+    },
+    "quote": {
+      "tier": "nano",
+      "price": "$0.0007"
+    },
+    "purchases": 14,
+    "loyal": true,
+    "convictionPricing": {
+      "model": "conviction-pegged",
+      "conviction": 72,
+      "band": "standard",
+      "bands": {
+        "discount": "$0.0005",
+        "standard": "$0.0007",
+        "premium": "$0.0009"
+      },
+      "note": "loyal price floats with live oracle confidence, hard-clamped to the band range"
+    },
+    "action": "BUY",
+    "paidUsd": 0.0007,
+    "settlement": "3d474318-63d3-467e-9b5b-fe8738cc3c0b",
+    "quality": {
+      "delivered": true,
+      "verdict": "SKIP",
+      "conviction": 58
+    },
+    "receipt": {
+      "standard": "EIP-191",
+      "verified": true,
+      "signer": "0x6829860b7f61FA01E5bf3D194d9f780ACa5B6787",
+      "settlement": "3d474318-63d3-467e-9b5b-fe8738cc3c0b",
+      "reportHash": "0x86c91b1024646d790fd0f94bb11c03655f8eb9a84758ea321069fc4f5c7c5ecb",
+      "signature": "0xfbdd21d5e4d1abaeecc7141876e0eadadef9665993d7ff5052c4c11a37dfd3a4052cf678e2fb30c7b7a2fd9b8e2af348332a22adb42264b1bc84abf56568c00a1b"
+    },
+    "feedback": {
+      "standard": "ERC-8004",
+      "agentId": 1,
+      "score": 5,
+      "jobRef": "0x55a242d0c5baba37a743af98a669a3a9bf8b86dba2f275477ea132e70b4931e7",
+      "tx": "0x2924270929d8a8d3cc1a19f1fa1a273c82c5ac9c485d33b480cee50ea1794c68"
+    },
+    "chain": {
+      "standard": "cronus-hashchain-v1",
+      "prev": "sha256:8ab8b21909bfd991ea6d1745626c2aaf3386083bc4dfb72880208055492e57a3"
+    },
+    "policyHash": "sha256:bb92e518a455c943e284069ca8ed9db14e07e3cc1bd5c40fddddf3bc82c0d936"
   }
 ]
