@@ -140,6 +140,14 @@ async function trackRecord() {
   return _trCache.v
 }
 
+// --- trade credit: deterministic credit line for loyal ERC-8004 buyers; the buyer repays on later runs ---
+const CREDIT_LIMIT_UNITS = Number(process.env.CREDIT_LIMIT_UNITS || "3")
+async function creditUnits(addr) {
+  if (!addr) return 0
+  const n = await kv(["GET", "cronus:credit:units:" + String(addr).toLowerCase()])
+  return Math.max(0, Number(n || 0))
+}
+
 async function payerPurchases(addr) {
   if (!addr) return 0
   const n = await kv(["GET", "cronus:nano:count:" + String(addr).toLowerCase()])
@@ -175,6 +183,8 @@ export default async function handler(req, res) {
   const purchases = await payerPurchases(payerAddr)
   const registered = await payerRegistered(payerAddr)
   const loyal = !!payerAddr && purchases >= LOYALTY_MIN && registered !== false
+  const creditDebt = await creditUnits(payerAddr)
+  const creditEligible = !!(loyal && creditDebt < CREDIT_LIMIT_UNITS)
   const conv = loyal ? await convictionNow(host, topic, instId) : null
   const lb = loyalBand(conv)
 
@@ -202,6 +212,7 @@ export default async function handler(req, res) {
       identity: { standard: "ERC-8004", registry: IDENTITY_REGISTRY, registered: registered === null ? "unknown" : registered },
       signalAccuracy: await trackRecord(),
       sellerReputation: { standard: "ERC-8004", registry: REPUTATION_REGISTRY, agentId: SELLER_AGENT_ID, feedbacks: sellerRep ? sellerRep.count : null, avg: sellerRep ? sellerRep.avg : null },
+      credit: { eligible: creditEligible, unitPrice: LOYAL_PRICE, unitsOutstanding: creditDebt, limit: CREDIT_LIMIT_UNITS, note: "loyal buyers can take a signal on credit and repay at the loyal price on a later run" },
       prices: { nano: NANO_PRICE, nanoLoyal: LOYAL_PRICE, dataset: DATASET_PRICE },
       offered: { tier: tier, price: tier === "dataset" ? DATASET_PRICE : (loyal ? lb.price : NANO_PRICE) },
       convictionPricing: loyal ? { model: "conviction-pegged", conviction: conv, band: lb.band, bands: { discount: LOYAL_LOW, standard: LOYAL_PRICE, premium: LOYAL_HIGH }, note: "loyal price floats with live oracle confidence, hard-clamped to the band range" } : null,
@@ -211,6 +222,26 @@ export default async function handler(req, res) {
 
   const negoBand = loyal ? await kv(["GET", "cronus:nego:" + payerAddr]) : null
   const negoMw = negoBand === "discount" ? payLoyalLow : negoBand === "standard" ? payLoyal : negoBand === "premium" ? payLoyalHigh : null
+  // trade credit: repay one outstanding unit at the loyal price (real x402 payment)
+  if (req.query && req.query.repay) {
+    if (creditDebt <= 0) return res.status(400).json({ error: "nothing to repay", unitsOutstanding: 0 })
+    let okRepay = false
+    try { okRepay = await runGateway(req, res, payLoyal) } catch (e) { if (!res.writableEnded) res.status(500).json({ error: "repay payment error", detail: String((e && e.message) || e) }); return }
+    if (!okRepay) return
+    const pay2 = req.payment || {}
+    await kv(["DECR", "cronus:credit:units:" + payerAddr])
+    try { await recordTraction({ tier: "CREDIT_REPAY", network: pay2.network || NETWORK, payer: pay2.payer, amount: pay2.amount, transaction: pay2.transaction }) } catch (_) {}
+    if (!res.writableEnded) res.status(200).json({ paid: true, repaid: true, creditStatus: { unitsOutstanding: Math.max(0, creditDebt - 1), limit: CREDIT_LIMIT_UNITS } })
+    return
+  }
+  // trade credit: eligible loyal buyers take the signal now, debt is tracked deterministically
+  if (req.query && req.query.credit) {
+    if (!creditEligible) return res.status(402).json({ error: "credit refused", reason: loyal ? "credit limit reached" : "credit is for loyal, ERC-8004 registered buyers", unitsOutstanding: creditDebt, limit: CREDIT_LIMIT_UNITS })
+    const creditReport = await generateReport(host, topic, instId)
+    await kv(["INCR", "cronus:credit:units:" + payerAddr])
+    try { await recordTraction({ tier: "NANO_CREDIT", payer: payerAddr, verdict: creditReport.verdict || null }) } catch (_) {}
+    return res.status(200).json({ paid: false, credit: true, creditStatus: { unitsOutstanding: creditDebt + 1, limit: CREDIT_LIMIT_UNITS, unitPrice: LOYAL_PRICE }, report: creditReport })
+  }
   const mw = tier === "dataset" ? payDataset : (negoMw || (loyal ? lb.mw : pay))
 
   let settled

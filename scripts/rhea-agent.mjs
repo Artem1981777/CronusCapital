@@ -67,7 +67,7 @@ function appendLedger(entry) {
 function spentToday() {
   try {
     const arr = JSON.parse(fs.readFileSync(ledgerPath(), "utf8"))
-    return Math.round(arr.filter(e => e.action === "BUY").reduce((s, e) => s + Number(e.paidUsd || 0), 0) * 1e6) / 1e6
+    return Math.round(arr.filter(e => e.action === "BUY" || e.action === "REPAY").reduce((s, e) => s + Number(e.paidUsd || 0), 0) * 1e6) / 1e6
   } catch (_) { return 0 }
 }
 const parseUsd = (s) => Number(String(s || "").replace("$", "")) || 0
@@ -107,6 +107,15 @@ async function main() {
   entry.quote = quote.offered; entry.purchases = quote.purchases; entry.loyal = !!quote.loyal
   log("    prices: " + JSON.stringify(quote.prices))
   log("    offered: " + (quote.offered && quote.offered.price) + " | purchases: " + quote.purchases + " | loyal: " + quote.loyal)
+  if (gateway && quote.credit && Number(quote.credit.unitsOutstanding) > 0) {
+    try {
+      log("[1b] repaying trade credit: " + quote.credit.unitsOutstanding + " unit(s) outstanding")
+      const rr = await gateway.pay(BASE + "/api/nano-signal?repay=1&payer=" + address)
+      const rd = (rr && rr.data) || {}
+      appendLedger({ agent: "rhea", ts: new Date().toISOString(), action: "REPAY", paidUsd: Number(rr.formattedAmount || 0), settlement: rr.transaction || "(batched)", creditStatus: rd.creditStatus || null })
+      log("  repaid 1 unit | tx: " + (rr.transaction || "(batched)"))
+    } catch (e) { log("  repay failed (non-fatal): " + (e.message || e)) }
+  }
   if (quote.convictionPricing) { entry.convictionPricing = quote.convictionPricing; log("  conviction-pegged: band " + quote.convictionPricing.band + " | oracle confidence " + quote.convictionPricing.conviction) }
   if (gateway && quote.convictionPricing && quote.convictionPricing.band === "premium" && quote.convictionPricing.bands) {
     try {
@@ -138,6 +147,22 @@ async function main() {
     log("    WALK AWAY: " + entry.reason); log("    ledger: " + appendLedger(entry)); return
   }
   if (offeredUsd > remaining) {
+    if (gateway && quote.credit && quote.credit.eligible) {
+      try {
+        log("  budget exhausted -> trying trade credit (buy now, repay next run)")
+        const cres = await fetch(BASE + "/api/nano-signal?credit=1&topic=" + encodeURIComponent(TOPIC) + "&payer=" + address)
+        if (cres.ok) {
+          const cd = await cres.json()
+          entry.action = "BUY_ON_CREDIT"
+          entry.credit = cd.creditStatus || null
+          const crep = cd.report || {}
+          entry.quality = { delivered: !!(crep.verdict && crep.conviction != null), verdict: crep.verdict || null, conviction: crep.conviction == null ? null : crep.conviction }
+          log("  BUY_ON_CREDIT | units outstanding: " + (cd.creditStatus ? cd.creditStatus.unitsOutstanding : "?"))
+          log("  ledger: " + appendLedger(entry)); return
+        }
+        log("  credit refused: HTTP " + cres.status)
+      } catch (e) { log("  credit attempt failed: " + (e.message || e)) }
+    }
     entry.action = "DEFER"; entry.reason = "daily budget exhausted"
     log("    DEFER: " + entry.reason); log("    ledger: " + appendLedger(entry)); return
   }
