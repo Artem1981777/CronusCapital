@@ -252,6 +252,9 @@ curl -s "https://cronus-capital.vercel.app/api/nano-signal?quote=1&payer=0xbe3a1
 # audit the hash-chained ledger, zero keys required
 git clone https://github.com/Artem1981777/CronusCapital && cd CronusCapital && node scripts/verify-chain.mjs
 
+# discover the storefront as a machine: the EIP-191 signed agent card
+curl -s "https://cronus-capital.vercel.app/api/agent-card"
+
 # read the buyer public spending mandate (its sha256 is pinned in every ledger entry)
 cat m2m-ledger/policy.json
 ```
