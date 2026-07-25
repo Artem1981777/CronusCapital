@@ -125,6 +125,21 @@ async function kv(cmd) {
   } catch (_) { return null }
 }
 
+// --- track record: the market grades our past signals; hash-anchored history cannot be rewritten ---
+let _trCache = { t: 0, v: null }
+async function trackRecord() {
+  if (Date.now() - _trCache.t < 300000) return _trCache.v
+  try {
+    const u = "https:" + "//raw.githubusercontent.com/Artem1981777/CronusCapital/main/m2m-ledger/track-record.json"
+    const r = await fetch(u)
+    if (!r.ok) throw new Error("HTTP " + r.status)
+    const j = await r.json()
+    const s = (j && j.stats) || null
+    _trCache = { t: Date.now(), v: s && s.updatedAt ? { standard: "cronus-track-record-v1", judge: "market outcomes, not self-review", graded: s.graded, hits: s.hits, hitRate: s.hitRate, abstained: s.abstained, proof: "receipts pin each reportHash; ledger files are keccak-anchored on-chain" } : null }
+  } catch (_) { _trCache = { t: Date.now(), v: null } } // fail open
+  return _trCache.v
+}
+
 async function payerPurchases(addr) {
   if (!addr) return 0
   const n = await kv(["GET", "cronus:nano:count:" + String(addr).toLowerCase()])
@@ -170,6 +185,7 @@ export default async function handler(req, res) {
       ok: true, negotiation: "cronus-quote-v1",
       payer: payerAddr || null, purchases, loyal, loyaltyThreshold: LOYALTY_MIN,
       identity: { standard: "ERC-8004", registry: IDENTITY_REGISTRY, registered: registered === null ? "unknown" : registered },
+      signalAccuracy: await trackRecord(),
       sellerReputation: { standard: "ERC-8004", registry: REPUTATION_REGISTRY, agentId: SELLER_AGENT_ID, feedbacks: sellerRep ? sellerRep.count : null, avg: sellerRep ? sellerRep.avg : null },
       prices: { nano: NANO_PRICE, nanoLoyal: LOYAL_PRICE, dataset: DATASET_PRICE },
       offered: { tier: tier, price: tier === "dataset" ? DATASET_PRICE : (loyal ? lb.price : NANO_PRICE) },
