@@ -1150,3 +1150,24 @@ npm run verify-live                  # 97 live checks against production
 ```
 
 Current state: **96 of 97 live checks pass**, plus 4 linked / 18 legacy / 0 broken links in the offline chain verifier. The single red check is `[4] metrics read from on-chain explorer`: while the Arc testnet explorer API is unavailable, metrics fall back to known on-chain proofs and label `source` honestly rather than reporting a fabricated number. Receipt verification already falls back to Arc RPC (`source: onchain-rpc`) when the explorer is down.
+
+## Submitting to Arc Showcase
+
+The project is listed at https://arc-showcase.thecanteenapp.com/p/cronuscapital/
+
+To update or resubmit the listing:
+
+```bash
+uv tool upgrade arc-canteen
+arc-canteen submit-showcase
+```
+
+The CLI will prompt for:
+1. Project name — press Enter to keep existing
+2. Repo URL — press Enter to keep existing
+3. Demo URL — press Enter to keep existing
+4. Description — paste your updated description as one line, then Enter
+5. Empty line — press Enter
+6. Two confirmation prompts — press Y then Enter for each
+
+The submission is saved locally at ~/.arc-canteen/showcase.yaml and can be resubmitted any time.
