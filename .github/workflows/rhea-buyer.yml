@@ -28,6 +28,9 @@ jobs:
       - name: Grade past signals against real market outcomes
         continue-on-error: true
         run: node scripts/grade-signals.mjs
+      - name: Verify ledger hash chain (zero-key public audit)
+        continue-on-error: true
+        run: node scripts/verify-chain.mjs
       - name: Commit m2m ledger
         run: |
           git config user.name "rhea-agent"

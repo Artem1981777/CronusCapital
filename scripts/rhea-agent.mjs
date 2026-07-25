@@ -5,6 +5,7 @@
 import { GatewayClient } from "@circle-fin/x402-batching/client"
 import fs from "node:fs"
 import path from "node:path"
+import crypto from "node:crypto"
 
 const BASE = process.env.CRONUS_BASE || "https://cronus-capital.vercel.app"
 const PK = process.env.RHEA_PRIVATE_KEY
@@ -55,11 +56,26 @@ const log = (...a) => console.log(...a)
 function ledgerPath() {
   return path.join("m2m-ledger", new Date().toISOString().slice(0, 10) + ".json")
 }
+// --- hash chain: every ledger entry pins the sha256 of the previous one; history cannot be quietly rewritten ---
+function entryHash(e) { return "sha256:" + crypto.createHash("sha256").update(JSON.stringify(e)).digest("hex") }
+function lastChainHash() {
+  try {
+    const files = fs.readdirSync("m2m-ledger").filter((f) => /^\d{4}-\d{2}-\d{2}\.json$/.test(f)).sort()
+    for (let i = files.length - 1; i >= 0; i--) {
+      try {
+        const arr = JSON.parse(fs.readFileSync(path.join("m2m-ledger", files[i]), "utf8"))
+        if (arr.length) return entryHash(arr[arr.length - 1])
+      } catch (_) {}
+    }
+  } catch (_) {}
+  return "sha256:genesis"
+}
 function appendLedger(entry) {
   fs.mkdirSync("m2m-ledger", { recursive: true })
   const p = ledgerPath()
   let arr = []
   try { arr = JSON.parse(fs.readFileSync(p, "utf8")) } catch (_) {}
+  entry.chain = { standard: "cronus-hashchain-v1", prev: lastChainHash() }
   arr.push(entry)
   fs.writeFileSync(p, JSON.stringify(arr, null, 2))
   return p
