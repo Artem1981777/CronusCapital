@@ -11,7 +11,44 @@ const PK = process.env.RHEA_PRIVATE_KEY
 const CHAIN = process.env.RHEA_CHAIN || "arcTestnet"
 const DAILY_BUDGET = Number(process.env.RHEA_DAILY_BUDGET || "0.01")
 const RESERVE_PRICE = Number(process.env.RHEA_RESERVE_PRICE || "0.002")
-const TOPIC = process.env.RHEA_TOPIC || "BTC-USDC momentum"
+// bandit: Rhea allocates her budget across topics using her own market-graded history (epsilon-greedy).
+// Rewards come from track-record.json (HIT/MISS judged by real price moves), not from self-review.
+const TOPICS = ["BTC-USDC momentum", "ETH-USDC trend", "SOL-USDC breakout"]
+const EPSILON = Number(process.env.RHEA_BANDIT_EPSILON || "0.2")
+function banditStats() {
+  const stats = {}
+  for (const t of TOPICS) stats[t] = { tries: 0, reward: 0 }
+  try {
+    const tr = JSON.parse(fs.readFileSync(path.join("m2m-ledger", "track-record.json"), "utf8"))
+    for (const r of tr.records || []) {
+      if (!stats[r.topic]) continue
+      if (r.result === "GRADED") { stats[r.topic].tries += 1; stats[r.topic].reward += r.hit ? 1 : 0 }
+      if (r.result === "ABSTAIN") { stats[r.topic].tries += 0.5; stats[r.topic].reward += 0.25 }
+    }
+  } catch (_) {}
+  try {
+    for (const f of fs.readdirSync("m2m-ledger").filter((x) => /^\d{4}-\d{2}-\d{2}\.json$/.test(x))) {
+      let arr = []
+      try { arr = JSON.parse(fs.readFileSync(path.join("m2m-ledger", f), "utf8")) } catch (_) { continue }
+      for (const e of arr) {
+        if (e.action === "BUY" && e.quality && stats[e.topic]) { stats[e.topic].tries += 0.25; stats[e.topic].reward += e.quality.delivered ? 0.125 : 0 }
+      }
+    }
+  } catch (_) {}
+  return stats
+}
+function chooseTopic() {
+  if (process.env.RHEA_TOPIC) return { topic: process.env.RHEA_TOPIC, mode: "env-override" }
+  const stats = banditStats()
+  const untried = TOPICS.filter((t) => stats[t].tries === 0)
+  if (untried.length) return { topic: untried[0], mode: "explore-untried", stats }
+  if (Math.random() < EPSILON) return { topic: TOPICS[Math.floor(Math.random() * TOPICS.length)], mode: "explore", stats }
+  let best = TOPICS[0], bestAvg = -1
+  for (const t of TOPICS) { const a = stats[t].reward / stats[t].tries; if (a > bestAvg) { bestAvg = a; best = t } }
+  return { topic: best, mode: "exploit", avg: Math.round(bestAvg * 100) / 100, stats }
+}
+const _pick = chooseTopic()
+const TOPIC = _pick.topic
 const DRY = process.argv.includes("--dry-run")
 const log = (...a) => console.log(...a)
 
@@ -57,6 +94,8 @@ async function leaveFeedback(settlement, quality) {
 
 async function main() {
   const entry = { agent: "rhea", ts: new Date().toISOString(), topic: TOPIC }
+  entry.bandit = { mode: _pick.mode, epsilon: EPSILON }
+  log("[0] bandit topic selection: " + TOPIC + " (" + _pick.mode + ")")
   let gateway = null, address = null
   if (PK) { gateway = new GatewayClient({ chain: CHAIN, privateKey: PK.startsWith("0x") ? PK : "0x" + PK, ...(process.env.ARC_RPC ? { rpcUrl: process.env.ARC_RPC } : {}) }); address = gateway.address }
 
