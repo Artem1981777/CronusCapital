@@ -1,0 +1,90 @@
+{
+  "standard": "cronus-track-record-v1",
+  "judge": "market outcomes via public price data",
+  "records": [
+    {
+      "key": "692480e8-7de7-4508-a4c6-8ddd7d187c8c",
+      "ts": "2026-07-23T06:05:31.526Z",
+      "topic": "BTC-USDC momentum",
+      "verdict": "SKIP",
+      "result": "ABSTAIN"
+    },
+    {
+      "key": "aea7c729-7a7f-4b96-8158-bbf948a062f7",
+      "ts": "2026-07-23T06:17:00.993Z",
+      "topic": "BTC-USDC momentum",
+      "verdict": "SKIP",
+      "result": "ABSTAIN"
+    },
+    {
+      "key": "5d5170de-cd36-4870-bbed-2fe4ed3ceac5",
+      "ts": "2026-07-23T07:23:09.012Z",
+      "topic": "BTC-USDC momentum",
+      "verdict": "SKIP",
+      "result": "ABSTAIN"
+    },
+    {
+      "key": "9091c77d-687b-4dc0-82aa-db35ab7c117d",
+      "ts": "2026-07-23T07:23:18.819Z",
+      "topic": "BTC-USDC momentum",
+      "verdict": "NO",
+      "result": "ABSTAIN"
+    },
+    {
+      "key": "379eda14-e8a7-4508-9c42-0b93122a3bd6",
+      "ts": "2026-07-23T07:23:25.701Z",
+      "topic": "BTC-USDC momentum",
+      "verdict": "SKIP",
+      "result": "ABSTAIN"
+    },
+    {
+      "key": "78f7d8bc-6547-489a-8012-3db81d03cf42",
+      "ts": "2026-07-23T07:23:32.487Z",
+      "topic": "BTC-USDC momentum",
+      "verdict": "SKIP",
+      "result": "ABSTAIN"
+    },
+    {
+      "key": "fb00f1ae-dae3-4448-b730-af259022324f",
+      "ts": "2026-07-23T07:23:39.367Z",
+      "topic": "BTC-USDC momentum",
+      "verdict": "SKIP",
+      "result": "ABSTAIN"
+    },
+    {
+      "key": "e4403a6c-b488-43d1-ab23-4da03f068c78",
+      "ts": "2026-07-23T07:23:46.001Z",
+      "topic": "BTC-USDC momentum",
+      "verdict": "SKIP",
+      "result": "ABSTAIN"
+    },
+    {
+      "key": "4522cd2e-3656-4553-a398-4820e56a294d",
+      "ts": "2026-07-23T07:23:52.635Z",
+      "topic": "BTC-USDC momentum",
+      "verdict": "SKIP",
+      "result": "ABSTAIN"
+    },
+    {
+      "key": "2e3cd2ee-2401-4f95-9467-3811a6edfedc",
+      "ts": "2026-07-23T07:28:10.667Z",
+      "topic": "BTC-USDC momentum",
+      "verdict": "SKIP",
+      "result": "ABSTAIN"
+    },
+    {
+      "key": "edd60865-36c1-47c5-bf74-d107ece81a4b",
+      "ts": "2026-07-23T07:28:33.315Z",
+      "topic": "BTC-USDC momentum",
+      "verdict": "SKIP",
+      "result": "ABSTAIN"
+    }
+  ],
+  "stats": {
+    "graded": 0,
+    "hits": 0,
+    "hitRate": null,
+    "abstained": 11,
+    "updatedAt": "2026-07-25T06:32:40.472Z"
+  }
+}
