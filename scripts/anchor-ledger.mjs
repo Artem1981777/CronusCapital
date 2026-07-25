@@ -1,21 +1,15 @@
 #!/usr/bin/env node
-// scripts/anchor-ledger.mjs - anchors keccak256 of previous-day m2m-ledger files on-chain
-// (tx to self with the hash as calldata). Git history could in theory be rewritten;
+// scripts/anchor-ledger.mjs - anchors keccak256 of previous-day m2m-ledger files on-chain                      // (tx to self with the hash as calldata). Git history could in theory be rewritten;
 // an on-chain anchor makes the public trade ledger tamper-evident.
 import fs from "node:fs"
-import path from "node:path"
-
-const PK = process.env.RHEA_PRIVATE_KEY
+import path from "node:path"                                                                                    const PK = process.env.RHEA_PRIVATE_KEY
 const ARC_RPC_URL = process.env.ARC_RPC || ("https:" + "//rpc.blockdaemon.testnet.arc.network")
 const DIR = "m2m-ledger"
 const ANCHORS = path.join(DIR, "anchors.json")
 const MAX_PER_RUN = 3
 
-async function main() {
-  if (!PK) { console.log("no RHEA_PRIVATE_KEY, skip anchoring"); return }
-  const today = new Date().toISOString().slice(0, 10)
-  let anchors = []
-  try { anchors = JSON.parse(fs.readFileSync(ANCHORS, "utf8")) } catch (_) {}
+async function main() {                                   if (!PK) { console.log("no RHEA_PRIVATE_KEY, skip anchoring"); return }                                         const today = new Date().toISOString().slice(0, 10)
+  let anchors = []                                        try { anchors = JSON.parse(fs.readFileSync(ANCHORS, "utf8")) } catch (_) {}
   const done = new Set(anchors.map(a => a.file))
   const pending = fs.readdirSync(DIR)
     .filter(f => /^\d{4}-\d{2}-\d{2}\.json$/.test(f) && f.slice(0, 10) < today && !done.has(f))
