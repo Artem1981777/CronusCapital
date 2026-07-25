@@ -225,7 +225,7 @@ Verify with zero keys:
 
 ### The m2m economy stack (July 25)
 
-Thirteen interlocking mechanisms turn two agents into a working micro-economy: prices are negotiated, credit is extended, stakes are slashed - and the only judge is the market. Everything below is verifiable with zero keys.
+Fifteen interlocking mechanisms turn two agents into a working micro-economy: prices are negotiated, credit is extended, stakes are slashed - and the only judge is the market. Everything below is verifiable with zero keys.
 
 | # | Mechanism | What it does |
 |---|-----------|--------------|
@@ -242,6 +242,8 @@ Thirteen interlocking mechanisms turn two agents into a working micro-economy: p
 | 11 | Brier calibration gate | the premium band must be earned: average Brier within 0.35 over graded signals |
 | 12 | Hash-chained ledger | every entry pins the sha256 of the previous one; CI publicly re-verifies the chain each run |
 | 13 | Policy envelope | the buyer spending mandate is public; its sha256 is pinned in every ledger entry |
+| 14 | Signed agent card | an EIP-191 signed machine-readable storefront lets stranger agents discover prices, rules and proofs |
+| 15 | Prepaid sessions | one x402 payment opens a bundle of metered units - a payment channel without the channel contract |
 
 Verify in one minute:
 

@@ -68,6 +68,15 @@ const LOYAL_LOW = process.env.NANO_LOYAL_LOW_USD || "$0.0005"
 const LOYAL_HIGH = process.env.NANO_LOYAL_HIGH_USD || "$0.0009"
 const payLoyalLow = gateway.require(LOYAL_LOW)
 const payLoyalHigh = gateway.require(LOYAL_HIGH)
+// --- prepaid sessions: one x402 payment opens a bundle of units; a KV counter meters consumption (payment-channel-lite) ---
+const SESSION_UNITS = Number(process.env.SESSION_UNITS || "10")
+const SESSION_PRICE = process.env.SESSION_PRICE_USD || "$0.006"
+const paySession = gateway.require(SESSION_PRICE)
+async function sessionUnits(addr) {
+  if (!addr) return 0
+  const n = await kv(["GET", "cronus:session:units:" + String(addr).toLowerCase()])
+  return Math.max(0, Number(n || 0))
+}
 async function convictionNow(host, topic, instId) {
   try {
     const key = "cronus:conv:" + topic
@@ -225,13 +234,16 @@ export default async function handler(req, res) {
         repay: cardBase + "/api/nano-signal?repay=1&payer=YOUR_ADDRESS",
         makeGood: cardBase + "/api/nano-signal?makegood=MISS_KEY&payer=YOUR_ADDRESS",
         dataset: cardBase + "/api/nano-signal?tier=dataset",
+        sessionOpen: cardBase + "/api/nano-signal?session=open&payer=YOUR_ADDRESS",
+        sessionUse: cardBase + "/api/nano-signal?session=use&topic=TOPIC&payer=YOUR_ADDRESS",
         traction: cardBase + "/api/traction",
       },
-      pricing: { nano: NANO_PRICE, loyalBands: { discount: LOYAL_LOW, standard: LOYAL_PRICE, premium: LOYAL_HIGH }, dataset: DATASET_PRICE, model: "conviction-pegged: the loyal price floats with live oracle confidence, hard-clamped to the band range" },
+      pricing: { nano: NANO_PRICE, loyalBands: { discount: LOYAL_LOW, standard: LOYAL_PRICE, premium: LOYAL_HIGH }, dataset: DATASET_PRICE, session: SESSION_PRICE + " for " + SESSION_UNITS + " units (24h)", model: "conviction-pegged: the loyal price floats with live oracle confidence, hard-clamped to the band range" },
       rules: {
         loyalty: "10+ purchases with a registered ERC-8004 identity unlock the loyal tier",
         haggling: "loyal buyers can counter exactly one band down; deterministic, no LLM in the loop",
         credit: "loyal buyers can hold up to " + CREDIT_LIMIT_UNITS + " units on credit and repay at the loyal price on a later run",
+        sessions: "one x402 payment opens " + SESSION_UNITS + " prepaid units metered for 24h; no payment per call and no channel contract",
         stake: "every market-graded MISS entitles the buyer to one free make-good unit",
         calibration: "the premium band is only charged while the seller average Brier stays within " + CAL_MAX_BRIER + " over graded signals",
       },
@@ -298,6 +310,7 @@ export default async function handler(req, res) {
       sellerReputation: { standard: "ERC-8004", registry: REPUTATION_REGISTRY, agentId: SELLER_AGENT_ID, feedbacks: sellerRep ? sellerRep.count : null, avg: sellerRep ? sellerRep.avg : null },
       credit: { eligible: creditEligible, unitPrice: LOYAL_PRICE, unitsOutstanding: creditDebt, limit: CREDIT_LIMIT_UNITS, note: "loyal buyers can take a signal on credit and repay at the loyal price on a later run" },
       stake: await stakeStatus(),
+      session: { standard: "cronus-session-v1", unitsRemaining: await sessionUnits(payerAddr), bundle: SESSION_UNITS + " units for " + SESSION_PRICE + " (24h TTL)", open: "/api/nano-signal?session=open&payer=YOUR_ADDRESS" },
       calibration: { standard: "cronus-calibration-v1", judge: "Brier score vs market outcomes, no self-review", rule: "premium band requires brierAvg within " + CAL_MAX_BRIER + " over " + CAL_MIN_GRADED + "+ graded signals", status: calGate.ok ? "pass" : "premium-demoted", detail: calGate.reason, stats: calGate.cal },
       prices: { nano: NANO_PRICE, nanoLoyal: LOYAL_PRICE, dataset: DATASET_PRICE },
       offered: { tier: tier, price: tier === "dataset" ? DATASET_PRICE : (loyal ? lb.price : NANO_PRICE) },
@@ -340,6 +353,32 @@ export default async function handler(req, res) {
     await kv(["SADD", "cronus:stake:redeemed", mgKey])
     try { await recordTraction({ tier: "STAKE_MAKEGOOD", payer: payerAddr, verdict: mgReport.verdict || null }) } catch (_) {}
     return res.status(200).json({ paid: false, makeGood: true, key: mgKey, stake: { model: st.model, misses: st.misses, redeemed: st.redeemed + 1, owedMakeGoods: st.owedMakeGoods - 1 }, report: mgReport })
+  }
+  // prepaid session: one x402 payment opens a bundle of metered units - a payment channel without the channel contract
+  if (req.query && req.query.session) {
+    const sessKey = "cronus:session:units:" + payerAddr
+    const sessMode = String(req.query.session).toLowerCase()
+    if (sessMode === "open") {
+      if (!payerAddr) return res.status(400).json({ error: "session refused", reason: "pass ?payer=YOUR_ADDRESS so the session can be metered" })
+      let okSession = false
+      try { okSession = await runGateway(req, res, paySession) } catch (e) { if (!res.writableEnded) res.status(500).json({ error: "session payment error", detail: String((e && e.message) || e) }); return }
+      if (!okSession) return
+      const paySess = req.payment || {}
+      const sessBalance = Number(await kv(["INCRBY", sessKey, String(SESSION_UNITS)]) || SESSION_UNITS)
+      await kv(["EXPIRE", sessKey, "86400"])
+      try { await recordTraction({ tier: "SESSION_OPEN", network: paySess.network || NETWORK, payer: paySess.payer, amount: paySess.amount, transaction: paySess.transaction }) } catch (_) {}
+      if (!res.writableEnded) res.status(200).json({ paid: true, session: { standard: "cronus-session-v1", opened: SESSION_UNITS, unitsRemaining: sessBalance, expiresInSec: 86400, price: SESSION_PRICE, consume: "/api/nano-signal?session=use&topic=TOPIC&payer=" + payerAddr, rule: "prepaid units are metered in KV and burn one per signal; no payment per call; reopening tops up and refreshes the 24h TTL" } })
+      return
+    }
+    if (sessMode === "use") {
+      const sessBal = await sessionUnits(payerAddr)
+      if (sessBal <= 0) return res.status(402).json({ error: "no active session", reason: "open one with ?session=open (a single x402 payment of " + SESSION_PRICE + " buys " + SESSION_UNITS + " units for 24h)", unitsRemaining: 0 })
+      const sessLeft = Number(await kv(["DECR", sessKey]) || 0)
+      const sessReport = await generateReport(host, topic, instId)
+      try { await recordTraction({ tier: "SESSION_USE", payer: payerAddr, verdict: sessReport.verdict || null, conviction: (sessReport.conviction != null ? sessReport.conviction : null) }) } catch (_) {}
+      return res.status(200).json({ paid: false, session: { standard: "cronus-session-v1", consumed: 1, unitsRemaining: Math.max(0, sessLeft) }, report: sessReport })
+    }
+    return res.status(400).json({ error: "unknown session mode", expected: ["open", "use"] })
   }
   const mw = tier === "dataset" ? payDataset : (negoMw || (loyal ? lb.mw : pay))
 
