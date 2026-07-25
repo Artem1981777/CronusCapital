@@ -62,6 +62,7 @@ const POLICY = {
   trustRule: "refuse to buy when the seller on-chain avg rating is below minSellerAvg",
   hagglingRule: "counter exactly one band down when offered premium; never chase below the discount floor",
   creditRule: "take trade credit only when the daily budget is exhausted; repay first on the next run",
+  sessionRule: "prefer prepaid sessions: open a bundle when the per-unit price beats the current offer and the daily budget allows; consume prepaid units before any new spend",
   makeGoodRule: "redeem at most one market-graded miss per run",
   verify: "policyHash = sha256 over JSON.stringify of this object minus policyHash and publishedAt",
 }
@@ -107,7 +108,7 @@ function appendLedger(entry) {
 function spentToday() {
   try {
     const arr = JSON.parse(fs.readFileSync(ledgerPath(), "utf8"))
-    return Math.round(arr.filter(e => e.action === "BUY" || e.action === "REPAY").reduce((s, e) => s + Number(e.paidUsd || 0), 0) * 1e6) / 1e6
+    return Math.round(arr.filter(e => e.action === "BUY" || e.action === "REPAY" || e.action === "SESSION_OPEN").reduce((s, e) => s + Number(e.paidUsd || 0), 0) * 1e6) / 1e6
   } catch (_) { return 0 }
 }
 const parseUsd = (s) => Number(String(s || "").replace("$", "")) || 0
@@ -200,6 +201,49 @@ async function main() {
   }
   log("  seller reputation: " + (rep8004 && rep8004.feedbacks ? rep8004.avg + "/5 over " + rep8004.feedbacks + " feedbacks" : "none yet") + " | trust threshold: " + MIN_SELLER_AVG + "/5")
 
+  // [2s] prepaid session: consume prepaid units first; open a bundle when it beats the per-unit offer
+  const USE_SESSIONS = process.env.RHEA_USE_SESSIONS !== "0"
+  const sess = quote.session || null
+  if (USE_SESSIONS && gateway && !DRY && sess) {
+    const unitsLeft = Number(sess.unitsRemaining || 0)
+    if (unitsLeft > 0) {
+      log("[2s] prepaid session: " + unitsLeft + " unit(s) left - consuming one, no payment")
+      const sr = await fetch(BASE + "/api/nano-signal?session=use&topic=" + encodeURIComponent(TOPIC) + "&payer=" + address)
+      const sj = await sr.json()
+      if (sr.ok && sj && sj.session) {
+        const srep = sj.report || {}
+        entry.action = "BUY"; entry.via = "prepaid-session"; entry.paidUsd = 0; entry.session = sj.session
+        entry.quality = { delivered: !!(srep.verdict && srep.conviction != null), verdict: srep.verdict || null, conviction: srep.conviction == null ? null : srep.conviction }
+        log(" consumed 1 unit | " + sj.session.unitsRemaining + " left | verdict=" + (srep.verdict || "-"))
+        log(" ledger: " + appendLedger(entry)); return
+      }
+      log(" session use refused: HTTP " + sr.status + " - falling back to pay-per-call")
+    } else {
+      const bundlePrice = parseUsd(sess.bundlePriceUsd)
+      const bundleUnits = Number(sess.bundleUnits || 0)
+      const perUnit = bundleUnits > 0 ? bundlePrice / bundleUnits : Infinity
+      const remainingNow = Math.max(0, DAILY_BUDGET - spentToday())
+      if (bundlePrice > 0 && bundlePrice <= remainingNow && perUnit < (offeredUsd || Infinity)) {
+        try {
+          log("[2s] opening prepaid session: " + bundleUnits + " units for " + sess.bundlePriceUsd + " (per-unit " + perUnit.toFixed(6) + " beats offer " + offeredUsd + ")")
+          const orr = await gateway.pay(BASE + "/api/nano-signal?session=open&payer=" + address)
+          const od = (orr && orr.data) || {}
+          appendLedger({ agent: "rhea", ts: new Date().toISOString(), action: "SESSION_OPEN", paidUsd: Number(orr.formattedAmount || bundlePrice), settlement: orr.transaction || "(batched)", session: od.session || null })
+          log(" session opened | tx: " + (orr.transaction || "(batched)") + " | units: " + (od.session ? od.session.unitsRemaining : bundleUnits))
+          const sr2 = await fetch(BASE + "/api/nano-signal?session=use&topic=" + encodeURIComponent(TOPIC) + "&payer=" + address)
+          const sj2 = await sr2.json()
+          if (sr2.ok && sj2 && sj2.session) {
+            const srep2 = sj2.report || {}
+            entry.action = "BUY"; entry.via = "prepaid-session"; entry.paidUsd = 0; entry.session = sj2.session
+            entry.quality = { delivered: !!(srep2.verdict && srep2.conviction != null), verdict: srep2.verdict || null, conviction: srep2.conviction == null ? null : srep2.conviction }
+            log(" consumed 1 unit | " + sj2.session.unitsRemaining + " left | verdict=" + (srep2.verdict || "-"))
+            log(" ledger: " + appendLedger(entry)); return
+          }
+          log(" post-open consume refused: HTTP " + sr2.status + " - falling back")
+        } catch (e) { log(" session open failed (non-fatal): " + (e.message || e)) }
+      }
+    }
+  }
   const spent = spentToday()
   const remaining = Math.max(0, DAILY_BUDGET - spent)
   log("[2] negotiate: reserve " + RESERVE_PRICE + " | daily budget " + DAILY_BUDGET + " | spent " + spent.toFixed(6) + " | left " + remaining.toFixed(6))

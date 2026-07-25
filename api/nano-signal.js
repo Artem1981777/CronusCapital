@@ -310,7 +310,7 @@ export default async function handler(req, res) {
       sellerReputation: { standard: "ERC-8004", registry: REPUTATION_REGISTRY, agentId: SELLER_AGENT_ID, feedbacks: sellerRep ? sellerRep.count : null, avg: sellerRep ? sellerRep.avg : null },
       credit: { eligible: creditEligible, unitPrice: LOYAL_PRICE, unitsOutstanding: creditDebt, limit: CREDIT_LIMIT_UNITS, note: "loyal buyers can take a signal on credit and repay at the loyal price on a later run" },
       stake: await stakeStatus(),
-      session: { standard: "cronus-session-v1", unitsRemaining: await sessionUnits(payerAddr), bundle: SESSION_UNITS + " units for " + SESSION_PRICE + " (24h TTL)", open: "/api/nano-signal?session=open&payer=YOUR_ADDRESS" },
+      session: { standard: "cronus-session-v1", unitsRemaining: await sessionUnits(payerAddr), bundleUnits: SESSION_UNITS, bundlePriceUsd: SESSION_PRICE, bundle: SESSION_UNITS + " units for " + SESSION_PRICE + " (24h TTL)", open: "/api/nano-signal?session=open&payer=YOUR_ADDRESS" },
       calibration: { standard: "cronus-calibration-v1", judge: "Brier score vs market outcomes, no self-review", rule: "premium band requires brierAvg within " + CAL_MAX_BRIER + " over " + CAL_MIN_GRADED + "+ graded signals", status: calGate.ok ? "pass" : "premium-demoted", detail: calGate.reason, stats: calGate.cal },
       prices: { nano: NANO_PRICE, nanoLoyal: LOYAL_PRICE, dataset: DATASET_PRICE },
       offered: { tier: tier, price: tier === "dataset" ? DATASET_PRICE : (loyal ? lb.price : NANO_PRICE) },
