@@ -108,6 +108,20 @@ async function main() {
   const delivered = !!(rep.verdict && rep.conviction != null)
   entry.quality = { delivered, verdict: rep.verdict || null, conviction: rep.conviction == null ? null : rep.conviction }
   log("[4] quality: delivered=" + delivered + " | verdict=" + (rep.verdict || "-"))
+  const dr = data.deliveryReceipt || null
+  if (dr && dr.payload && dr.signature) {
+    try {
+      const { recoverMessageAddress, keccak256, stringToHex } = await import("viem")
+      const signer = await recoverMessageAddress({ message: JSON.stringify(dr.payload), signature: dr.signature })
+      const hashOk = dr.payload.reportHash === keccak256(stringToHex(JSON.stringify(rep)))
+      const signerOk = signer.toLowerCase() === String(dr.payload.signer || "").toLowerCase()
+      entry.receipt = { standard: "EIP-191", verified: hashOk && signerOk, signer: signer, settlement: dr.payload.settlement, reportHash: dr.payload.reportHash, signature: dr.signature }
+      log("[4b] delivery receipt: signature " + (signerOk ? "valid" : "INVALID") + " | report hash " + (hashOk ? "match" : "MISMATCH") + " | signer " + signer)
+    } catch (e) {
+      entry.receipt = { error: String((e && e.message) || e).slice(0, 120) }
+      log("[4b] receipt verification failed (non-fatal): " + entry.receipt.error)
+    }
+  } else { log("[4b] no delivery receipt in response") }
   try {
     log("[5] reputation: rating the seller on-chain (ERC-8004 giveFeedback)")
     entry.feedback = await leaveFeedback(entry.settlement, entry.quality)

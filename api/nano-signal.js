@@ -66,6 +66,20 @@ const payLoyal     = gateway.require(LOYAL_PRICE)
 const LOYALTY_MIN  = Number(process.env.LOYALTY_MIN_PURCHASES || "10")
 
 // Reuse the same oracle the STANDARD x402 path uses.
+// --- signed delivery receipts: the seller cryptographically attests every delivered trade (EIP-191) ---
+async function signReceipt(payment, report) {
+  const key = process.env.TREASURY_PRIVATE_KEY
+  if (!key) return null
+  try {
+    const { keccak256, stringToHex } = await import("viem")
+    const { privateKeyToAccount } = await import("viem/accounts")
+    const account = privateKeyToAccount(key.startsWith("0x") ? key : "0x" + key)
+    const payload = { receipt: "cronus-delivery-v1", seller: PAY_TO, signer: account.address, payer: payment.payer || null, amountUsd: payment.amount || null, settlement: payment.transaction || null, reportHash: keccak256(stringToHex(JSON.stringify(report))), verdict: (report && report.verdict) || null, ts: Date.now() }
+    const signature = await account.signMessage({ message: JSON.stringify(payload) })
+    return { standard: "EIP-191", payload: payload, signature: signature, verify: "recover signer from signature over JSON.stringify(payload); reportHash = keccak256(utf8 of JSON.stringify(report))" }
+  } catch (_) { return null } // fail open: a missing receipt never blocks a sale
+}
+
 async function generateReport(host, topic, instId) {
   try {
     const r = await fetch("https://" + host + "/api/consult?topic=" + encodeURIComponent(topic) + "&instId=" + encodeURIComponent(instId))
@@ -193,6 +207,7 @@ export default async function handler(req, res) {
   } catch (_) {}
 
   const isOnchainTx = /^0x[0-9a-fA-F]{64}$/.test(String(payment.transaction || ""))
+  const deliveryReceipt = await signReceipt(payment, report)
   const txUrl = isOnchainTx ? "https://testnet.arcscan.app/tx/" + payment.transaction : null
   if (!res.writableEnded) {
     res.status(200).json({
@@ -215,6 +230,7 @@ export default async function handler(req, res) {
       },
       settledAt,
       report,
+      deliveryReceipt: deliveryReceipt,
     })
   }
 }
