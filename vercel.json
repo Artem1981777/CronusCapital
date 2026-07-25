@@ -1,6 +1,10 @@
 {
   "rewrites": [
     {
+      "source": "/api/agent-card",
+      "destination": "/api/nano-signal?card=1"
+    },
+    {
       "source": "/api/alerts",
       "destination": "/api/info?kind=alerts"
     },

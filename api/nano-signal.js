@@ -201,6 +201,65 @@ export default async function handler(req, res) {
   const host   = (req.headers && req.headers.host) || "localhost"
   const tier = (req.query && String(req.query.tier || "")).toLowerCase() === "dataset" ? "dataset" : "nano"
   const payerAddr = String((req.query && req.query.payer) || "").toLowerCase()
+    // agent card: machine-readable x402 storefront for stranger agents (public URL /api/agent-card via rewrite)
+  if (req.query && req.query.card) {
+    const cardBase = "https:" + "//" + host
+    const RAWC = "https://raw.githubusercontent.com/Artem1981777/CronusCapital/main/"
+    const sellerRepCard = await sellerReputation()
+    const trCard = await trackRecord()
+    let policyCard = null
+    try { const pr = await fetch(RAWC + "m2m-ledger/policy.json"); if (pr.ok) { const pj = await pr.json(); policyCard = { file: RAWC + "m2m-ledger/policy.json", policyHash: pj.policyHash || null } } } catch (_) {}
+    const card = {
+      standard: "cronus-agent-card-v1",
+      kind: "x402 storefront manifest for autonomous agents",
+      name: "Cronus Capital - micro trading signals",
+      seller: PAY_TO,
+      network: NETWORK,
+      networkLabel: NETWORK_LABEL,
+      identity: { standard: "ERC-8004", registry: IDENTITY_REGISTRY, reputationRegistry: REPUTATION_REGISTRY, agentId: SELLER_AGENT_ID, feedbacks: sellerRepCard ? sellerRepCard.count : null, avgRating: sellerRepCard ? sellerRepCard.avg : null },
+      endpoints: {
+        quote: cardBase + "/api/nano-signal?quote=1&payer=YOUR_ADDRESS",
+        buy: cardBase + "/api/nano-signal?topic=TOPIC&payer=YOUR_ADDRESS",
+        counterOffer: cardBase + "/api/nano-signal?quote=1&counter=PRICE&payer=YOUR_ADDRESS",
+        credit: cardBase + "/api/nano-signal?credit=1&payer=YOUR_ADDRESS",
+        repay: cardBase + "/api/nano-signal?repay=1&payer=YOUR_ADDRESS",
+        makeGood: cardBase + "/api/nano-signal?makegood=MISS_KEY&payer=YOUR_ADDRESS",
+        dataset: cardBase + "/api/nano-signal?tier=dataset",
+      },
+      pricing: { nano: NANO_PRICE, loyalBands: { discount: LOYAL_LOW, standard: LOYAL_PRICE, premium: LOYAL_HIGH }, dataset: DATASET_PRICE, model: "conviction-pegged: the loyal price floats with live oracle confidence, hard-clamped to the band range" },
+      rules: {
+        loyalty: "10+ purchases with a registered ERC-8004 identity unlock the loyal tier",
+        haggling: "loyal buyers can counter exactly one band down; deterministic, no LLM in the loop",
+        credit: "loyal buyers can hold up to " + CREDIT_LIMIT_UNITS + " units on credit and repay at the loyal price on a later run",
+        stake: "every market-graded MISS entitles the buyer to one free make-good unit",
+        calibration: "the premium band is only charged while the seller average Brier stays within " + CAL_MAX_BRIER + " over graded signals",
+      },
+      proofs: {
+        trackRecord: RAWC + "m2m-ledger/track-record.json",
+        trackRecordStats: trCard,
+        ledger: "https://github.com/Artem1981777/CronusCapital/tree/main/m2m-ledger",
+        hashChain: "clone the repo and run: node scripts/verify-chain.mjs (zero keys required)",
+        deliveryReceipts: "every paid delivery returns an EIP-191 receipt pinning the report hash before the outcome is known",
+        referenceBuyerMandate: policyCard,
+      },
+      honestLabel: "our reference buyer (Rhea) is a second wallet of this project - a disclosed self-demo; this card exists so stranger agents can trade with Cronus too",
+      ts: Date.now(),
+    }
+    let cardAttestation = null
+    try {
+      const cardKey = process.env.TREASURY_PRIVATE_KEY
+      if (cardKey) {
+        const { keccak256, stringToHex } = await import("viem")
+        const { privateKeyToAccount } = await import("viem/accounts")
+        const cardAccount = privateKeyToAccount(cardKey.startsWith("0x") ? cardKey : "0x" + cardKey)
+        const cardHash = keccak256(stringToHex(JSON.stringify(card)))
+        cardAttestation = { standard: "EIP-191", signer: cardAccount.address, cardHash: cardHash, signature: await cardAccount.signMessage({ message: cardHash }), verify: "recover the signer from the signature over cardHash; cardHash = keccak256(utf8 of JSON.stringify(card))" }
+      }
+    } catch (_) { cardAttestation = null } // fail open: an unsigned card is still a useful card
+    res.setHeader("cache-control", "public, max-age=300")
+    return res.status(200).json({ card: card, attestation: cardAttestation })
+  }
+
   const purchases = await payerPurchases(payerAddr)
   const registered = await payerRegistered(payerAddr)
   const loyal = !!payerAddr && purchases >= LOYALTY_MIN && registered !== false
