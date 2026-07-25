@@ -68,5 +68,26 @@
       "prev": "sha256:4703d508c1f643ef5c489902081ed7de8b7baf618d26accc71dfc3c80cc9df55"
     },
     "policyHash": "sha256:bb92e518a455c943e284069ca8ed9db14e07e3cc1bd5c40fddddf3bc82c0d936"
+  },
+  {
+    "agent": "rhea",
+    "ts": "2026-07-25T07:20:19.794Z",
+    "topic": "SOL-USDC breakout",
+    "bandit": {
+      "mode": "explore-untried",
+      "epsilon": 0.2
+    },
+    "quote": {
+      "tier": "nano",
+      "price": "$0.001"
+    },
+    "purchases": 0,
+    "loyal": false,
+    "action": "DRY_RUN",
+    "chain": {
+      "standard": "cronus-hashchain-v1",
+      "prev": "sha256:93498d84f8eb255bef0954fbc065b36e63bebebaf85be8b15ca7e77e6c7f9f5e"
+    },
+    "policyHash": "sha256:bb92e518a455c943e284069ca8ed9db14e07e3cc1bd5c40fddddf3bc82c0d936"
   }
 ]
