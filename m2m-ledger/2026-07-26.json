@@ -42,5 +42,54 @@
       "prev": "sha256:047046b37ab5ac0d21d665b57ce294edf6fbd2ed40e21b6d4206429f139b2969"
     },
     "policyHash": "sha256:fa6496db7611aeb26710b34b3401992704cc21891df021a9262bd9c13ffdeb38"
+  },
+  {
+    "agent": "rhea",
+    "ts": "2026-07-26T15:44:35.449Z",
+    "topic": "SOL-USDC breakout",
+    "bandit": {
+      "mode": "explore",
+      "epsilon": 0.2
+    },
+    "quote": {
+      "tier": "nano",
+      "price": "$0.0009"
+    },
+    "purchases": 18,
+    "loyal": true,
+    "convictionPricing": {
+      "model": "conviction-pegged",
+      "conviction": 82,
+      "band": "premium",
+      "bands": {
+        "discount": "$0.0005",
+        "standard": "$0.0007",
+        "premium": "$0.0009"
+      },
+      "note": "loyal price floats with live oracle confidence, hard-clamped to the band range"
+    },
+    "negotiation": {
+      "countered": "$0.0009",
+      "agreed": "$0.0007",
+      "band": "standard"
+    },
+    "action": "BUY",
+    "via": "prepaid-session",
+    "paidUsd": 0,
+    "session": {
+      "standard": "cronus-session-v1",
+      "consumed": 1,
+      "unitsRemaining": 7
+    },
+    "quality": {
+      "delivered": true,
+      "verdict": "YES",
+      "conviction": 82
+    },
+    "chain": {
+      "standard": "cronus-hashchain-v1",
+      "prev": "sha256:362c34fee7fd2fdb181163d98c8fa72bf8ff68a262aa73241314dc2a1b3daf53"
+    },
+    "policyHash": "sha256:fa6496db7611aeb26710b34b3401992704cc21891df021a9262bd9c13ffdeb38"
   }
 ]
