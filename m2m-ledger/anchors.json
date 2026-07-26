@@ -14,5 +14,13 @@
     "block": 53545896,
     "anchoredAt": "2026-07-25T06:32:36.512Z",
     "by": "0xbe3a16bD4137A8a293aCBcaA75cCE3420919D21d"
+  },
+  {
+    "file": "2026-07-25.json",
+    "keccak256": "0x3c9f635c1e524713b9d4b25e796f6dc1779ca7539f2649e0cf31b316238b39ce",
+    "tx": "0x534605999608a562a75c8b47ab68f6f729d572722a7b3c6d50031a8c0a353f71",
+    "block": 53731095,
+    "anchoredAt": "2026-07-26T09:01:08.274Z",
+    "by": "0xbe3a16bD4137A8a293aCBcaA75cCE3420919D21d"
   }
 ]
