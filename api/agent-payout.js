@@ -301,6 +301,12 @@ export default async function handler(req, res) {
 	}
 
 	if (action === "set-available") {
+                const csA = process.env.CRON_SECRET || ""
+                const authA = String((req.headers && req.headers.authorization) || "")
+                if (String(process.env.ALLOW_SET_AVAILABLE || "1") !== "1" || !csA || authA !== "Bearer " + csA) {
+                        res.status(403).json({ ok: false, error: "set-available requires Authorization: Bearer CRON_SECRET", hint: "set ALLOW_SET_AVAILABLE=0 to disable this operator override entirely" })
+                        return
+                }
 		const v = Number(q.value)
 		if (!isFinite(v) || v < 0) { res.status(400).json({ detail: "invalid value" }); return }
 		await kvSet(AVAIL_KEY, String(v))
