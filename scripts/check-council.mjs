@@ -49,7 +49,13 @@ const cases = [
     assert.equal(r.providers.length >= 2, true)
     for (const p of r.providers) assert.equal(r.providersAttempted.includes(p), true)
     for (const p of r.providersFailed) assert.equal(r.providers.includes(p), false)
-    assert.equal(r.providers.length + r.providersFailed.length, r.providersAttempted.length)
+    // После переголосования провайдер может быть опрошен, не дать голос и при
+    // этом не остаться в providersFailed: его роль закрыл другой провайдер.
+    // Поэтому опрошенные = проголосовавшие + упавшие + восстановленные.
+    const recovered = Array.from(new Set((r.failover || []).map((f) => f.from)))
+    const accounted = new Set(r.providers.concat(r.providersFailed, recovered))
+    assert.equal(accounted.size, r.providersAttempted.length)
+    for (const p of r.providersAttempted) assert.equal(accounted.has(p), true)
     assert.equal(r.consensus, "ABSTAIN")
     assert.equal(r.reason, "no_majority")
     assert.equal(r.confidence, null)
