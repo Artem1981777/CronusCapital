@@ -4,7 +4,7 @@ import { spawnSync } from "node:child_process"
 
 const SUITES = [
   "policy-kernel", "fact-guard", "decision-gate", "council", "provenance",
-  "live", "live-passport", "live-thompson", "contract", "routing", "failover",
+  "live", "live-passport", "live-thompson", "contract", "routing", "failover", "rigor",
 ]
 let total = 0
 const failed = []

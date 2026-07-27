@@ -143,6 +143,14 @@
     {
       "source": "/api/capabilities",
       "destination": "/api/info?kind=capabilities"
+    },
+    {
+      "source": "/api/rigor",
+      "destination": "/api/info?kind=rigor"
+    },
+    {
+      "source": "/api/alpha-passport",
+      "destination": "/api/info?kind=alpha-passport"
     }
   ]
 }
