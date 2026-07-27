@@ -2,6 +2,8 @@
 // Any external agent/wallet can pay and consume. Verification is pure JSON-RPC with multi-endpoint fallback.
 import { keccak256, toBytes } from "viem"
 import { eurcEnabled, toUsdAtomic, EURC_ADDRESS } from "../lib/fx.js"
+import { claimOnce, failClosedEnabled } from "../lib/kvSafe.js"
+import { recordSignalBuyer } from "../lib/upgrades/makegoodEscrow.js"
 
 const X402_VERSION = 1
 const NETWORK    = process.env.X402_NETWORK     || "arc-testnet"
@@ -146,6 +148,14 @@ export default async function handler(req, res) {
   catch (e) { res.status(502).json({ error: "payment verification failed", detail: String((e && e.message) || e) }); return }
   if (!proof.ok) { res.status(402).json({ ...requirements(resource), error: "payment not verified: " + proof.reason, txHash }); return }
 
+  // ADDITIVE: independent one-time-use claim on a separate key (cronus:guard:), so the
+  // existing markUsedOnce path below is untouched. With KV_FAIL_CLOSED=1 an unreachable or
+  // unconfigured replay store refuses the sale instead of failing open.
+  const guard = await claimOnce("cronus:guard:" + txHash, Math.max(MAX_AGE_SEC, 86400))
+  if (!guard.ok) {
+    res.status(402).json({ ...requirements(resource), error: "payment proof rejected: " + guard.reason, txHash, failClosed: failClosedEnabled(), replayStoreHealthy: guard.healthy })
+    return
+  }
   const once = await markUsedOnce(txHash)
   if (once.enforced && !once.fresh) {
     res.status(402).json({ ...requirements(resource), error: "payment proof already consumed (one-time-use)", txHash })
@@ -153,6 +163,9 @@ export default async function handler(req, res) {
   }
   // Credit real, on-chain-verified, one-time x402 revenue into the payout available pool (demo calls never reach here).
   await creditPayoutAvailable(REVENUE_CREDIT_USDC).catch(function () { return null })
+  // ADDITIVE (make-good): record the real, on-chain-verified buyer so a later WRONG stake on
+  // this instrument can compensate them instead of burning. Fire-and-forget; never blocks the sale.
+  await recordSignalBuyer(instId, proof.from, txHash).catch(function () { return null })
   const report = await generateReport(host, topic, instId)
   const settledAt = Date.now()
   const commitment = keccak256(toBytes("CRONUS-SIGNAL|" + txHash + "|" + topic + "|" + (report.verdict || "SKIP") + "|" + (report.conviction || 0) + "|" + settledAt))

@@ -167,6 +167,29 @@ function normPk(pk) {
 }
 
 async function runExecute(req, res, q) {
+        // ADDITIVE auth gate - refuses to move funds without CRON_SECRET. Suffixed names so the
+        // existing cronSecret/auth/trustedCron declarations below remain untouched.
+        const cronSecret0 = process.env.CRON_SECRET || ""
+        const auth0 = req.headers ? (req.headers.authorization || "") : ""
+        const viaBearer0 = Boolean(cronSecret0) && auth0 === "Bearer " + cronSecret0
+        const viaQuery0 = Boolean(cronSecret0) && q.secret === cronSecret0
+        if (String(process.env.EXECUTE_REQUIRE_AUTH || "1") === "1") {
+                if (!cronSecret0) {
+                        res.status(503).json({ ok: false, error: "execute disabled: CRON_SECRET not configured", hint: "set CRON_SECRET, or EXECUTE_REQUIRE_AUTH=0 to restore the previous open behaviour" })
+                        return
+                }
+                if (!viaBearer0 && !viaQuery0) {
+                        res.status(401).json({ ok: false, error: "execute requires CRON_SECRET", hint: "send Authorization: Bearer CRON_SECRET; query secret= is still accepted for the existing scheduler" })
+                        return
+                }
+        }
+        if (viaQuery0 && !viaBearer0) {
+                console.warn("[cronus] execute authorized via query secret - migrate the scheduler to Authorization: Bearer so the secret stops landing in request logs")
+        }
+        if (typeof q.available !== "undefined" && String(process.env.ALLOW_AVAILABLE_OVERRIDE || "1") !== "1") {
+                res.status(403).json({ ok: false, error: "available override disabled (ALLOW_AVAILABLE_OVERRIDE=0)" })
+                return
+        }
 	const cronSecret = process.env.CRON_SECRET || ""
 	const auth = req.headers ? (req.headers.authorization || "") : ""
 	const trustedCron = Boolean(cronSecret) && (auth === "Bearer " + cronSecret || q.secret === cronSecret)
@@ -278,6 +301,12 @@ export default async function handler(req, res) {
 	}
 
 	if (action === "set-available") {
+                const csA = process.env.CRON_SECRET || ""
+                const authA = String((req.headers && req.headers.authorization) || "")
+                if (String(process.env.ALLOW_SET_AVAILABLE || "1") !== "1" || !csA || authA !== "Bearer " + csA) {
+                        res.status(403).json({ ok: false, error: "set-available requires Authorization: Bearer CRON_SECRET", hint: "set ALLOW_SET_AVAILABLE=0 to disable this operator override entirely" })
+                        return
+                }
 		const v = Number(q.value)
 		if (!isFinite(v) || v < 0) { res.status(400).json({ detail: "invalid value" }); return }
 		await kvSet(AVAIL_KEY, String(v))
