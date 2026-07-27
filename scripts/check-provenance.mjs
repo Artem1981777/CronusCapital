@@ -44,7 +44,7 @@ const cases = [
     assert.equal(locatePassport(null), null)
   }],
   ["passport помечен synthetic и НЕ утверждает целостность", async () => {
-    const { out } = await call(REAL_ROUTES.passport)
+    const { out } = await call(PROVENANCE_ROUTES.passport)
     assert.equal(out.kind, "strategy-passport")
     assert.equal(out.dataProvenance.synthetic, true)
     assert.equal(out.integrityRecheck.ok, false)
@@ -89,7 +89,8 @@ const cases = [
   ["живой kelly перекрывает обёртку заглушки", async () => {
     assert.equal(REAL_ROUTES.kelly === PROVENANCE_ROUTES.kelly, false)
     assert.equal(typeof REAL_ROUTES.kelly, "function")
-    assert.equal(REAL_ROUTES.passport === PROVENANCE_ROUTES.passport, true)
+    assert.equal(REAL_ROUTES["shadow-float"] === PROVENANCE_ROUTES["shadow-float"], true)
+    assert.equal(REAL_ROUTES.passport === PROVENANCE_ROUTES.passport, false)
   }],
 ]
 for (const [name, fn] of cases) { await fn(); n += 1; console.log("  ok - " + name) }
