@@ -151,6 +151,10 @@
     {
       "source": "/api/alpha-passport",
       "destination": "/api/info?kind=alpha-passport"
+    },
+    {
+      "source": "/api/makegood",
+      "destination": "/api/info?kind=makegood"
     }
   ]
 }
