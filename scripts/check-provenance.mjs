@@ -89,7 +89,9 @@ const cases = [
   ["живой kelly перекрывает обёртку заглушки", async () => {
     assert.equal(REAL_ROUTES.kelly === PROVENANCE_ROUTES.kelly, false)
     assert.equal(typeof REAL_ROUTES.kelly, "function")
-    assert.equal(REAL_ROUTES["shadow-float"] === PROVENANCE_ROUTES["shadow-float"], true)
+    const sf = await call(REAL_ROUTES["shadow-float"])
+    assert.equal(sf.out.dataProvenance.synthetic, true)
+    assert.equal(sf.out.ok, true)
     assert.equal(REAL_ROUTES.passport === PROVENANCE_ROUTES.passport, false)
   }],
 ]

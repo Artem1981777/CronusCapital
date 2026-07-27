@@ -108,7 +108,9 @@ const cases = [
   ["живой thompson перекрывает обёртку заглушки", async () => {
     assert.equal(REAL_ROUTES.thompson === PROVENANCE_ROUTES.thompson, false)
     assert.equal(typeof REAL_ROUTES.thompson, "function")
-    assert.equal(REAL_ROUTES["shadow-float"] === PROVENANCE_ROUTES["shadow-float"], true)
+    const sf = await call(REAL_ROUTES["shadow-float"], {})
+    assert.equal(sf.dataProvenance.synthetic, true)
+    assert.equal(sf.ok, true)
   }],
 ]
 for (const [name, fn] of cases) { await fn(); n += 1; console.log("  ok - " + name) }
