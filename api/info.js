@@ -27,8 +27,9 @@ import vaultNav from "../lib/vaultNav.js"
 import signalX402 from "../lib/signalX402.js"
 import cover from "../lib/cover.js"
 import alerts from "../lib/alerts.js"
+import { UPGRADE_ROUTES } from "../lib/upgrades/router.js"
 
-const ROUTES = { cover, alerts, "backtest": backtest, "trace": trace, "agent-withdraw": agentWithdraw, "subscription": subscription, "split-pay": splitPay, "spend-limit": spendLimit, "fund-escrow": fundEscrow, "resolve-stake": resolveStake, manifest, openapi, receipts, receipt, metrics, traction, leaderboard, settlements, "spend-intent": spendIntent, scorecard, "track-record": trackRecord, "open-stake": openStake, "pay-to-think": payToThink, "vault-nav": vaultNav, "signal-x402": signalX402 }
+const ROUTES = { ...UPGRADE_ROUTES, cover, alerts, "backtest": backtest, "trace": trace, "agent-withdraw": agentWithdraw, "subscription": subscription, "split-pay": splitPay, "spend-limit": spendLimit, "fund-escrow": fundEscrow, "resolve-stake": resolveStake, manifest, openapi, receipts, receipt, metrics, traction, leaderboard, settlements, "spend-intent": spendIntent, scorecard, "track-record": trackRecord, "open-stake": openStake, "pay-to-think": payToThink, "vault-nav": vaultNav, "signal-x402": signalX402 }
 
 export default async function handler(req, res) {
 	const kind = String((req.query && req.query.kind) || "").toLowerCase()

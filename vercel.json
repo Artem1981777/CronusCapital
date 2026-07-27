@@ -95,6 +95,30 @@
     {
       "source": "/api/agent-withdraw",
       "destination": "/api/info?kind=agent-withdraw"
+    },
+    {
+      "source": "/api/shadow-float",
+      "destination": "/api/info?kind=shadow-float"
+    },
+    {
+      "source": "/api/council",
+      "destination": "/api/info?kind=council"
+    },
+    {
+      "source": "/api/thompson",
+      "destination": "/api/info?kind=thompson"
+    },
+    {
+      "source": "/api/kelly",
+      "destination": "/api/info?kind=kelly"
+    },
+    {
+      "source": "/api/use-receipt",
+      "destination": "/api/info?kind=use-receipt"
+    },
+    {
+      "source": "/api/passport",
+      "destination": "/api/info?kind=passport"
     }
   ]
 }
