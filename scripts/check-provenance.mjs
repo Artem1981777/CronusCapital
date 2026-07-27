@@ -2,6 +2,7 @@
 import assert from "node:assert/strict"
 import { decorate, recheckIntegrity, normalizeHash, locatePassport, wrapHandler } from "../lib/provenance/wrap.js"
 import { REAL_ROUTES } from "../lib/council/routes.js"
+import { PROVENANCE_ROUTES } from "../lib/provenance/routes.js"
 
 const H64 = "a".repeat(64)
 const call = async (h, req) => {
@@ -51,13 +52,13 @@ const cases = [
     assert.equal(out.passport.decision.verdict, "BUY")
   }],
   ["kelly: формула настоящая, входные данные демо", async () => {
-    const { out } = await call(REAL_ROUTES.kelly)
+    const { out } = await call(PROVENANCE_ROUTES.kelly)
     assert.equal(out.dataProvenance.computation, "real_kelly_formula")
     assert.equal(out.dataProvenance.synthetic, true)
     assert.equal(typeof out.stake, "number")
   }],
   ["thompson: cold start честно назван", async () => {
-    const { out } = await call(REAL_ROUTES.thompson)
+    const { out } = await call(PROVENANCE_ROUTES.thompson)
     assert.equal(out.dataProvenance.inputs.includes("cold_start_prior"), true)
     assert.equal(out.distribution.params.alpha, 1)
   }],
@@ -84,6 +85,11 @@ const cases = [
   ["council не перекрыт обёртками", async () => {
     const { out } = await call(REAL_ROUTES.council, { query: { instId: "BTC-USDC" } })
     assert.equal(out.version === "council-2" || out.reason === "market_unavailable", true)
+  }],
+  ["живой kelly перекрывает обёртку заглушки", async () => {
+    assert.equal(REAL_ROUTES.kelly === PROVENANCE_ROUTES.kelly, false)
+    assert.equal(typeof REAL_ROUTES.kelly, "function")
+    assert.equal(REAL_ROUTES.passport === PROVENANCE_ROUTES.passport, true)
   }],
 ]
 for (const [name, fn] of cases) { await fn(); n += 1; console.log("  ok - " + name) }
