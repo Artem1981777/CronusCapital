@@ -2,14 +2,13 @@
 // Any external agent/wallet can pay and consume. Verification is pure JSON-RPC with multi-endpoint fallback.
 import { keccak256, toBytes } from "viem"
 import { eurcEnabled, toUsdAtomic, EURC_ADDRESS } from "../lib/fx.js"
+import { claimOnce, failClosedEnabled } from "../lib/kvSafe.js"
 
 const X402_VERSION = 1
 const NETWORK    = process.env.X402_NETWORK     || "arc-testnet"
 const USDC_ASSET = (process.env.ARC_USDC_ADDRESS || "0x3600000000000000000000000000000000000000").toLowerCase()
 const PAY_TO     = (process.env.CRONUS_PAYTO     || "0xdc6778c5f8cc74b10aed11c48306d4cfc5737fbd").toLowerCase()
 const PRICE      = BigInt(process.env.SIGNAL_PRICE || "20000") // 0.02 USDC (6 decimals)
-import { claimOnce, failClosedEnabled } from "../lib/kvSafe.js"
-
 const MAX_AGE_SEC = Number(process.env.SIGNAL_MAX_AGE_SECONDS || "1800")
 const EUR_USD_REF = process.env.EUR_USD_REFERENCE || "1.08"
 const TRANSFER_TOPIC = "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"

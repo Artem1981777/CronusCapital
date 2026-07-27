@@ -10,7 +10,8 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "node --test test/*.test.mjs",
-    "verify-intent": "node scripts/verify-intent.mjs"
+    "verify-intent": "node scripts/verify-intent.mjs",
+    "check-vault": "node scripts/check-vault-invariants.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.95.2",
