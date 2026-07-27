@@ -43,7 +43,13 @@ const cases = [
     const r = await runCouncil({ topic: "BTC-USDC", market, opts: {
       env: THREE, fetchImpl: byRole({ technical: ["BUY", 0.9], fundamental: ["SKIP", 0.5], contrarian: ["SELL", 0.6] }) } })
     assert.equal(r.mode, "multi-provider")
-    assert.equal(r.providers.length, 3)
+    // providers перечисляет ТОЛЬКО зачтённые голоса, поэтому его длина
+    // зависит от того, сколько провайдеров реально ответило.
+    assert.equal(r.providersAttempted.length, 3)
+    assert.equal(r.providers.length >= 2, true)
+    for (const p of r.providers) assert.equal(r.providersAttempted.includes(p), true)
+    for (const p of r.providersFailed) assert.equal(r.providers.includes(p), false)
+    assert.equal(r.providers.length + r.providersFailed.length, r.providersAttempted.length)
     assert.equal(r.consensus, "ABSTAIN")
     assert.equal(r.reason, "no_majority")
     assert.equal(r.confidence, null)

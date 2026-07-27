@@ -119,6 +119,30 @@
     {
       "source": "/api/passport",
       "destination": "/api/info?kind=passport"
+    },
+    {
+      "source": "/api/council-consensus",
+      "destination": "/api/info?kind=council-consensus"
+    },
+    {
+      "source": "/api/thompson-price",
+      "destination": "/api/info?kind=thompson-price"
+    },
+    {
+      "source": "/api/kelly-stake",
+      "destination": "/api/info?kind=kelly-stake"
+    },
+    {
+      "source": "/api/use-registry",
+      "destination": "/api/info?kind=use-registry"
+    },
+    {
+      "source": "/api/strategy-passport",
+      "destination": "/api/info?kind=strategy-passport"
+    },
+    {
+      "source": "/api/capabilities",
+      "destination": "/api/info?kind=capabilities"
     }
   ]
 }
