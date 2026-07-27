@@ -50,6 +50,9 @@ const cases = [
     assert.equal(out.passport.verification.anchored, true)
     assert.equal(out.integrityRecheck.ok, true)
     assert.equal(out.integrityRecheck.reason, "hash_matches_record")
+    assert.equal(out.integrityRecheck.method, "recomputed_content_hash")
+    assert.equal(out.hashFormatCheck.ok, true)
+    assert.equal(out.hashFormatCheck.reason, "hash_wellformed")
     assert.equal(out.dataProvenance.synthetic, false)
     assert.equal(out.dataProvenance.live, true)
   }],
