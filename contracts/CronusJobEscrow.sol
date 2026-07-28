@@ -74,9 +74,10 @@ contract CronusJobEscrow {
 
     function submit(uint256 jobId, string calldata resultURI) external {
         Job storage j = _jobs[jobId];
-        if (j.status == Status.None) revert NotFound();
         if (msg.sender != j.provider) revert NotProvider();
-        if (j.status != Status.Funded) revert BadStatus();
+        if (block.timestamp > j.deadline) revert NotExpired(); // ADDITIVE: блокируем поздние сабмиты
+        Job storage j = _jobs[jobId];
+        if (msg.sender != j.provider) revert NotProvider();
         j.resultURI = resultURI;
         j.status = Status.Submitted;
         emit JobSubmitted(jobId, resultURI);
@@ -84,7 +85,6 @@ contract CronusJobEscrow {
 
     function release(uint256 jobId) external nonReentrant {
         Job storage j = _jobs[jobId];
-        if (j.status == Status.None) revert NotFound();
         if (!_isArbiter(j, msg.sender)) revert NotArbiter();
         if (j.status != Status.Submitted) revert BadStatus();
         j.status = Status.Completed;                  // effects before interaction
@@ -94,7 +94,6 @@ contract CronusJobEscrow {
 
     function reject(uint256 jobId) external nonReentrant {
         Job storage j = _jobs[jobId];
-        if (j.status == Status.None) revert NotFound();
         if (!_isArbiter(j, msg.sender)) revert NotArbiter();
         if (j.status != Status.Submitted) revert BadStatus();
         j.status = Status.Rejected;
@@ -104,7 +103,6 @@ contract CronusJobEscrow {
 
     function refundExpired(uint256 jobId) external nonReentrant {
         Job storage j = _jobs[jobId];
-        if (j.status == Status.None) revert NotFound();
         if (msg.sender != j.client) revert NotClient();
         if (j.status != Status.Funded && j.status != Status.Submitted) revert BadStatus();
         if (block.timestamp < j.deadline) revert NotExpired();
