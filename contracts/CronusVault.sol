@@ -61,4 +61,23 @@ contract CronusVault {
         require(usdc.transferFrom(msg.sender, address(this), amount), "transferFrom failed");
         emit YieldAdded(amount);
     }
+
+    // =====================================================================
+    // ADDITIVE MODULES: ERC-4626 Previews & Rounding Protection
+    // =====================================================================
+    function previewDeposit(uint256 assets) public view returns (uint256) {
+        uint256 ta = totalAssets();
+        if (totalShares == 0 || ta == 0) return assets;
+        return (assets * totalShares + ta - 1) / ta;
+    }
+
+    function previewWithdraw(uint256 sh) public view returns (uint256) {
+        if (totalShares == 0) return 0;
+        return (sh * totalAssets() + totalShares - 1) / totalShares;
+    }
+
+    function minDeposit() public pure returns (uint256) {
+        return 1e6; // 1 USDC (6 decimals)
+    }
+
 }
