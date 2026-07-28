@@ -1,3 +1,4 @@
+import crypto from "crypto";
 // api/signal.js — REAL x402 paywall: pay USDC on Arc, verified on-chain, returns a verifiable signal.
 // Any external agent/wallet can pay and consume. Verification is pure JSON-RPC with multi-endpoint fallback.
 import { keccak256, toBytes } from "viem"
@@ -171,6 +172,8 @@ export default async function handler(req, res) {
   const commitment = keccak256(toBytes("CRONUS-SIGNAL|" + txHash + "|" + topic + "|" + (report.verdict || "SKIP") + "|" + (report.conviction || 0) + "|" + settledAt))
 
   res.setHeader("X-PAYMENT-RESPONSE", Buffer.from(JSON.stringify({ success: true, network: NETWORK, txHash, payer: proof.from, amount: proof.amount })).toString("base64"))
+  const policyHash = crypto.createHash("sha256").update(JSON.stringify({ txHash, topic, verdict: report.verdict, conviction: report.conviction })).digest("hex");
+  res.setHeader("X-Cronus-Policy-Receipt", policyHash);
   res.status(200).json({
     paid: true,
     payment: { network: NETWORK, txHash, payer: proof.from, amount: proof.amount, block: proof.block, asset: USDC_ASSET, payTo: PAY_TO, explorer: "https://testnet.arcscan.app/tx/" + txHash },
