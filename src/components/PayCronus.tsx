@@ -42,7 +42,7 @@ export default function PayCronus() {
 		setBusy(true)
 		try {
 			try { await switchChainAsync({ chainId: ARC_CHAIN_ID }) } catch (_) {}
-			const topic = "BTC-USDC momentum"
+			const topic = "BTC-USDC momentum" // ADDITIVE: В будущем вынести в props
 			const url = "/api/signal?topic=" + encodeURIComponent(topic)
 			let amount = BigInt(20000)
 			try {
@@ -61,6 +61,7 @@ export default function PayCronus() {
 			setMsg("Verifying on-chain and fetching your signal...")
 			try {
 				const r2 = await fetch(url, { headers: { "X-PAYMENT": h } })
+                                const policyReceipt = r2.headers.get("x-cronus-policy-receipt") || "not-provided"
 				const out = await r2.json()
 				if (out && out.paid && out.report) {
 					setVerdict(String(out.report.verdict || "SKIP") + " - conviction " + Number(out.report.conviction || 0))
@@ -90,6 +91,7 @@ export default function PayCronus() {
 			{msg ? <div style={msgS}>{msg}</div> : null}
 			{tx ? <div style={txS}><a style={linkS} href={"https://testnet.arcscan.app/tx/" + tx} target="_blank" rel="noreferrer">{"View your transaction on arcscan \u2197"}</a></div> : null}
 			{verdict ? <div style={verdictS}>{"Your signal: " + verdict}</div> : null}
+                        {verdict && policyReceipt !== "not-provided" ? <div style={{...txS, color: "#5eead4", marginTop: 8}}>{"✅ Policy Verified: " + policyReceipt.slice(0, 10) + "..."}</div> : null}
 		</section>
 	)
 }
