@@ -11,15 +11,16 @@
 
 > **Ask Cronus: _"Should I buy BTC right now?"_** The agent scouts live market data, pays for it on-chain via x402, runs an EV check, and returns a verifiable **BUY / SKIP** verdict - every paid call settled in real USDC on Arc, with an on-chain receipt.
 
-**The first AI agent that runs a real business on Arc — it earns, spends, settles, and reports its own P&L on-chain.**
+**An AI agent that puts its own money behind every verdict: the stake is committed on-chain before the outcome is known, returned when the call is right and burned when it is wrong — and every paid call leaves a public receipt.**
 
 > **Now with a NANO tier:** sub-cent ($0.001) paid calls settled **gas-free via Circle Gateway** (EIP-3009), consumed autonomously by an A2A buyer-agent — with honest self-demo labeling (no faked external demand).
 
-Cronus is an autonomous prediction-market oracle agent. It scans markets, scores expected value with three oracles, and executes settlements in native USDC on Arc. Unlike agents that only *spend*, Cronus **charges for its work and closes the loop net-positive**, with a verifiable trace of every decision.
+Cronus is an autonomous prediction-market oracle agent. It scans markets, scores expected value with three oracles, and executes settlements in native USDC on Arc. It **charges for its work** via x402, **pays its own upstream data costs**, and leaves a verifiable trace of every decision — from the committed stake to the settled receipt.
 
 - **Live demo:** https://cronus-capital.vercel.app
 - **Repo:** https://github.com/Artem1981777/CronusCapital
 - **Use via MCP:** `npx cronus-mcp@latest` exposes Cronus as agent tools — free verdict + x402-paid signal + Circle Gateway nano.
+- **Primitives:** `npm i arc-honest-money` — four zero-dependency money primitives extracted from this repo (MIT, 42 tests, no network); `lib/priceSources.js` consumes the published package.
 - **Explorer:** https://testnet.arcscan.app
 - **Network:** Arc Testnet · chainId 5042002 · native USDC 0x3600...0000 (6 decimals)
 
@@ -68,7 +69,7 @@ This submission centers **Circle Gateway nanopayments**: a sub-cent ($0.001) age
 
 Most "agent economy" demos show an agent *paying* for things. Cronus is the other half of the economy: an agent that **gets paid per call, covers its own costs, and earns a positive margin on every paid call** — fully on-chain and auditable.
 
-> Other agents learn to honestly **spend**. Cronus is the agent that **earns**, pays, settles on-chain, and balances its P&L. It is an engine for the agent economy on Arc.
+> Cronus **charges** for its work, **pays** its own costs, **stakes** USDC on its own verdicts and burns that stake when it is wrong — every step settled on-chain, with the money primitives it runs on published as a standalone MIT package. It is an engine for the agent economy on Arc.
 
 ---
 
