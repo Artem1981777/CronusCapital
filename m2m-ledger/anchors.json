@@ -30,5 +30,13 @@
     "block": 53908279,
     "anchoredAt": "2026-07-27T10:29:11.801Z",
     "by": "0xbe3a16bD4137A8a293aCBcaA75cCE3420919D21d"
+  },
+  {
+    "file": "2026-07-27.json",
+    "keccak256": "0x45cacfaf7d0ba3c26a69bb37e14d55ebdd0ac4f1b921bdc1da9b1d62522b53f3",
+    "tx": "0xf249aef8329bf23cdd15129770e6386cd6e0e734d4aae610a938615ab7a075e5",
+    "block": 54066991,
+    "anchoredAt": "2026-07-28T09:21:35.660Z",
+    "by": "0xbe3a16bD4137A8a293aCBcaA75cCE3420919D21d"
   }
 ]
