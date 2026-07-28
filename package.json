@@ -24,6 +24,7 @@
     "@web3modal/wagmi": "^5.1.11",
     "@x402/core": "^2.17.0",
     "@x402/evm": "^2.17.0",
+    "arc-honest-money": "^0.1.0",
     "axios": "^1.16.0",
     "buffer": "^6.0.3",
     "ethers": "^6.16.0",
