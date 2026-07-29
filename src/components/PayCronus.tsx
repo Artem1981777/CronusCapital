@@ -43,7 +43,7 @@ export default function PayCronus() {
 		setBusy(true)
 		try {
 			try { await switchChainAsync({ chainId: ARC_CHAIN_ID }) } catch (_) {}
-			const topic = "BTC-USDC momentum" // ADDITIVE: В будущем вынести в props
+			const topic = "BTC-USDC momentum" // ADDITIVE: move to props later
 			const url = "/api/signal?topic=" + encodeURIComponent(topic)
 			let amount = BigInt(20000)
 			try {

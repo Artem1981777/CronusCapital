@@ -1,19 +1,19 @@
 // Cronus autonomous oracle: REAL OKX market data (price + 24h high/low/volume) -> REAL LLM decision + historical-analog recall (Groq / Llama 3.3).
 
-// POLISH: универсальный retry с экспоненциальным backoff (OKX/Groq иногда дают 5xx/таймаут).
-// Экспортируется для юнит-тестов (test/consult.test.mjs). Не меняет внешний контракт хендлера.
+// POLISH: generic retry with exponential backoff (OKX/Groq occasionally return 5xx or time out).
+// Exported for unit tests (test/consult.test.mjs). The handler's external contract is unchanged.
 import { crossCheck } from "../lib/priceSources.js"
 import { buildTraceRecord, contentHash, archiveTrace, withCogs } from "../lib/traceArchive.js"
 import { dataMarketEnabled, liveSettlementEnabled, parseSources, decideDataPurchase, recordUpstreamPayment, cogsAtomic } from "../lib/dataMarket.js"
 
 export async function fetchWithRetry(url, init, opts = {}) {
-  const retries = Number(opts.retries ?? process.env.CONSULT_RETRIES ?? 2); // 2 ретрая = 3 попытки
+  const retries = Number(opts.retries ?? process.env.CONSULT_RETRIES ?? 2); // 2 retries = 3 attempts
   const baseMs = Number(opts.baseMs ?? 250);
   let lastErr;
   for (let attempt = 0; attempt <= retries; attempt++) {
     try {
       const res = await fetch(url, init);
-      if (res.ok || res.status < 500) return res; // POLISH: 4xx не ретраим — это не сетевой сбой
+      if (res.ok || res.status < 500) return res; // POLISH: 4xx is not retried, it is not a transport failure
       lastErr = new Error("HTTP " + res.status);
     } catch (e) { lastErr = e; }
     if (attempt < retries) {
@@ -25,19 +25,19 @@ export async function fetchWithRetry(url, init, opts = {}) {
 }
 
 export default async function handler(req, res) {
-  // POLISH: опц. CDN-кэш по topic+instId (Vercel кэширует по полному URL). 0 = выкл (дефолт = поведение как раньше).
+  // POLISH: optional CDN cache keyed by topic+instId (Vercel caches on the full URL). 0 disables it, which is the previous behaviour.
   const cacheSec = Number(process.env.CONSULT_CACHE_SECONDS || 0);
   if (cacheSec > 0) {
     res.setHeader("Cache-Control", "s-maxage=" + cacheSec + ", stale-while-revalidate=" + (cacheSec * 5));
   }
 
   const topic = (req.query && req.query.topic) || "BTC-USDC momentum";
-  // POLISH: дефолтный инструмент переопределяется через env (дефолт прежний — ничего не ломает).
+  // POLISH: the default instrument can be overridden via env; the default itself is unchanged.
   const instId = (req.query && req.query.instId) || process.env.CONSULT_DEFAULT_INST || "BTC-USDC";
 
   let price = null, prevPrice = null, changePct = null, high24h = null, low24h = null, vol24h = null;
   try {
-    const r = await fetchWithRetry("https://www.okx.com/api/v5/market/ticker?instId=" + encodeURIComponent(instId)); // POLISH: было fetch()
+    const r = await fetchWithRetry("https://www.okx.com/api/v5/market/ticker?instId=" + encodeURIComponent(instId)); // POLISH: was a bare fetch()
     const j = await r.json();
     const t = j && j.data && j.data[0];
     if (t) {
@@ -83,7 +83,7 @@ export default async function handler(req, res) {
 
   let data = null;
   try {
-    const resp = await fetchWithRetry("https://api.groq.com/openai/v1/chat/completions", { // POLISH: было fetch()
+    const resp = await fetchWithRetry("https://api.groq.com/openai/v1/chat/completions", { // POLISH: was a bare fetch()
       method: "POST",
       headers: { "content-type": "application/json", "authorization": "Bearer " + key },
       body: JSON.stringify({
