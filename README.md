@@ -31,13 +31,14 @@ Cronus is an autonomous prediction-market oracle agent. It scans markets, scores
 Cronus is an autonomous AI agent that runs a real, honest business on Arc: it **earns** via x402 paid calls, **pays** upstream data costs, **stakes its own USDC** on its own verdicts, and **settles every step on-chain** — all independently verifiable in a browser, with zero private keys.
 
 - **Live demo:** https://cronus-capital.vercel.app
-- **Verify in 2 min (no keys):** run **npm run verify-live** (97 checks) or open **/api/scorecard**
+- **Verify in 2 min (no keys):** run **npm run verify-live** (104 checks) or open **/api/scorecard**
 - **Run every test:** `npm run test:all` — production build, 157 Node tests, and 25 Foundry tests across four contract suites (identity, reputation, vault, job escrow).
 - **Live, not placeholder:** every metric on the dashboard is populated from live / on-chain endpoints and reproducible with one command — no dashes, no backfilled or mocked numbers.
 - **Verifiable receipt (new):** paste any payment tx into the **Verifiable Receipt** card on the **Proof / Verify** tab (or call **/api/info?kind=receipt&tx=0x…**) — Cronus re-checks it live on the Arc explorer and binds payer -> amount -> the exact x402 price -> the on-chain commitment, with a non-custodial note. No keys.
 - **Guardrail proof (new):** the **Risk / SecOps** tab live-runs the real spending policy — an oversized payout is **blocked** (no funds move) while an in-budget one clears — plus the EIP-712 **SpendIntent** fields every autonomous spend must carry (signer, payTo, asset, maxAmount, nonce, deadline). Verify via **/api/spend-limit** and **/api/spend-intent**.
 - **Agent adjudication receipt (new):** the **Track Record** tab shows Cronus judging its own verdicts against **objective on-chain outcomes** — rule + stake committed (keccak256) **before** the result, then settled verifiably (correct → returned, wrong → **burned**), with commit/settle explorer links. Verify via **/api/track-record**.
 - **Rational spend / pay-to-think (new):** the **Payments** tab shows Cronus spending like a rational agent — it buys upstream data **only when a verdict is borderline** and skips confident/low calls to avoid waste, then settles real **cost-of-goods** to self-operated demo feeds (labeled, never counted as external revenue). Verify via **/api/pay-to-think**.
+- **Private-by-default receipts (new):** open **/api/disclosure** — Cronus proves a real payment obeyed its spend policy while the amount, the counterparty and the tx hash stay sealed (9 of 12 Merkle leaves hidden). POST that same JSON back to **/api/disclosure-verify** to check it yourself; change one character and it fails with 422. Sorted-pair hashing keeps the proofs OpenZeppelin-compatible. This is selective disclosure, **not** zero-knowledge, and the endpoint says so itself.
 - **Honest by default:** external_payers = **0** — every x402 payment so far is our own self-generated test traffic, always labeled as such. We never fake demand.
 - **Real on-chain:** x402 revenue, upstream COGS, skin-in-the-game stakes, live vault NAV, ERC-8004 identity/reputation + ERC-8183 escrow.
 - **Visual tour:** 11 annotated dashboard screenshots at the bottom of this README (and in docs/dashboard-v2.md).
@@ -104,7 +105,7 @@ All `/api/*` endpoints return HTTP 200 (or 402 for the paywall) — never 500.
 Every number on this page is reproducible by a judge with **zero private keys**. We publish a machine-readable scorecard that, for each claim, returns *how to verify it* — a command or an on-chain link — never a self-graded "passed":
 
 - **Scorecard:** https://cronus-capital.vercel.app/api/scorecard — 4 Sourcify exact-match contracts, live on-chain counts, honest `external_payers: 0`, and the exact reproduce step for each claim.
-- **No-key end-to-end:** `npm run verify-live` (97 checks) and `npm run verify-intent` (EIP-712 round-trip) reproduce the entire honesty surface against the live deployment without any secret.
+- **No-key end-to-end:** `npm run verify-live` (104 checks) and `npm run verify-intent` (EIP-712 round-trip) reproduce the entire honesty surface against the live deployment without any secret.
 - **Source, not bytecode:** every contract links to its verified, exact-match source on Sourcify.
 
 We would rather show a verifiable **0** external payers than an impressive number you cannot independently check.
@@ -428,7 +429,7 @@ Everything here settles through **@circle-fin/x402-batching**: gas-free EIP-3009
 - Public receipts — https://cronus-capital.vercel.app/api/receipts (append ?format=csv to export)
 - Live metrics — https://cronus-capital.vercel.app/api/metrics
 - Honest traction — https://cronus-capital.vercel.app/api/traction (external_payers, self_generated_*)
-- One-command replay — **npm run verify-live** (97 checks)
+- One-command replay — **npm run verify-live** (104 checks)
 
 ---
 
@@ -510,7 +511,7 @@ Cronus is not "deployed on a testnet" - it depends on properties only Arc gives 
 | **Sub-second finality** | Earn -> spend -> settle is a tight loop; a consult that resolves and a settlement that confirms in under a second are what make a live, in-browser demo of a full economic cycle possible. |
 | **Built-in stablecoin / FX engine** | Upstream costs and payouts settle in stable value without bridging out, so the agent's books stay clean and auditable. |
 | **x402-native payments** | Pay-per-call monetization (UNLOCK 0.02 / upstream 0.005) is a first-class primitive, not a bolted-on hack - the business model is the protocol itself. |
-| **Opt-in privacy** | Strategy-level reasoning can stay private while settlements stay publicly verifiable - the agent proves it paid without leaking how it decides. |
+| **Opt-in privacy (built)** | A receipt is a Merkle tree of field leaves: the agent proves a payment satisfied the spend policy without revealing the amount, the counterparty, or the tx hash. Live at `/api/disclosure`, independently checkable at `/api/disclosure-verify`, 9 unit tests. Selective disclosure, not zero-knowledge. |
 
 Take away USDC-as-gas or native x402 and Cronus stops being a self-contained business. That is the difference between *deployed on Arc* and *only possible on Arc*.
 
@@ -1149,10 +1150,10 @@ curl -s .../api/agent-card           # card, attestation, avgRating, policyHash
 curl -s '.../api/nano-signal?quote=1&payer=0x...'   # pricing, bundle, session
 curl -s '.../api/nano-signal?session=use&payer=0x...'  # expects HTTP 402 without a session
 npm run test:all                     # build + 157 Node tests + 25 Foundry contract tests
-npm run verify-live                  # 97 live checks against production
+npm run verify-live                  # 104 live checks against production
 ```
 
-Current state: **97 of 97 live checks pass**, plus 4 linked / 18 legacy / 0 broken links in the offline chain verifier. The formerly red check `[4] metrics read from on-chain explorer` now passes too. If the Arc testnet explorer API goes down again, metrics fall back to known on-chain proofs and label `source` honestly rather than reporting a fabricated number. Receipt verification already falls back to Arc RPC (`source: onchain-rpc`) when the explorer is down.
+Current state: **104 of 104 live checks pass**, plus 4 linked / 18 legacy / 0 broken links in the offline chain verifier. The formerly red check `[4] metrics read from on-chain explorer` now passes too. If the Arc testnet explorer API goes down again, metrics fall back to known on-chain proofs and label `source` honestly rather than reporting a fabricated number. Receipt verification already falls back to Arc RPC (`source: onchain-rpc`) when the explorer is down.
 
 ## Submitting to Arc Showcase
 

@@ -254,6 +254,25 @@ console.log("\n[K] rational spend / pay-to-think (GET /api/pay-to-think)")
 	const settled = rec.filter((e) => e && e.mode === "settled")
 	ok("settled COGS entries labeled self-operated demo (not external)", settled.every((e) => e.self_operated_demo === true), "settled=" + settled.length)
 }
+console.log("\n[L] selective disclosure of receipts (GET /api/disclosure)")
+{
+	const r = await getJson("/api/disclosure")
+	ok("HTTP 200 disclosure", r.status === 200 && !!r.body && r.body.ok === true)
+	const d = (r && r.body) || {}
+	const raw = JSON.stringify(d)
+	const shown = (Array.isArray(d.revealed) ? d.revealed : []).map((x) => x.field)
+	ok("hidden leaves outnumber revealed ones", Number(d.hiddenCount) > 0, "hidden=" + d.hiddenCount + " of " + d.leafCount)
+	ok("amount, payer and txHash are NOT disclosed", !shown.includes("amountAtomic") && !shown.includes("payer") && !shown.includes("txHash"), shown.join(","))
+	ok("policy compliance is proven without the amount", shown.includes("predicate:amount_within_policy_cap"))
+	ok("honest about not being zero-knowledge", /not zero-knowledge/i.test(String(d.limitation || "")))
+	const v = await getJson("/api/disclosure-verify", { method: "POST", headers: { "content-type": "application/json" }, body: raw })
+	ok("the disclosure verifies against its Merkle root", v.status === 200 && !!v.body && v.body.ok === true)
+	const tampered = JSON.parse(raw)
+	if (tampered.revealed && tampered.revealed[0]) tampered.revealed[0].value = "tampered"
+	const t = await getJson("/api/disclosure-verify", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(tampered) })
+	ok("a tampered leaf is rejected (422)", t.status === 422 && !!t.body && t.body.ok === false, t.body && t.body.error)
+}
+
 console.log((fail === 0 ? "ALL CHECKS PASSED" : fail + " CHECK(S) FAILED") + " — " + pass + " passed, " + fail + " failed")
 console.log("No private keys were used. Reproduce: npm run verify-live")
 process.exit(fail === 0 ? 0 : 1)
