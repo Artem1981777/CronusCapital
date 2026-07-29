@@ -32,6 +32,7 @@ Cronus is an autonomous AI agent that runs a real, honest business on Arc: it **
 
 - **Live demo:** https://cronus-capital.vercel.app
 - **Verify in 2 min (no keys):** run **npm run verify-live** (97 checks) or open **/api/scorecard**
+- **Run every test:** `npm run test:all` — production build, 157 Node tests, and 25 Foundry tests across four contract suites (identity, reputation, vault, job escrow).
 - **Live, not placeholder:** every metric on the dashboard is populated from live / on-chain endpoints and reproducible with one command — no dashes, no backfilled or mocked numbers.
 - **Verifiable receipt (new):** paste any payment tx into the **Verifiable Receipt** card on the **Proof / Verify** tab (or call **/api/info?kind=receipt&tx=0x…**) — Cronus re-checks it live on the Arc explorer and binds payer -> amount -> the exact x402 price -> the on-chain commitment, with a non-custodial note. No keys.
 - **Guardrail proof (new):** the **Risk / SecOps** tab live-runs the real spending policy — an oversized payout is **blocked** (no funds move) while an in-budget one clears — plus the EIP-712 **SpendIntent** fields every autonomous spend must carry (signer, payTo, asset, maxAmount, nonce, deadline). Verify via **/api/spend-limit** and **/api/spend-intent**.
@@ -1147,6 +1148,7 @@ node scripts/verify-chain.mjs        # offline: replays the ledger hash chain, z
 curl -s .../api/agent-card           # card, attestation, avgRating, policyHash
 curl -s '.../api/nano-signal?quote=1&payer=0x...'   # pricing, bundle, session
 curl -s '.../api/nano-signal?session=use&payer=0x...'  # expects HTTP 402 without a session
+npm run test:all                     # build + 157 Node tests + 25 Foundry contract tests
 npm run verify-live                  # 97 live checks against production
 ```
 

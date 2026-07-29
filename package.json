@@ -11,7 +11,9 @@
     "preview": "vite preview",
     "test": "node --test test/*.test.mjs",
     "verify-intent": "node scripts/verify-intent.mjs",
-    "check-vault": "node scripts/check-vault-invariants.mjs"
+    "check-vault": "node scripts/check-vault-invariants.mjs",
+    "test:contracts": "forge test",
+    "test:all": "npm run build && npm test && npm run test:contracts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.95.2",
