@@ -1152,7 +1152,7 @@ npm run test:all                     # build + 157 Node tests + 25 Foundry contr
 npm run verify-live                  # 97 live checks against production
 ```
 
-Current state: **96 of 97 live checks pass**, plus 4 linked / 18 legacy / 0 broken links in the offline chain verifier. The single red check is `[4] metrics read from on-chain explorer`: while the Arc testnet explorer API is unavailable, metrics fall back to known on-chain proofs and label `source` honestly rather than reporting a fabricated number. Receipt verification already falls back to Arc RPC (`source: onchain-rpc`) when the explorer is down.
+Current state: **97 of 97 live checks pass**, plus 4 linked / 18 legacy / 0 broken links in the offline chain verifier. The formerly red check `[4] metrics read from on-chain explorer` now passes too. If the Arc testnet explorer API goes down again, metrics fall back to known on-chain proofs and label `source` honestly rather than reporting a fabricated number. Receipt verification already falls back to Arc RPC (`source: onchain-rpc`) when the explorer is down.
 
 ## Submitting to Arc Showcase
 
