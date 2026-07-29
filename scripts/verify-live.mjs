@@ -273,6 +273,24 @@ console.log("\n[L] selective disclosure of receipts (GET /api/disclosure)")
 	ok("a tampered leaf is rejected (422)", t.status === 422 && !!t.body && t.body.ok === false, t.body && t.body.error)
 }
 
+console.log("\n[M] USYC treasury benchmark (GET /api/treasury-yield)")
+{
+	const r = await getJson("/api/treasury-yield")
+	ok("HTTP 200 treasury-yield", r.status === 200 && !!r.body && r.body.ok === true)
+	const b = (r && r.body) || {}
+	const nav = b.nav || {}
+	const y = b.yieldFromChain || {}
+	const e = b.entitlement || {}
+	ok("NAV agrees across oracle and ERC-4626 teller", !!nav.crossCheck && nav.crossCheck.agrees === true, "delta=" + (nav.crossCheck && nav.crossCheck.agreeWithin))
+	ok("yield is a T-bill rate, not a DeFi fantasy", typeof y.apyPct === "number" && y.apyPct > 0 && y.apyPct < 10, "apy=" + y.apyPct)
+	ok("rate rests on a real window of on-chain NAV", y.basisAdequate === true, "span=" + y.spanDays + "d over " + b.roundsUsed + " points")
+	ok("corrupt oracle rounds are listed, not hidden", Array.isArray(b.roundsRejected))
+	ok("entitlement is proven by canCall, not claimed", typeof e.entitled === "boolean" && typeof e.howToVerify === "string" && /canCall/.test(e.howToVerify))
+	ok("no position is claimed without entitlement", e.entitled === true || (b.honesty && b.honesty.position === "none"))
+	ok("idle-capital yield is counterfactual and never booked", !b.projection || b.projection.booked === false)
+	ok("vault NAV is untouched by this route", !!b.honesty && /zero/i.test(String(b.honesty.vaultImpact)))
+}
+
 console.log((fail === 0 ? "ALL CHECKS PASSED" : fail + " CHECK(S) FAILED") + " — " + pass + " passed, " + fail + " failed")
 console.log("No private keys were used. Reproduce: npm run verify-live")
 process.exit(fail === 0 ? 0 : 1)
