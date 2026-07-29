@@ -1,0 +1,30 @@
+name: Keep the live checks warm
+
+# Three routes read Arc on a cold cache and are slow enough to matter: the treasury
+# benchmark takes ~15s cold, the settlement resolver ~39s at the windows=24 our own
+# suite uses, and the scorecard calls both over HTTP so it inherits their latency.
+# Cold, they approach the platform's function ceiling and the live checks go red -
+# which happened three times in one day. This does not hide slowness: it keeps the
+# cache populated so a reviewer is never the one paying for the cold read. Every
+# response still reports cache.hit and its real ageSeconds.
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch: {}
+permissions:
+  contents: read
+jobs:
+  warm:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Warm the chain-reading routes (public GETs, no keys, no side effects)
+        run: |
+          base="https://cronus-capital.vercel.app"
+          fail=0
+          for path in "/api/treasury-yield" "/api/settlements?windows=24" "/api/settlements" "/api/scorecard"; do
+            code=$(curl -s -o /tmp/body -w "%{http_code}" --max-time 90 "$base$path")
+            secs=$(curl -s -o /dev/null -w "%{time_total}" --max-time 90 "$base$path")
+            echo "$path -> $code in ${secs}s"
+            if [ "$code" != "200" ]; then fail=1; fi
+          done
+          exit $fail

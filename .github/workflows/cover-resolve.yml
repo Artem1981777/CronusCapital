@@ -1,0 +1,34 @@
+name: Resolve due cover policies
+
+# The hosted cron job for this was disabled automatically after 26 failed attempts.
+# It lives here instead, next to the other schedules, so a failure is visible in the
+# same place as everything else. A GET is a dry run; only POST with the bearer token
+# moves funds, and payouts stay bounded by COVER_MAX_PAYOUT and COVER_DAILY_CAP in
+# the route itself. Without the secret configured the job reports that and stops
+# rather than pretending it ran.
+on:
+  schedule:
+    - cron: "17 * * * *"
+  workflow_dispatch: {}
+permissions:
+  contents: read
+jobs:
+  resolve:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Execute due payouts (bearer token; secret never in the URL)
+        env:
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          if [ -z "$CRON_SECRET" ]; then
+            echo "CRON_SECRET is not configured in repository secrets; nothing was called."
+            echo "Add it under Settings -> Secrets and variables -> Actions."
+            exit 1
+          fi
+          code=$(curl -s -o /tmp/out -w "%{http_code}" --max-time 90 -X POST \
+            -H "Authorization: Bearer $CRON_SECRET" \
+            "https://cronus-capital.vercel.app/api/cover?action=resolve")
+          echo "HTTP $code"
+          head -c 800 /tmp/out
+          echo
+          [ "$code" = "200" ]
