@@ -65,6 +65,14 @@
       "destination": "/api/info?kind=scorecard"
     },
     {
+      "source": "/api/disclosure",
+      "destination": "/api/info?kind=disclosure"
+    },
+    {
+      "source": "/api/disclosure-verify",
+      "destination": "/api/info?kind=disclosure-verify"
+    },
+    {
       "source": "/api/track-record",
       "destination": "/api/info?kind=track-record"
     },
