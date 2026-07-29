@@ -167,6 +167,10 @@
     {
       "source": "/api/makegood",
       "destination": "/api/info?kind=makegood"
+    },
+    {
+      "source": "/api/make-good",
+      "destination": "/api/info?kind=make-good"
     }
   ]
 }
