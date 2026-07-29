@@ -1151,7 +1151,7 @@ curl -s .../api/agent-card           # card, attestation, avgRating, policyHash
 curl -s '.../api/nano-signal?quote=1&payer=0x...'   # pricing, bundle, session
 curl -s '.../api/nano-signal?session=use&payer=0x...'  # expects HTTP 402 without a session
 npm run test:all                     # build + 157 Node tests + 25 Foundry contract tests
-npm run verify-live                  # 104 live checks against production
+npm run verify-live                  # 113 live checks against production
 ```
 
 Current state: **113 of 113 live checks pass**, plus 4 linked / 18 legacy / 0 broken links in the offline chain verifier. The formerly red check `[4] metrics read from on-chain explorer` now passes too. If the Arc testnet explorer API goes down again, metrics fall back to known on-chain proofs and label `source` honestly rather than reporting a fabricated number. Receipt verification already falls back to Arc RPC (`source: onchain-rpc`) when the explorer is down.
