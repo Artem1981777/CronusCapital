@@ -65,6 +65,10 @@
       "destination": "/api/info?kind=scorecard"
     },
     {
+      "source": "/api/treasury-yield",
+      "destination": "/api/info?kind=treasury-yield"
+    },
+    {
       "source": "/api/disclosure",
       "destination": "/api/info?kind=disclosure"
     },
