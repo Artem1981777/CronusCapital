@@ -965,7 +965,7 @@ The agent's skin-in-the-game staking history: each conviction stake with its on-
 
 ![Proof / Verify](assets/screenshots/08-proof-verify.png)
 
-The verification hub: proof seals plus direct links to public receipts, /api/scorecard, and the one-command replay (npm run verify-live, 97 checks) so anyone can reproduce the entire honesty surface with no keys.
+The verification hub: proof seals plus direct links to public receipts, /api/scorecard, and the one-command replay (npm run verify-live, 104 checks) so anyone can reproduce the entire honesty surface with no keys.
 
 **9. Standards**
 
