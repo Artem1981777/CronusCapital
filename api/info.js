@@ -45,3 +45,9 @@ export default async function handler(req, res) {
 	}
 	return fn(req, res)
 }
+
+// This one function serves every /api/* upgrade route, including treasury-yield,
+// which reads a dozen values off Arc and takes up to ~15s on a cold cache. Without
+// an explicit limit it ran on the platform default and was cut off mid-read, so the
+// caller got an empty body - which is how twelve live checks went red twice today.
+export const config = { maxDuration: 60 }
