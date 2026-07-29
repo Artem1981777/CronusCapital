@@ -81,6 +81,10 @@
       "destination": "/api/info?kind=track-record"
     },
     {
+      "source": "/api/vault-nav",
+      "destination": "/api/info?kind=vault-nav"
+    },
+    {
       "source": "/api/open-stake",
       "destination": "/api/info?kind=open-stake"
     },
