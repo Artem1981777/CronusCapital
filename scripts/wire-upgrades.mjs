@@ -32,4 +32,4 @@ for (const k of want) {
   }
 }
 if (added > 0) writeFileSync("vercel.json", JSON.stringify(j, null, 2) + "\n")
-console.log("vercel.json: +" + added + " rewrites, всего " + j.rewrites.length)
+console.log("vercel.json: +" + added + " rewrites, total " + j.rewrites.length)
