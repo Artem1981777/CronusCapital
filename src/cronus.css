@@ -820,7 +820,7 @@ html, body { background: linear-gradient(rgba(0,0,0,0.12), rgba(0,0,0,0.22)), ur
 
 /* ===== FILL EMPTY SPACE — v2 ===== */
 
-/* 1. AGENT PIPELINE: агенты растягиваются на всю высоту */
+/* 1. AGENT PIPELINE: agents stretch to full height */
 .cd-panel.cd-agents { justify-content: space-between; }
 .cd-panel.cd-agents .cd-agent { flex: 1; min-height: 56px; padding: 14px 12px; align-items: center; }
 .cd-panel.cd-agents .cd-agent-glyph { font-size: 32px; width: 40px; }
@@ -828,43 +828,43 @@ html, body { background: linear-gradient(rgba(0,0,0,0.12), rgba(0,0,0,0.22)), ur
 .cd-panel.cd-agents .cd-agent-role { font-size: 11px; margin-top: 3px; }
 .cd-panel.cd-agents .cd-agent-state { font-size: 11px; }
 
-/* 2. RADAR: большой, заполняет панель */
+/* 2. RADAR: large, fills the panel */
 .cd-radar { max-width: none !important; width: min(90%, 340px) !important; margin: 0 auto; }
 .cd-panel.cd-radar-panel { justify-content: center; gap: 18px; }
 .cd-radar-panel > * { width: 100%; }
 
-/* 3. KPI КАРТОЧКИ: выше, значения крупнее */
+/* 3. KPI CARDS: taller, larger values */
 .cd-card { padding: 20px 20px !important; min-height: 110px; display: flex; flex-direction: column; justify-content: space-between; }
 .cd-card-value { font-size: clamp(26px, 4.8vw, 38px) !important; }
 .cd-bar { margin-top: auto; }
 .cd-kpi-grid { align-items: stretch; }
 .cd-kpi-grid > .cd-card, .cd-kpi-grid > .cd-conf-card { min-height: 120px; }
 
-/* 4. CONFIDENCE RING: кольцо крупнее */
+/* 4. CONFIDENCE RING: bigger ring */
 .cd-ring-wrap { width: 148px !important; height: 148px !important; }
 .cd-ring-num { font-size: 36px !important; }
 .cd-conf-card { padding: 24px 18px !important; justify-content: center; gap: 12px; }
 
-/* 5. ORACLE ACTIONS: кнопки равномерно */
+/* 5. ORACLE ACTIONS: evenly spaced buttons */
 .cd-panel.cd-actions { justify-content: space-between; gap: 6px; }
 .cd-panel.cd-actions .cd-btn { padding: 14px 16px; font-size: 13px; }
 
-/* 6. Все cd-mid панели — минимальная высота */
+/* 6. All cd-mid panels: minimum height */
 .cd-mid > .cd-panel { min-height: 380px; }
 
-/* 7. Vault: input растягивается */
+/* 7. Vault: the input stretches */
 .cd-vault-input { flex: 1; width: auto; min-width: 70px; }
 .cd-vault-stats { font-size: 13px; padding: 6px 0; }
 
-/* 8. Panel title крупнее */
+/* 8. Larger panel title */
 .cd-panel-title { font-size: 13px !important; margin-bottom: 4px; }
 
-/* ===== FILL EMPTY SPACE — v3 (правильный подход) ===== */
+/* ===== FILL EMPTY SPACE - v3 (the right approach) ===== */
 
-/* ОТМЕНЯЕМ space-between из v2 (создавал пустые промежутки) */
+/* Undo the v2 space-between (it produced empty gaps) */
 .cd-panel.cd-agents { justify-content: flex-start !important; }
 
-/* АГЕНТЫ: каждая карточка растягивается чтобы заполнить панель */
+/* AGENTS: every card stretches to fill the panel */
 .cd-panel.cd-agents .cd-agent {
   flex: 1 !important;
   min-height: 0 !important;
@@ -875,12 +875,12 @@ html, body { background: linear-gradient(rgba(0,0,0,0.12), rgba(0,0,0,0.22)), ur
 .cd-panel.cd-agents .cd-agent-role  { font-size: 11px !important; margin-top: 4px; }
 .cd-panel.cd-agents .cd-agent-state { font-size: 12px !important; margin-top: 4px; }
 
-/* РАДАР: заполнить всю ширину панели */
+/* RADAR: fill the full panel width */
 .cd-radar {
   width: 88% !important;
   max-width: 88% !important;
 }
-/* Панель радара: растянуть радар по высоте */
+/* Radar panel: stretch the radar vertically */
 .cd-panel.cd-radar-panel {
   justify-content: flex-start !important;
   gap: 14px !important;
@@ -892,12 +892,12 @@ html, body { background: linear-gradient(rgba(0,0,0,0.12), rgba(0,0,0,0.22)), ur
   max-height: 450px;
 }
 
-/* Oracle Actions: убираем space-between, кнопки flex-start чтобы не тянуло */
+/* Oracle Actions: drop space-between, flex-start so nothing is stretched */
 .cd-panel.cd-actions { justify-content: flex-start !important; gap: 7px !important; }
 
 /* ===== FILL v4 — timeline + wide confidence ===== */
 
-/* 1. CONFIDENCE CARD: занять всю оставшуюся ширину строки, кольцо слева */
+/* 1. CONFIDENCE CARD: take the rest of the row, ring on the left */
 .cd-kpi-grid {
   grid-template-columns: repeat(3, 1fr) repeat(1, 1fr) !important;
 }
@@ -914,7 +914,7 @@ html, body { background: linear-gradient(rgba(0,0,0,0.12), rgba(0,0,0,0.22)), ur
   width: 140px !important;
   height: 140px !important;
 }
-/* Блок подписей справа от кольца */
+/* Label block to the right of the ring */
 .cd-conf-card::after {
   content: "ORACLE CONFIDENCE\A━━━━━━━━━━━━━━━━━\A✦  Active Signals\A✦  Cooperative Mode\A✦  Not Live Trades";
   white-space: pre;
@@ -926,7 +926,7 @@ html, body { background: linear-gradient(rgba(0,0,0,0.12), rgba(0,0,0,0.22)), ur
   flex: 1;
 }
 
-/* 2. AGENT PIPELINE TIMELINE: вертикальная линия между агентами */
+/* 2. AGENT PIPELINE TIMELINE: vertical line between agents */
 .cd-panel.cd-agents {
   position: relative !important;
 }
@@ -946,7 +946,7 @@ html, body { background: linear-gradient(rgba(0,0,0,0.12), rgba(0,0,0,0.22)), ur
   border-radius: 2px;
   z-index: 0;
 }
-/* Агентские узлы выше линии */
+/* Agent nodes sit above the line */
 .cd-panel.cd-agents .cd-agent {
   position: relative;
   z-index: 1;
@@ -955,7 +955,7 @@ html, body { background: linear-gradient(rgba(0,0,0,0.12), rgba(0,0,0,0.22)), ur
   padding: 16px 14px !important;
   background: rgba(4,10,6,0.55) !important;
 }
-/* Точка-коннектор на линии */
+/* Connector dot on the line */
 .cd-panel.cd-agents .cd-agent::before {
   content: "◆";
   position: absolute;
@@ -968,7 +968,7 @@ html, body { background: linear-gradient(rgba(0,0,0,0.12), rgba(0,0,0,0.22)), ur
   z-index: 2;
 }
 
-/* 3. РАДАР: максимально заполнить панель */
+/* 3. RADAR: fill the panel as much as possible */
 .cd-panel.cd-radar-panel {
   justify-content: center !important;
   align-items: center !important;
@@ -979,12 +979,12 @@ html, body { background: linear-gradient(rgba(0,0,0,0.12), rgba(0,0,0,0.22)), ur
   flex-shrink: 0;
 }
 
-/* 4. KPI строка — равная высота всех карточек */
+/* 4. KPI row: equal height for every card */
 .cd-kpi-grid > .cd-card {
   min-height: 115px !important;
 }
 
-/* Мобильный: conf-card на всю ширину */
+/* Mobile: conf-card spans the full width */
 @media (max-width: 640px) {
   .cd-conf-card {
     grid-column: 1 / -1 !important;
@@ -995,26 +995,26 @@ html, body { background: linear-gradient(rgba(0,0,0,0.12), rgba(0,0,0,0.22)), ur
   }
 }
 
-/* ===== FILL v5 — ФИНАЛЬНОЕ ИСПРАВЛЕНИЕ ===== */
+/* ===== FILL v5 - FINAL FIX ===== */
 
-/* ГЛАВНЫЙ ФИК: панели cd-mid НЕ растягиваются по высоте Oracle Actions */
+/* THE KEY FIX: cd-mid panels do NOT stretch to the height of Oracle Actions */
 .cd-mid {
   align-items: flex-start !important;
 }
 
-/* Агенты — нормальный размер без растяжки */
+/* Agents: normal size, no stretching */
 .cd-panel.cd-agents .cd-agent {
   flex: 0 0 auto !important;
   padding: 14px 14px !important;
   min-height: 64px !important;
 }
 
-/* Radar panel — высота по контенту */
+/* Radar panel: height follows content */
 .cd-panel.cd-radar-panel {
   min-height: unset !important;
 }
 
-/* ОТКАТ v4 confidence — убираем span:2 который сломал KPI ряд */
+/* Revert v4 confidence: drop the span:2 that broke the KPI row */
 .cd-conf-card {
   grid-column: span 1 !important;
   flex-direction: column !important;
@@ -1025,33 +1025,33 @@ html, body { background: linear-gradient(rgba(0,0,0,0.12), rgba(0,0,0,0.22)), ur
   content: none !important;
 }
 
-/* Confidence card — нормальный размер кольца */
+/* Confidence card: normal ring size */
 .cd-conf-card .cd-ring-wrap,
 .cd-ring-wrap {
   width: 130px !important;
   height: 130px !important;
 }
 
-/* KPI grid — стабильная сетка */
+/* KPI grid: a stable grid */
 .cd-kpi-grid {
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)) !important;
 }
 
-/* ===== v6 — ЕДИНЫЙ СТИЛЬ: всё в одну колонку как нижние секции ===== */
+/* ===== v6 - ONE STYLE: single column, like the sections below ===== */
 
-/* cd-mid: одна колонка, каждая панель на всю ширину */
+/* cd-mid: one column, every panel full width */
 .cd-mid {
   grid-template-columns: 1fr !important;
   align-items: stretch !important;
 }
 
-/* Панели внутри cd-mid — стиль как у нижних секций */
+/* Panels inside cd-mid: styled like the sections below */
 .cd-mid > .cd-panel {
   min-height: unset !important;
   width: 100% !important;
 }
 
-/* Oracle Actions кнопки — в 2 колонки (иначе растянется в 1 длинный столбец) */
+/* Oracle Actions buttons: 2 columns (otherwise it becomes one long column) */
 .cd-panel.cd-actions {
   display: grid !important;
   grid-template-columns: repeat(2, 1fr) !important;
@@ -1068,7 +1068,7 @@ html, body { background: linear-gradient(rgba(0,0,0,0.12), rgba(0,0,0,0.22)), ur
   grid-column: 1 / -1;
 }
 
-/* Agent Pipeline — агенты в ряд горизонтально */
+/* Agent Pipeline: agents in a horizontal row */
 .cd-panel.cd-agents .cd-agent {
   flex: 0 0 auto !important;
 }
@@ -1086,7 +1086,7 @@ html, body { background: linear-gradient(rgba(0,0,0,0.12), rgba(0,0,0,0.22)), ur
   min-height: 80px !important;
 }
 
-/* Радар + контент рядом */
+/* Radar and content side by side */
 .cd-panel.cd-radar-panel {
   flex-direction: row !important;
   align-items: center !important;
@@ -1102,7 +1102,7 @@ html, body { background: linear-gradient(rgba(0,0,0,0.12), rgba(0,0,0,0.22)), ur
   max-width: min(280px, 45%) !important;
 }
 
-/* На десктопе cd-mid обратно 3 колонки */
+/* On desktop cd-mid goes back to 3 columns */
 @media (min-width: 1024px) {
   .cd-mid {
     grid-template-columns: 1fr 1fr 1.2fr !important;
@@ -1119,7 +1119,7 @@ html, body { background: linear-gradient(rgba(0,0,0,0.12), rgba(0,0,0,0.22)), ur
   }
 }
 
-/* ===== KPI + RADAR рядом ===== */
+/* ===== KPI and RADAR side by side ===== */
 .cd-kpi-radar-row {
   display: flex;
   gap: 14px;
@@ -1175,7 +1175,7 @@ html, body { background: linear-gradient(rgba(0,0,0,0.12), rgba(0,0,0,0.22)), ur
 
 /* ===== FIX KPI HORIZONTAL + AGENT OVERLAP ===== */
 
-/* 1. KPI карточки обратно горизонтально */
+/* 1. KPI cards horizontal again */
 .cd-kpi-grid {
   display: grid !important;
   grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)) !important;
@@ -1183,7 +1183,7 @@ html, body { background: linear-gradient(rgba(0,0,0,0.12), rgba(0,0,0,0.22)), ur
   width: 100% !important;
 }
 
-/* 2. cd-mid — агенты и actions рядом, без overlap */
+/* 2. cd-mid: agents and actions side by side, no overlap */
 .cd-mid {
   display: grid !important;
   grid-template-columns: 1fr 2fr !important;
@@ -1193,7 +1193,7 @@ html, body { background: linear-gradient(rgba(0,0,0,0.12), rgba(0,0,0,0.22)), ur
   margin-top: 12px !important;
 }
 
-/* 3. На мобильном агенты в колонку */
+/* 3. On mobile the agents stack into a column */
 @media (max-width: 700px) {
   .cd-mid {
     grid-template-columns: 1fr !important;
@@ -1216,7 +1216,7 @@ html, body { background: linear-gradient(rgba(0,0,0,0.12), rgba(0,0,0,0.22)), ur
   flex-shrink: 0 !important;
 }
 
-/* ===== HEADER LAYOUT FIX — button не overlap ===== */
+/* ===== HEADER LAYOUT FIX - the button no longer overlaps ===== */
 .cd-header {
   display: flex !important;
   flex-wrap: wrap !important;

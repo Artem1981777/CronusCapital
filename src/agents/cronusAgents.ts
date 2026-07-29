@@ -199,10 +199,10 @@ export async function runCronusPipeline(topic: string): Promise<AgentState> {
 }
 
 // ============================================================
-// POLISH (Шаг 3, opt-in): живой OKX+LLM оракул как источник пайплайна.
-// ТОЛЬКО additive — runScout/runAnalyst/runExecutor/runCronusPipeline не тронуты.
-// Включается из App.tsx лишь при VITE_USE_LIVE_ORACLE === "true".
-// Повторяет рабочий GET-вызов из src/components/CronusDashboard.tsx.
+// POLISH (step 3, opt-in): a live OKX+LLM oracle as the pipeline's source.
+// STRICTLY additive - runScout/runAnalyst/runExecutor/runCronusPipeline are untouched.
+// Enabled from App.tsx only when VITE_USE_LIVE_ORACLE === "true".
+// Mirrors the working GET call in src/components/CronusDashboard.tsx.
 // ============================================================
 const CONSULT_URL = '/api/consult';
 

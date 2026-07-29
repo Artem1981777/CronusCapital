@@ -75,7 +75,7 @@ contract CronusJobEscrow {
     function submit(uint256 jobId, string calldata resultURI) external {
         Job storage j = _jobs[jobId];
         if (msg.sender != j.provider) revert NotProvider();
-        if (block.timestamp > j.deadline) revert NotExpired(); // ADDITIVE: блокируем поздние сабмиты
+        if (block.timestamp > j.deadline) revert NotExpired(); // ADDITIVE: reject late submissions
         j.resultURI = resultURI;
         j.status = Status.Submitted;
         emit JobSubmitted(jobId, resultURI);
