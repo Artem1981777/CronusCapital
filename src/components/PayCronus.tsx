@@ -30,6 +30,7 @@ export default function PayCronus() {
 	const [msg, setMsg] = useState("")
 	const [tx, setTx] = useState("")
 	const [verdict, setVerdict] = useState("")
+	const [policyReceipt, setPolicyReceipt] = useState("not-provided")
 
 	async function pay() {
 		setTx(""); setVerdict(""); setMsg("")
@@ -61,7 +62,7 @@ export default function PayCronus() {
 			setMsg("Verifying on-chain and fetching your signal...")
 			try {
 				const r2 = await fetch(url, { headers: { "X-PAYMENT": h } })
-                                const policyReceipt = r2.headers.get("x-cronus-policy-receipt") || "not-provided"
+                                setPolicyReceipt(r2.headers.get("x-cronus-policy-receipt") || "not-provided")
 				const out = await r2.json()
 				if (out && out.paid && out.report) {
 					setVerdict(String(out.report.verdict || "SKIP") + " - conviction " + Number(out.report.conviction || 0))
