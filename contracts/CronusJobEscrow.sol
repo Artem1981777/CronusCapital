@@ -76,8 +76,6 @@ contract CronusJobEscrow {
         Job storage j = _jobs[jobId];
         if (msg.sender != j.provider) revert NotProvider();
         if (block.timestamp > j.deadline) revert NotExpired(); // ADDITIVE: блокируем поздние сабмиты
-        Job storage j = _jobs[jobId];
-        if (msg.sender != j.provider) revert NotProvider();
         j.resultURI = resultURI;
         j.status = Status.Submitted;
         emit JobSubmitted(jobId, resultURI);
