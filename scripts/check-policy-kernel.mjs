@@ -1,4 +1,4 @@
-// Автономная проверка PolicyKernel. Не трогает npm test и его конфиг.
+// A standalone check of PolicyKernel. It touches neither npm test nor its config.
 import assert from "node:assert/strict"
 import { evaluate, applyAdvice } from "../lib/policyKernel.js"
 
@@ -20,10 +20,10 @@ t("happy path allows", () => {
   assert.equal(r.allow, true, JSON.stringify(r.reasons))
   assert.equal(r.amountAtomic, 5_000)
 })
-t("fail-closed: пустой контекст запрещает", () => {
+t("fail-closed: an empty context denies", () => {
   assert.equal(evaluate(act, {}).allow, false)
 })
-t("fail-closed: нет allowlist => запрет", () => {
+t("fail-closed: no allowlist => denied", () => {
   const { allowlist, ...c } = okCtx
   assert.deepEqual(evaluate(act, c).reasons.includes("allowlist_missing"), true)
 })
@@ -41,37 +41,37 @@ t("recipient cap", () => {
 t("stale signal", () => {
   assert.equal(evaluate(act, { ...okCtx, signalAgeSeconds: 1801 }).reasons.includes("signal_stale"), true)
 })
-t("fact guard обязателен", () => {
+t("the fact guard is mandatory", () => {
   const r = evaluate(act, { ...okCtx, factGuard: { ok: false } })
   assert.equal(r.reasons.includes("fact_guard_not_passed"), true)
 })
-t("conviction ниже планки", () => {
+t("conviction below the bar", () => {
   assert.equal(evaluate({ ...act, conviction: 64 }, okCtx).reasons.includes("conviction_below_bar"), true)
 })
-t("нет trace hash => запрет", () => {
+t("no trace hash => denied", () => {
   assert.equal(evaluate({ ...act, traceHash: "nope" }, okCtx).reasons.includes("trace_hash_missing"), true)
 })
 t("kill switch", () => {
   assert.equal(evaluate(act, { ...okCtx, paused: true }).allow, false)
 })
-t("LLM НЕ может поднять сумму", () => {
+t("an LLM can NOT raise the amount", () => {
   const r = applyAdvice(evaluate(act, okCtx), { amountAtomic: 9_999_999 })
   assert.equal(r.allow, true)
   assert.equal(r.amountAtomic, 5_000)
   assert.equal(r.reasons.includes("advisory_raise_ignored"), true)
 })
-t("LLM может уменьшить сумму", () => {
+t("an LLM may reduce the amount", () => {
   assert.equal(applyAdvice(evaluate(act, okCtx), { amountAtomic: 1_000 }).amountAtomic, 1_000)
 })
-t("LLM может запретить", () => {
+t("an LLM may forbid", () => {
   assert.equal(applyAdvice(evaluate(act, okCtx), { allow: false }).allow, false)
 })
-t("LLM НЕ может сменить получателя", () => {
+t("an LLM can NOT change the recipient", () => {
   const r = applyAdvice(evaluate(act, okCtx), { recipient: "0x000000000000000000000000000000000000dEaD" })
   assert.equal(r.recipient, TO.toLowerCase())
   assert.equal(r.reasons.includes("advisory_recipient_ignored"), true)
 })
-t("детерминизм", () => {
+t("determinism", () => {
   assert.equal(JSON.stringify(evaluate(act, okCtx)), JSON.stringify(evaluate(act, okCtx)))
 })
 console.log("\nPolicyKernel: " + n + "/" + n + " passed")

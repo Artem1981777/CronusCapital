@@ -20,59 +20,59 @@ const call = async (h, query) => {
 }
 let n = 0
 const cases = [
-  ["цена доказуемо постоянна: постериор не влияет", async () => {
+  ["the price is provably constant: the posterior changes nothing", async () => {
     const d = clampDiagnosis(0.001)
     assert.equal(d.constant, true)
     assert.equal(d.value, 0.0009)
     assert.equal(d.reason, "base_price_at_or_above_cap")
     assert.equal(clampDiagnosis(0.0004).constant, false)
   }],
-  ["покупки считаются по реальным чекам, регистр адреса не важен", async () => {
+  ["purchases are counted from real receipts, address case does not matter", async () => {
     const h = purchaseHistory(R, "0xaaa", [])
     assert.equal(h.purchases, 3)
     assert.equal(h.spentUsdc, 0.05)
     assert.equal(h.distinctPayers, 3)
   }],
-  ["собственный кошелёк проекта помечается", async () => {
+  ["the project's own wallet is flagged", async () => {
     const h = purchaseHistory(R, "0x46213abeca58cc9a89a269fd25a8737c700ca164", ["0x46213abeca58cc9a89a269fd25a8737c700ca164"])
     assert.equal(h.selfGenerated, true)
     assert.equal(h.externalPayers, 2)
   }],
-  ["без адреса плательщика считать отказ", async () => {
+  ["with no payer address, refuse to compute", async () => {
     const out = await call(makeLiveThompson({ env: {}, fetchImpl: okFeed }), {})
     assert.equal(out.ok, false)
     assert.equal(out.reason, "payer_required")
   }],
-  ["чеки недоступны => отказ, без подстановки", async () => {
-    const bad = async () => { throw new Error("сеть недоступна") }
+  ["receipts unavailable => refusal, nothing substituted", async () => {
+    const bad = async () => { throw new Error("network unavailable") }
     const out = await call(makeLiveThompson({ env: {}, fetchImpl: bad }), { payer: "0xaaa" })
     assert.equal(out.ok, false)
     assert.equal(out.reason, "receipts_unreachable")
   }],
-  ["битый ответ чеков не притворяется данными", async () => {
+  ["a malformed receipts response does not pretend to be data", async () => {
     const r = await readReceipts({ fetchImpl: feed({ ok: true }), env: {} })
     assert.equal(r.ok, false)
     assert.equal(r.reason, "receipts_malformed")
   }],
-  ["неизвестный адрес => cold_start, а не цена из Beta(1,1)", async () => {
+  ["an unknown address => cold_start, not a price drawn from Beta(1,1)", async () => {
     const out = await call(makeLiveThompson({ env: {}, fetchImpl: okFeed }), { payer: "0xZZZ" })
     assert.equal(out.ok, false)
     assert.equal(out.reason, "cold_start_no_purchase_history")
     assert.equal(out.basePriceUsdc, 0.001)
   }],
-  ["наблюдений конверсии нет => отказ считать байесовскую цену", async () => {
+  ["no conversion observations => refuse to compute a Bayesian price", async () => {
     const out = await call(makeLiveThompson({ env: {}, fetchImpl: okFeed }), { payer: "0xaaa" })
     assert.equal(out.ok, false)
     assert.equal(out.reason, "no_conversion_observations")
     assert.equal(out.history.purchases, 3)
   }],
-  ["successRate без явного признания допущения не принимается", async () => {
+  ["successRate is rejected unless the assumption is acknowledged explicitly", async () => {
     const out = await call(makeLiveThompson({ env: {}, fetchImpl: okFeed }), { payer: "0xaaa", successRate: "0.5" })
     assert.equal(out.reason, "no_conversion_observations")
     const bad = await call(makeLiveThompson({ env: {}, fetchImpl: okFeed }), { payer: "0xaaa", successRate: "9", acceptUnobserved: "1" })
     assert.equal(bad.reason, "no_conversion_observations")
   }],
-  ["явное допущение => расчёт, но помечен как допущение", async () => {
+  ["an explicit assumption => it computes, but is labeled an assumption", async () => {
     const out = await call(makeLiveThompson({ env: {}, fetchImpl: okFeed }), { payer: "0xaaa", successRate: "0.5", acceptUnobserved: "1" })
     assert.equal(out.ok, true)
     assert.equal(out.history.purchases, 3)
@@ -80,7 +80,7 @@ const cases = [
     assert.equal(out.priceDependsOnObservations, false)
     assert.equal(out.priceUsdc, 0.0009)
   }],
-  ["одинаковые входы => побитово одинаковый ответ", async () => {
+  ["identical inputs => a bit-for-bit identical answer", async () => {
     const h = makeLiveThompson({ env: {}, fetchImpl: okFeed })
     const q = { payer: "0xaaa", successRate: "0.5", acceptUnobserved: "1" }
     const a = await call(h, q), b = await call(h, q)
@@ -88,24 +88,24 @@ const cases = [
     assert.equal(a.determinism.seed, b.determinism.seed)
     assert.equal(a.determinism.seeded, true)
   }],
-  ["другой плательщик => другой посев", async () => {
+  ["a different payer => a different seed", async () => {
     const h = makeLiveThompson({ env: {}, fetchImpl: okFeed })
     const a = await call(h, { payer: "0xaaa", successRate: "0.5", acceptUnobserved: "1" })
     const b = await call(h, { payer: "0xbbb", successRate: "0.5", acceptUnobserved: "1" })
     assert.equal(a.determinism.seed === b.determinism.seed, false)
   }],
-  ["глобальный Math.random возвращается на место", async () => {
+  ["the global Math.random is restored", async () => {
     const orig = Math.random
     await withSeededRandom("deadbeef", async () => { assert.equal(Math.random === orig, false) })
     assert.equal(Math.random, orig)
-    try { await withSeededRandom("deadbeef", async () => { throw new Error("сбой") }) } catch (_) {}
+    try { await withSeededRandom("deadbeef", async () => { throw new Error("failure") }) } catch (_) {}
     assert.equal(Math.random, orig)
   }],
-  ["посев воспроизводим", async () => {
+  ["the seed is reproducible", async () => {
     const a = seededRandom("cafebabe"), b = seededRandom("cafebabe")
     assert.equal(a(), b())
   }],
-  ["живой thompson перекрывает обёртку заглушки", async () => {
+  ["the live thompson overrides the stub wrapper", async () => {
     assert.equal(REAL_ROUTES.thompson === PROVENANCE_ROUTES.thompson, false)
     assert.equal(typeof REAL_ROUTES.thompson, "function")
     const sf = await call(REAL_ROUTES["shadow-float"], {})

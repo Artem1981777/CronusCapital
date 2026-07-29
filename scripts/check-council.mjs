@@ -1,4 +1,4 @@
-// Оффлайн-проверка Council: провайдеры подменяются fetchImpl, ключи — фейковым env.
+// Offline check of Council: providers are stubbed via fetchImpl, keys via a fake env.
 import assert from "node:assert/strict"
 import {
   runCouncil, tally, eloUpdate, parseVote, assignProviders, sliceEvidence, enrichMarket, ROLES,
@@ -8,7 +8,7 @@ const market = { price: 100000, changePct: 2.5, high24h: 101000, low24h: 97000, 
 const reply = (verdict, confidence) => ({
   json: async () => ({ choices: [{ message: { content: JSON.stringify({ verdict, confidence, rationale: "test" }) } }] }),
 })
-// разные ответы по роли: определяем роль по содержимому evidence в промпте
+// different answers per role: the role is inferred from the evidence in the prompt
 const byRole = (map) => async (url, init) => {
   const body = JSON.parse(init.body)
   const user = body.messages ? body.messages[1].content : body.messages
@@ -21,7 +21,7 @@ const THREE = { GROQ_API_KEY: "x", DEEPSEEK_API_KEY: "y", ANTHROPIC_API_KEY: "z"
 let n = 0
 
 const cases = [
-  ["нет ключей => НЕТ голосования, а не фейковые голоса", async () => {
+  ["no keys => NO vote at all, not fake ballots", async () => {
     const r = await runCouncil({ topic: "BTC-USDC", market, opts: { env: {} } })
     assert.equal(r.ok, false)
     assert.equal(r.mode, "unavailable")
@@ -29,7 +29,7 @@ const cases = [
     assert.equal(r.votes.length, 0)
     assert.equal(r.synthetic, false)
   }],
-  ["один ключ => честный режим single-provider-three-role", async () => {
+  ["one key => the honest single-provider-three-role mode", async () => {
     const r = await runCouncil({ topic: "BTC-USDC", market, opts: {
       env: ONE, fetchImpl: byRole({ technical: ["BUY", 0.8], fundamental: ["BUY", 0.6], contrarian: ["SELL", 0.7] }) } })
     assert.equal(r.mode, "single-provider-three-role")
@@ -39,19 +39,19 @@ const cases = [
     assert.equal(r.confidence, 0.7)
     assert.deepEqual(r.dissent, ["contrarian"])
   }],
-  ["три ключа => multi-provider, роли на разных моделях", async () => {
+  ["three keys => multi-provider, roles on different models", async () => {
     const r = await runCouncil({ topic: "BTC-USDC", market, opts: {
       env: THREE, fetchImpl: byRole({ technical: ["BUY", 0.9], fundamental: ["SKIP", 0.5], contrarian: ["SELL", 0.6] }) } })
     assert.equal(r.mode, "multi-provider")
-    // providers перечисляет ТОЛЬКО зачтённые голоса, поэтому его длина
-    // зависит от того, сколько провайдеров реально ответило.
+    // providers lists ONLY the counted votes, so its length depends on how
+    // many providers actually answered.
     assert.equal(r.providersAttempted.length, 3)
     assert.equal(r.providers.length >= 2, true)
     for (const p of r.providers) assert.equal(r.providersAttempted.includes(p), true)
     for (const p of r.providersFailed) assert.equal(r.providers.includes(p), false)
-    // После переголосования провайдер может быть опрошен, не дать голос и при
-    // этом не остаться в providersFailed: его роль закрыл другой провайдер.
-    // Поэтому опрошенные = проголосовавшие + упавшие + восстановленные.
+    // After a re-vote a provider may be asked, fail to vote, and still not appear
+    // in providersFailed: another provider covered its role.
+    // Hence asked = voted + failed + recovered.
     const recovered = Array.from(new Set((r.failover || []).map((f) => f.from)))
     const accounted = new Set(r.providers.concat(r.providersFailed, recovered))
     assert.equal(accounted.size, r.providersAttempted.length)
@@ -60,7 +60,7 @@ const cases = [
     assert.equal(r.reason, "no_majority")
     assert.equal(r.confidence, null)
   }],
-  ["роли получают РАЗНЫЕ данные", async () => {
+  ["the roles receive DIFFERENT data", async () => {
     const m = enrichMarket(market)
     const t = sliceEvidence(ROLES[0], m)
     const f = sliceEvidence(ROLES[1], m)
@@ -72,18 +72,18 @@ const cases = [
     assert.equal(c.distFromHighPct, 0.99)
     assert.equal(JSON.stringify(t) === JSON.stringify(f), false)
   }],
-  ["мусорный ответ модели отбрасывается, а не чинится", async () => {
-    assert.equal(parseVote("не json"), null)
+  ["a garbage model answer is discarded, not repaired", async () => {
+    assert.equal(parseVote("not json"), null)
     assert.equal(parseVote('{"verdict":"MAYBE","confidence":0.7}'), null)
     assert.equal(parseVote('{"verdict":"BUY","confidence":"abc"}'), null)
     assert.equal(parseVote('{"verdict":"BUY","confidence":5}').confidence, 0.05)
     assert.equal(parseVote('{"verdict":"BUY","confidence":150}'), null)
     assert.equal(parseVote('{"verdict":"BUY","confidence":-1}'), null)
     assert.equal(parseVote('{"verdict":"BUY"}'), null)
-    assert.equal(parseVote('текст {"verdict":"buy","confidence":72} хвост').verdict, "BUY")
+    assert.equal(parseVote('prose {"verdict":"buy","confidence":72} tail').verdict, "BUY")
     assert.equal(parseVote('{"verdict":"BUY","confidence":72}').confidence, 0.72)
   }],
-  ["все модели упали => ABSTAIN без NaN", async () => {
+  ["every model failed => ABSTAIN with no NaN", async () => {
     const r = await runCouncil({ topic: "BTC-USDC", market, opts: {
       env: ONE, fetchImpl: async () => { throw new Error("boom") } } })
     assert.equal(r.ok, false)
@@ -91,13 +91,13 @@ const cases = [
     assert.equal(r.confidence, null)
     assert.equal(r.errors.length, 3)
   }],
-  ["один голос из трёх => недостаточно для консенсуса", async () => {
+  ["one vote out of three => not enough for consensus", async () => {
     const t = tally([{ role: "technical", verdict: "BUY", confidence: 0.9 }])
     assert.equal(t.consensus, "ABSTAIN")
     assert.equal(t.reason, "insufficient_votes")
     assert.equal(t.confidence, null)
   }],
-  ["ELO против РЕАЛЬНОСТИ, а не против большинства", async () => {
+  ["ELO against REALITY, not against the majority", async () => {
     const votes = [
       { role: "technical", verdict: "BUY", confidence: 0.9 },
       { role: "fundamental", verdict: "BUY", confidence: 0.8 },
@@ -105,19 +105,19 @@ const cases = [
     ]
     const e = eloUpdate(votes, "SELL", { ratings: {} })
     assert.equal(e.applied, true)
-    // одиночка, угадавший рынок, получает плюс; согласное большинство — минус
+    // the lone voice that read the market right gains; the agreeing majority loses
     assert.equal(e.delta.contrarian > 0, true)
     assert.equal(e.delta.technical < 0, true)
     assert.equal(e.delta.fundamental < 0, true)
     assert.equal(e.ratings.contrarian > 1200, true)
   }],
-  ["без разрешённого исхода ELO не применяется", async () => {
+  ["without a resolved outcome ELO is not applied", async () => {
     const e = eloUpdate([{ role: "a", verdict: "BUY", confidence: 0.9 }], null, {})
     assert.equal(e.applied, false)
     assert.equal(e.reason, "unresolved_outcome")
     assert.deepEqual(e.delta, {})
   }],
-  ["распределение провайдеров детерминировано", async () => {
+  ["the provider assignment is deterministic", async () => {
     assert.equal(assignProviders([], ROLES).mode, "unavailable")
     assert.equal(assignProviders(["groq"], ROLES).mode, "single-provider-three-role")
     assert.equal(assignProviders(["groq", "deepseek"], ROLES).mode, "mixed-provider")

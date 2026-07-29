@@ -1,4 +1,4 @@
-// Оффлайн-проверка живого паспорта: рынок и модели инжектируются.
+// Offline check of the live passport: market and models are injected.
 import assert from "node:assert/strict"
 import { makeLivePassport, verifyPassportAgainstRecord, legacyIntegrityDiagnosis } from "../lib/provenance/livePassport.js"
 import { normalizeHash } from "../lib/provenance/wrap.js"
@@ -15,33 +15,33 @@ const call = async (h, query) => {
 }
 let n = 0
 const cases = [
-  ["sha256-хеш из contentHash признаётся корректным", async () => {
+  ["the sha256 hash from contentHash is accepted as valid", async () => {
     const h = contentHash({ a: 1 })
     assert.equal(h.startsWith("sha256:"), true)
     assert.equal(h.length, 71)
     assert.equal(normalizeHash(h), h)
     assert.equal(normalizeHash("sha256:zzz"), null)
   }],
-  ["встроенная проверка длины 66 несовместима в принципе", async () => {
+  ["the built-in length-66 check can never be satisfied", async () => {
     const d = legacyIntegrityDiagnosis({ verification: { traceHash: contentHash({ a: 1 }) } })
     assert.equal(d.ok, false)
     assert.equal(d.actualLength, 71)
     assert.equal(d.reason, "length_check_incompatible_with_content_hash_format")
   }],
-  ["без ключей LLM паспорт НЕ выпускается", async () => {
+  ["with no LLM keys no passport is issued", async () => {
     const h = makeLivePassport({ env: {}, fetchImpl: fetchOk })
     const { out } = await call(h, { instId: "BTC-USDC" })
     assert.equal(out.ok, false)
     assert.equal(out.reason, "no_llm_keys")
     assert.equal(out.passport, undefined)
   }],
-  ["нет рынка => нет паспорта", async () => {
+  ["no market => no passport", async () => {
     const h = makeLivePassport({ env: { GROQ_API_KEY: "x" }, fetchImpl: async () => ({ json: async () => ({ data: [] }) }) })
     const { out } = await call(h, { instId: "BTC-USDC" })
     assert.equal(out.ok, false)
     assert.equal(out.reason, "market_unavailable")
   }],
-  ["живой паспорт: реальный вердикт и целостность ПОДТВЕРЖДЕНА пересчётом", async () => {
+  ["live passport: a real verdict, integrity CONFIRMED by recomputation", async () => {
     const h = makeLivePassport({ env: { GROQ_API_KEY: "x" }, fetchImpl: fetchOk })
     const { out } = await call(h, { instId: "BTC-USDC" })
     assert.equal(out.ok, true)
@@ -56,7 +56,7 @@ const cases = [
     assert.equal(out.dataProvenance.synthetic, false)
     assert.equal(out.dataProvenance.live, true)
   }],
-  ["встроенная валидация честно показана как сломанная", async () => {
+  ["the built-in validation is honestly shown as broken", async () => {
     const h = makeLivePassport({ env: { GROQ_API_KEY: "x" }, fetchImpl: fetchOk })
     const { out } = await call(h, {})
     assert.equal(out.validation.integrity, false)
@@ -64,7 +64,7 @@ const cases = [
     assert.equal(out.integrityRecheck.ok, true)
     assert.equal(out.validation.completeness, 1)
   }],
-  ["паспорт содержит РЕАЛЬНЫЕ рыночные данные, а не пустой объект", async () => {
+  ["the passport carries REAL market data, not an empty object", async () => {
     const h = makeLivePassport({ env: { GROQ_API_KEY: "x" }, fetchImpl: fetchOk })
     const { out } = await call(h, {})
     assert.equal(out.passport.inputs.marketData.price, 100000)
@@ -72,7 +72,7 @@ const cases = [
     assert.equal(out.passport.reasoning.trace.length, 3)
     assert.equal(out.traceRecord.input.instId, "BTC-USDC")
   }],
-  ["подмена записи трассы ловится", async () => {
+  ["tampering with the trace record is caught", async () => {
     const rec = buildTraceRecord({ instId: "BTC-USDC", price: 100000 }, { verdict: "BUY", conviction: 0.8 })
     const p = { verification: { traceHash: contentHash(rec) } }
     assert.equal(verifyPassportAgainstRecord(p, rec).ok, true)
@@ -82,16 +82,16 @@ const cases = [
     assert.equal(bad.ok, false)
     assert.equal(bad.reason, "hash_mismatch")
   }],
-  ["отсутствующий хеш не выдаётся за подтверждённый", async () => {
+  ["a missing hash is not passed off as confirmed", async () => {
     const r = verifyPassportAgainstRecord({ verification: {} }, { a: 1 })
     assert.equal(r.ok, false)
     assert.equal(r.reason, "trace_hash_missing")
   }],
-  ["экономика не выдумывается при отсутствии конфигурации", async () => {
+  ["economics is not invented when configuration is absent", async () => {
     const h = makeLivePassport({ env: { GROQ_API_KEY: "x" }, fetchImpl: fetchOk })
     const { out } = await call(h, {})
     assert.equal(out.passport.economics.revenue, 0)
-    assert.equal(out.economicsSource.includes("не измерено"), true)
+    assert.equal(/not measured|unmeasured/i.test(out.economicsSource), true, "economicsSource: " + out.economicsSource)
     const h2 = makeLivePassport({ env: { GROQ_API_KEY: "x", SIGNAL_PRICE: "0.02" }, fetchImpl: fetchOk })
     const r2 = await call(h2, {})
     assert.equal(r2.out.passport.economics.revenue, 0.02)

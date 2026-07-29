@@ -1,5 +1,5 @@
-// Единый прогон. Возвращает ненулевой код при первом падении, чтобы красный
-// тест не мог уехать в main через цепочку команд.
+// One run for everything. Exits non-zero on the first failure, so a red test
+// cannot slip into main through a chain of commands.
 import { spawnSync } from "node:child_process"
 
 const SUITES = [
@@ -15,7 +15,7 @@ for (const s of SUITES) {
   if (r.status !== 0) {
     failed.push(s)
     const err = String(r.stderr || "").trim().split("\n").filter((l) => /Assertion|Error|at file/.test(l)).slice(0, 3)
-    console.log("ПАДАЕТ  " + s)
+    console.log("FAILING  " + s)
     for (const e of err) console.log("        " + e.trim())
     continue
   }
@@ -25,7 +25,7 @@ for (const s of SUITES) {
 }
 console.log("")
 if (failed.length) {
-  console.log("НАБОРОВ УПАЛО: " + failed.length + " (" + failed.join(", ") + ")")
+  console.log("SUITES FAILED: " + failed.length + " (" + failed.join(", ") + ")")
   process.exit(1)
 }
-console.log("ВСЕ " + SUITES.length + " НАБОРОВ ЗЕЛЁНЫЕ, ПРОВЕРОК: " + total)
+console.log("ALL " + SUITES.length + " SUITES GREEN, CHECKS: " + total)
