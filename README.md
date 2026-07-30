@@ -32,7 +32,7 @@ Cronus is an autonomous AI agent that runs a real, honest business on Arc: it **
 
 - **Live demo:** https://cronus-capital.vercel.app
 - **Verify in 2 min (no keys):** run **npm run verify-live** (113 checks) or open **/api/scorecard**
-- **Run every test:** `npm run test:all` — production build, 157 Node tests, and 25 Foundry tests across four contract suites (identity, reputation, vault, job escrow).
+- **Run every test:** `npm run test:all` — production build, 248 Node tests, and 25 Foundry tests across four contract suites (identity, reputation, vault, job escrow).
 - **Live, not placeholder:** every metric on the dashboard is populated from live / on-chain endpoints and reproducible with one command — no dashes, no backfilled or mocked numbers.
 - **Verifiable receipt (new):** paste any payment tx into the **Verifiable Receipt** card on the **Proof / Verify** tab (or call **/api/info?kind=receipt&tx=0x…**) — Cronus re-checks it live on the Arc explorer and binds payer -> amount -> the exact x402 price -> the on-chain commitment, with a non-custodial note. No keys.
 - **Guardrail proof (new):** the **Risk / SecOps** tab live-runs the real spending policy — an oversized payout is **blocked** (no funds move) while an in-budget one clears — plus the EIP-712 **SpendIntent** fields every autonomous spend must carry (signer, payTo, asset, maxAmount, nonce, deadline). Verify via **/api/spend-limit** and **/api/spend-intent**.
@@ -40,6 +40,9 @@ Cronus is an autonomous AI agent that runs a real, honest business on Arc: it **
 - **Rational spend / pay-to-think (new):** the **Payments** tab shows Cronus spending like a rational agent — it buys upstream data **only when a verdict is borderline** and skips confident/low calls to avoid waste, then settles real **cost-of-goods** to self-operated demo feeds (labeled, never counted as external revenue). Verify via **/api/pay-to-think**.
 - **Private-by-default receipts (new):** open **/api/disclosure** — Cronus proves a real payment obeyed its spend policy while the amount, the counterparty and the tx hash stay sealed (9 of 12 Merkle leaves hidden). POST that same JSON back to **/api/disclosure-verify** to check it yourself; change one character and it fails with 422. Sorted-pair hashing keeps the proofs OpenZeppelin-compatible. This is selective disclosure, **not** zero-knowledge, and the endpoint says so itself.
 - **Idle-capital benchmark (new):** open **/api/treasury-yield** — Cronus reads the real USYC money-market fund on Arc (NAV from the Circle oracle, cross-checked against the Teller's ERC-4626 conversion) and computes the yearly rate from NAV growth recorded on-chain, currently ~3.23% over 209 days. It holds no USYC and proves why instead of claiming it: `canCall(agent, teller, deposit)` returns **false**, because USYC is permissioned. Idle-capital earnings are labeled counterfactual and never touch vault NAV, and corrupt oracle rounds are rejected in the open.
+- **Make-good escrow (new):** when a graded verdict misses, the buyer who paid for that signal is entitled to a make-good — the wrong stake's principal is paid out of escrow, not promised in prose. Verify via **/api/make-good**. If the stake ledger cannot be read the endpoint refuses with a named reason instead of reporting zero open positions, because a payer cannot tell those two apart.
+- **Settlement resolver (new):** **/api/settlements** maps x402 payments to on-chain settlements across two rails, reads one chain tip for both so the two windows describe the same segment of history, labels batched or unmappable transfers instead of wiring them to a plausible-looking tx, and serves the cached answer together with its real age when the public node rate-limits — 163 gateway settlements and 5 direct, 20.079998 USDC indexed so far.
+- **Declared surface, audited (new):** **/api/openapi** declares **27 endpoints**, and every declared path was called against production *before* it was declared — the two that did not answer as advertised were fixed, not quietly dropped. Each description also states when the route refuses, not only what it returns.
 - **Honest by default:** external_payers = **0** — every x402 payment so far is our own self-generated test traffic, always labeled as such. We never fake demand.
 - **Real on-chain:** x402 revenue, upstream COGS, skin-in-the-game stakes, live vault NAV, ERC-8004 identity/reputation + ERC-8183 escrow.
 - **Visual tour:** 11 annotated dashboard screenshots at the bottom of this README (and in docs/dashboard-v2.md).
@@ -1150,7 +1153,7 @@ node scripts/verify-chain.mjs        # offline: replays the ledger hash chain, z
 curl -s .../api/agent-card           # card, attestation, avgRating, policyHash
 curl -s '.../api/nano-signal?quote=1&payer=0x...'   # pricing, bundle, session
 curl -s '.../api/nano-signal?session=use&payer=0x...'  # expects HTTP 402 without a session
-npm run test:all                     # build + 157 Node tests + 25 Foundry contract tests
+npm run test:all                     # build + 248 Node tests + 25 Foundry contract tests
 npm run verify-live                  # 113 live checks against production
 ```
 
