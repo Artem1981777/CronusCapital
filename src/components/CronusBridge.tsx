@@ -29,6 +29,14 @@ const ZERO32 = "0x00000000000000000000000000000000000000000000000000000000000000
 const DASH = "\u2014"
 const ARROW = "\u2192"
 const SWAP = "\u21C4"
+const HKEY = "cronus_bridge_history_v1"
+
+type Entry = { id: number; route: string; amount: string; burnTx: string; burnUrl: string; mintTx: string; mintUrl: string; status: string }
+
+function loadHistory(): Entry[] {
+  try { const raw = localStorage.getItem(HKEY); const a = raw ? JSON.parse(raw) : []; return Array.isArray(a) ? a : [] } catch { return [] }
+}
+function persist(next: Entry[]) { try { localStorage.setItem(HKEY, JSON.stringify(next)) } catch { /* ignore quota/SSR */ } }
 
 const ERC20_ABI = [
   { type: "function", name: "approve", stateMutability: "nonpayable", inputs: [{ name: "spender", type: "address" }, { name: "amount", type: "uint256" }], outputs: [{ name: "", type: "bool" }] },
@@ -67,6 +75,7 @@ function addrToBytes32(a: string): string {
 }
 function shorten(x: string): string { return x ? x.slice(0, 8) + "\u2026" + x.slice(-6) : "" }
 function sleep(ms: number) { return new Promise((r) => setTimeout(r, ms)) }
+function fmtTime(id: number): string { try { return new Date(id).toLocaleString() } catch { return "" } }
 
 export default function CronusBridge() {
   const { address, isConnected } = useAccount()
@@ -86,6 +95,15 @@ export default function CronusBridge() {
   const [mintTx, setMintTx] = useState("")
   const [err, setErr] = useState("")
   const [busy, setBusy] = useState(false)
+  const [history, setHistory] = useState<Entry[]>(loadHistory)
+
+  function pushEntry(e: Entry) {
+    setHistory((prev) => { const next = [e, ...prev].slice(0, 25); persist(next); return next })
+  }
+  function patchEntry(id: number, patch: Partial<Entry>) {
+    setHistory((prev) => { const next = prev.map((x) => (x.id === id ? { ...x, ...patch } : x)); persist(next); return next })
+  }
+  function clearHistory() { setHistory([]); persist([]) }
 
   async function bridge() {
     setErr(""); setBurnTx(""); setMintTx(""); setStep("")
@@ -94,6 +112,8 @@ export default function CronusBridge() {
     if (!destClient) { setErr(dest.name + " RPC client unavailable."); return }
     const amt = toUnits(amount, 6)
     if (amt <= 0n) { setErr("Enter an amount greater than 0."); return }
+    const route = source.name + " " + ARROW + " " + dest.name
+    let entryId = 0
     setBusy(true)
     try {
       if (chainId !== source.chainId) {
@@ -130,6 +150,8 @@ export default function CronusBridge() {
       } as any)
       await sourceClient.waitForTransactionReceipt({ hash: bHash })
       setBurnTx(bHash)
+      entryId = Date.now()
+      pushEntry({ id: entryId, route, amount, burnTx: bHash, burnUrl: source.scan + bHash, mintTx: "", mintUrl: "", status: "attesting" })
       setStep("3/4 Waiting for Circle attestation" + DASH)
       let msg: any = null
       for (let i = 0; i < 60; i++) {
@@ -143,7 +165,7 @@ export default function CronusBridge() {
         } catch { /* retry */ }
         await sleep(5000)
       }
-      if (!msg) throw new Error("Attestation timed out. Your burn is safe; the mint can be completed later with the burn tx.")
+      if (!msg) { patchEntry(entryId, { status: "mint pending" }); throw new Error("Attestation timed out. Your burn is safe; the mint can be completed later with the burn tx.") }
       setStep("4/4 Minting on " + dest.name + DASH)
       await switchChainAsync({ chainId: dest.chainId })
       const mHash = await writeContractAsync({
@@ -155,8 +177,10 @@ export default function CronusBridge() {
       } as any)
       await destClient.waitForTransactionReceipt({ hash: mHash })
       setMintTx(mHash)
+      patchEntry(entryId, { mintTx: mHash, mintUrl: dest.scan + mHash, status: "complete" })
       setStep("Done. USDC bridged " + source.name + " to " + dest.name + " via Circle CCTP V2.")
     } catch (e: any) {
+      if (entryId) patchEntry(entryId, { status: "error" })
       setErr((e && (e.shortMessage || e.message)) || "Transaction failed")
       setStep("")
     }
@@ -177,6 +201,14 @@ export default function CronusBridge() {
   const link: any = { color: "#39e014", textDecoration: "none", fontFamily: "monospace" }
   const ok: any = { color: "#39e014", fontSize: 13, marginTop: 10, lineHeight: 1.5 }
   const errStyle: any = { color: "#ff6b6b", fontSize: 13, marginTop: 10, lineHeight: 1.5 }
+  const histHead: any = { display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 18, marginBottom: 4 }
+  const histTitle: any = { color: "#7fd87f", letterSpacing: ".5px", fontSize: 13, fontWeight: 700 }
+  const clearBtn: any = { background: "transparent", color: "#8aa98a", border: "1px solid #39e01433", borderRadius: 8, padding: "4px 10px", fontSize: 11, cursor: "pointer" }
+  const histItem: any = { padding: "8px 0", borderBottom: "1px solid #39e01422", fontSize: 12 }
+  const histTop: any = { display: "flex", justifyContent: "space-between", color: "#d6ffd6" }
+  const histMeta: any = { color: "#8aa98a", fontSize: 11, marginTop: 2 }
+  const histLinks: any = { display: "flex", gap: 14, marginTop: 4 }
+  const statusColor = (s: string): string => (s === "complete" ? "#39e014" : s === "error" ? "#ff6b6b" : "#e0c14a")
 
   return (
     <div style={wrap}>
@@ -196,6 +228,27 @@ export default function CronusBridge() {
       {burnTx && <div style={row}><span style={lbl}>BURN TX</span><a style={link} href={source.scan + burnTx} target="_blank" rel="noreferrer">{shorten(burnTx)}</a></div>}
       {mintTx && <div style={row}><span style={lbl}>MINT TX</span><a style={link} href={dest.scan + mintTx} target="_blank" rel="noreferrer">{shorten(mintTx)}</a></div>}
       {err && <p style={errStyle}>{err}</p>}
+      {history.length > 0 && (
+        <div>
+          <div style={histHead}>
+            <span style={histTitle}>HISTORY ({history.length})</span>
+            <button style={clearBtn} onClick={clearHistory} disabled={busy}>Clear</button>
+          </div>
+          {history.map((h) => (
+            <div key={h.id} style={histItem}>
+              <div style={histTop}>
+                <span style={val}>{h.route}</span>
+                <span style={{ color: statusColor(h.status), fontWeight: 700 }}>{h.amount + " USDC " + DASH + " " + h.status}</span>
+              </div>
+              <div style={histMeta}>{fmtTime(h.id)}</div>
+              <div style={histLinks}>
+                {h.burnUrl && <a style={link} href={h.burnUrl} target="_blank" rel="noreferrer">burn {shorten(h.burnTx)}</a>}
+                {h.mintUrl && <a style={link} href={h.mintUrl} target="_blank" rel="noreferrer">mint {shorten(h.mintTx)}</a>}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   )
 }
