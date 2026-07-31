@@ -19,6 +19,8 @@ const DASH = "\u2014"
 
 const ERC20_ABI = [
   { type: "function", name: "approve", stateMutability: "nonpayable", inputs: [{ name: "spender", type: "address" }, { name: "amount", type: "uint256" }], outputs: [{ name: "", type: "bool" }] },
+  { type: "function", name: "allowance", stateMutability: "view", inputs: [{ name: "owner", type: "address" }, { name: "spender", type: "address" }], outputs: [{ name: "", type: "uint256" }] },
+  { type: "function", name: "balanceOf", stateMutability: "view", inputs: [{ name: "account", type: "address" }], outputs: [{ name: "", type: "uint256" }] },
 ]
 const TM_ABI = [
   { type: "function", name: "depositForBurn", stateMutability: "nonpayable", inputs: [
@@ -81,6 +83,8 @@ export default function CronusBridge() {
         await switchChainAsync({ chainId: BASE_SEPOLIA_ID })
       }
       const maxFee = amt / 100n
+      const bal = await baseClient.readContract({ address: BASE_USDC, abi: ERC20_ABI, functionName: "balanceOf", args: [address] }) as bigint
+      if (bal < amt) throw new Error("Insufficient Base Sepolia USDC balance. Fund this wallet at faucet.circle.com and retry.")
       setStep("1/4 Approving USDC on Base Sepolia" + DASH)
       const approveHash = await writeContractAsync({
         chainId: BASE_SEPOLIA_ID,
@@ -90,7 +94,13 @@ export default function CronusBridge() {
         args: [TOKEN_MESSENGER_V2, amt],
       } as any)
       await baseClient.waitForTransactionReceipt({ hash: approveHash })
+      for (let i = 0; i < 10; i++) {
+        const a = await baseClient.readContract({ address: BASE_USDC, abi: ERC20_ABI, functionName: "allowance", args: [address, TOKEN_MESSENGER_V2] }) as bigint
+        if (a >= amt) break
+        await sleep(1500)
+      }
       setStep("2/4 Burning USDC on Base Sepolia (CCTP V2)" + DASH)
+      await baseClient.simulateContract({ account: address, chainId: BASE_SEPOLIA_ID, address: TOKEN_MESSENGER_V2, abi: TM_ABI, functionName: "depositForBurn", args: [amt, ARC_DOMAIN, addrToBytes32(address), BASE_USDC, ZERO32, maxFee, 1000] } as any)
       const bHash = await writeContractAsync({
         chainId: BASE_SEPOLIA_ID,
         address: TOKEN_MESSENGER_V2,
