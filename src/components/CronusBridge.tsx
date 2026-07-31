@@ -1,18 +1,29 @@
 import { useState } from "react"
 import { useAccount, useWriteContract, usePublicClient, useChainId, useSwitchChain } from "wagmi"
 
-// Base Sepolia -> Arc Testnet USDC bridge via Circle CCTP V2 (burn-and-mint).
+// Testnet -> Arc Testnet USDC bridge via Circle CCTP V2 (burn-and-mint).
 // Non-custodial: every tx is signed by the visitor's own connected wallet.
-// Contract addresses: https://developers.circle.com/cctp/references/contract-addresses
-const BASE_SEPOLIA_ID = 84532
+// Addresses verified against https://developers.circle.com/cctp/references/contract-addresses
+type Hex = `0x${string}`
+
 const ARC_ID = 5042002
-const BASE_USDC = "0x036CbD53842c5426634e7929541eC2318f3dCF7e"
+const ARC_DOMAIN = 26
+// V2 contracts are identical across all supported EVM testnets.
 const TOKEN_MESSENGER_V2 = "0x8FE6B999Dc680CcFDD5Bf7EB0974218be2542DAA"
 const MESSAGE_TRANSMITTER_V2 = "0xE737e5cEBEEBa77EFE34D4aa090756590b1CE275"
-const BASE_DOMAIN = 6
-const ARC_DOMAIN = 26
+
+type SourceChain = { key: string; name: string; chainId: number; domain: number; usdc: Hex; scan: string }
+
+// Source chains the judge can pick. Arc is always the destination.
+const SOURCES: SourceChain[] = [
+  { key: "base", name: "Base Sepolia", chainId: 84532, domain: 6, usdc: "0x036CbD53842c5426634e7929541eC2318f3dCF7e", scan: "https://sepolia.basescan.org/tx/" },
+  { key: "eth", name: "Ethereum Sepolia", chainId: 11155111, domain: 0, usdc: "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238", scan: "https://sepolia.etherscan.io/tx/" },
+  { key: "arb", name: "Arbitrum Sepolia", chainId: 421614, domain: 3, usdc: "0x75faf114eafb1BDbe2F0316DF893fd58CE46AA4d", scan: "https://sepolia.arbiscan.io/tx/" },
+  { key: "op", name: "OP Sepolia", chainId: 11155420, domain: 2, usdc: "0x5fd84259d66Cd46123540766Be93DFE6D43130D7", scan: "https://sepolia-optimism.etherscan.io/tx/" },
+  { key: "avax", name: "Avalanche Fuji", chainId: 43113, domain: 1, usdc: "0x5425890298aed601595a70AB815c96711a31Bc65", scan: "https://testnet.snowtrace.io/tx/" },
+]
+
 const IRIS = "https://iris-api-sandbox.circle.com"
-const BASESCAN = "https://sepolia.basescan.org/tx/"
 const ARCSCAN = "https://testnet.arcscan.app/tx/"
 const ZERO32 = "0x0000000000000000000000000000000000000000000000000000000000000000"
 const DASH = "\u2014"
@@ -60,9 +71,10 @@ export default function CronusBridge() {
   const chainId = useChainId()
   const { switchChainAsync } = useSwitchChain()
   const { writeContractAsync } = useWriteContract()
-  const baseClient = usePublicClient({ chainId: BASE_SEPOLIA_ID })
+  const [sourceKey, setSourceKey] = useState("base")
+  const src = SOURCES.find((s) => s.key === sourceKey) || SOURCES[0]
   const arcClient = usePublicClient({ chainId: ARC_ID })
-
+  const srcClient = usePublicClient({ chainId: src.chainId })
   const [amount, setAmount] = useState("1")
   const [step, setStep] = useState("")
   const [burnTx, setBurnTx] = useState("")
@@ -73,48 +85,51 @@ export default function CronusBridge() {
   async function bridge() {
     setErr(""); setBurnTx(""); setMintTx(""); setStep("")
     if (!isConnected || !address) { setErr("Connect your wallet first (button at top)."); return }
-    if (!baseClient || !arcClient) { setErr("RPC client unavailable."); return }
+    if (!srcClient) { setErr(src.name + " RPC client unavailable."); return }
+    if (!arcClient) { setErr("Arc RPC client unavailable."); return }
     const amt = toUnits(amount, 6)
     if (amt <= 0n) { setErr("Enter an amount greater than 0."); return }
     setBusy(true)
     try {
-      if (chainId !== BASE_SEPOLIA_ID) {
-        setStep("Switching wallet to Base Sepolia" + DASH)
-        await switchChainAsync({ chainId: BASE_SEPOLIA_ID })
+      if (chainId !== src.chainId) {
+        setStep("Switching wallet to " + src.name + DASH)
+        await switchChainAsync({ chainId: src.chainId })
       }
       const maxFee = amt / 100n
-      const bal = await baseClient.readContract({ address: BASE_USDC, abi: ERC20_ABI, functionName: "balanceOf", args: [address] }) as bigint
-      if (bal < amt) throw new Error("Insufficient Base Sepolia USDC balance. Fund this wallet at faucet.circle.com and retry.")
-      setStep("1/4 Approving USDC on Base Sepolia" + DASH)
-      const approveHash = await writeContractAsync({
-        chainId: BASE_SEPOLIA_ID,
-        address: BASE_USDC,
-        abi: ERC20_ABI,
-        functionName: "approve",
-        args: [TOKEN_MESSENGER_V2, amt],
-      } as any)
-      await baseClient.waitForTransactionReceipt({ hash: approveHash })
-      for (let i = 0; i < 10; i++) {
-        const a = await baseClient.readContract({ address: BASE_USDC, abi: ERC20_ABI, functionName: "allowance", args: [address, TOKEN_MESSENGER_V2] }) as bigint
-        if (a >= amt) break
-        await sleep(1500)
+      const bal = await srcClient.readContract({ address: src.usdc, abi: ERC20_ABI, functionName: "balanceOf", args: [address] }) as bigint
+      if (bal < amt) throw new Error("Insufficient " + src.name + " USDC balance. Fund this wallet at faucet.circle.com and retry.")
+      let allowance = await srcClient.readContract({ address: src.usdc, abi: ERC20_ABI, functionName: "allowance", args: [address, TOKEN_MESSENGER_V2] }) as bigint
+      if (allowance < amt) {
+        setStep("1/4 Approving USDC on " + src.name + DASH)
+        const approveHash = await writeContractAsync({
+          chainId: src.chainId,
+          address: src.usdc,
+          abi: ERC20_ABI,
+          functionName: "approve",
+          args: [TOKEN_MESSENGER_V2, amt],
+        } as any)
+        await srcClient.waitForTransactionReceipt({ hash: approveHash })
+        for (let i = 0; i < 10 && allowance < amt; i++) {
+          await sleep(1500)
+          allowance = await srcClient.readContract({ address: src.usdc, abi: ERC20_ABI, functionName: "allowance", args: [address, TOKEN_MESSENGER_V2] }) as bigint
+        }
       }
-      setStep("2/4 Burning USDC on Base Sepolia (CCTP V2)" + DASH)
-      await baseClient.simulateContract({ account: address, chainId: BASE_SEPOLIA_ID, address: TOKEN_MESSENGER_V2, abi: TM_ABI, functionName: "depositForBurn", args: [amt, ARC_DOMAIN, addrToBytes32(address), BASE_USDC, ZERO32, maxFee, 1000] } as any)
+      setStep("2/4 Burning USDC on " + src.name + " (CCTP V2)" + DASH)
+      await srcClient.simulateContract({ account: address, chainId: src.chainId, address: TOKEN_MESSENGER_V2, abi: TM_ABI, functionName: "depositForBurn", args: [amt, ARC_DOMAIN, addrToBytes32(address), src.usdc, ZERO32, maxFee, 1000] } as any)
       const bHash = await writeContractAsync({
-        chainId: BASE_SEPOLIA_ID,
+        chainId: src.chainId,
         address: TOKEN_MESSENGER_V2,
         abi: TM_ABI,
         functionName: "depositForBurn",
-        args: [amt, ARC_DOMAIN, addrToBytes32(address), BASE_USDC, ZERO32, maxFee, 1000],
+        args: [amt, ARC_DOMAIN, addrToBytes32(address), src.usdc, ZERO32, maxFee, 1000],
       } as any)
-      await baseClient.waitForTransactionReceipt({ hash: bHash })
+      await srcClient.waitForTransactionReceipt({ hash: bHash })
       setBurnTx(bHash)
       setStep("3/4 Waiting for Circle attestation" + DASH)
       let msg: any = null
       for (let i = 0; i < 60; i++) {
         try {
-          const r = await fetch(IRIS + "/v2/messages/" + BASE_DOMAIN + "?transactionHash=" + bHash)
+          const r = await fetch(IRIS + "/v2/messages/" + src.domain + "?transactionHash=" + bHash)
           if (r.ok) {
             const j = await r.json()
             const m = j && j.messages && j.messages[0]
@@ -135,7 +150,7 @@ export default function CronusBridge() {
       } as any)
       await arcClient.waitForTransactionReceipt({ hash: mHash })
       setMintTx(mHash)
-      setStep("Done. USDC bridged Base Sepolia to Arc Testnet via Circle CCTP V2.")
+      setStep("Done. USDC bridged " + src.name + " to Arc Testnet via Circle CCTP V2.")
     } catch (e: any) {
       setErr((e && (e.shortMessage || e.message)) || "Transaction failed")
       setStep("")
@@ -148,8 +163,9 @@ export default function CronusBridge() {
   const title: any = { color: "#39e014", fontWeight: 800, fontSize: 17, letterSpacing: ".5px" }
   const note: any = { color: "#8aa98a", fontSize: 12, marginTop: 10, lineHeight: 1.5 }
   const row: any = { display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid #39e01422", fontSize: 14 }
-  const lbl: any = { color: "#7fd87f", letterSpacing: ".5px", fontSize: 13 }
+  const lbl: any = { color: "#7fd87f", letterSpacing: ".5px", fontSize: 13, display: "block", marginTop: 10 }
   const val: any = { color: "#d6ffd6", fontFamily: "monospace" }
+  const sel: any = { width: "100%", boxSizing: "border-box", background: "#020802", color: "#d6ffd6", border: "1px solid #39e01455", borderRadius: 10, padding: "12px 12px", fontSize: 15, marginTop: 6, marginBottom: 6 }
   const inp: any = { width: "100%", boxSizing: "border-box", background: "#020802", color: "#d6ffd6", border: "1px solid #39e01455", borderRadius: 10, padding: "12px 12px", fontSize: 15, marginTop: 6, marginBottom: 12 }
   const btn: any = { width: "100%", background: "#39e014", color: "#041006", border: "none", borderRadius: 10, padding: "14px 18px", fontWeight: 800, fontSize: 15, cursor: "pointer" }
   const link: any = { color: "#39e014", textDecoration: "none", fontFamily: "monospace" }
@@ -157,17 +173,21 @@ export default function CronusBridge() {
   const errStyle: any = { color: "#ff6b6b", fontSize: 13, marginTop: 10, lineHeight: 1.5 }
 
   return (
-    <div style={wrap} id="cap-bridge">
-      <div style={head}><span style={title}>{"\u21CC"} USDC BRIDGE {DASH} BASE SEPOLIA TO ARC (CCTP V2)</span></div>
-      <p style={note}>Native burn-and-mint via Circle CCTP V2. No wrapped tokens, no liquidity pool, no custodian. Every step is signed by your own connected wallet {DASH} Cronus never holds your key. You need Base Sepolia USDC and a little Base Sepolia ETH for gas.</p>
-      <div style={row}><span style={lbl}>ROUTE</span><span style={val}>Base Sepolia {"\u2192"} Arc Testnet</span></div>
-      <div style={row}><span style={lbl}>RECIPIENT</span><span style={val}>{address ? shorten(address) : "connect wallet"}</span></div>
+    <div style={wrap}>
+      <div style={head}><span style={title}>{"\u2726"} USDC BRIDGE {DASH} {src.name.toUpperCase()} TO ARC (CCTP V2)</span></div>
+      <p style={note}>Native burn-and-mint via Circle CCTP V2. No wrapped tokens, no liquidity pool, no custodian. Every step is signed by your own connected wallet {DASH} Cronus never holds your key. You need source-chain USDC and a little native gas.</p>
+      <label style={lbl}>SOURCE NETWORK</label>
+      <select style={sel} value={sourceKey} onChange={(e) => setSourceKey(e.target.value)} disabled={busy}>
+        {SOURCES.map((s) => (<option key={s.key} value={s.key}>{s.name + " " + "\u2192" + " Arc Testnet"}</option>))}
+      </select>
+      <div style={row}><span style={lbl}>ROUTE</span><span style={val}>{src.name + " " + "\u2192" + " Arc Testnet"}</span></div>
+      <div style={row}><span style={lbl}>RECIPIENT (ARC)</span><span style={val}>{address ? shorten(address) : "connect wallet"}</span></div>
       <label style={lbl}>AMOUNT (USDC)</label>
       <input style={inp} value={amount} onChange={(e) => setAmount(e.target.value)} inputMode="decimal" />
       <button style={btn} onClick={bridge} disabled={busy}>{busy ? (step || "Working" + DASH) : "Bridge USDC to Arc"}</button>
       {step && !busy && <p style={ok}>{step}</p>}
-      {burnTx && <div style={row}><span style={lbl}>BURN TX (Base)</span><a style={link} href={BASESCAN + burnTx} target="_blank" rel="noreferrer">{shorten(burnTx)}</a></div>}
-      {mintTx && <div style={row}><span style={lbl}>MINT TX (Arc)</span><a style={link} href={ARCSCAN + mintTx} target="_blank" rel="noreferrer">{shorten(mintTx)}</a></div>}
+      {burnTx && <div style={row}><span style={lbl}>BURN TX</span><a style={link} href={src.scan + burnTx} target="_blank" rel="noreferrer">{shorten(burnTx)}</a></div>}
+      {mintTx && <div style={row}><span style={lbl}>MINT TX</span><a style={link} href={ARCSCAN + mintTx} target="_blank" rel="noreferrer">{shorten(mintTx)}</a></div>}
       {err && <p style={errStyle}>{err}</p>}
     </div>
   )
