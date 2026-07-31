@@ -305,6 +305,16 @@ console.log("\n[N] prompt injection is refused at the council door (GET /api/cou
 	const cb = (clean && clean.body) || {}
 	ok("a legitimate instrument still passes untouched", clean.status === 200 && cb.instId === "ETH-USDC" && (cb.promptInput || {}).rejectedFreeText === false, "instId=" + cb.instId)
 }
+console.log("\n[O] the conviction gate learns from outcomes, and refuses to fake it")
+{
+	const r = await getJson("/api/track-record")
+	const b = (r && r.body) || {}
+	const L = b.learning || {}
+	ok("HTTP 200 track-record", r.status === 200)
+	ok("the gate is a function of the record, not a bare constant", typeof L.gate === "number" && typeof L.base === "number" && typeof L.adaptive === "boolean")
+	ok("with too few resolved outcomes the gate holds and admits it", L.adaptive === false && L.reason === "insufficient_resolved_outcomes" && L.gate === L.base, "resolved=" + L.resolved + " gate=" + L.gate)
+	ok("the rule that will move the gate is published, not hidden", typeof L.rule === "string" && /accuracy/.test(L.rule))
+}
 
 console.log((fail === 0 ? "ALL CHECKS PASSED" : fail + " CHECK(S) FAILED") + " — " + pass + " passed, " + fail + " failed")
 console.log("No private keys were used. Reproduce: npm run verify-live")
