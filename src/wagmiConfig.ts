@@ -1,5 +1,6 @@
 import { createConfig, http } from "wagmi"
 import { defineChain } from "viem"
+import { baseSepolia } from "viem/chains"
 import { injected, metaMask, walletConnect } from "wagmi/connectors"
 
 export const arcTestnet = defineChain({
@@ -19,13 +20,13 @@ export const arcTestnet = defineChain({
 const projectId = "854e57f5212e148744af551c3d2794bc"
 
 export const wagmiConfig = createConfig({
-	chains: [arcTestnet],
+	chains: [arcTestnet, baseSepolia],
 	connectors: [
 		metaMask(),
 		injected(),
 		walletConnect({ projectId }),
 	],
-	transports: { [arcTestnet.id]: http("/api/rpc") },
+	transports: { [arcTestnet.id]: http("/api/rpc"), [baseSepolia.id]: http("https://sepolia.base.org") },
 })
 
 export { projectId }

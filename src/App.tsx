@@ -3,6 +3,7 @@ import CoverStats from "./components/CoverStats"
 import { StellarBridge } from "./components/StellarBridge"
 import StellarWallet from "./components/StellarWallet"
 import StellarBurn from "./components/StellarBurn"
+import CronusBridge from "./components/CronusBridge"
 import StellarComplete from "./components/StellarComplete"
 import AgentPayout from "./components/AgentPayout"
 import ProofBanner from "./components/ProofBanner"
@@ -392,7 +393,7 @@ export default function App() {
 			<Sec id="proof" section={secView}><VerifiableLedger /></Sec>
       <Sec id="traction" section={secView}><div id="cap-settlements" /><Dashboard totalOnChain={sessionTxCount} /></Sec>
       <Sec id="proof" section={secView}><ProofBanner /></Sec><Sec id="standards" section={secView}><div id="cap-stellar" /><StellarWallet /><StellarBurn /><StellarComplete /></Sec>
-        <Sec id="standards" section={secView}><AgentPayout /><StellarBridge /></Sec><Sec id="vault" section={secView}><VaultPanel /><VaultNavHistory /></Sec>
+        <Sec id="standards" section={secView}><AgentPayout /><StellarBridge /></Sec><Sec id="vault" section={secView}><VaultPanel /><VaultNavHistory /></Sec><Sec id="bridge" section={secView}><CronusBridge /></Sec>
 
       {onChainTxs.length > 0 && (
         <div style={{ padding: "12px 32px", background: "#050505", borderTop: "1px solid #39e01422" }}>
