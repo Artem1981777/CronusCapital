@@ -1180,3 +1180,33 @@ The CLI will prompt for:
 6. Two confirmation prompts — press Y then Enter for each
 
 The submission is saved locally at ~/.arc-canteen/showcase.yaml and can be resubmitted any time.
+
+<!-- BRIDGE-CCTP-SECTION -->
+## Cross-chain USDC Bridge — Circle CCTP V2
+
+A **non-custodial** USDC bridge is built into the dashboard (**Bridge** tab), moving
+native USDC between **Arc Testnet** and major EVM testnets via Circle CCTP V2
+burn-and-mint. No wrapped tokens, no liquidity pool, no custodian — every step is signed
+by the visitor's own wallet. Full threat model and verification steps:
+[`docs/BRIDGE_SECURITY.md`](docs/BRIDGE_SECURITY.md).
+
+### Progress log — 31 Jul 2026
+- CLI bridge script (`scripts/bridge.mjs`) for Base -> Arc transfers via Circle CCTP V2.
+- Bridge integrated into the dashboard as a first-class **Bridge** section (`008c628`, `f4ce5d1`).
+- Preflight hardening: balance check, allowance read + poll to kill the approve->burn race, and `simulateContract` before every burn.
+- **Selectable paired network** — Base / Ethereum / Arbitrum / Optimism / Avalanche (`2bc64e4`).
+- **Manual direction toggle** — Arc <-> EVM, default Base -> Arc, flip on the dashboard (`5ab2645`).
+- **Persistent transaction history** — burn/mint hashes and status saved in `localStorage`, surviving reloads.
+- End-to-end verified live on testnet in **both directions** (see below).
+
+### Live bridge transactions (testnet, verified on-chain)
+
+Recipient wallet: `0xdc6778c5f8cc74b10aed11c48306d4cfc5737fbd`
+
+| Time (MSK) | Route | Amount | Burn tx | Mint tx |
+|---|---|---|---|---|
+| 22:07:56 | Base Sepolia -> Arc Testnet | 1 USDC | [`0x957acd…2d7b41`](https://sepolia.basescan.org/tx/0x957acdf34455475cfd44042d3baa39ec20f60760778fad472cc75816ca2d7b41) | [`0x62db1a…477855`](https://testnet.arcscan.app/tx/0x62db1ab921503ecaaa8afa3dc4e371926159d2b56d9ffda3e74f473731477855) |
+| 22:09:34 | Arc Testnet -> Base Sepolia | 1 USDC | [`0xbf1616…945ba1`](https://testnet.arcscan.app/tx/0xbf1616af8a378643b158802ebea0b0b9254b536659f521a1c26bb2299e945ba1) | [`0x17cccc…20cd5b`](https://sepolia.basescan.org/tx/0x17ccccceb6c937d9b729136942f0e3a22c7918f898a512be6f420abb3620cd5b) |
+
+Each row is a complete CCTP V2 round-trip leg: USDC burned on the source chain and
+minted natively on the destination chain, both signed by the recipient's own wallet.
