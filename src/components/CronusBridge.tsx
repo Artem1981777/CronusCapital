@@ -1,21 +1,22 @@
 import { useState } from "react"
 import { useAccount, useWriteContract, usePublicClient, useChainId, useSwitchChain } from "wagmi"
 
-// Testnet -> Arc Testnet USDC bridge via Circle CCTP V2 (burn-and-mint).
+// Arc Testnet <-> EVM testnets USDC bridge via Circle CCTP V2 (burn-and-mint), either direction.
 // Non-custodial: every tx is signed by the visitor's own connected wallet.
 // Addresses verified against https://developers.circle.com/cctp/references/contract-addresses
 type Hex = `0x${string}`
 
-const ARC_ID = 5042002
-const ARC_DOMAIN = 26
-// V2 contracts are identical across all supported EVM testnets.
+// V2 contracts are identical across all supported EVM testnets (including Arc).
 const TOKEN_MESSENGER_V2 = "0x8FE6B999Dc680CcFDD5Bf7EB0974218be2542DAA"
 const MESSAGE_TRANSMITTER_V2 = "0xE737e5cEBEEBa77EFE34D4aa090756590b1CE275"
 
-type SourceChain = { key: string; name: string; chainId: number; domain: number; usdc: Hex; scan: string }
+type ChainInfo = { key: string; name: string; chainId: number; domain: number; usdc: Hex; scan: string }
 
-// Source chains the judge can pick. Arc is always the destination.
-const SOURCES: SourceChain[] = [
+// Arc is always one side of the route.
+const ARC: ChainInfo = { key: "arc", name: "Arc Testnet", chainId: 5042002, domain: 26, usdc: "0x3600000000000000000000000000000000000000", scan: "https://testnet.arcscan.app/tx/" }
+
+// The paired chain; pick which one + which direction on the dashboard.
+const CHAINS: ChainInfo[] = [
   { key: "base", name: "Base Sepolia", chainId: 84532, domain: 6, usdc: "0x036CbD53842c5426634e7929541eC2318f3dCF7e", scan: "https://sepolia.basescan.org/tx/" },
   { key: "eth", name: "Ethereum Sepolia", chainId: 11155111, domain: 0, usdc: "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238", scan: "https://sepolia.etherscan.io/tx/" },
   { key: "arb", name: "Arbitrum Sepolia", chainId: 421614, domain: 3, usdc: "0x75faf114eafb1BDbe2F0316DF893fd58CE46AA4d", scan: "https://sepolia.arbiscan.io/tx/" },
@@ -24,9 +25,10 @@ const SOURCES: SourceChain[] = [
 ]
 
 const IRIS = "https://iris-api-sandbox.circle.com"
-const ARCSCAN = "https://testnet.arcscan.app/tx/"
 const ZERO32 = "0x0000000000000000000000000000000000000000000000000000000000000000"
 const DASH = "\u2014"
+const ARROW = "\u2192"
+const SWAP = "\u21C4"
 
 const ERC20_ABI = [
   { type: "function", name: "approve", stateMutability: "nonpayable", inputs: [{ name: "spender", type: "address" }, { name: "amount", type: "uint256" }], outputs: [{ name: "", type: "bool" }] },
@@ -71,10 +73,13 @@ export default function CronusBridge() {
   const chainId = useChainId()
   const { switchChainAsync } = useSwitchChain()
   const { writeContractAsync } = useWriteContract()
-  const [sourceKey, setSourceKey] = useState("base")
-  const src = SOURCES.find((s) => s.key === sourceKey) || SOURCES[0]
-  const arcClient = usePublicClient({ chainId: ARC_ID })
-  const srcClient = usePublicClient({ chainId: src.chainId })
+  const [chainKey, setChainKey] = useState("base")
+  const [toArc, setToArc] = useState(true)
+  const cp = CHAINS.find((c) => c.key === chainKey) || CHAINS[0]
+  const source = toArc ? cp : ARC
+  const dest = toArc ? ARC : cp
+  const sourceClient = usePublicClient({ chainId: source.chainId })
+  const destClient = usePublicClient({ chainId: dest.chainId })
   const [amount, setAmount] = useState("1")
   const [step, setStep] = useState("")
   const [burnTx, setBurnTx] = useState("")
@@ -85,51 +90,51 @@ export default function CronusBridge() {
   async function bridge() {
     setErr(""); setBurnTx(""); setMintTx(""); setStep("")
     if (!isConnected || !address) { setErr("Connect your wallet first (button at top)."); return }
-    if (!srcClient) { setErr(src.name + " RPC client unavailable."); return }
-    if (!arcClient) { setErr("Arc RPC client unavailable."); return }
+    if (!sourceClient) { setErr(source.name + " RPC client unavailable."); return }
+    if (!destClient) { setErr(dest.name + " RPC client unavailable."); return }
     const amt = toUnits(amount, 6)
     if (amt <= 0n) { setErr("Enter an amount greater than 0."); return }
     setBusy(true)
     try {
-      if (chainId !== src.chainId) {
-        setStep("Switching wallet to " + src.name + DASH)
-        await switchChainAsync({ chainId: src.chainId })
+      if (chainId !== source.chainId) {
+        setStep("Switching wallet to " + source.name + DASH)
+        await switchChainAsync({ chainId: source.chainId })
       }
       const maxFee = amt / 100n
-      const bal = await srcClient.readContract({ address: src.usdc, abi: ERC20_ABI, functionName: "balanceOf", args: [address] }) as bigint
-      if (bal < amt) throw new Error("Insufficient " + src.name + " USDC balance. Fund this wallet at faucet.circle.com and retry.")
-      let allowance = await srcClient.readContract({ address: src.usdc, abi: ERC20_ABI, functionName: "allowance", args: [address, TOKEN_MESSENGER_V2] }) as bigint
+      const bal = await sourceClient.readContract({ address: source.usdc, abi: ERC20_ABI, functionName: "balanceOf", args: [address] }) as bigint
+      if (bal < amt) throw new Error("Insufficient " + source.name + " USDC balance. Fund this wallet at faucet.circle.com and retry.")
+      let allowance = await sourceClient.readContract({ address: source.usdc, abi: ERC20_ABI, functionName: "allowance", args: [address, TOKEN_MESSENGER_V2] }) as bigint
       if (allowance < amt) {
-        setStep("1/4 Approving USDC on " + src.name + DASH)
+        setStep("1/4 Approving USDC on " + source.name + DASH)
         const approveHash = await writeContractAsync({
-          chainId: src.chainId,
-          address: src.usdc,
+          chainId: source.chainId,
+          address: source.usdc,
           abi: ERC20_ABI,
           functionName: "approve",
           args: [TOKEN_MESSENGER_V2, amt],
         } as any)
-        await srcClient.waitForTransactionReceipt({ hash: approveHash })
+        await sourceClient.waitForTransactionReceipt({ hash: approveHash })
         for (let i = 0; i < 10 && allowance < amt; i++) {
           await sleep(1500)
-          allowance = await srcClient.readContract({ address: src.usdc, abi: ERC20_ABI, functionName: "allowance", args: [address, TOKEN_MESSENGER_V2] }) as bigint
+          allowance = await sourceClient.readContract({ address: source.usdc, abi: ERC20_ABI, functionName: "allowance", args: [address, TOKEN_MESSENGER_V2] }) as bigint
         }
       }
-      setStep("2/4 Burning USDC on " + src.name + " (CCTP V2)" + DASH)
-      await srcClient.simulateContract({ account: address, chainId: src.chainId, address: TOKEN_MESSENGER_V2, abi: TM_ABI, functionName: "depositForBurn", args: [amt, ARC_DOMAIN, addrToBytes32(address), src.usdc, ZERO32, maxFee, 1000] } as any)
+      setStep("2/4 Burning USDC on " + source.name + " (CCTP V2)" + DASH)
+      await sourceClient.simulateContract({ account: address, chainId: source.chainId, address: TOKEN_MESSENGER_V2, abi: TM_ABI, functionName: "depositForBurn", args: [amt, dest.domain, addrToBytes32(address), source.usdc, ZERO32, maxFee, 1000] } as any)
       const bHash = await writeContractAsync({
-        chainId: src.chainId,
+        chainId: source.chainId,
         address: TOKEN_MESSENGER_V2,
         abi: TM_ABI,
         functionName: "depositForBurn",
-        args: [amt, ARC_DOMAIN, addrToBytes32(address), src.usdc, ZERO32, maxFee, 1000],
+        args: [amt, dest.domain, addrToBytes32(address), source.usdc, ZERO32, maxFee, 1000],
       } as any)
-      await srcClient.waitForTransactionReceipt({ hash: bHash })
+      await sourceClient.waitForTransactionReceipt({ hash: bHash })
       setBurnTx(bHash)
       setStep("3/4 Waiting for Circle attestation" + DASH)
       let msg: any = null
       for (let i = 0; i < 60; i++) {
         try {
-          const r = await fetch(IRIS + "/v2/messages/" + src.domain + "?transactionHash=" + bHash)
+          const r = await fetch(IRIS + "/v2/messages/" + source.domain + "?transactionHash=" + bHash)
           if (r.ok) {
             const j = await r.json()
             const m = j && j.messages && j.messages[0]
@@ -139,18 +144,18 @@ export default function CronusBridge() {
         await sleep(5000)
       }
       if (!msg) throw new Error("Attestation timed out. Your burn is safe; the mint can be completed later with the burn tx.")
-      setStep("4/4 Minting on Arc Testnet" + DASH)
-      await switchChainAsync({ chainId: ARC_ID })
+      setStep("4/4 Minting on " + dest.name + DASH)
+      await switchChainAsync({ chainId: dest.chainId })
       const mHash = await writeContractAsync({
-        chainId: ARC_ID,
+        chainId: dest.chainId,
         address: MESSAGE_TRANSMITTER_V2,
         abi: MT_ABI,
         functionName: "receiveMessage",
         args: [msg.message, msg.attestation],
       } as any)
-      await arcClient.waitForTransactionReceipt({ hash: mHash })
+      await destClient.waitForTransactionReceipt({ hash: mHash })
       setMintTx(mHash)
-      setStep("Done. USDC bridged " + src.name + " to Arc Testnet via Circle CCTP V2.")
+      setStep("Done. USDC bridged " + source.name + " to " + dest.name + " via Circle CCTP V2.")
     } catch (e: any) {
       setErr((e && (e.shortMessage || e.message)) || "Transaction failed")
       setStep("")
@@ -166,6 +171,7 @@ export default function CronusBridge() {
   const lbl: any = { color: "#7fd87f", letterSpacing: ".5px", fontSize: 13, display: "block", marginTop: 10 }
   const val: any = { color: "#d6ffd6", fontFamily: "monospace" }
   const sel: any = { width: "100%", boxSizing: "border-box", background: "#020802", color: "#d6ffd6", border: "1px solid #39e01455", borderRadius: 10, padding: "12px 12px", fontSize: 15, marginTop: 6, marginBottom: 6 }
+  const swapBtn: any = { width: "100%", background: "transparent", color: "#39e014", border: "1px solid #39e01455", borderRadius: 10, padding: "10px 14px", fontWeight: 700, fontSize: 13, cursor: "pointer", marginTop: 8, marginBottom: 4 }
   const inp: any = { width: "100%", boxSizing: "border-box", background: "#020802", color: "#d6ffd6", border: "1px solid #39e01455", borderRadius: 10, padding: "12px 12px", fontSize: 15, marginTop: 6, marginBottom: 12 }
   const btn: any = { width: "100%", background: "#39e014", color: "#041006", border: "none", borderRadius: 10, padding: "14px 18px", fontWeight: 800, fontSize: 15, cursor: "pointer" }
   const link: any = { color: "#39e014", textDecoration: "none", fontFamily: "monospace" }
@@ -174,20 +180,21 @@ export default function CronusBridge() {
 
   return (
     <div style={wrap}>
-      <div style={head}><span style={title}>{"\u2726"} USDC BRIDGE {DASH} {src.name.toUpperCase()} TO ARC (CCTP V2)</span></div>
-      <p style={note}>Native burn-and-mint via Circle CCTP V2. No wrapped tokens, no liquidity pool, no custodian. Every step is signed by your own connected wallet {DASH} Cronus never holds your key. You need source-chain USDC and a little native gas.</p>
-      <label style={lbl}>SOURCE NETWORK</label>
-      <select style={sel} value={sourceKey} onChange={(e) => setSourceKey(e.target.value)} disabled={busy}>
-        {SOURCES.map((s) => (<option key={s.key} value={s.key}>{s.name + " " + "\u2192" + " Arc Testnet"}</option>))}
+      <div style={head}><span style={title}>{"\u2726"} USDC BRIDGE {DASH} CCTP V2</span></div>
+      <p style={note}>Native burn-and-mint via Circle CCTP V2 between Arc Testnet and major EVM testnets, in either direction. No wrapped tokens, no liquidity pool, no custodian. Every step is signed by your own connected wallet {DASH} Cronus never holds your key. You need source-chain USDC and a little native gas.</p>
+      <label style={lbl}>PAIRED NETWORK</label>
+      <select style={sel} value={chainKey} onChange={(e) => setChainKey(e.target.value)} disabled={busy}>
+        {CHAINS.map((c) => (<option key={c.key} value={c.key}>{c.name}</option>))}
       </select>
-      <div style={row}><span style={lbl}>ROUTE</span><span style={val}>{src.name + " " + "\u2192" + " Arc Testnet"}</span></div>
-      <div style={row}><span style={lbl}>RECIPIENT (ARC)</span><span style={val}>{address ? shorten(address) : "connect wallet"}</span></div>
+      <div style={row}><span style={lbl}>ROUTE</span><span style={val}>{source.name + " " + ARROW + " " + dest.name}</span></div>
+      <button style={swapBtn} onClick={() => setToArc((v) => !v)} disabled={busy}>{SWAP + " Swap direction"}</button>
+      <div style={row}><span style={lbl}>RECIPIENT ({dest.name})</span><span style={val}>{address ? shorten(address) : "connect wallet"}</span></div>
       <label style={lbl}>AMOUNT (USDC)</label>
       <input style={inp} value={amount} onChange={(e) => setAmount(e.target.value)} inputMode="decimal" />
-      <button style={btn} onClick={bridge} disabled={busy}>{busy ? (step || "Working" + DASH) : "Bridge USDC to Arc"}</button>
+      <button style={btn} onClick={bridge} disabled={busy}>{busy ? (step || "Working" + DASH) : ("Bridge " + source.name + " " + ARROW + " " + dest.name)}</button>
       {step && !busy && <p style={ok}>{step}</p>}
-      {burnTx && <div style={row}><span style={lbl}>BURN TX</span><a style={link} href={src.scan + burnTx} target="_blank" rel="noreferrer">{shorten(burnTx)}</a></div>}
-      {mintTx && <div style={row}><span style={lbl}>MINT TX</span><a style={link} href={ARCSCAN + mintTx} target="_blank" rel="noreferrer">{shorten(mintTx)}</a></div>}
+      {burnTx && <div style={row}><span style={lbl}>BURN TX</span><a style={link} href={source.scan + burnTx} target="_blank" rel="noreferrer">{shorten(burnTx)}</a></div>}
+      {mintTx && <div style={row}><span style={lbl}>MINT TX</span><a style={link} href={dest.scan + mintTx} target="_blank" rel="noreferrer">{shorten(mintTx)}</a></div>}
       {err && <p style={errStyle}>{err}</p>}
     </div>
   )
