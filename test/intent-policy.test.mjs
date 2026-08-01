@@ -110,7 +110,7 @@ test("swap: a plausible stablecoin pair is still refused, not routed", () => {
 })
 
 test("swap: only supported pairs are advertised", () => {
-  assert.deepEqual([...SWAP_PAIRS], ["usdc>usyc", "usyc>usdc"])
+  assert.deepEqual([...SWAP_PAIRS], ["usdc>usyc", "usyc>usdc", "usdc>crn", "crn>usdc"])
 })
 
 test("amount: decimal USDC converts to exact atomic units", () => {
@@ -312,4 +312,32 @@ test("lang: Russian case endings on network names still resolve", () => {
     assert.equal(r.from, from, text)
     assert.equal(r.to, to, text)
   }
+})
+
+test("swap: the CRN pair parses and is marked tradeable", () => {
+  const r = parseIntent("swap 1 usdc for crn")
+  assert.equal(r.ok, true)
+  assert.equal(r.fromToken, "usdc")
+  assert.equal(r.toToken, "crn")
+  assert.equal(r.pairTradeable, true)
+})
+
+test("swap: selling CRN resolves USDC as the destination", () => {
+  const r = parseIntent("sell 50 crn")
+  assert.equal(r.ok, true)
+  assert.equal(r.fromToken, "crn")
+  assert.equal(r.toToken, "usdc")
+})
+
+test("swap: USYC still parses but is never marked tradeable", () => {
+  const r = parseIntent("swap 10 usdc for usyc")
+  assert.equal(r.ok, true)
+  assert.equal(r.pairTradeable, false)
+})
+
+test("swap: CRN is understood in Russian too", () => {
+  const r = parseIntent("обменяй 2 usdc на crn")
+  assert.equal(r.ok, true)
+  assert.equal(r.toToken, "crn")
+  assert.equal(r.pairTradeable, true)
 })
