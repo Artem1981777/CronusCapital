@@ -1207,6 +1207,13 @@ Recipient wallet: `0xdc6778c5f8cc74b10aed11c48306d4cfc5737fbd`
 |---|---|---|---|---|
 | 19:07:56 | Base Sepolia -> Arc Testnet | 1 USDC | [`0x957acd…2d7b41`](https://sepolia.basescan.org/tx/0x957acdf34455475cfd44042d3baa39ec20f60760778fad472cc75816ca2d7b41) | [`0x62db1a…477855`](https://testnet.arcscan.app/tx/0x62db1ab921503ecaaa8afa3dc4e371926159d2b56d9ffda3e74f473731477855) |
 | 19:09:34 | Arc Testnet -> Base Sepolia | 1 USDC | [`0xbf1616…945ba1`](https://testnet.arcscan.app/tx/0xbf1616af8a378643b158802ebea0b0b9254b536659f521a1c26bb2299e945ba1) | [`0x17cccc…20cd5b`](https://sepolia.basescan.org/tx/0x17ccccceb6c937d9b729136942f0e3a22c7918f898a512be6f420abb3620cd5b) |
+| 13:44:32 | Base Sepolia -> Arc Testnet | 1 USDC | [`0x53a60f…557e9e`](https://sepolia.basescan.org/tx/0x53a60f765cc71b6a144fa853e85f1d4b3fd20b70cc3959c9ac9b4f3743557e9e) | [`0x9894b4…ac1f3d`](https://testnet.arcscan.app/tx/0x9894b458f264e8aa7f47353a8e4208a53de3b4a8bc8062a6d3de8cc8b0ac1f3d) |
+| 13:48:02 | Base Sepolia -> Arc Testnet | 1 USDC | [`0xaaf07c…727c13`](https://sepolia.basescan.org/tx/0xaaf07c36a5fd7d7561511d62e10249bd16bba8636cfe44bbb4dc215aeb727c13) | [`0xe38179…a20a11`](https://testnet.arcscan.app/tx/0xe38179d77e7bc2131ab5579b274473741597e52639ad9b3451c81afdcaa20a11) |
+
+The last two rows were not started by picking chains from a dropdown. They were started by
+typing a sentence in plain language, which a deterministic parser turned into an allowlisted
+route before the policy layer allowed it. No language model took part, and the wallet still
+signed every step.
 
 Each row is a complete CCTP V2 round-trip leg: USDC burned on the source chain and
 minted natively on the destination chain, both signed by the recipient's own wallet.

@@ -91,7 +91,9 @@ function addrToBytes32(a: string): string {
 }
 function shorten(x: string): string { return x ? x.slice(0, 8) + "\u2026" + x.slice(-6) : "" }
 function sleep(ms: number) { return new Promise((r) => setTimeout(r, ms)) }
-function fmtTime(id: number): string { try { return new Date(id).toLocaleString() } catch { return "" } }
+// UTC only. A local clock would disagree with the on-chain record and with README,
+// and a reviewer in another timezone would see a mismatch that looks like tampering.
+function fmtTime(id: number): string { try { return new Date(id).toISOString().replace("T", " ").slice(0, 19) + " UTC" } catch { return "" } }
 
 export default function CronusBridge() {
   const { address, isConnected } = useAccount()
