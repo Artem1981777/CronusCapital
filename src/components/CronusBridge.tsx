@@ -24,6 +24,14 @@ const CHAINS: ChainInfo[] = [
   { key: "avax", name: "Avalanche Fuji", chainId: 43113, domain: 1, usdc: "0x5425890298aed601595a70AB815c96711a31Bc65", scan: "https://testnet.snowtrace.io/tx/" },
 ]
 
+// CCTP V2 uses the same TokenMessengerV2 and MessageTransmitterV2 on every supported
+// network, so every ordered pair is routable. Arc is a destination, not a required hub.
+const ALL_CHAINS: ChainInfo[] = [ARC, ...CHAINS]
+
+// Routes Cronus has actually executed on-chain with published hashes. Everything else is
+// routable but unproven by us, and the UI says so rather than implying we tested it.
+const VERIFIED_ROUTES: string[] = ["base>arc", "arc>base"]
+
 const IRIS = "https://iris-api-sandbox.circle.com"
 const ZERO32 = "0x0000000000000000000000000000000000000000000000000000000000000000"
 const DASH = "\u2014"
@@ -82,11 +90,12 @@ export default function CronusBridge() {
   const chainId = useChainId()
   const { switchChainAsync } = useSwitchChain()
   const { writeContractAsync } = useWriteContract()
-  const [chainKey, setChainKey] = useState("base")
-  const [toArc, setToArc] = useState(true)
-  const cp = CHAINS.find((c) => c.key === chainKey) || CHAINS[0]
-  const source = toArc ? cp : ARC
-  const dest = toArc ? ARC : cp
+  const [fromKey, setFromKey] = useState("base")
+  const [toKey, setToKey] = useState("arc")
+  const source = ALL_CHAINS.find((c) => c.key === fromKey) || CHAINS[0]
+  const dest = ALL_CHAINS.find((c) => c.key === toKey) || ARC
+  const sameNetwork = source.key === dest.key
+  const routeVerified = VERIFIED_ROUTES.includes(source.key + ">" + dest.key)
   const sourceClient = usePublicClient({ chainId: source.chainId })
   const destClient = usePublicClient({ chainId: dest.chainId })
   const [amount, setAmount] = useState("1")
@@ -213,17 +222,23 @@ export default function CronusBridge() {
   return (
     <div style={wrap}>
       <div style={head}><span style={title}>{"\u2726"} USDC BRIDGE {DASH} CCTP V2</span></div>
-      <p style={note}>Native burn-and-mint via Circle CCTP V2 between Arc Testnet and major EVM testnets, in either direction. No wrapped tokens, no liquidity pool, no custodian. Every step is signed by your own connected wallet {DASH} Cronus never holds your key. You need source-chain USDC and a little native gas.</p>
-      <label style={lbl}>PAIRED NETWORK</label>
-      <select style={sel} value={chainKey} onChange={(e) => setChainKey(e.target.value)} disabled={busy}>
-        {CHAINS.map((c) => (<option key={c.key} value={c.key}>{c.name}</option>))}
-      </select>
-      <div style={row}><span style={lbl}>ROUTE</span><span style={val}>{source.name + " " + ARROW + " " + dest.name}</span></div>
-      <button style={swapBtn} onClick={() => setToArc((v) => !v)} disabled={busy}>{SWAP + " Swap direction"}</button>
+      <p style={note}>Native burn-and-mint via Circle CCTP V2 between any two of six supported testnets, in any direction, including routes that never touch Arc. No wrapped tokens, no liquidity pool, no custodian. Every step is signed by your own connected wallet {DASH} Cronus never holds your key. You need source-chain USDC and a little native gas.</p>
+        <label style={lbl}>FROM</label>
+        <select style={sel} value={fromKey} onChange={(e) => setFromKey(e.target.value)} disabled={busy}>
+          {ALL_CHAINS.map((c) => (<option key={c.key} value={c.key}>{c.name}</option>))}
+        </select>
+        <label style={lbl}>TO</label>
+        <select style={sel} value={toKey} onChange={(e) => setToKey(e.target.value)} disabled={busy}>
+          {ALL_CHAINS.map((c) => (<option key={c.key} value={c.key}>{c.name}</option>))}
+        </select>
+        <div style={row}><span style={lbl}>ROUTE</span><span style={val}>{source.name + " " + ARROW + " " + dest.name}</span></div>
+        <div style={row}><span style={lbl}>ROUTE STATUS</span><span style={val}>{routeVerified ? "executed on-chain by Cronus" : "routable via CCTP V2, not yet executed by us"}</span></div>
+        <button style={swapBtn} onClick={() => { const f = fromKey; setFromKey(toKey); setToKey(f) }} disabled={busy}>{SWAP + " Reverse route"}</button>
+        {sameNetwork && <p style={errStyle}>Source and destination must be different networks.</p>}
       <div style={row}><span style={lbl}>RECIPIENT ({dest.name})</span><span style={val}>{address ? shorten(address) : "connect wallet"}</span></div>
       <label style={lbl}>AMOUNT (USDC)</label>
       <input style={inp} value={amount} onChange={(e) => setAmount(e.target.value)} inputMode="decimal" />
-      <button style={btn} onClick={bridge} disabled={busy}>{busy ? (step || "Working" + DASH) : ("Bridge " + source.name + " " + ARROW + " " + dest.name)}</button>
+      <button style={btn} onClick={bridge} disabled={busy || sameNetwork}>{busy ? (step || "Working" + DASH) : ("Bridge " + source.name + " " + ARROW + " " + dest.name)}</button>
       {step && !busy && <p style={ok}>{step}</p>}
       {burnTx && <div style={row}><span style={lbl}>BURN TX</span><a style={link} href={source.scan + burnTx} target="_blank" rel="noreferrer">{shorten(burnTx)}</a></div>}
       {mintTx && <div style={row}><span style={lbl}>MINT TX</span><a style={link} href={dest.scan + mintTx} target="_blank" rel="noreferrer">{shorten(mintTx)}</a></div>}
