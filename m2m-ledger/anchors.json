@@ -62,5 +62,13 @@
     "block": 54573105,
     "anchoredAt": "2026-07-31T09:31:05.974Z",
     "by": "0xbe3a16bD4137A8a293aCBcaA75cCE3420919D21d"
+  },
+  {
+    "file": "2026-07-31.json",
+    "keccak256": "0xe84a7cd8b7caffe29abcf9a8d31a840d4e1e1da141d0b2cb2002bb95cb8ac3d9",
+    "tx": "0xc9fe5381dac7476cc4c057ce3d2879b76aa41f7c7dfc41d272af818307267b8d",
+    "block": 54738703,
+    "anchoredAt": "2026-08-01T08:56:44.221Z",
+    "by": "0xbe3a16bD4137A8a293aCBcaA75cCE3420919D21d"
   }
 ]
