@@ -126,7 +126,7 @@ export default function CronusBridge() {
 
   function planSummary(d: any): string {
     const p = d.parsed
-    if (!p.ok) return "not understood"
+    if (!p.ok) return "no executable plan"
     if (p.kind === "bridge") {
       return p.amount + " USDC " + p.from + " " + ARROW + " " + p.to +
         (p.routeVerified ? " (route executed on-chain by Cronus)" : " (route not yet executed by us)")
@@ -137,6 +137,13 @@ export default function CronusBridge() {
 
   // Only a bridge that policy already allowed may prefill the form, and prefilling is all
   // it does: the transaction still has to be reviewed and signed in your own wallet.
+  // Without a wallet the kernel rejects on recipient validation before it ever reaches the
+  // caps, so a decision shown here would be an artefact of the missing address rather than
+  // a judgement on the request. Parser refusals need no address and are always shown.
+  function judged(d: any): boolean {
+    return d.parsed.ok === false || isConnected
+  }
+
   function canApply(d: any): boolean {
     return d.allow === true && d.parsed.ok === true && d.parsed.kind === "bridge" &&
       !!POLICY_TO_UI[d.parsed.from] && !!POLICY_TO_UI[d.parsed.to]
@@ -283,14 +290,18 @@ export default function CronusBridge() {
           <div style={{ border: "1px solid #39e01433", borderRadius: 8, padding: 10, marginTop: 10 }}>
             <div style={row}><span style={lbl}>PARSED</span><span style={val}>{planSummary(plan)}</span></div>
             <div style={row}><span style={lbl}>LANGUAGE</span><span style={val}>{plan.lang}</span></div>
-            <div style={row}><span style={lbl}>DECISION</span><span style={val}>{plan.allow ? "allowed by policy" : "refused by policy"}</span></div>
-            {plan.reasons.length > 0 && (
+            {judged(plan) && (
+              <div style={row}><span style={lbl}>DECISION</span><span style={val}>{plan.allow ? "allowed by policy" : "refused by policy"}</span></div>
+            )}
+            {judged(plan) && plan.reasons.length > 0 && (
               <div style={row}><span style={lbl}>REASONS</span><span style={val}>{plan.reasons.join(", ")}</span></div>
             )}
-            {plan.missing.length > 0 && (
+            {judged(plan) && plan.missing.length > 0 && (
               <div style={row}><span style={lbl}>MISSING</span><span style={val}>{plan.missing.join(", ")}</span></div>
             )}
-            {!isConnected && <p style={note}>Connect a wallet for the policy caps and the recipient check to apply.</p>}
+            {!judged(plan) && (
+              <p style={note}>Understood. The spending caps and the recipient check need a connected wallet, so no decision is claimed here.</p>
+            )}
             {plan.parsed.ok && plan.parsed.kind === "swap" && (
               <p style={note}>Conversion intents are parsed and judged, but USDC to USYC conversion is not wired into this widget yet.</p>
             )}
