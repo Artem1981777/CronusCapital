@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { useAccount, useWriteContract, usePublicClient, useChainId, useSwitchChain } from "wagmi"
+import { useAccount, useWriteContract, usePublicClient, useSwitchChain } from "wagmi"
 import { parseAbi, parseUnits, formatUnits } from "viem"
 import { evaluateIntent } from "../../lib/intentPolicyCore.js"
 
@@ -54,7 +54,6 @@ function shorten(h: string): string { return h.slice(0, 8) + "\u2026" + h.slice(
 
 export function CronusSwap() {
   const { address, isConnected } = useAccount()
-  const chainId = useChainId()
   const { switchChainAsync } = useSwitchChain()
   const { writeContractAsync } = useWriteContract()
   const client = usePublicClient({ chainId: ARC_CHAIN_ID })
@@ -120,7 +119,7 @@ export function CronusSwap() {
     setErr(""); setTx("")
     setBusy(true)
     try {
-      if (chainId !== ARC_CHAIN_ID) await switchChainAsync({ chainId: ARC_CHAIN_ID })
+      await switchChainAsync({ chainId: ARC_CHAIN_ID })
       if (!client) throw new Error("No Arc client")
 
       // minOut is computed from the quote the user actually saw, not re-read at send time.
