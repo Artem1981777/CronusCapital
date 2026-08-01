@@ -13,6 +13,7 @@
     "verbatimModuleSyntax": true,
     "moduleDetection": "force",
     "noEmit": true,
+    "allowJs": true,
     "jsx": "react-jsx",
 
     /* Linting */
@@ -21,5 +22,5 @@
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src"]
+  "include": ["src", "lib/intentPolicyCore.js", "lib/policyKernel.js"]
 }
