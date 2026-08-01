@@ -1209,11 +1209,18 @@ Recipient wallet: `0xdc6778c5f8cc74b10aed11c48306d4cfc5737fbd`
 | 31 Jul 2026 | 19:09:34 | Arc Testnet -> Base Sepolia | 1 USDC | [`0xbf1616…945ba1`](https://testnet.arcscan.app/tx/0xbf1616af8a378643b158802ebea0b0b9254b536659f521a1c26bb2299e945ba1) | [`0x17cccc…20cd5b`](https://sepolia.basescan.org/tx/0x17ccccceb6c937d9b729136942f0e3a22c7918f898a512be6f420abb3620cd5b) |
 | 1 Aug 2026 | 13:44:32 | Base Sepolia -> Arc Testnet | 1 USDC | [`0x53a60f…557e9e`](https://sepolia.basescan.org/tx/0x53a60f765cc71b6a144fa853e85f1d4b3fd20b70cc3959c9ac9b4f3743557e9e) | [`0x9894b4…ac1f3d`](https://testnet.arcscan.app/tx/0x9894b458f264e8aa7f47353a8e4208a53de3b4a8bc8062a6d3de8cc8b0ac1f3d) |
 | 1 Aug 2026 | 13:48:02 | Base Sepolia -> Arc Testnet | 1 USDC | [`0xaaf07c…727c13`](https://sepolia.basescan.org/tx/0xaaf07c36a5fd7d7561511d62e10249bd16bba8636cfe44bbb4dc215aeb727c13) | [`0xe38179…a20a11`](https://testnet.arcscan.app/tx/0xe38179d77e7bc2131ab5579b274473741597e52639ad9b3451c81afdcaa20a11) |
+| 1 Aug 2026 | 14:12:03 | Base Sepolia -> Arc Testnet | 1 USDC | [`0x5e74a9…cad0e1`](https://sepolia.basescan.org/tx/0x5e74a9b1b01664c5640c4ca47909802c86aba715716b4b8240cedbf276cad0e1) | [`0xd0a6e8…1d976c`](https://testnet.arcscan.app/tx/0xd0a6e8b88c3b0495a13a01ee42b5664c0eb31c4619f9a542bb82a831441d976c) |
+| 1 Aug 2026 | 14:19:56 | Arbitrum Sepolia -> Base Sepolia | 5 USDC | [`0x73a54f…dc87c7`](https://sepolia.arbiscan.io/tx/0x73a54fb672f3cad4c741ded63083df441fe5eea061b60f3342d376ededdc87c7) | [`0x57ddae…48c223`](https://sepolia.basescan.org/tx/0x57ddaeae3e3e0146bb1df986cc969b0b25dfa400393e9e83fa77915b7848c223) |
 
-The last two rows were not started by picking chains from a dropdown. They were started by
-typing a sentence in plain language, which a deterministic parser turned into an allowlisted
-route before the policy layer allowed it. No language model took part, and the wallet still
-signed every step.
+Every row dated 1 Aug 2026 was started by typing a sentence in plain language, not by picking
+chains from a dropdown. A deterministic parser turned that sentence into an allowlisted route
+and the policy layer judged it before anything was signed. No language model took part, and
+the wallet signed every step.
+
+The 14:19:56 leg is the first executed route that never touches Arc, which is what makes the
+any-to-any claim above a fact rather than a capability: Arbitrum Sepolia to Base Sepolia, 5
+USDC, burned and minted natively, started from the Russian sentence "переведи 5 usdc из
+арбитрума в base".
 
 Each row is a complete CCTP V2 round-trip leg: USDC burned on the source chain and
 minted natively on the destination chain, both signed by the recipient's own wallet.

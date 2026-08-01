@@ -7,7 +7,7 @@ import { useAccount, useWriteContract, usePublicClient, useChainId, useSwitchCha
 type Hex = `0x${string}`
 
 // V2 contracts are identical across all supported EVM testnets (including Arc).
-import { evaluateIntent } from "../../lib/intentPolicyCore.js"
+import { evaluateIntent, isVerifiedRoute } from "../../lib/intentPolicyCore.js"
 
 // The policy layer speaks canonical network keys; this widget uses its own shorter keys.
 // Mapping them here keeps both vocabularies intact instead of bending one to the other.
@@ -38,7 +38,11 @@ const ALL_CHAINS: ChainInfo[] = [ARC, ...CHAINS]
 
 // Routes Cronus has actually executed on-chain with published hashes. Everything else is
 // routable but unproven by us, and the UI says so rather than implying we tested it.
-const VERIFIED_ROUTES: string[] = ["base>arc", "arc>base"]
+// Derived, never re-typed: the executed-route list lives only in the policy core, and this
+// map is the inverse of POLICY_TO_UI, so the two vocabularies cannot drift apart.
+const UI_TO_POLICY: Record<string, string> = Object.fromEntries(
+  Object.entries(POLICY_TO_UI).map(([policyKey, uiKey]) => [uiKey, policyKey]),
+)
 
 const IRIS = "https://iris-api-sandbox.circle.com"
 const ZERO32 = "0x0000000000000000000000000000000000000000000000000000000000000000"
@@ -105,7 +109,7 @@ export default function CronusBridge() {
   const source = ALL_CHAINS.find((c) => c.key === fromKey) || CHAINS[0]
   const dest = ALL_CHAINS.find((c) => c.key === toKey) || ARC
   const sameNetwork = source.key === dest.key
-  const routeVerified = VERIFIED_ROUTES.includes(source.key + ">" + dest.key)
+  const routeVerified = isVerifiedRoute(UI_TO_POLICY[source.key], UI_TO_POLICY[dest.key])
   const sourceClient = usePublicClient({ chainId: source.chainId })
   const destClient = usePublicClient({ chainId: dest.chainId })
   const [amount, setAmount] = useState("1")
