@@ -16,7 +16,7 @@ export const GROUPS: SectionGroup[] = [
     { id: "payments", label: "Payments (x402)", glyph: "◈" },
     { id: "traction", label: "Traction", glyph: "↗" },
     { id: "rhea", label: "Rhea / M2M", glyph: "⇄" },
-    { id: "bridge", label: "Bridge", glyph: "⇌" },
+    { id: "bridge", label: "Intent / Bridge", glyph: "⇌" },
     { id: "vault", label: "Vault", glyph: "▤" },
     { id: "cover", label: "Cover", glyph: "🛡" },
   ] },
