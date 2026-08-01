@@ -25,7 +25,7 @@ const wallet = new ethers.Wallet(PK, provider)
 async function withRetry(label, fn, tries = 8) {
   for (let i = 1; i <= tries; i++) {
     try { return await fn() } catch (e) {
-      const msg = String(e?.error?.message || e?.shortMessage || e?.message || e)
+      const msg = String(e?.code || "") + " " + String(e?.error?.message || e?.shortMessage || e?.message || e)
       if (!/request limit|-32011|rate|timeout|ECONN|fetch failed|502|503/i.test(msg) || i === tries) throw e
       const wait = 4000 * i
       console.log("  [" + label + "] rate limited -> retry " + i + " in " + (wait / 1000) + "s")

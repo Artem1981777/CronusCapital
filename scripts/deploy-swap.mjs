@@ -54,7 +54,7 @@ provider.pollingInterval = 6000
 async function withRetry(label, fn, tries = 8) {
   for (let i = 1; i <= tries; i++) {
     try { return await fn() } catch (e) {
-      const msg = String(e?.error?.message || e?.shortMessage || e?.message || e)
+      const msg = String(e?.code || "") + " " + String(e?.error?.message || e?.shortMessage || e?.message || e)
       const transient = /request limit|-32011|rate|timeout|ECONN|fetch failed|502|503/i.test(msg)
       if (!transient || i === tries) throw e
       const wait = 4000 * i

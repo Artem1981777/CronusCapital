@@ -1245,14 +1245,18 @@ the code says so in its header comment. What it proves is that the swap path is 
 | Token (CRN) | [`0x352991E7…0E53C9`](https://testnet.arcscan.app/address/0x352991E7Ba195DcB2AdAC9128B88cD3bd80E53C9) |
 | Initial liquidity | [`0x8ceb3aaa…6ab106`](https://testnet.arcscan.app/tx/0x8ceb3aaa3784f4c56fdc19f65182a0f4837410a76dd3a69e0a5eaf34f76ab106) |
 | First swap, 0.1 USDC -> 94.965947 CRN | [`0x080c1310…f6464b`](https://testnet.arcscan.app/tx/0x080c1310a77e56b234399d04795982a40ad1ff2a3c58b77a5345305c09f6464b) |
+| Liquidity deepened to 10 USDC / 9071.59 CRN | [`0x98648cb1…ddabf1`](https://testnet.arcscan.app/tx/0x98648cb1ffd15f7384e263ac5ed662486037a579187507349fbe33543fddabf1) |
 
 The invariant is checked on-chain, not asserted in prose: reserves went from 2 USDC / 2000
 CRN to 2.1 USDC / 1905.034053 CRN, so the product rose from 4000 to 4000.57 — the 0.3% fee,
 and nothing else. A swap that would shrink the product reverts with `k`.
 
-Pricing is deliberately unflattering. The pool is thin, so 1 USDC quotes 665 CRN rather than
-the 1000 implied by the deposit ratio. That is the same maths Uniswap uses; we did not paper
-over it with a fixed rate.
+Pricing is deliberately unflattering. Depth was later raised to 10 USDC / 9071.59 CRN in exact
+proportion to the reserves already there, which reduces slippage without moving the price by a
+single unit — `scripts/add-liquidity.mjs` derives the CRN side from the live ratio rather than
+accepting it as input, because a mismatch would hand a free arbitrage to the first observer.
+The pool is still small on purpose: 1 USDC quotes 822 CRN, not the 907 the reserve ratio
+implies. That is the same maths Uniswap uses, and we did not paper over it with a fixed rate.
 
 Each row is a complete CCTP V2 round-trip leg: USDC burned on the source chain and
 minted natively on the destination chain, both signed by the recipient's own wallet.
