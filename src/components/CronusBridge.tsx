@@ -7,6 +7,14 @@ import { useAccount, useWriteContract, usePublicClient, useChainId, useSwitchCha
 type Hex = `0x${string}`
 
 // V2 contracts are identical across all supported EVM testnets (including Arc).
+import { evaluateIntent } from "../../lib/intentPolicyCore.js"
+
+// The policy layer speaks canonical network keys; this widget uses its own shorter keys.
+// Mapping them here keeps both vocabularies intact instead of bending one to the other.
+const POLICY_TO_UI: Record<string, string> = {
+  arc: "arc", base: "base", ethereum: "eth", arbitrum: "arb", optimism: "op", avalanche: "avax",
+}
+
 const TOKEN_MESSENGER_V2 = "0x8FE6B999Dc680CcFDD5Bf7EB0974218be2542DAA"
 const MESSAGE_TRANSMITTER_V2 = "0xE737e5cEBEEBa77EFE34D4aa090756590b1CE275"
 
@@ -105,6 +113,43 @@ export default function CronusBridge() {
   const [err, setErr] = useState("")
   const [busy, setBusy] = useState(false)
   const [history, setHistory] = useState<Entry[]>(loadHistory)
+  const [intentText, setIntentText] = useState("")
+  const [plan, setPlan] = useState<any>(null)
+
+  // Reads the sentence with the same module the test suite and the server use. Nothing is
+  // executed here: the result only describes what policy would decide, and why.
+  function readIntent() {
+    const text = intentText.trim()
+    if (!text) return
+    setPlan(evaluateIntent(text, { sender: address ? address.toLowerCase() : undefined }))
+  }
+
+  function planSummary(d: any): string {
+    const p = d.parsed
+    if (!p.ok) return "not understood"
+    if (p.kind === "bridge") {
+      return p.amount + " USDC " + p.from + " " + ARROW + " " + p.to +
+        (p.routeVerified ? " (route executed on-chain by Cronus)" : " (route not yet executed by us)")
+    }
+    return p.amount + " " + String(p.fromToken).toUpperCase() + " " + ARROW +
+      " " + String(p.toToken).toUpperCase() + " on Arc"
+  }
+
+  // Only a bridge that policy already allowed may prefill the form, and prefilling is all
+  // it does: the transaction still has to be reviewed and signed in your own wallet.
+  function canApply(d: any): boolean {
+    return d.allow === true && d.parsed.ok === true && d.parsed.kind === "bridge" &&
+      !!POLICY_TO_UI[d.parsed.from] && !!POLICY_TO_UI[d.parsed.to]
+  }
+
+  function applyPlan() {
+    if (!plan || !canApply(plan)) return
+    setFromKey(POLICY_TO_UI[plan.parsed.from])
+    setToKey(POLICY_TO_UI[plan.parsed.to])
+    setAmount(plan.parsed.amount)
+    setPlan(null)
+    setIntentText("")
+  }
 
   function pushEntry(e: Entry) {
     setHistory((prev) => { const next = [e, ...prev].slice(0, 25); persist(next); return next })
@@ -223,6 +268,37 @@ export default function CronusBridge() {
     <div style={wrap}>
       <div style={head}><span style={title}>{"\u2726"} USDC BRIDGE {DASH} CCTP V2</span></div>
       <p style={note}>Native burn-and-mint via Circle CCTP V2 between any two of six supported testnets, in any direction, including routes that never touch Arc. No wrapped tokens, no liquidity pool, no custodian. Every step is signed by your own connected wallet {DASH} Cronus never holds your key. You need source-chain USDC and a little native gas.</p>
+        <label style={lbl}>INTENT {DASH} PLAIN LANGUAGE</label>
+        <input
+          style={inp}
+          value={intentText}
+          onChange={(e) => setIntentText(e.target.value)}
+          onKeyDown={(e) => { if (e.key === "Enter") readIntent() }}
+          placeholder="bridge 5 usdc from base to arc"
+          disabled={busy}
+        />
+        <p style={note}>Parsed by a deterministic allowlist, not by a language model, so the same sentence always yields the same decision. English, Russian, Spanish, Portuguese, French and German are understood. Nothing is signed or sent by this box.</p>
+        <button style={btn} onClick={readIntent} disabled={busy || !intentText.trim()}>Read intent</button>
+        {plan && (
+          <div style={{ border: "1px solid #39e01433", borderRadius: 8, padding: 10, marginTop: 10 }}>
+            <div style={row}><span style={lbl}>PARSED</span><span style={val}>{planSummary(plan)}</span></div>
+            <div style={row}><span style={lbl}>LANGUAGE</span><span style={val}>{plan.lang}</span></div>
+            <div style={row}><span style={lbl}>DECISION</span><span style={val}>{plan.allow ? "allowed by policy" : "refused by policy"}</span></div>
+            {plan.reasons.length > 0 && (
+              <div style={row}><span style={lbl}>REASONS</span><span style={val}>{plan.reasons.join(", ")}</span></div>
+            )}
+            {plan.missing.length > 0 && (
+              <div style={row}><span style={lbl}>MISSING</span><span style={val}>{plan.missing.join(", ")}</span></div>
+            )}
+            {!isConnected && <p style={note}>Connect a wallet for the policy caps and the recipient check to apply.</p>}
+            {plan.parsed.ok && plan.parsed.kind === "swap" && (
+              <p style={note}>Conversion intents are parsed and judged, but USDC to USYC conversion is not wired into this widget yet.</p>
+            )}
+            {canApply(plan) && (
+              <button style={btn} onClick={applyPlan} disabled={busy}>Load this route into the form</button>
+            )}
+          </div>
+        )}
         <label style={lbl}>FROM</label>
         <select style={sel} value={fromKey} onChange={(e) => setFromKey(e.target.value)} disabled={busy}>
           {ALL_CHAINS.map((c) => (<option key={c.key} value={c.key}>{c.name}</option>))}
