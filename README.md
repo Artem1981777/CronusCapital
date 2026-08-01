@@ -1229,5 +1229,30 @@ mechanism and the same code path, so they are expected to behave identically —
 lists only what has actually been signed and settled, and the widget marks any route it has
 not executed as unverified rather than implying otherwise.
 
+### Swap — a constant-product AMM written from scratch
+
+Arc testnet has no DEX, and USYC cannot be swapped because it is permissioned and the
+entitlements contract answers false for our address. Rather than mock a swap, we deployed
+one: a fixed-supply ERC-20 and a constant-product pool against native Arc USDC, both in
+`contracts/CronusSwap.sol`, about 200 lines with no external libraries.
+
+This is our own pool holding our own liquidity, not an integration with a third party, and
+the code says so in its header comment. What it proves is that the swap path is real.
+
+| What | Address / tx |
+|---|---|
+| Pool (CronusSwap) | [`0x1c1dE1f3…8a1c32`](https://testnet.arcscan.app/address/0x1c1dE1f341823cdB13bF8f8669ceB8167d8a1c32) |
+| Token (CRN) | [`0x352991E7…0E53C9`](https://testnet.arcscan.app/address/0x352991E7Ba195DcB2AdAC9128B88cD3bd80E53C9) |
+| Initial liquidity | [`0x8ceb3aaa…6ab106`](https://testnet.arcscan.app/tx/0x8ceb3aaa3784f4c56fdc19f65182a0f4837410a76dd3a69e0a5eaf34f76ab106) |
+| First swap, 0.1 USDC -> 94.965947 CRN | [`0x080c1310…f6464b`](https://testnet.arcscan.app/tx/0x080c1310a77e56b234399d04795982a40ad1ff2a3c58b77a5345305c09f6464b) |
+
+The invariant is checked on-chain, not asserted in prose: reserves went from 2 USDC / 2000
+CRN to 2.1 USDC / 1905.034053 CRN, so the product rose from 4000 to 4000.57 — the 0.3% fee,
+and nothing else. A swap that would shrink the product reverts with `k`.
+
+Pricing is deliberately unflattering. The pool is thin, so 1 USDC quotes 665 CRN rather than
+the 1000 implied by the deposit ratio. That is the same maths Uniswap uses; we did not paper
+over it with a fixed rate.
+
 Each row is a complete CCTP V2 round-trip leg: USDC burned on the source chain and
 minted natively on the destination chain, both signed by the recipient's own wallet.
