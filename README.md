@@ -1211,6 +1211,7 @@ Recipient wallet: `0xdc6778c5f8cc74b10aed11c48306d4cfc5737fbd`
 | 1 Aug 2026 | 13:48:02 | Base Sepolia -> Arc Testnet | 1 USDC | [`0xaaf07c…727c13`](https://sepolia.basescan.org/tx/0xaaf07c36a5fd7d7561511d62e10249bd16bba8636cfe44bbb4dc215aeb727c13) | [`0xe38179…a20a11`](https://testnet.arcscan.app/tx/0xe38179d77e7bc2131ab5579b274473741597e52639ad9b3451c81afdcaa20a11) |
 | 1 Aug 2026 | 14:12:03 | Base Sepolia -> Arc Testnet | 1 USDC | [`0x5e74a9…cad0e1`](https://sepolia.basescan.org/tx/0x5e74a9b1b01664c5640c4ca47909802c86aba715716b4b8240cedbf276cad0e1) | [`0xd0a6e8…1d976c`](https://testnet.arcscan.app/tx/0xd0a6e8b88c3b0495a13a01ee42b5664c0eb31c4619f9a542bb82a831441d976c) |
 | 1 Aug 2026 | 14:19:56 | Arbitrum Sepolia -> Base Sepolia | 5 USDC | [`0x73a54f…dc87c7`](https://sepolia.arbiscan.io/tx/0x73a54fb672f3cad4c741ded63083df441fe5eea061b60f3342d376ededdc87c7) | [`0x57ddae…48c223`](https://sepolia.basescan.org/tx/0x57ddaeae3e3e0146bb1df986cc969b0b25dfa400393e9e83fa77915b7848c223) |
+| 1 Aug 2026 | 14:38:37 | Ethereum Sepolia -> Arc Testnet | 5 USDC | [`0x76c834…d32b94`](https://sepolia.etherscan.io/tx/0x76c8347290a20ecd8cf78a12b7a9d4a5d3966f02ab6fe5413d2d76cd33d32b94) | [`0x262ed6…f362f6`](https://testnet.arcscan.app/tx/0x262ed60bd3be46118b4ddce0fea7482e2f7ab78a75dbb9d4ef57e4c388f362f6) |
 
 Every row dated 1 Aug 2026 was started by typing a sentence in plain language, not by picking
 chains from a dropdown. A deterministic parser turned that sentence into an allowlisted route
@@ -1221,6 +1222,12 @@ The 14:19:56 leg is the first executed route that never touches Arc, which is wh
 any-to-any claim above a fact rather than a capability: Arbitrum Sepolia to Base Sepolia, 5
 USDC, burned and minted natively, started from the Russian sentence "переведи 5 usdc из
 арбитрума в base".
+
+Four of the thirty directed routes have now been executed on-chain: Base to Arc, Arc to Base,
+Arbitrum to Base, and Ethereum to Arc. The remaining twenty-six use the same CCTP V2 domain
+mechanism and the same code path, so they are expected to behave identically — but this table
+lists only what has actually been signed and settled, and the widget marks any route it has
+not executed as unverified rather than implying otherwise.
 
 Each row is a complete CCTP V2 round-trip leg: USDC burned on the source chain and
 minted natively on the destination chain, both signed by the recipient's own wallet.
