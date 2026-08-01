@@ -201,3 +201,115 @@ test("pdr: tampering with a stored record breaks its address", () => {
   const tampered = { ...record, input: { ...record.input, amountAtomic: 25000000 } }
   assert.equal(verifyIntentPdr(tampered, address), false)
 })
+
+// --- multilingual (ipdr-3) ---
+import { localizeIntent, LANGUAGES } from "../lib/intentPolicy.js"
+
+test("lang: a Russian bridge request parses like its English twin", () => {
+  const r = parseIntent("переведи 5 usdc с base на arc")
+  assert.equal(r.ok, true)
+  assert.equal(r.lang, "ru")
+  assert.equal(r.from, "base")
+  assert.equal(r.to, "arc")
+  assert.equal(r.amount, "5")
+})
+
+test("lang: Russian network names in Cyrillic resolve", () => {
+  const r = parseIntent("отправь 2 usdc из арбитрума в арк")
+  assert.equal(r.ok, true)
+  assert.equal(r.from, "arbitrum")
+  assert.equal(r.to, "arc")
+})
+
+test("lang: a Russian conversion resolves the real USYC pair", () => {
+  const r = parseIntent("обменяй 10 usdc на usyc")
+  assert.equal(r.ok, true)
+  assert.equal(r.kind, "swap")
+  assert.equal(r.fromToken, "usdc")
+  assert.equal(r.toToken, "usyc")
+})
+
+test("lang: a Russian redeem resolves the destination without being told", () => {
+  const r = parseIntent("погаси 4 usyc")
+  assert.equal(r.ok, true)
+  assert.equal(r.fromToken, "usyc")
+  assert.equal(r.toToken, "usdc")
+})
+
+test("lang: a Russian refusal keeps its reason, translated to nothing", () => {
+  const r = parseIntent("обменяй 5 eth на usdc")
+  assert.equal(r.ok, false)
+  assert.equal(r.lang, "ru")
+  assert.ok(r.reasons.includes("dex_not_integrated"))
+})
+
+test("lang: Spanish, Portuguese, French and German bridges all parse", () => {
+  const cases = [
+    ["envía 5 usdc de base a arc", "es"],
+    ["envie 5 usdc de base para arc", "pt"],
+    ["envoie 5 usdc depuis base vers arc", "fr"],
+    ["sende 5 usdc von base nach arc", "de"],
+  ]
+  for (const [text, lang] of cases) {
+    const r = parseIntent(text)
+    assert.equal(r.ok, true, text)
+    assert.equal(r.lang, lang, text)
+    assert.equal(r.from, "base", text)
+    assert.equal(r.to, "arc", text)
+  }
+})
+
+test("lang: the same intent in six languages yields one identical decision", () => {
+  const texts = [
+    "bridge 5 usdc from base to arc",
+    "переведи 5 usdc с base на arc",
+    "envía 5 usdc de base a arc",
+    "envie 5 usdc de base para arc",
+    "envoie 5 usdc depuis base vers arc",
+    "sende 5 usdc von base nach arc",
+  ]
+  const decisions = texts.map((t) => evaluateIntent(t, { sender: SENDER }))
+  for (const d of decisions) {
+    assert.equal(d.allow, true)
+    assert.equal(d.amountAtomic, 5000000)
+  }
+  const routes = new Set(decisions.map((d) => d.parsed.from + ">" + d.parsed.to))
+  assert.equal(routes.size, 1)
+})
+
+test("lang: an English sentence is never mangled by a foreign dictionary", () => {
+  const { lang, text } = localizeIntent("Bridge 5 USDC from Base to Arc")
+  assert.equal(lang, "en")
+  assert.equal(text, "bridge 5 usdc from base to arc")
+})
+
+test("lang: mainnet is refused in Russian too", () => {
+  const r = parseIntent("переведи 1 usdc с base на арк майннет")
+  assert.equal(r.ok, false)
+  assert.ok(r.reasons.includes("mainnet_not_supported"))
+})
+
+test("lang: the record states which language was used", () => {
+  const text = "переведи 5 usdc с base на arc"
+  const { record } = buildIntentPdr(text, evaluateIntent(text, { sender: SENDER }))
+  assert.equal(record.input.lang, "ru")
+  assert.ok(!JSON.stringify(record).includes("переведи"))
+})
+
+test("lang: the supported language list is explicit", () => {
+  assert.deepEqual([...LANGUAGES], ["en", "ru", "es", "pt", "fr", "de"])
+})
+
+test("lang: Russian case endings on network names still resolve", () => {
+  const cases = [
+    ["переведи 3 usdc из базы в арк", "base", "arc"],
+    ["переведи 3 usdc с арки в оптимизм", "arc", "optimism"],
+    ["отправь 1 usdc из эфириума в арбитрум", "ethereum", "arbitrum"],
+  ]
+  for (const [text, from, to] of cases) {
+    const r = parseIntent(text)
+    assert.equal(r.ok, true, text)
+    assert.equal(r.from, from, text)
+    assert.equal(r.to, to, text)
+  }
+})
