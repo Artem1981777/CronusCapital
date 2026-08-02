@@ -16,11 +16,11 @@ const ARC_CHAIN_ID = 5042002
 const SCAN = "https://testnet.arcscan.app/tx/"
 const USDC: Hex = "0x3600000000000000000000000000000000000000"
 const CRN: Hex = "0x352991E7Ba195DcB2AdAC9128B88cD3bd80E53C9"
-const POOL: Hex = "0x1c1dE1f341823cdB13bF8f8669ceB8167d8a1c32"
+const POOL: Hex = "0x0924Dae7005FC214D3A243E4f811ae4A34607400"
 
 const POOL_ABI = parseAbi([
   "function quote(address tokenIn, uint256 amountIn) view returns (uint256)",
-  "function swapExactIn(address tokenIn, uint256 amountIn, uint256 minOut, address to) returns (uint256)",
+  "function swapExactIn(address tokenIn, uint256 amountIn, uint256 minOut, address to, uint256 deadline) returns (uint256)",
   "function reserveA() view returns (uint256)",
   "function reserveB() view returns (uint256)",
 ])
@@ -138,9 +138,10 @@ export function CronusSwap() {
         await client.waitForTransactionReceipt({ hash: ah })
       }
 
-      const h = await writeContractAsync({
+      const deadline = BigInt(Math.floor(Date.now() / 1000) + 20 * 60)
+    const h = await writeContractAsync({
         address: POOL, abi: POOL_ABI, functionName: "swapExactIn",
-        args: [tokenIn, quoted.inAtomic, minOut, address], chainId: ARC_CHAIN_ID,
+        args: [tokenIn, quoted.inAtomic, minOut, address, deadline], chainId: ARC_CHAIN_ID,
       })
       setTx(h)
       const rc = await client.waitForTransactionReceipt({ hash: h })

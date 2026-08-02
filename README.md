@@ -1241,11 +1241,14 @@ the code says so in its header comment. What it proves is that the swap path is 
 
 | What | Address / tx |
 |---|---|
-| Pool (CronusSwap) | [`0x1c1dE1f3…8a1c32`](https://testnet.arcscan.app/address/0x1c1dE1f341823cdB13bF8f8669ceB8167d8a1c32) |
+| Pool (CronusSwap) | [`0x0924Dae7…607400`](https://testnet.arcscan.app/address/0x0924Dae7005FC214D3A243E4f811ae4A34607400) |
 | Token (CRN) | [`0x352991E7…0E53C9`](https://testnet.arcscan.app/address/0x352991E7Ba195DcB2AdAC9128B88cD3bd80E53C9) |
 | Initial liquidity | [`0x8ceb3aaa…6ab106`](https://testnet.arcscan.app/tx/0x8ceb3aaa3784f4c56fdc19f65182a0f4837410a76dd3a69e0a5eaf34f76ab106) |
 | First swap, 0.1 USDC -> 94.965947 CRN | [`0x080c1310…f6464b`](https://testnet.arcscan.app/tx/0x080c1310a77e56b234399d04795982a40ad1ff2a3c58b77a5345305c09f6464b) |
 | Liquidity deepened to 10 USDC / 9071.59 CRN | [`0x98648cb1…ddabf1`](https://testnet.arcscan.app/tx/0x98648cb1ffd15f7384e263ac5ed662486037a579187507349fbe33543fddabf1) |
+| Hardened v2 redeploy — reentrancy guard, pausable, swap deadline | [`0x2e977f…a9b337a`](https://testnet.arcscan.app/tx/0x2e977ffc2292c78a46a53f78a068a224277afe69e86b8e24602cf4efaa9b337a) |
+| Re-seeded 10 USDC / 6613 CRN into hardened pool | [`0xcaff28…3951be`](https://testnet.arcscan.app/tx/0xcaff280f964a6b56c209253567365f9f569d461db12eac0bfd4d295b853951be) |
+| First v2 swap, 0.1 USDC -> 65.28076 CRN | [`0xa3b40e…ba75dc`](https://testnet.arcscan.app/tx/0xa3b40e4de2668265dafa5b9b31ff7fcbcfc1d8e5dcdb28600434580e17ba75dc) |
 
 The invariant is checked on-chain, not asserted in prose: reserves went from 2 USDC / 2000
 CRN to 2.1 USDC / 1905.034053 CRN, so the product rose from 4000 to 4000.57 — the 0.3% fee,
@@ -1255,8 +1258,10 @@ Pricing is deliberately unflattering. Depth was later raised to 10 USDC / 9071.5
 proportion to the reserves already there, which reduces slippage without moving the price by a
 single unit — `scripts/add-liquidity.mjs` derives the CRN side from the live ratio rather than
 accepting it as input, because a mismatch would hand a free arbitrage to the first observer.
-The pool is still small on purpose: 1 USDC quotes 822 CRN, not the 907 the reserve ratio
+The pool is still thin on purpose: at the live reserves a 1 USDC order returns fewer CRN than the raw reserve ratio
 implies. That is the same maths Uniswap uses, and we did not paper over it with a fixed rate.
+
+After a self-audit we redeployed the pool as a hardened v2: a reentrancy guard on every state-changing path, an owner pause switch for incident response, and a deadline argument on `swapExactIn` so a transaction stuck in the mempool cannot execute later at a stale price. The original pool was drained to zero and retired; the v2 pool above was re-seeded with 10 USDC / 6613 CRN, and its first v2 swap is linked in the table. Scope, threat model, and disclosure policy live in `SECURITY.md`.
 
 Each row is a complete CCTP V2 round-trip leg: USDC burned on the source chain and
 minted natively on the destination chain, both signed by the recipient's own wallet.
