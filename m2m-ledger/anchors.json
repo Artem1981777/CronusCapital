@@ -70,5 +70,13 @@
     "block": 54738703,
     "anchoredAt": "2026-08-01T08:56:44.221Z",
     "by": "0xbe3a16bD4137A8a293aCBcaA75cCE3420919D21d"
+  },
+  {
+    "file": "2026-08-01.json",
+    "keccak256": "0xce22f730e1f1a0c7bf7b3ad0f6782d58dbd2638b5a98ae81bb0dd0b54d897274",
+    "tx": "0xcc8471ba49eed8d5ca5a1904745a1012532af3e25cdaca5b3020979c2f29a280",
+    "block": 54908449,
+    "anchoredAt": "2026-08-02T08:58:37.989Z",
+    "by": "0xbe3a16bD4137A8a293aCBcaA75cCE3420919D21d"
   }
 ]
