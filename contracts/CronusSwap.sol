@@ -2,6 +2,7 @@
 pragma solidity ^0.8.20;
 
 // A constant-product AMM on Arc, written from scratch.
+// v2 — hardened: non-reentrancy lock, owner circuit breaker, and a swap deadline.
 //
 // Honesty note, because this is easy to overstate: this is OUR pool, holding OUR
 // liquidity, quoting OUR token against USDC. It is not an integration with a
@@ -81,15 +82,55 @@ contract CronusSwap {
 
     uint256 public constant FEE_BPS = 30; // 0.3%, the original Uniswap fee
 
+    // --- v2 hardening state ---
+    // Non-reentrancy lock. 1 = unlocked, 2 = entered. Cheaper than a bool because
+    // the slot never returns to zero. CEI already protects the maths; this is a
+    // hard stop so a hostile token callback cannot re-enter a state path at all.
+    uint256 private _lock = 1;
+    // Circuit breaker. The owner can freeze swaps if a pricing or token bug is
+    // suspected. It does not touch liquidity: removeLiquidity stays owner-only and
+    // is intentionally left callable so funds can always be recovered while paused.
+    bool public paused;
+
     event LiquidityAdded(uint256 amountA, uint256 amountB, uint256 reserveA, uint256 reserveB);
     event LiquidityRemoved(uint256 amountA, uint256 amountB, uint256 reserveA, uint256 reserveB);
     event Swap(address indexed trader, address indexed tokenIn, uint256 amountIn, uint256 amountOut);
+    event Paused(address indexed by);
+    event Unpaused(address indexed by);
+
+    modifier onlyOwner() {
+        require(msg.sender == owner, "owner");
+        _;
+    }
+
+    modifier nonReentrant() {
+        require(_lock == 1, "reentrant");
+        _lock = 2;
+        _;
+        _lock = 1;
+    }
+
+    modifier whenNotPaused() {
+        require(!paused, "paused");
+        _;
+    }
 
     constructor(address a, address b) {
         require(a != address(0) && b != address(0) && a != b, "tokens");
         tokenA = IERC20(a);
         tokenB = IERC20(b);
         owner = msg.sender;
+    }
+
+    // --- circuit breaker ---
+    function pause() external onlyOwner {
+        paused = true;
+        emit Paused(msg.sender);
+    }
+
+    function unpause() external onlyOwner {
+        paused = false;
+        emit Unpaused(msg.sender);
     }
 
     // x * y = k, with the fee taken off the input before it is priced.
@@ -109,8 +150,7 @@ contract CronusSwap {
                    : getAmountOut(amountIn, reserveB, reserveA);
     }
 
-    function addLiquidity(uint256 amountA, uint256 amountB) external {
-        require(msg.sender == owner, "owner");
+    function addLiquidity(uint256 amountA, uint256 amountB) external onlyOwner nonReentrant {
         require(amountA > 0 && amountB > 0, "amount");
         require(tokenA.transferFrom(msg.sender, address(this), amountA), "pull_a");
         require(tokenB.transferFrom(msg.sender, address(this), amountB), "pull_b");
@@ -119,8 +159,7 @@ contract CronusSwap {
         emit LiquidityAdded(amountA, amountB, reserveA, reserveB);
     }
 
-    function removeLiquidity(uint256 amountA, uint256 amountB, address to) external {
-        require(msg.sender == owner, "owner");
+    function removeLiquidity(uint256 amountA, uint256 amountB, address to) external onlyOwner nonReentrant {
         require(to != address(0), "to_zero");
         require(amountA <= reserveA && amountB <= reserveB, "reserves");
         reserveA -= amountA;
@@ -132,9 +171,18 @@ contract CronusSwap {
 
     // minOut is not optional in spirit: pass a real number. Passing zero means
     // accepting any price, which on a thin pool means accepting any loss.
-    function swapExactIn(address tokenIn, uint256 amountIn, uint256 minOut, address to)
-        external returns (uint256 out)
+    // deadline is a unix timestamp; a swap stuck in the mempool past it reverts
+    // instead of filling later at a stale price.
+    function swapExactIn(
+        address tokenIn,
+        uint256 amountIn,
+        uint256 minOut,
+        address to,
+        uint256 deadline
+    )
+        external nonReentrant whenNotPaused returns (uint256 out)
     {
+        require(block.timestamp <= deadline, "expired");
         require(to != address(0), "to_zero");
         bool aIn = tokenIn == address(tokenA);
         require(aIn || tokenIn == address(tokenB), "token");
@@ -147,7 +195,7 @@ contract CronusSwap {
         // State is updated before the outgoing transfer so a hostile token that
         // calls back into this contract cannot see stale reserves.
         if (aIn) { reserveA += amountIn; reserveB -= out; }
-        else     { reserveB += amountIn; reserveA -= out; }
+        else { reserveB += amountIn; reserveA -= out; }
 
         require(IERC20(tokenIn).transferFrom(msg.sender, address(this), amountIn), "pull_in");
         require((aIn ? tokenB : tokenA).transfer(to, out), "push_out");
