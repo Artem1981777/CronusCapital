@@ -1,0 +1,56 @@
+[
+  {
+    "agent": "rhea",
+    "ts": "2026-08-03T10:26:40.111Z",
+    "topic": "BTC-USDC momentum",
+    "bandit": {
+      "mode": "exploit",
+      "epsilon": 0.2
+    },
+    "quote": {
+      "tier": "nano",
+      "price": "$0.0005"
+    },
+    "purchases": 38,
+    "loyal": true,
+    "convictionPricing": {
+      "model": "conviction-pegged",
+      "conviction": 42,
+      "band": "discount",
+      "bands": {
+        "discount": "$0.0005",
+        "standard": "$0.0007",
+        "premium": "$0.0009"
+      },
+      "note": "loyal price floats with live oracle confidence, hard-clamped to the band range"
+    },
+    "action": "BUY",
+    "paidUsd": 0.0005,
+    "settlement": "b6d048d0-dafe-4d20-9288-dc0c18a8ca29",
+    "quality": {
+      "delivered": true,
+      "verdict": "SKIP",
+      "conviction": 42
+    },
+    "receipt": {
+      "standard": "EIP-191",
+      "verified": true,
+      "signer": "0x6829860b7f61FA01E5bf3D194d9f780ACa5B6787",
+      "settlement": "b6d048d0-dafe-4d20-9288-dc0c18a8ca29",
+      "reportHash": "0x318eff95fa81c75df3d4f571f1f8665198465b51b916841779ead1e7e7f37f8e",
+      "signature": "0x37625f2a78dd204b9ef5c105120b9c2c959e0ab1992c2d1b095199a13b1f17906916c9d5de83eac0c186d78aabca2e835dc5e777736ce951341235c770072ff41c"
+    },
+    "feedback": {
+      "standard": "ERC-8004",
+      "agentId": 1,
+      "score": 5,
+      "jobRef": "0x0ea159e30118af7ed9d83179d89187ea64760fbbff34a175edcfac86abff34cc",
+      "tx": "0x1f70df9594a1e2bb391d6965fa13ec73b85f4463e99873cbb4d37925d2c6357e"
+    },
+    "chain": {
+      "standard": "cronus-hashchain-v1",
+      "prev": "sha256:e251109a8ebb6f0bc1ec09b6d4e00bcbb61976d88907a4894484e8b07daba806"
+    },
+    "policyHash": "sha256:fa6496db7611aeb26710b34b3401992704cc21891df021a9262bd9c13ffdeb38"
+  }
+]
