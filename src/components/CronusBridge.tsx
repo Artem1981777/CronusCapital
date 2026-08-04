@@ -8,6 +8,7 @@ type Hex = `0x${string}`
 
 // V2 contracts are identical across all supported EVM testnets (including Arc).
 import { evaluateIntent, isVerifiedRoute } from "../../lib/intentPolicyCore.js"
+import { ensureChain, isSupportedChain } from "../lib/chains"
 
 // The policy layer speaks canonical network keys; this widget uses its own shorter keys.
 // Mapping them here keeps both vocabularies intact instead of bending one to the other.
@@ -100,7 +101,7 @@ function sleep(ms: number) { return new Promise((r) => setTimeout(r, ms)) }
 function fmtTime(id: number): string { try { return new Date(id).toISOString().replace("T", " ").slice(0, 19) + " UTC" } catch { return "" } }
 
 export default function CronusBridge() {
-  const { address, isConnected } = useAccount()
+  const { address, isConnected, connector } = useAccount()
   const chainId = useChainId()
   const { switchChainAsync } = useSwitchChain()
   const { writeContractAsync } = useWriteContract()
@@ -177,6 +178,7 @@ export default function CronusBridge() {
     if (!isConnected || !address) { setErr("Connect your wallet first (button at top)."); return }
     if (!sourceClient) { setErr(source.name + " RPC client unavailable."); return }
     if (!destClient) { setErr(dest.name + " RPC client unavailable."); return }
+    if (!isSupportedChain(source.chainId) || !isSupportedChain(dest.chainId)) { setErr("Blocked: this route includes a non-testnet network."); return }
     const amt = toUnits(amount, 6)
     if (amt <= 0n) { setErr("Enter an amount greater than 0."); return }
     const route = source.name + " " + ARROW + " " + dest.name
@@ -185,7 +187,7 @@ export default function CronusBridge() {
     try {
       if (chainId !== source.chainId) {
         setStep("Switching wallet to " + source.name + DASH)
-        await switchChainAsync({ chainId: source.chainId })
+        await ensureChain(source.chainId, { switchChainAsync, getProvider: () => connector?.getProvider?.() })
       }
       const maxFee = amt / 100n
       const bal = await sourceClient.readContract({ address: source.usdc, abi: ERC20_ABI, functionName: "balanceOf", args: [address] }) as bigint
@@ -234,7 +236,7 @@ export default function CronusBridge() {
       }
       if (!msg) { patchEntry(entryId, { status: "mint pending" }); throw new Error("Attestation timed out. Your burn is safe; the mint can be completed later with the burn tx.") }
       setStep("4/4 Minting on " + dest.name + DASH)
-      await switchChainAsync({ chainId: dest.chainId })
+      await ensureChain(dest.chainId, { switchChainAsync, getProvider: () => connector?.getProvider?.() })
       const mHash = await writeContractAsync({
         chainId: dest.chainId,
         address: MESSAGE_TRANSMITTER_V2,

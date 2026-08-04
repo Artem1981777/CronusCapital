@@ -2,6 +2,7 @@ import { useState } from "react"
 import { useAccount, useWriteContract, usePublicClient, useSwitchChain } from "wagmi"
 import { parseAbi, parseUnits, formatUnits } from "viem"
 import { evaluateIntent } from "../../lib/intentPolicyCore.js"
+import { ensureChain } from "../lib/chains"
 
 // Swap against the Cronus AMM on Arc: contracts/CronusSwap.sol, deployed and funded by us.
 //
@@ -53,7 +54,7 @@ function fmtTime(id: number): string {
 function shorten(h: string): string { return h.slice(0, 8) + "\u2026" + h.slice(-6) }
 
 export function CronusSwap() {
-  const { address, isConnected } = useAccount()
+  const { address, isConnected, connector } = useAccount()
   const { switchChainAsync } = useSwitchChain()
   const { writeContractAsync } = useWriteContract()
   const client = usePublicClient({ chainId: ARC_CHAIN_ID })
@@ -119,7 +120,7 @@ export function CronusSwap() {
     setErr(""); setTx("")
     setBusy(true)
     try {
-      await switchChainAsync({ chainId: ARC_CHAIN_ID })
+      await ensureChain(ARC_CHAIN_ID, { switchChainAsync, getProvider: () => connector?.getProvider?.() })
       if (!client) throw new Error("No Arc client")
 
       // minOut is computed from the quote the user actually saw, not re-read at send time.
