@@ -69,3 +69,20 @@ Explorer: https://testnet.arcscan.app/
 - `contracts/test/CronusAgentGuard.t.sol` — 11 tests
 - `deploy-agent-guard.mjs` — deployer (roles + caps via env)
 - `rogue-demo.mjs` — live rogue-agent simulation
+
+## Who controls the controller? (governance terminator)
+
+A guard begs the question: who controls the owner - and who controls *that* controller, forever upward? That regress only exists if the top holds **positive power** (the ability to move funds). `CronusAgentGuardV2` terminates it by removing the need to trust the top at all:
+
+- **Immutable hard caps.** `MAX_PER_TX_CAP` / `MAX_DAILY_CAP` are fixed at deploy; even the owner can only lower the active caps, never exceed the ceiling.
+- **Timelock on every owner action.** Changes are queued, delayed, and public - vetoable during the delay. Power shifts from who acts to who can watch and stop in time (everyone).
+- **Guardian = negative power only.** It can `pause()`, veto a queued op, and remove an allowlist entry - never move funds or raise limits. A corrupt stopper can at worst halt the system, which is the safe state.
+- **Immutable cold recovery + exit.** The recovery address is fixed forever and can `emergencyExit()` the full balance home at any time, independent of owner/operator/guardian. Each stakeholder's exit right is the terminal control.
+- **Renounceable ownership.** `renounceOwnership()` freezes the rules permanently - after that there is no top to control; the byte-code is the final constitution.
+
+The buck stops at math (thresholds) + immutable code + the exit right + public verifiability - not at an infinitely tall tower of human controllers.
+
+### Live (Arc testnet)
+- **CronusAgentGuardV2:** `0xCE9B824231bACEDB102D2848e4e1cf3D35eC595d`
+- **Deploy tx:** `0x226b0762c1531453db6d9f747c06eedc9dba30a65388e7b94eb8855b42ed4c03`
+- **Tests:** `forge test --match-contract CronusAgentGuardV2Test` -> 13/13 passing.
