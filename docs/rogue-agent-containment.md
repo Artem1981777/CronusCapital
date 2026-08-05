@@ -103,3 +103,15 @@ The V2 guard is now owned by an on-chain **2-of-3 multisig** (no single key can 
 - Multisig deploy tx: `0xff488479f2b20b44b9c36924795d56dfb3616d2bcd24d3218f10a7e025eaff5e`
 - Immutable hard caps: 50 USDC per-tx / 500 USDC daily. Timelock delay: 172800s (48h).
 - Proofs: multisig unit tests 12/12, guard V2 unit tests 13/13, and `verify-governance.mjs` asserts the live on-chain wiring (14/14).
+
+
+#### Live proof: 2-of-3 multisig governs the guard
+
+Verified end-to-end on Arc testnet (`demo-multisig-governs-guard.mjs`, 7/7):
+
+1. Guardian (hot key) pauses the guard.
+2. One multisig signature submits `unpause()` — **execute reverts** ("not enough confirmations"); the guard stays paused. A single key is powerless.
+3. A second owner (cold co-signer) confirms; execute now succeeds and the **2-of-3 multisig unpauses the guard**.
+4. The hot key calling `unpause()` directly **reverts** ("not owner").
+
+- Multisig execute (unpause) tx: `0x68d83327ebb92a14ca69c27dd511823340d859d8ed6c5a4de7a9c32150627669`
