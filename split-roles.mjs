@@ -14,9 +14,9 @@ const U = (n) => ethers.parseUnits(String(n), 6)
 const key = PK.startsWith("0x") ? PK : "0x" + PK
 const provider = new ethers.JsonRpcProvider(RPC)
 const owner = new ethers.Wallet(key, provider)
-const guard = new ethers.Contract(GUARD, abi, owner)
+const guard = new ethers.Contract(GUARD, abi, owner)         // owner signer: real role changes
+const guardRead = new ethers.Contract(GUARD, abi, provider)  // provider: eth_call with from-override
 
-// Separate role holders. Keys are NOT needed: powers are proven via eth_call with a from-override.
 const OPERATOR = process.env.OPERATOR_ADDR || ethers.Wallet.createRandom().address
 const GUARDIAN = process.env.GUARDIAN_ADDR || ethers.Wallet.createRandom().address
 
@@ -29,7 +29,7 @@ async function expectRevert(label, p) {
   catch (e) { console.log(`  ${label}: BLOCKED -> ${e.reason || e.shortMessage || "revert"}`) }
 }
 async function expectOk(label, p) {
-  try { const r = await p; console.log(`  ${label}: OK${r === undefined ? "" : " -> " + r}`) }
+  try { const r = await p; console.log(`  ${label}: OK${r === undefined || r === null ? "" : " -> " + r}`) }
   catch (e) { console.log(`  ${label}: !!! FAILED -> ${e.reason || e.shortMessage || "revert"}`) }
 }
 
@@ -39,15 +39,15 @@ t = await guard.setGuardian(GUARDIAN); await t.wait(); console.log("  guardian s
 if (!(await guard.allowed(VENDOR))) { t = await guard.setAllowed(VENDOR, true); await t.wait(); console.log("  vendor allowlisted") }
 
 console.log("\n=== OPERATOR (AI hot key) powers ===")
-await expectOk    ("spend(vendor, 1 USDC)     ", guard.spend.staticCall(VENDOR, U(1), { from: OPERATOR }))
-await expectRevert("sweepToRecovery()         ", guard.sweepToRecovery.staticCall({ from: OPERATOR }))
-await expectRevert("setAllowed(attacker,true) ", guard.setAllowed.staticCall(ATTACKER, true, { from: OPERATOR }))
-await expectRevert("setLimits(huge,huge)      ", guard.setLimits.staticCall(U(1000000), U(1000000), { from: OPERATOR }))
-await expectRevert("pause() as operator       ", guard.pause.staticCall({ from: OPERATOR }))
+await expectOk    ("spend(vendor, 1 USDC)     ", guardRead.spend.staticCall(VENDOR, U(1), { from: OPERATOR }))
+await expectRevert("sweepToRecovery()         ", guardRead.sweepToRecovery.staticCall({ from: OPERATOR }))
+await expectRevert("setAllowed(attacker,true) ", guardRead.setAllowed.staticCall(ATTACKER, true, { from: OPERATOR }))
+await expectRevert("setLimits(huge,huge)      ", guardRead.setLimits.staticCall(U(1000000), U(1000000), { from: OPERATOR }))
+await expectRevert("pause() as operator       ", guardRead.pause.staticCall({ from: OPERATOR }))
 
 console.log("\n=== GUARDIAN (watcher) powers ===")
-await expectOk    ("pause()                   ", guard.pause.staticCall({ from: GUARDIAN }))
-await expectRevert("unpause() (owner-only)    ", guard.unpause.staticCall({ from: GUARDIAN }))
+await expectOk    ("pause()                   ", guardRead.pause.staticCall({ from: GUARDIAN }))
+await expectRevert("unpause() (owner-only)    ", guardRead.unpause.staticCall({ from: GUARDIAN }))
 
 console.log("\nRestoring roles to owner (safe default)...")
 t = await guard.setOperator(owner.address); await t.wait()
