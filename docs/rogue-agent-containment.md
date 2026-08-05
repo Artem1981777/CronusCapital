@@ -86,3 +86,20 @@ The buck stops at math (thresholds) + immutable code + the exit right + public v
 - **CronusAgentGuardV2:** `0xCE9B824231bACEDB102D2848e4e1cf3D35eC595d`
 - **Deploy tx:** `0x226b0762c1531453db6d9f747c06eedc9dba30a65388e7b94eb8855b42ed4c03`
 - **Tests:** `forge test --match-contract CronusAgentGuardV2Test` -> 13/13 passing.
+
+
+### Hardened production config (multisig owner + cold recovery)
+
+The V2 guard is now owned by an on-chain **2-of-3 multisig** (no single key can change the rules), and its exit sink is an **immutable cold recovery** address. This closes the "who controls the controller" regress in practice, not just in theory.
+
+| Component | Address |
+| :-- | :-- |
+| CronusAgentGuardV2 (hardened) | `0xeA4788164c63B0EF2788d9c74859B43f42BC391E` |
+| CronusMultisig (owner, 2-of-3) | `0xde8874C53D82a38c1c2864ea575f9E62Dc29dA5F` |
+| Cold recovery (immutable exit) | `0x99d0Da7e02c605e9Efe6b06226433770DBafEEac` |
+| Operator (AI hot key) | `0xB8D0054Dd4FE76115E75BF196d89E760bbCD3bc6` |
+
+- Guard deploy tx: `0x83667368e256c7a84e783a49baed7185f2256241b18f21ae219ff93696b2aa31`
+- Multisig deploy tx: `0xff488479f2b20b44b9c36924795d56dfb3616d2bcd24d3218f10a7e025eaff5e`
+- Immutable hard caps: 50 USDC per-tx / 500 USDC daily. Timelock delay: 172800s (48h).
+- Proofs: multisig unit tests 12/12, guard V2 unit tests 13/13, and `verify-governance.mjs` asserts the live on-chain wiring (14/14).
