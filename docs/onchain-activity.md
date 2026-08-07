@@ -2,7 +2,7 @@
 
 Latest transactions of the Cronus Capital treasury and every deployed contract on Arc Testnet.
 
-Generated: 2026-08-06T07:36:08.670Z — regenerate anytime with `node scripts/traction-snapshot.mjs` (public API only, zero private keys).
+Generated: 2026-08-07T06:07:21.002Z — regenerate anytime with `node scripts/traction-snapshot.mjs` (public API only, zero private keys).
 
 ## Treasury (agent wallet)
 
@@ -10,6 +10,7 @@ Address: [`0xdc6778c5f8cc74b10aed11c48306d4cfc5737fbd`](https://testnet.arcscan.
 
 | When (UTC) | Tx | Method | Dir | Value (native) | Status |
 |---|---|---|---|---|---|
+| 2026-08-06 11:24 | [0x7feffded...9cacc6](https://testnet.arcscan.app/tx/0x7feffdedbc2d81791c7007a772c6d01eba5fd41efbc83855cafdaaaf119cacc6) | transfer | IN | 0.000000 | success |
 | 2026-08-06 01:04 | [0x5abd8149...65bd0d](https://testnet.arcscan.app/tx/0x5abd81490e29f122289ed09ecd5e7a330ec29b34ab3ca2c0c17670c17965bd0d) | transfer | OUT | 0.000000 | success |
 | 2026-08-06 01:04 | [0x4fc9b9cb...f14e75](https://testnet.arcscan.app/tx/0x4fc9b9cb04993baff28aaa604412235b5d8175d92d32bbf495dc44a063f14e75) | transfer | OUT | 0.000000 | success |
 | 2026-08-05 03:14 | [0xc374d840...b357f5](https://testnet.arcscan.app/tx/0xc374d840760cc8621e014be1194b90e948416a4a1859abd11d8fcdd348b357f5) | depositForBurn | OUT | 0.000000 | success |
@@ -19,7 +20,6 @@ Address: [`0xdc6778c5f8cc74b10aed11c48306d4cfc5737fbd`](https://testnet.arcscan.
 | 2026-08-05 03:13 | [0x8cb7e5b1...e5b51e](https://testnet.arcscan.app/tx/0x8cb7e5b1684dff580e4ff36387f0d74665e141a302d1b22e13c0dd1472e5b51e) | approve | OUT | 0.000000 | success |
 | 2026-08-05 03:12 | [0x3bb2bda6...dab6ea](https://testnet.arcscan.app/tx/0x3bb2bda603e8447834543ed09fe6a399960c307de3249f737dc2807bd6dab6ea) | swapExactIn | OUT | 0.000000 | success |
 | 2026-08-05 03:12 | [0x00a3929e...ac89f7](https://testnet.arcscan.app/tx/0x00a3929e5ac9ce4c8685ba114289b030c611f00e9a95a0f468380aa1bbac89f7) | approve | OUT | 0.000000 | success |
-| 2026-08-04 20:20 | [0x11e4e728...7ef89f](https://testnet.arcscan.app/tx/0x11e4e728ccd5350ff058638a911514a66080f29c21adc077c7bac20aca7ef89f) | swapExactIn | OUT | 0.000000 | success |
 
 ## Vault (ERC-4626-style)
 
@@ -27,6 +27,8 @@ Address: [`0x13B6984357e27dAB17DF44a6396042239e70542C`](https://testnet.arcscan.
 
 | When (UTC) | Tx | Method | Dir | Value (native) | Status |
 |---|---|---|---|---|---|
+| 2026-08-06 11:23 | [0x67022116...c3a437](https://testnet.arcscan.app/tx/0x67022116ffe77d8e32f37086b6e422f04d7e2c8076e5cd36f7fc9c47adc3a437) | withdrawAll | IN | 0.000000 | success |
+| 2026-08-06 11:22 | [0x5e6b8817...3b9568](https://testnet.arcscan.app/tx/0x5e6b8817e5047ff4ecd6960554b0041334bd2806a33558d92e98bcda753b9568) | deposit | IN | 0.000000 | success |
 | 2026-08-05 15:59 | [0x6257e6ef...6e2f59](https://testnet.arcscan.app/tx/0x6257e6ef5458cdd284dc357338d498a8972f8751e94268d6c9e1e0a72a6e2f59) | deposit | IN | 0.000000 | success |
 | 2026-08-05 15:59 | [0x223c659d...fbd612](https://testnet.arcscan.app/tx/0x223c659d9b664f20896230da69033a00cf821d9a84ac348fd08ba7a6effbd612) | withdrawAll | IN | 0.000000 | success |
 | 2026-08-05 15:57 | [0xf55b32cf...124b71](https://testnet.arcscan.app/tx/0xf55b32cf46f25591f18265621f93a7251c04468ebf3bedbd18f9dfb0ba124b71) | deposit | IN | 0.000000 | success |
@@ -35,8 +37,6 @@ Address: [`0x13B6984357e27dAB17DF44a6396042239e70542C`](https://testnet.arcscan.
 | 2026-08-04 12:17 | [0xfe467f1a...566464](https://testnet.arcscan.app/tx/0xfe467f1a53d861fa31433715b7baf95d7e8c83d7da1629535659ffa48b566464) | deposit | IN | 0.000000 | success |
 | 2026-08-03 18:54 | [0x808e36a4...938ded](https://testnet.arcscan.app/tx/0x808e36a4dd79b4be0b940820058f9eb9d684f9af00bc29da57ddb6d969938ded) | withdrawAll | IN | 0.000000 | success |
 | 2026-08-03 18:52 | [0x7ae28768...61c1de](https://testnet.arcscan.app/tx/0x7ae2876866429e4fbc19c196f3e2ca8d77ccf6fbe8e1b41b91b5991b3b61c1de) | deposit | IN | 0.000000 | success |
-| 2026-08-03 18:52 | [0xea0648d0...852ca8](https://testnet.arcscan.app/tx/0xea0648d0893509debfc64ccdb2505b3a8011d28d5ce4c82d3aa87089e0852ca8) | withdrawAll | IN | 0.000000 | success |
-| 2026-08-03 18:50 | [0x13ab1278...2967f1](https://testnet.arcscan.app/tx/0x13ab1278e3ef4df498062a28c0ec1feafc7851494f247f37886eb7928f2967f1) | deposit | IN | 0.000000 | success |
 
 ## Identity (ERC-8004)
 
@@ -123,13 +123,13 @@ Address: [`0x5294E9927c3306DcBaDb03fe70b92e01cCede505`](https://testnet.arcscan.
 
 | When (UTC) | Tx | Method | Dir | Value (native) | Status |
 |---|---|---|---|---|---|
-| 2026-08-06 07:36 | [0xbfcfa1a9...fea663](https://testnet.arcscan.app/tx/0xbfcfa1a9fe46afe18f7d6d1a61254ec9222eef53573389f219527f6717fea663) | memo | IN | 0.000000 | success |
-| 2026-08-06 07:35 | [0x906f00d3...cc310a](https://testnet.arcscan.app/tx/0x906f00d314fc7c8ac5842d1168614d1a03b919b01277a0fb057208815acc310a) | memo | IN | 0.000000 | success |
-| 2026-08-06 07:35 | [0xe5962f69...b425e6](https://testnet.arcscan.app/tx/0xe5962f69a725f7428754a81f4df75419481724842c0e43dd4a0994aa98b425e6) | memo | IN | 0.000000 | success |
-| 2026-08-06 07:35 | [0xbd852373...5bcbca](https://testnet.arcscan.app/tx/0xbd8523730a2201bbaf04915a710653e538e575afc66c1be3d80985887d5bcbca) | memo | IN | 0.000000 | success |
-| 2026-08-06 07:35 | [0x342eb6cd...d35856](https://testnet.arcscan.app/tx/0x342eb6cde86c0a5caf606efe89dc65b229666d9f10fff10f55870aa9e0d35856) | memo | IN | 0.000000 | success |
-| 2026-08-06 07:34 | [0x4f0bd737...3a9a94](https://testnet.arcscan.app/tx/0x4f0bd737eaddc736f4332811369dfcbd341da1102028bc0947fcb0b18d3a9a94) | memo | IN | 0.000000 | success |
-| 2026-08-06 07:34 | [0xa85758a0...adcccf](https://testnet.arcscan.app/tx/0xa85758a099f61763f53302170c54d9ee02bb120c5bf1891f29f9aaecb7adcccf) | memo | IN | 0.000000 | success |
-| 2026-08-06 07:34 | [0xe319d338...5e9a5a](https://testnet.arcscan.app/tx/0xe319d338d06c998beaa4cbe3e200cf1b41a666407a8dfb310e9e6b023e5e9a5a) | memo | IN | 0.000000 | success |
-| 2026-08-06 07:34 | [0xbd765248...adc53e](https://testnet.arcscan.app/tx/0xbd765248f0aee178965fdd82889e6cfcce09e5b39044214b5cce137780adc53e) | memo | IN | 0.000000 | success |
-| 2026-08-06 07:34 | [0xe3751372...d4606c](https://testnet.arcscan.app/tx/0xe37513728a5cb8e6292c1c5bcfec29d711ac0ff94aa2c7aff662ef1af3d4606c) | memo | IN | 0.000000 | success |
+| 2026-08-07 06:07 | [0xa7adbb11...d4f384](https://testnet.arcscan.app/tx/0xa7adbb11a78a7cf43182f56bc2ba5b451485113145bc302ceebdec1f1ed4f384) | memo | IN | 0.000000 | success |
+| 2026-08-07 06:07 | [0x5a32e78f...e693c1](https://testnet.arcscan.app/tx/0x5a32e78f3fa43f6f009e078ba6af4ee31cb3e186a0c691e85f33436d08e693c1) | memo | IN | 0.000000 | success |
+| 2026-08-07 06:06 | [0x1fd8739c...8eb80a](https://testnet.arcscan.app/tx/0x1fd8739c73fd6f06eef40a1cdeef523457df3d4a7dac1b19d17d65b6fe8eb80a) | memo | IN | 0.000000 | success |
+| 2026-08-07 06:06 | [0x0fa5cc06...57c7ee](https://testnet.arcscan.app/tx/0x0fa5cc06c9dc19261da19425b4b1a07a72cc90a1f0b35b95b5149c715a57c7ee) | memo | IN | 0.000000 | success |
+| 2026-08-07 06:06 | [0xebc9127a...c95ed8](https://testnet.arcscan.app/tx/0xebc9127a084e07df9e8621e63f5488b83647323d2780b312b8b866a5dcc95ed8) | memo | IN | 0.000000 | success |
+| 2026-08-07 06:05 | [0xdaf7141c...c36a1b](https://testnet.arcscan.app/tx/0xdaf7141c4f389cb02473d84163a7e2f31f1b4caffbfeff785039e41ec9c36a1b) | memo | IN | 0.000000 | success |
+| 2026-08-07 06:05 | [0x072dc86b...5fbb60](https://testnet.arcscan.app/tx/0x072dc86b16c2ad3fdd928073e986a402a1e096f2ea7d91138cacd8fcaf5fbb60) | memo | IN | 0.000000 | success |
+| 2026-08-07 06:05 | [0xa317cc7b...93cf45](https://testnet.arcscan.app/tx/0xa317cc7b78d2b038274a74de5f3e1d2ed8c9d1c8f714f337e1a783f8e093cf45) | memo | IN | 0.000000 | success |
+| 2026-08-07 06:05 | [0x46ea914e...1e03c6](https://testnet.arcscan.app/tx/0x46ea914e52994f63fbaad4c9b2f467bc36d045b2ac89dd687f6b0d9d431e03c6) | memo | IN | 0.000000 | success |
+| 2026-08-07 06:05 | [0x14284d13...ab8764](https://testnet.arcscan.app/tx/0x14284d132a8a1d5e9836f4ee643fb07b3586605c2b82fe5168dd0eefffab8764) | memo | IN | 0.000000 | success |
