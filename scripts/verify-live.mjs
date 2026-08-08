@@ -122,7 +122,25 @@ console.log("\n[7] Gateway settlement resolver (GET /api/settlements)")
 	ok("resolver exposes an honesty statement", !!s.body && typeof s.body.honesty === "string" && s.body.honesty.length > 0)
 	const m = await getJson("/api/metrics")
 	const lastTx = m.body && m.body.lastTx
-	ok("resolver corroborates the metrics settlement tx on-chain", !!lastTx && list.some(function (x) { return String(x.txHash).toLowerCase() === String(lastTx).toLowerCase() }), lastTx || "")
+	const rec = lastTx ? await rpc("eth_getTransactionReceipt", [lastTx]) : null
+	const blk = rec && rec.blockNumber ? parseInt(rec.blockNumber, 16) : null
+	const floorBlk = (d && typeof d.chainTip === "number" && typeof d.windowBlocks === "number") ? d.chainTip - d.windowBlocks : null
+	const inWindow = blk !== null && floorBlk !== null && blk >= floorBlk
+	const corroborated = !!lastTx && list.some(function (x) { return String(x.txHash).toLowerCase() === String(lastTx).toLowerCase() })
+	// A log window the node refused is not an empty window. The resolver used to swallow
+	// per-window failures and publish the surviving subset as a finished tally: it reported
+	// four direct settlements when there were ten, and once reported zero batched ones,
+	// while looking authoritative. The old check here demanded corroboration",
+	// unconditionally, which made it flake once a payment aged out of the scanned range.
+	// These pin the fix instead: the scan must state how much of it succeeded, and a scan
+	// that calls itself complete must not omit a payment inside the range it claims to have read.
+	ok("direct rail discloses whether its log scan was complete", !!(d && d.scan) && typeof d.scan.windowsRequested === "number" && typeof d.scan.windowsFailed === "number" && typeof d.scan.complete === "boolean", d && d.scan ? d.scan.windowsFailed + " of " + d.scan.windowsRequested + " windows unread" : "no disclosure")
+	ok("gateway rail discloses whether its log scan was complete", !!(g && g.scan) && typeof g.scan.windowsFailed === "number" && typeof g.scan.complete === "boolean")
+	ok("a partial scan is never presented as a complete tally", !!s.body && s.body.scanComplete === (!!(d && d.scan && d.scan.complete) && !!(g && g.scan && g.scan.complete)) && (s.body.scanComplete === true || !!s.body.degraded), "scanComplete=" + (s.body && s.body.scanComplete))
+	ok("an unread window is disclosed with its reason, never as an empty one", !(d && d.scan && d.scan.windowsFailed > 0) || (Array.isArray(d.scan.errors) && d.scan.errors.length > 0))
+	ok("resolver publishes the block range it scanned, so an absence is explainable", !!d && typeof d.chainTip === "number" && typeof d.windowBlocks === "number", "tip=" + (d && d.chainTip) + " window=" + (d && d.windowBlocks))
+	ok("resolver corroborates the metrics settlement tx when it falls inside the scanned range", !inWindow || corroborated, "block=" + blk + " floor=" + floorBlk + " corroborated=" + corroborated)
+	ok("a scan that calls itself complete never omits an in-window payment", !(inWindow && d && d.scan && d.scan.complete) || corroborated, lastTx || "")
 }
 
 console.log("\n[8] EIP-712 spend-intent endpoint (no keys: schema + honest rejection)")
