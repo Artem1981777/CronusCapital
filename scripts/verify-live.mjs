@@ -141,6 +141,21 @@ console.log("\n[7] Gateway settlement resolver (GET /api/settlements)")
 	ok("resolver publishes the block range it scanned, so an absence is explainable", !!d && typeof d.chainTip === "number" && typeof d.windowBlocks === "number", "tip=" + (d && d.chainTip) + " window=" + (d && d.windowBlocks))
 	ok("resolver corroborates the metrics settlement tx when it falls inside the scanned range", !inWindow || corroborated, "block=" + blk + " floor=" + floorBlk + " corroborated=" + corroborated)
 	ok("a scan that calls itself complete never omits an in-window payment", !(inWindow && d && d.scan && d.scan.complete) || corroborated, lastTx || "")
+	// The treasury doubles as the AMM buyer and the bridge recipient, so a rail that counted
+	// every inbound USDC transfer as an x402 settlement reported 12.150098 USDC where signals
+	// had earned 0.16 - a swap payout, a CCTP mint and a funding transfer, counted as revenue.
+	// Overstating is as dishonest as understating, so a settlement must now be a transfer of a
+	// published price, and anything else must be disclosed rather than dropped or absorbed.
+	const prices = (d && Array.isArray(d.prices)) ? d.prices : []
+	const ZERO = "0x0000000000000000000000000000000000000000"
+	const allPriced = list.length > 0 && list.every(function (x) { return prices.some(function (p) { return Math.abs(Number(x.amountUsdc) - Number(p)) < 1e-9 }) })
+	const listSum = Number(list.reduce(function (a, x) { return a + Number(x.amountUsdc) }, 0).toFixed(6))
+	const np = d && d.nonPayments
+	ok("resolver publishes the prices that define an x402 settlement", prices.length > 0, prices.join(" / "))
+	ok("every direct settlement is a transfer of a published price, not any inbound USDC", allPriced, list.length + " settlements")
+	ok("a mint is never counted as a payment", list.every(function (x) { return String(x.payer).toLowerCase() !== ZERO }))
+	ok("the direct total is exactly the sum of the settlements it lists", !!d && Math.abs(Number(d.totalUsdc) - listSum) < 1e-6, "totalUsdc=" + (d && d.totalUsdc) + " sum=" + listSum)
+	ok("inbound transfers that are not payments are disclosed, never silently absorbed", !!np && typeof np.count === "number" && typeof np.totalUsdc === "number", np ? np.count + " disclosed, " + np.totalUsdc + " USDC" : "no disclosure")
 }
 
 console.log("\n[8] EIP-712 spend-intent endpoint (no keys: schema + honest rejection)")
