@@ -158,6 +158,31 @@ console.log("\n[7] Gateway settlement resolver (GET /api/settlements)")
 	ok("inbound transfers that are not payments are disclosed, never silently absorbed", !!np && typeof np.count === "number" && typeof np.totalUsdc === "number", np ? np.count + " disclosed, " + np.totalUsdc + " USDC" : "no disclosure")
 }
 
+console.log("\n[G] governance state (GET /api/governance)")
+{
+	const s = await getJson("/api/governance?fresh=1")
+	const b = (s && s.body) || {}
+	const gd = b.guard || {}
+	const ms = b.multisig || {}
+	const inv = Array.isArray(b.invariants) ? b.invariants : []
+	ok("HTTP 200", s.status === 200, "got " + s.status)
+	ok("governance state ok", b.ok === true)
+	ok("the guard is owned by the multisig, not by a single key", gd.ownerIsMultisig === true, "owner=" + gd.owner)
+	ok("changing the rules needs at least two keys", typeof ms.threshold === "number" && ms.threshold >= 2 && ms.threshold <= ms.ownersCount, ms.threshold + " of " + ms.ownersCount)
+	ok("live caps never exceed the immutable hard ceilings", typeof gd.perTxCapUsdc === "number" && typeof gd.hardPerTxCapUsdc === "number" && gd.perTxCapUsdc <= gd.hardPerTxCapUsdc && gd.dailyCapUsdc <= gd.hardDailyCapUsdc, gd.perTxCapUsdc + "/" + gd.hardPerTxCapUsdc + " per tx, " + gd.dailyCapUsdc + "/" + gd.hardDailyCapUsdc + " daily USDC")
+	ok("no owner action can take effect immediately", typeof gd.timelockDelaySeconds === "number" && gd.timelockDelaySeconds > 0, gd.timelockDelaySeconds + "s timelock")
+	ok("the cold recovery sink is neither the owner nor the operator", !!gd.recovery && gd.recovery !== gd.owner && gd.recovery !== gd.operator, "recovery=" + gd.recovery)
+	// A governance surface that hides its own weak spots is worse than none: it launders an
+	// unverified control into a green check. So the endpoint must publish what does NOT hold,
+	// name the gap, and state the fix - and a value the node refused must never render as fine.
+	ok("every invariant reports holds as true, false or unknown, never omits it", inv.length > 0 && inv.every(function (i) { return i.holds === true || i.holds === false || i.holds === null }), inv.length + " invariants")
+	ok("an unread value is disclosed, never defaulted to a safe-looking one", Array.isArray(b.unread) && b.complete === (b.unread.length === 0), "unread=" + (Array.isArray(b.unread) ? b.unread.length : "none"))
+	ok("a failing invariant is published with a named gap, its impact and its fix", inv.every(function (i) { return i.holds !== false }) || (Array.isArray(b.knownGaps) && b.knownGaps.length > 0 && b.knownGaps.every(function (g) { return typeof g.gap === "string" && typeof g.fix === "string" && typeof g.impact === "string" })), (Array.isArray(b.knownGaps) ? b.knownGaps.length : 0) + " gaps named")
+	ok("pending multisig transactions state how many confirmations are missing", !Array.isArray(ms.pending) || ms.pending.every(function (t) { return t.confirmationsNeeded === null || typeof t.confirmationsNeeded === "number" }), ms.pendingCount + " pending")
+	const hot = inv.find(function (i) { return String(i.name).indexOf("cannot change the rules on its own") !== -1 })
+	ok("the agent hot key cannot change the rules on its own", !hot || hot.holds === true, hot && hot.detail)
+}
+
 console.log("\n[8] EIP-712 spend-intent endpoint (no keys: schema + honest rejection)")
 {
 	const s = await getJson("/api/spend-intent")
