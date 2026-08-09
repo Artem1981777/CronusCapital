@@ -9,7 +9,6 @@ import { useEffect, useRef, useState } from "react"
 import { encodeFunctionData, keccak256, stringToHex, toBytes } from "viem"
 import MarketBoard from "../MarketBoard"
 import SecurityPanel from "../SecurityPanel"
-import GovernancePanel from "./GovernancePanel"
 import type { CSSProperties } from "react"
 import { useAccount, useConnect, useDisconnect, useWriteContract, usePublicClient, useWaitForTransactionReceipt, useSwitchChain } from "wagmi"
 import { LiveSettlements } from "./LiveSettlements"
@@ -677,7 +676,6 @@ export function CronusDashboard() {
 			</div>
 
 			<SecurityPanel />
-                    <GovernancePanel />
 					<MarketBoard />
 						
 			{(txBusy || txConfirmed || txError || preflight.status === "running" || preflight.status === "fail") && (
