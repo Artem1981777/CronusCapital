@@ -181,6 +181,15 @@ console.log("\n[G] governance state (GET /api/governance)")
 	ok("pending multisig transactions state how many confirmations are missing", !Array.isArray(ms.pending) || ms.pending.every(function (t) { return t.confirmationsNeeded === null || typeof t.confirmationsNeeded === "number" }), ms.pendingCount + " pending")
 	const hot = inv.find(function (i) { return String(i.name).indexOf("cannot change the rules on its own") !== -1 })
 	ok("the agent hot key cannot change the rules on its own", !hot || hot.holds === true, hot && hot.detail)
+	// A remediation that lives only in prose is not a remediation. If a gap is being fixed,
+	// the queue must be readable, time-stamped, and unable to look done before its eta.
+	const tl = b.timelock || {}
+	const q = Array.isArray(tl.queued) ? tl.queued : []
+	const nowS = Math.floor(Date.now() / 1000)
+	ok("a rules change in flight is disclosed with the exact time it can execute", typeof tl.queuedCount === "number" && tl.queuedCount === q.length && q.every(function (x) { return typeof x.eta === "number" && typeof x.etaIso === "string" && typeof x.secondsRemaining === "number" }), tl.queuedCount + " queued")
+	ok("a queued rules change never reports itself executable before its timelock expires", q.every(function (x) { return x.executable === (nowS >= x.eta) }), q.map(function (x) { return x.action + " in " + x.secondsRemaining + "s" }).join(", ") || "none queued")
+	ok("the scanned window for queued operations is stated, so an absence is explainable", typeof tl.scanned === "string" && tl.scanned.length > 0, tl.scanned)
+	ok("a gap whose fix is already on-chain publishes its executable time, not a promise", (Array.isArray(b.knownGaps) ? b.knownGaps : []).every(function (g) { return !g.remediation || (typeof g.remediation.executableAt === "string" && typeof g.remediation.opId === "string" && typeof g.remediation.status === "string") }), (Array.isArray(b.knownGaps) ? b.knownGaps : []).filter(function (g) { return !!g.remediation }).length + " gaps with an on-chain fix in flight")
 }
 
 console.log("\n[8] EIP-712 spend-intent endpoint (no keys: schema + honest rejection)")

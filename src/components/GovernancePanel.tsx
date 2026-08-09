@@ -3,10 +3,12 @@ import type { CSSProperties } from "react"
 
 type Invariant = { name: string; holds: boolean | null; detail: string }
 type Gap = { gap: string; impact: string; severity: string; fix: string }
+type Queued = { id: string; action: string; eta: number; etaIso: string; secondsRemaining: number; executable: boolean; queuedByMultisigTx: number }
+type Timelock = { delaySeconds: number | null; queuedCount: number; queued: Queued[]; scanned: string; note?: string }
 type PendingTx = { id: number; to: string; executed: boolean; confirmations: number | null; confirmationsNeeded: number | null; targetsGuard: boolean; selector: string }
 type Guard = { address: string; explorer: string; owner: string | null; ownerIsMultisig: boolean | null; operator: string | null; guardian: string | null; recovery: string | null; perTxCapUsdc: number | null; dailyCapUsdc: number | null; hardPerTxCapUsdc: number | null; hardDailyCapUsdc: number | null; availableUsdc: number | null; paused: boolean | null; timelockDelaySeconds: number | null; note?: string }
 type Multisig = { address: string; explorer: string; threshold: number | null; ownersCount: number | null; owners: string[]; txCount: number | null; pendingCount: number; pending: PendingTx[]; note?: string }
-type GovResp = { ok: boolean; generatedAt?: string; guard?: Guard; multisig?: Multisig; invariants?: Invariant[]; knownGaps?: Gap[]; unread?: Array<{ field: string; reason: string }>; complete?: boolean; honesty?: string; cache?: { hit: boolean; stale: boolean; ageSeconds: number }; degraded?: { reason: string } }
+type GovResp = { ok: boolean; generatedAt?: string; guard?: Guard; multisig?: Multisig; invariants?: Invariant[]; knownGaps?: Gap[]; timelock?: Timelock; unread?: Array<{ field: string; reason: string }>; complete?: boolean; honesty?: string; cache?: { hit: boolean; stale: boolean; ageSeconds: number }; degraded?: { reason: string } }
 
 const short = (a: string | null) => (a && a.length > 10 ? a.slice(0, 6) + "\u2026" + a.slice(-4) : a || "")
 
@@ -31,6 +33,7 @@ const S: Record<string, CSSProperties> = {
   gapBody: { fontSize: 11, color: "#cbd5e1", lineHeight: 1.5, marginTop: 3 },
   fix: { fontSize: 11, color: "#bfe9cb", marginTop: 3 },
   err: { fontSize: 11, color: "#f0a0a0", marginTop: 8 },
+	fixWrap: { marginTop: 8, padding: "8px 10px", borderRadius: 8, background: "rgba(120,200,140,0.07)", border: "1px solid rgba(120,200,140,0.35)" },
 }
 
 function Val({ text }: { text: string | null }) {
@@ -67,6 +70,7 @@ export default function GovernancePanel() {
   const ms = data?.multisig || null
   const inv = data?.invariants || []
   const gaps = data?.knownGaps || []
+	const queued = data?.timelock?.queued || []
   const unread = data?.unread || []
   const failing = inv.filter((i) => i.holds === false).length
   const unknown = inv.filter((i) => i.holds === null).length
@@ -131,7 +135,18 @@ export default function GovernancePanel() {
       {unread.length > 0 ? <div style={S.note}>{unread.length} value(s) could not be read from Arc and are shown as unread, never defaulted: {unread.map((u) => u.field).join(", ")}.</div> : null}
       {data?.degraded ? <div style={S.err}>Arc could not be read for this request ({data.degraded.reason}); showing the last successful read.</div> : null}
       {data?.honesty ? <div style={S.note}>{data.honesty}</div> : null}
-      <div style={S.note}>Reproduce without keys: <a style={S.link} href="/api/governance" target="_blank" rel="noreferrer">/api/governance {"\u2197"}</a> {"\u00b7"} asserted by 12 of the 145 checks in npm run verify-live.</div>
+      {queued.length > 0 ? (
+        <div style={S.fixWrap}>
+          <div style={S.gapTitle}>Fix in flight {"\u00b7"} {queued.length} rules change queued on-chain</div>
+          {queued.map((q) => (
+            <div key={q.id} style={S.gapBody}>
+              {q.action} {"\u00b7"} executable at {q.etaIso} {"\u00b7"} {q.executable ? "timelock expired, awaiting execution" : Math.round(q.secondsRemaining / 3600) + "h left"} {"\u00b7"} queued by multisig tx #{q.queuedByMultisigTx}
+            </div>
+          ))}
+          <div style={S.fix}>A queued change cannot execute before its stated time, and the guardian or the owner can still cancel it. The fix is on-chain and time-stamped, not a promise in prose.</div>
+        </div>
+      ) : null}
+      <div style={S.note}>Reproduce without keys: <a style={S.link} href="/api/governance" target="_blank" rel="noreferrer">/api/governance {"\u2197"}</a> {"\u00b7"} asserted by 16 of the 149 checks in npm run verify-live.</div>
       {err ? <div style={S.err}>governance unavailable: {err}</div> : null}
     </section>
   )
