@@ -1,0 +1,14 @@
+{
+  "op": "extSetGuardian",
+  "reason": "split the pause role away from the hot operator key",
+  "guard": "0xeA4788164c63B0EF2788d9c74859B43f42BC391E",
+  "multisig": "0xde8874C53D82a38c1c2864ea575f9E62Dc29dA5F",
+  "newGuardian": "0x3D31EC5079E78ab2e18A1b49fd78927523d5A7F7",
+  "previousGuardian": "0xB8D0054Dd4FE76115E75BF196d89E760bbCD3bc6",
+  "data": "0x46c197b60000000000000000000000003d31ec5079e78ab2e18a1b49fd78927523d5a7f7",
+  "salt": "0x88c305a7e3169664b7b2cc0d222ff15df17bc463604ce1ab797c53acb6e61106",
+  "id": "0xd55e737fd23b7c32c34cc33761eed51810733bc7f0d8a11b66497d9fc8a8f304",
+  "eta": 1786413122,
+  "etaIso": "2026-08-11T01:52:02.000Z",
+  "queuedByMultisigTx": "0x33e84cf132961079e2dc16473f447ddcb2739194bbd2e7690524fc9f744d2d08"
+}
