@@ -22,6 +22,8 @@ Funds live in `CronusAgentGuard`. Three separated roles:
 | `operator` | AI hot key | **only** `spend()`, bounded by caps + allowlist |
 | `guardian` | watcher | `pause()` instantly (circuit breaker) |
 
+**What is actually deployed on Arc testnet, as read live by `/api/governance`:** the table above is the design, not a claim about the current keys. On the live instance the `operator` and `guardian` roles are held by the **same** hot key (`0xB8D0054Dd4FE76115E75BF196d89E760bbCD3bc6`), and that key is also one of the three multisig owners. The containment guarantees still hold: a single key cannot change the rules (2-of-3) and no owner action escapes the 48h timelock. But the three-way split is two roles in practice, the guardian is not an independent circuit breaker against the operator, and a compromised hot key would need one cold co-signer instead of two to queue a rules change. Both gaps are published as machine-readable `knownGaps` by `/api/governance` with the exact fix for each, rather than left for a reader to discover. Before mainnet: a separate cold watcher key as guardian, and the hot key removed from the multisig.
+
 ### Invariants enforced by the contract
 - `spend()` reverts unless the recipient is on the **allowlist** (`recipient not allowlisted`).
 - `spend()` reverts above the **per-transaction cap** (`over per-tx cap`).
@@ -83,7 +85,7 @@ A guard begs the question: who controls the owner - and who controls *that* cont
 The buck stops at math (thresholds) + immutable code + the exit right + public verifiability - not at an infinitely tall tower of human controllers.
 
 ### Live (Arc testnet)
-- **CronusAgentGuardV2:** `0xCE9B824231bACEDB102D2848e4e1cf3D35eC595d`
+- **CronusAgentGuardV2:** `0xCE9B824231bACEDB102D2848e4e1cf3D35eC595d` (first V2 deployment, single-key owner; the hardened production instance owned by the multisig is in the section below)
 - **Deploy tx:** `0x226b0762c1531453db6d9f747c06eedc9dba30a65388e7b94eb8855b42ed4c03`
 - **Tests:** `forge test --match-contract CronusAgentGuardV2Test` -> 13/13 passing.
 
@@ -103,6 +105,7 @@ The V2 guard is now owned by an on-chain **2-of-3 multisig** (no single key can 
 - Multisig deploy tx: `0xff488479f2b20b44b9c36924795d56dfb3616d2bcd24d3218f10a7e025eaff5e`
 - Immutable hard caps: 50 USDC per-tx / 500 USDC daily. Timelock delay: 172800s (48h).
 - Proofs: multisig unit tests 12/12, guard V2 unit tests 13/13, and `verify-governance.mjs` asserts the live on-chain wiring (14/14).
+- `/api/governance` reads the live state off Arc with `eth_call` and no keys, and publishes 7 governance invariants: 6 hold, 1 is reported as failing (operator and guardian are the same key). A value the node refuses to return is listed under `unread` and its invariant reads unknown, never satisfied.
 
 
 #### Live proof: 2-of-3 multisig governs the guard
