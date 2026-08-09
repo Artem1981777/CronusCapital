@@ -53,6 +53,10 @@
       "destination": "/api/info?kind=leaderboard"
     },
     {
+      "source": "/api/governance",
+      "destination": "/api/info?kind=governance"
+    },
+    {
       "source": "/api/settlements",
       "destination": "/api/info?kind=settlements"
     },
