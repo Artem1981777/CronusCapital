@@ -1,0 +1,16 @@
+{
+  "op": "extAddAllowed",
+  "reason": "give the guard one allowlisted recipient so the remaining two fire-drill scenarios can run for real",
+  "guard": "0xeA4788164c63B0EF2788d9c74859B43f42BC391E",
+  "multisig": "0xde8874C53D82a38c1c2864ea575f9E62Dc29dA5F",
+  "target": "0xdc6778C5F8cC74b10aED11c48306D4Cfc5737FBD",
+  "data": "0x3358e415000000000000000000000000dc6778c5f8cc74b10aed11c48306d4cfc5737fbd",
+  "salt": "0x1342ae498ff58025cd39a2ca02579a8402792f08e50343a05abc8ee9a790c003",
+  "id": "0x611d39237db982d1a3d66d7653d2aecd4735df19eef1f56047cd1915fe4cad5e",
+  "eta": 1786655222,
+  "etaIso": "2026-08-13T21:07:02.000Z",
+  "multisigTx": 6,
+  "submitHash": "0x6ec1e71a05f51e7f9831f1af4e7ffd2cd6016ec43dfd4ab8f8bee4c6512ef3bf",
+  "confirmHash": "0x4fd7710bf50a153d374aeab276e2da8d20c3ba216d2741803450517d1f251278",
+  "executeHash": "0xafcd81b3ba1a334af1a64c89056c39e669aba30bb37dbab186362e3d1b075b38"
+}
