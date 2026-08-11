@@ -57,6 +57,10 @@
       "destination": "/api/info?kind=governance"
     },
     {
+      "source": "/api/drills",
+      "destination": "/api/info?kind=drills"
+    },
+    {
       "source": "/api/settlements",
       "destination": "/api/info?kind=settlements"
     },

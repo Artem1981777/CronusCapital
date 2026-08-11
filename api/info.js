@@ -11,6 +11,7 @@ import traction from "../lib/traction.js"
 import leaderboard from "../lib/leaderboard.js"
 import settlements from "../lib/gateway.js"
 import governance from "../lib/governance.js"
+import drills from "../lib/drills.js"
 import spendIntent from "../lib/intents.js"
 import scorecard from "../lib/scorecard.js"
 import trackRecord from "../lib/stake.js"
@@ -35,7 +36,7 @@ import { PRIVACY_ROUTES } from "../lib/privacy/routes.js"
 import { TREASURY_ROUTES } from "../lib/treasury/routes.js"
 
 const ROUTES = { ...mapContract(UPGRADE_ROUTES), ...REAL_ROUTES, ...PRIVACY_ROUTES,
-	...TREASURY_ROUTES, cover, alerts, governance, "backtest": backtest, "trace": trace, "agent-withdraw": agentWithdraw, "subscription": subscription, "split-pay": splitPay, "spend-limit": spendLimit, "fund-escrow": fundEscrow, "resolve-stake": resolveStake, manifest, openapi, receipts, receipt, metrics, traction, leaderboard, settlements, "spend-intent": spendIntent, scorecard, "track-record": trackRecord, "open-stake": openStake, "pay-to-think": payToThink, "vault-nav": vaultNav, "signal-x402": signalX402 }
+	...TREASURY_ROUTES, cover, alerts, governance, drills, "backtest": backtest, "trace": trace, "agent-withdraw": agentWithdraw, "subscription": subscription, "split-pay": splitPay, "spend-limit": spendLimit, "fund-escrow": fundEscrow, "resolve-stake": resolveStake, manifest, openapi, receipts, receipt, metrics, traction, leaderboard, settlements, "spend-intent": spendIntent, scorecard, "track-record": trackRecord, "open-stake": openStake, "pay-to-think": payToThink, "vault-nav": vaultNav, "signal-x402": signalX402 }
 
 export default async function handler(req, res) {
 	const kind = String((req.query && req.query.kind) || "").toLowerCase()
