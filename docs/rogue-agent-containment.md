@@ -22,7 +22,7 @@ Funds live in `CronusAgentGuard`. Three separated roles:
 | `operator` | AI hot key | **only** `spend()`, bounded by caps + allowlist |
 | `guardian` | watcher | `pause()` instantly (circuit breaker) |
 
-**What is actually deployed on Arc testnet, as read live by `/api/governance`:** the table above is the design, not a claim about the current keys. On the live instance the `operator` and `guardian` roles are held by the **same** hot key (`0xB8D0054Dd4FE76115E75BF196d89E760bbCD3bc6`), and that key is also one of the three multisig owners. The containment guarantees still hold: a single key cannot change the rules (2-of-3) and no owner action escapes the 48h timelock. But the three-way split is two roles in practice, the guardian is not an independent circuit breaker against the operator, and a compromised hot key would need one cold co-signer instead of two to queue a rules change. Both gaps are published as machine-readable `knownGaps` by `/api/governance` with the exact fix for each, rather than left for a reader to discover. Before mainnet: a separate cold watcher key as guardian, and the hot key removed from the multisig.
+**What is actually deployed on Arc testnet, as read live by `/api/governance`:** the table above is the design, and as of 2026-08-11 the live keys finally match it. The role migration is complete, and every step of it is on-chain rather than asserted in prose. A fresh cold watcher key became the `guardian` through the timelock: queued 2026-08-09 as multisig tx #3, executable only after 2026-08-11T01:52:02Z, and executed at that time in multisig tx #4 (`0x35332dd2784d9fe94c16899078f5196c7cb16bda0dc682361b438139d3a03498`). The agent hot key was then removed from the multisig in tx #5 (`0x95d75321b131b9c71cf04c1c1b1c1e9c7055671eb44acabe613ed97178629d70`), leaving a 2-of-3 multisig whose signers are all cold keys. The operator now holds no governance signature at all: it can spend within the caps and do nothing else. `/api/governance` accordingly reports `knownGaps` as an empty array. The two gaps that used to be listed there are kept in this history rather than quietly deleted, because a fix is only meaningful next to the flaw it closed: one key had held both the spend role and the pause role, and that key had also been one of the multisig signers.
 
 ### Invariants enforced by the contract
 - `spend()` reverts unless the recipient is on the **allowlist** (`recipient not allowlisted`).
@@ -99,13 +99,14 @@ The V2 guard is now owned by an on-chain **2-of-3 multisig** (no single key can 
 | CronusAgentGuardV2 (hardened) | `0xeA4788164c63B0EF2788d9c74859B43f42BC391E` |
 | CronusMultisig (owner, 2-of-3) | `0xde8874C53D82a38c1c2864ea575f9E62Dc29dA5F` |
 | Cold recovery (immutable exit) | `0x99d0Da7e02c605e9Efe6b06226433770DBafEEac` |
-| Operator (AI hot key) | `0xB8D0054Dd4FE76115E75BF196d89E760bbCD3bc6` |
+| Operator (AI hot key, spend only) | `0xB8D0054Dd4FE76115E75BF196d89E760bbCD3bc6` |
+| Guardian (cold watcher, negative power only) | `0x3D31EC5079E78ab2e18A1b49fd78927523d5A7F7` |
 
 - Guard deploy tx: `0x83667368e256c7a84e783a49baed7185f2256241b18f21ae219ff93696b2aa31`
 - Multisig deploy tx: `0xff488479f2b20b44b9c36924795d56dfb3616d2bcd24d3218f10a7e025eaff5e`
 - Immutable hard caps: 50 USDC per-tx / 500 USDC daily. Timelock delay: 172800s (48h).
 - Proofs: multisig unit tests 12/12, guard V2 unit tests 13/13, and `verify-governance.mjs` asserts the live on-chain wiring (14/14).
-- `/api/governance` reads the live state off Arc with `eth_call` and no keys, and publishes 7 governance invariants: 6 hold, 1 is reported as failing (operator and guardian are the same key). A value the node refuses to return is listed under `unread` and its invariant reads unknown, never satisfied.
+- `/api/governance` reads the live state off Arc with `eth_call` and no keys, and publishes 8 governance invariants, all of which hold as of 2026-08-11: the guard is owned by the multisig, moving it needs 2 of 3 cold keys, live caps sit at or below the immutable ceilings, no owner action takes effect immediately, the cold recovery sink is neither owner nor operator, the agent hot key holds no signature, the spend role and the pause role are held by different keys, and a rules change in flight is disclosed with the exact time it can execute. A value the node refuses to return is listed under `unread` and its invariant reads unknown, never satisfied.
 
 
 #### Live proof: 2-of-3 multisig governs the guard

@@ -135,6 +135,7 @@ export default function GovernancePanel() {
       {unread.length > 0 ? <div style={S.note}>{unread.length} value(s) could not be read from Arc and are shown as unread, never defaulted: {unread.map((u) => u.field).join(", ")}.</div> : null}
       {data?.degraded ? <div style={S.err}>Arc could not be read for this request ({data.degraded.reason}); showing the last successful read.</div> : null}
       {data?.honesty ? <div style={S.note}>{data.honesty}</div> : null}
+      {gaps.length === 0 && data?.complete ? <div style={S.note}>No known gaps on this read: every published invariant holds. This line renders only when the read completed, so an incomplete read stays silent instead of passing for a clean bill of health.</div> : null}
       {queued.length > 0 ? (
         <div style={S.fixWrap}>
           <div style={S.gapTitle}>Fix in flight {"\u00b7"} {queued.length} rules change queued on-chain</div>
