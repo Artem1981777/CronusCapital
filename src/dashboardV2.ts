@@ -27,6 +27,7 @@ export const GROUPS: SectionGroup[] = [
     { id: "standards", label: "Standards", glyph: "⬢" },
   ] },
   { label: "OPS", items: [
+    { id: "drills", label: "Fire Drills", glyph: "⚔" },
     { id: "risk", label: "Risk / SecOps", glyph: "◆" },
     { id: "system", label: "System", glyph: "⚙" },
   ] },
