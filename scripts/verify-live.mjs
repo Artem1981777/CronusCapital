@@ -192,6 +192,46 @@ console.log("\n[G] governance state (GET /api/governance)")
 	ok("a gap whose fix is already on-chain publishes its executable time, not a promise", (Array.isArray(b.knownGaps) ? b.knownGaps : []).every(function (g) { return !g.remediation || (typeof g.remediation.executableAt === "string" && typeof g.remediation.opId === "string" && typeof g.remediation.status === "string") }), (Array.isArray(b.knownGaps) ? b.knownGaps : []).filter(function (g) { return !!g.remediation }).length + " gaps with an on-chain fix in flight")
 }
 
+console.log("\n[D] fire drills (GET /api/drills)")
+{
+  const s = await getJson("/api/drills")
+  const b = (s && s.body) || {}
+  const bl = b.boundedLoss || {}
+  const dr = b.drills || {}
+  const runs = Array.isArray(dr.runs) ? dr.runs : []
+  const last = runs.length > 0 ? runs[0] : null
+  const scen = last && Array.isArray(last.scenarios) ? last.scenarios : []
+  const inv = Array.isArray(b.invariants) ? b.invariants : []
+  const hashRe = /^0x[0-9a-fA-F]{64}$/
+  const byName = function (frag) { return inv.find(function (i) { return String(i.name).indexOf(frag) !== -1 }) }
+  ok("HTTP 200", s.status === 200, "got " + s.status)
+  ok("drills state ok", b.ok === true)
+  // Configuration proves the guard is wired. It does not prove it still fires. These
+  // checks exist so the section cannot quietly rot into a decorative green badge.
+  ok("the worst case is published as numbers, not adjectives", typeof bl.immediateUsdc === "number" && typeof bl.perRolling24hUsdc === "number" && typeof bl.absoluteCeilingPerDayUsdc === "number", bl.immediateUsdc + " now / " + bl.perRolling24hUsdc + " per 24h / " + bl.absoluteCeilingPerDayUsdc + " ceiling")
+  ok("the published worst case never exceeds the immutable ceiling", bl.immediateUsdc <= bl.perRolling24hUsdc && bl.perRolling24hUsdc <= bl.absoluteCeilingPerDayUsdc)
+  ok("the worst case states its formula and its assumption, so it can be argued with", typeof bl.formula === "string" && bl.formula.length > 0 && typeof bl.assumption === "string" && bl.assumption.length > 0)
+  ok("a drill that was never run reads as unknown, never as safe", dr.runCount > 0 || (dr.status === "never_run" && inv.filter(function (i) { return i.holds === true }).length <= 1), "runCount=" + dr.runCount + " status=" + dr.status)
+  ok("freshness is derived from the clock, not asserted", typeof dr.staleAfterSeconds === "number" && (dr.runCount === 0 ? dr.fresh === false : dr.fresh === (dr.ageSeconds < dr.staleAfterSeconds)), dr.ageSeconds + "s old, stale after " + dr.staleAfterSeconds + "s")
+  // The cheapest unforgeable evidence available: a rejected attempt is a FAILED
+  // transaction in a mined block. A claimed rejection without a hash is just a claim.
+  ok("every rejected attack is backed by a real transaction hash, never by a claim", scen.filter(function (x) { return x.outcome === "reverted" }).every(function (x) { return hashRe.test(String(x.txHash)) }), scen.filter(function (x) { return x.outcome === "reverted" }).length + " rejections on-chain")
+  ok("a rejected attack states the reason the contract gave", scen.filter(function (x) { return x.outcome === "reverted" }).every(function (x) { return typeof x.reason === "string" && x.reason.length > 0 }))
+  // A skipped test is not a passed test. This is the check that currently fails us
+  // on purpose: two scenarios cannot run until the guard has an allowlisted recipient.
+  const skipped = scen.filter(function (x) { return x.outcome === "skipped" })
+  const rogueInv = byName("every rogue scenario")
+  ok("a skipped scenario is never counted as a passed one", skipped.length === 0 || !rogueInv || rogueInv.holds !== true, skipped.length + " skipped")
+  ok("a skipped scenario says why it could not run", skipped.every(function (x) { return typeof x.reason === "string" && x.reason.length > 0 }))
+  const paid = scen.find(function (x) { return x.id === "bounded_allowlisted_payment" })
+  const railInv = byName("bounded rail still pays")
+  ok("the rail is only called alive when a real payment settled", !railInv || railInv.holds !== true || (!!paid && paid.outcome === "succeeded" && hashRe.test(String(paid.txHash))), paid ? paid.outcome : "no control payment")
+  // An attack that would have succeeded must be screamed about, not filed as a pass.
+  ok("an attack path that would have worked is never recorded as containment", scen.every(function (x) { return x.outcome !== "unexpected_success" && x.outcome !== "aborted_would_succeed" }))
+  ok("every invariant reports holds as true, false or unknown, never omits it", inv.length > 0 && inv.every(function (i) { return i.holds === true || i.holds === false || i.holds === null }), inv.length + " invariants")
+  ok("an unread value is disclosed, never defaulted to a safe-looking one", Array.isArray(b.unread) && b.complete === (b.unread.length === 0))
+  ok("the drill history states where it is stored, so a reader can go and check it", typeof dr.storage === "string" && dr.storage.length > 0, dr.storage)
+}
 console.log("\n[8] EIP-712 spend-intent endpoint (no keys: schema + honest rejection)")
 {
 	const s = await getJson("/api/spend-intent")
