@@ -1127,6 +1127,63 @@ no manual checks. If something happens on-chain, the operator knows within
 *Judges: this means the autonomous agent is not a demo loop — it runs 24/7
 unattended, and its operator is paged like an SRE when real money moves.*
 
+## Fire drills: is the containment still firing?
+
+Configuration proves the guard is wired correctly. It does not prove it still fires. So the
+agent periodically attacks itself on the live network and publishes what came back.
+
+Live section: https://cronus-capital.vercel.app/#/drills — raw JSON: `/api/drills`
+
+| Scenario | Expected | What it proves |
+| --- | --- | --- |
+| `drain_to_new_address` | revert | a fully compromised key cannot reach an address nobody approved |
+| `over_per_tx_cap` | revert | a single payment cannot exceed the per-tx cap |
+| `operator_escalation` | revert | the spending key cannot change the rules or unpause |
+| `bounded_allowlisted_payment` | success | the bounded rail still pays, so a pass is not just a dead contract |
+
+A rejected attempt is a FAILED transaction in a mined block, which is the cheapest
+unforgeable evidence available: a screenshot can be drawn, a reverted transaction cannot.
+
+### First exercise, 2026-08-11T20:59:27Z
+
+- `drain_to_new_address` — reverted, `recipient not allowlisted`, block 56504166,
+  [0x3f603699…bc295](https://testnet.arcscan.app/tx/0x3f6036996012c228f4c6370b05359ab79166ac8545bafa8d97b927ffb83bc295)
+- `operator_escalation` — reverted, `not owner`, block 56504176,
+  [0x9ab114b1…edb22](https://testnet.arcscan.app/tx/0x9ab114b1a90e78ed3de53807e4deaa91da7af5fa4a403fdda52e9bef3e1edb22)
+- `over_per_tx_cap` — **skipped**: the guard has no allowlisted recipient, so a cap test
+  would have reverted for the wrong reason and proven nothing
+- `bounded_allowlisted_payment` — **skipped**: no allowlisted recipient and no balance
+
+Two of four scenarios did not run, so two invariants read `false` rather than green. A
+skipped test is not a passed test, and `/api/drills` is built so it cannot pretend otherwise.
+
+Closing those two gaps requires adding an allowlisted recipient, which is a rule change, so
+it is queued behind the guard's own 48-hour timelock. Queued 2026-08-11T21:07:02Z as multisig
+transaction 6, operation `0x611d3923…ad5e`, executable no earlier than **2026-08-13T21:07:02Z**.
+We cannot widen the agent's reach faster than an observer can react — not even with every
+cold key in hand. A delay that inconveniences its own authors is a control, not a claim.
+
+### Bounded-loss certificate
+
+The same endpoint publishes the upper bound on what a fully compromised operator key can
+cost, derived from live caps rather than asserted: **25 USDC** immediately, **100 USDC** per
+rolling 24h, and never above the immutable **500 USDC** ceiling fixed at deploy. The figure
+assumes the key is entirely in an attacker's hands and that nothing off-chain slows them down.
+It excludes a compromise of two cold co-signers, which would still face the 48-hour timelock.
+
+### Safety of the drill itself
+
+An attack transaction is broadcast only after a static call proves it reverts. If a rogue
+path ever turns out to be executable, the runner refuses to send it and records a red result
+instead: a fire drill must never become the fire.
+
+Drill history lives in `drills/*.json` in this repository, not in a private cache, so anyone
+can replay it. Sixteen checks in `npm run verify-live` hold the section to its claims,
+including one asserting that a scenario marked `skipped` is never counted as passed.
+
+Reproduce with no keys: `curl https://cronus-capital.vercel.app/api/drills`
+Dry-run it yourself: `node scripts/drills/run-drill.mjs --simulate`
+
 ## Security audit and test suite
 
 Self-audit of every money-moving path, 2026-07-25. Machine-readable copy lives in the agent card under `security` and `tests`.
