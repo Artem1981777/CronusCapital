@@ -1,0 +1,48 @@
+{
+  "runId": "2026-08-11T20-59-15-085Z",
+  "startedAt": "2026-08-11T20:59:15.085Z",
+  "finishedAt": "2026-08-11T20:59:27.890Z",
+  "mode": "live",
+  "guard": "0xeA4788164c63B0EF2788d9c74859B43f42BC391E",
+  "operator": "0xB8D0054Dd4FE76115E75BF196d89E760bbCD3bc6",
+  "perTxCapUsdc": 25,
+  "availableUsdcAtStart": 25,
+  "allowlistedRecipientUsed": null,
+  "scenarios": [
+    {
+      "id": "drain_to_new_address",
+      "expect": "revert",
+      "outcome": "reverted",
+      "reason": "recipient not allowlisted",
+      "txHash": "0x3f6036996012c228f4c6370b05359ab79166ac8545bafa8d97b927ffb83bc295",
+      "block": 56504166,
+      "gasUsed": "33589",
+      "why": "a fully compromised key must not reach an address nobody approved"
+    },
+    {
+      "id": "over_per_tx_cap",
+      "expect": "revert",
+      "outcome": "skipped",
+      "reason": "no allowlisted recipient found among the candidates, so a cap test would revert for the wrong reason",
+      "why": "a single payment must not exceed the per-tx cap"
+    },
+    {
+      "id": "operator_escalation",
+      "expect": "revert",
+      "outcome": "reverted",
+      "reason": "not owner",
+      "txHash": "0x9ab114b1a90e78ed3de53807e4deaa91da7af5fa4a403fdda52e9bef3e1edb22",
+      "block": 56504176,
+      "gasUsed": "23570",
+      "why": "the spending key must not be able to change the rules or unpause"
+    },
+    {
+      "id": "bounded_allowlisted_payment",
+      "expect": "success",
+      "outcome": "skipped",
+      "reason": "no allowlisted recipient",
+      "why": "a bounded rail must still pay, otherwise the test proves nothing but a dead contract"
+    }
+  ],
+  "note": "Rogue scenarios are broadcast only after a static call proved they revert, so a reverted transaction here is evidence of containment rather than a failed attempt at theft."
+}
