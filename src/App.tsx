@@ -33,6 +33,7 @@ import { RiskGauges } from "./components/RiskGauges"
 import { GuardrailProof } from "./components/GuardrailProof"
 import GovernancePanel from "./components/GovernancePanel"
 import DrillsPanel from "./components/DrillsPanel"
+import NftPanel from "./components/NftPanel"
 import { VaultPanel } from "./components/VaultPanel"
 import { SystemPanel } from "./components/SystemPanel"
 import { MarketTickers } from "./components/MarketTickers"
@@ -394,6 +395,7 @@ export default function App() {
       <Sec id="standards" section={secView}><ComposabilityStrip /></Sec>
         <Sec id="risk" section={secView}><GovernancePanel /><PolicyGuardrails /><RiskGauges /><GuardrailProof /></Sec>
         <Sec id="drills" section={secView}><DrillsPanel /></Sec>
+        <Sec id="nft" section={secView}><NftPanel /></Sec>
 			<Sec id="proof" section={secView}><VerifiableLedger /></Sec>
       <Sec id="traction" section={secView}><div id="cap-settlements" /><Dashboard totalOnChain={sessionTxCount} /></Sec>
       <Sec id="proof" section={secView}><ProofBanner /></Sec><Sec id="standards" section={secView}><div id="cap-stellar" /><StellarWallet /><StellarBurn /><StellarComplete /></Sec>

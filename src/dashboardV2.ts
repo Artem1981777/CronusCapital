@@ -28,6 +28,7 @@ export const GROUPS: SectionGroup[] = [
   ] },
   { label: "OPS", items: [
     { id: "drills", label: "Fire Drills", glyph: "⚔" },
+    { id: "nft", label: "NFT / Proof Tokens", glyph: "❖" },
     { id: "risk", label: "Risk / SecOps", glyph: "◆" },
     { id: "system", label: "System", glyph: "⚙" },
   ] },
