@@ -1127,6 +1127,42 @@ no manual checks. If something happens on-chain, the operator knows within
 *Judges: this means the autonomous agent is not a demo loop — it runs 24/7
 unattended, and its operator is paged like an SRE when real money moves.*
 
+## Proof tokens (two NFTs that do work)
+
+Live section: https://cronus-capital.vercel.app/#/nft — resolver: `/api/nft`
+
+Most agent NFTs are a picture. These two are load-bearing, and one can switch the other off.
+
+**Fire drill certificate** (`0xB327a942A64A190b453c7D6b27Cc03FE7ACDF166`, soulbound ERC-721).
+Minted by the operator that runs a drill, to the multisig, never to itself. The guardian can revoke
+one but can never issue one: the watcher holds negative power only. Transfers revert, so a track
+record cannot be sold or gifted. It expires one day after the drill it describes, so silence turns
+into EXPIRED without anyone acting. Certificate #1 reads INCOMPLETE, not passing, because two of the
+four scenarios were skipped — the guard's allowlist is empty and it holds no USDC, so those two
+scenarios had nothing to attempt. A skipped scenario is never counted as a passing one.
+Known limit: the contract stores each scenario's transaction hash but cannot verify it itself.
+
+**Access pass and parametric policy** (`0x6D59E3bF169743Dd31b5ba9eb394FEad0A9756C2`, ERC-721).
+2 USDC buys 30 days of API access plus a policy. Half of every payment stays in the contract as the
+coverage pool, half goes to the treasury. The advertised cap is 5 USDC per pass, but `backedPerPass`
+is the smaller of that cap and what the pool can actually pay, so the policy can never promise more
+than it holds. A payout requires an unexpired pass and a certificate reading BREACHED, once per pass.
+
+**The leash.** The pass reads the certificate's status on chain. If the drills stop and the
+certificate goes stale, the contract suspends coverage by itself. We cannot keep selling protection
+while letting the proofs rot.
+
+Live so far: pass #1 was bought for 2 USDC and renewed for 2 more. The pool went from 1 to 2 USDC and
+the backing per pass followed the money to 2, not to the advertised 5.
+
+**Contract verification: 8 of 10.** The count on the site is read from the explorer on every request
+and re-checked address by address in `verify-live`. The two that are not verified are named with the
+reason rather than left out: the agent guard v2 and the multisig were compiled with the Termux
+toolchain `0.8.36+commit.8a079791.Android.clang`, which is not among the explorer's reference builds,
+so the verifier cannot reproduce their bytecode. Redeploying them with a supported compiler would
+reset roles, the timelock and a queued multisig transaction, so we publish the gap instead. CRN has
+no source in `contracts/`, so there is nothing to submit for it.
+
 ## Fire drills: is the containment still firing?
 
 Configuration proves the guard is wired correctly. It does not prove it still fires. So the
