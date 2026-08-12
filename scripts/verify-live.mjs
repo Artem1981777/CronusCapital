@@ -481,6 +481,25 @@ console.log("\n[P] the two NFTs are load-bearing, and the policy cannot promise 
 
   ok("nothing on this page was guessed: unread values are reported, not defaulted", Array.isArray(b.unread) && (b.unread.length === 0) === (b.complete === true), "unread=" + (b.unread || []).length + " complete=" + b.complete)
 }
+console.log("\n[Q] the access pass buys something, and a silent chain does not hand out free calls")
+{
+  const base = "/api/signal-x402?topic=BTC-USDC"
+  const holder = await getJson(base + "&pass=0xB8D0054Dd4FE76115E75BF196d89E760bbCD3bc6")
+  const hb = (holder && holder.body) || {}
+  const acc = hb.access || {}
+  ok("a live pass is served without paying for the call", holder.status === 200 && acc.via === "access-pass", "status=" + holder.status)
+  ok("the pass that was served is the one on chain, by token id", acc.tokenId === 1 && String(acc.holder || "").toLowerCase() === "0xb8d0054dd4fe76115e75bf196d89e760bbcd3bc6", "tokenId=" + acc.tokenId)
+  ok("the holder still receives a real report, not a stub", !!hb.report && typeof hb.commitment === "string")
+  ok("the response admits an address is not proof of ownership", /not that the caller/i.test(String(acc.limit || "")))
+  ok("the expiry served matches a future date, so an expired pass could not pass", !!acc.expiresAt && new Date(acc.expiresAt).getTime() > Date.now(), "expires=" + acc.expiresAt)
+
+  const stranger = await getJson(base + "&pass=0x000000000000000000000000000000000000dEaD")
+  ok("an address with no pass is charged like everyone else", stranger.status === 402, "status=" + stranger.status)
+  const junk = await getJson(base + "&pass=not-an-address")
+  ok("a malformed pass claim is refused rather than trusted", junk.status === 402, "status=" + junk.status)
+  const plain = await getJson(base)
+  ok("the paid route is untouched: no pass, no free signal", plain.status === 402, "status=" + plain.status)
+}
 console.log((fail === 0 ? "ALL CHECKS PASSED" : fail + " CHECK(S) FAILED") + " — " + pass + " passed, " + fail + " failed")
 console.log("No private keys were used. Reproduce: npm run verify-live")
 process.exit(fail === 0 ? 0 : 1)

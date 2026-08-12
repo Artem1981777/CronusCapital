@@ -1167,6 +1167,14 @@ scheduled after the queued multisig transaction executes, not waved away. CRN ha
 
 no source in `contracts/`, so there is nothing to submit for it.
 
+**The pass buys something.** `/api/signal-x402` normally charges per call over x402. A holder can
+instead pass their address, and the endpoint reads `hasAccess` on Arc at request time and serves the
+signal without a payment. There is no subscriber database anywhere: the contract is the only list.
+Two limits are printed in the response rather than hidden. An address is not proof of ownership -
+this proves the named address holds a live pass, not that the caller is that address, so a signature
+challenge is required before this is safe off testnet. And if the chain does not answer, access is
+denied and the caller pays as usual: an unread value is never resolved in the customer's favour.
+
 ## Fire drills: is the containment still firing?
 
 Configuration proves the guard is wired correctly. It does not prove it still fires. So the

@@ -147,7 +147,7 @@ export default function GovernancePanel() {
           <div style={S.fix}>A queued change cannot execute before its stated time, and the guardian or the owner can still cancel it. The fix is on-chain and time-stamped, not a promise in prose.</div>
         </div>
       ) : null}
-      <div style={S.note}>Reproduce without keys: <a style={S.link} href="/api/governance" target="_blank" rel="noreferrer">/api/governance {"\u2197"}</a> {"\u00b7"} asserted by 16 of the 183 checks in npm run verify-live.</div>
+      <div style={S.note}>Reproduce without keys: <a style={S.link} href="/api/governance" target="_blank" rel="noreferrer">/api/governance {"\u2197"}</a> {"\u00b7"} asserted by 16 of the 191 checks in npm run verify-live.</div>
       {err ? <div style={S.err}>governance unavailable: {err}</div> : null}
     </section>
   )

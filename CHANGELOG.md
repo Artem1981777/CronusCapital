@@ -4,6 +4,14 @@ Full dated build log for Cronus Capital, newest first. See the [README](README.m
 
 ## What's new (build log)
 
+- **The pass now buys something, and the verification gap got measured.** `/api/signal-x402` honours a
+  live access pass instead of charging per call: the contract is the only subscriber list, a malformed or
+  passless claim still pays, and a silent chain denies rather than grants. The response states plainly that
+  an address is not proof of ownership. Separately, the two unverified contracts stopped being a shrug: a
+  canary built from the identical guard source on solc 0.8.35 (`0xD8A26144Ff1838bB6fecd467418Db979985f0346`)
+  verified in under a minute, while the deployed 0.8.36 builds are accepted by the explorer and never
+  finished - standard-input, flattened-code and multi-part alike. `verify-live` is now 191 checks, 0 failed.
+
 - **Two NFTs that are not decoration.** A soulbound fire drill certificate records each drill and
   expires a day later; an access pass sells 30 days of API access plus a parametric policy and reads
   the certificate on chain before agreeing that the policy is live. Both draw their own SVG on chain.
