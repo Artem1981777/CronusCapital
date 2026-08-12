@@ -1157,10 +1157,14 @@ the backing per pass followed the money to 2, not to the advertised 5.
 
 **Contract verification: 8 of 10.** The count on the site is read from the explorer on every request
 and re-checked address by address in `verify-live`. The two that are not verified are named with the
-reason rather than left out: the agent guard v2 and the multisig were compiled with the Termux
-toolchain `0.8.36+commit.8a079791.Android.clang`, which is not among the explorer's reference builds,
-so the verifier cannot reproduce their bytecode. Redeploying them with a supported compiler would
-reset roles, the timelock and a queued multisig transaction, so we publish the gap instead. CRN has
+reason rather than left out. The agent guard v2 and the multisig were deployed from 0.8.36 builds,
+and this explorer accepts 0.8.36 submissions and then silently never finishes them: standard-input,
+flattened-code and multi-part all returned "verification started" and nothing else. That is a
+measured claim, not a shrug - the identical guard source compiled with 0.8.35 and deployed as a
+throwaway canary (`0xD8A26144Ff1838bB6fecd467418Db979985f0346`) verified within a minute. Closing the
+gap therefore means redeploying both on 0.8.35 and migrating roles through the 48h timelock, which is
+scheduled after the queued multisig transaction executes, not waved away. CRN has
+
 no source in `contracts/`, so there is nothing to submit for it.
 
 ## Fire drills: is the containment still firing?
