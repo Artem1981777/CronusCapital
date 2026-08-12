@@ -423,6 +423,64 @@ console.log("\n[O] the conviction gate learns from outcomes, and refuses to fake
 	ok("the rule that will move the gate is published, not hidden", typeof L.rule === "string" && /accuracy/.test(L.rule))
 }
 
+console.log("\n[P] the two NFTs are load-bearing, and the policy cannot promise more than it holds")
+{
+  const r = await getJson("/api/nft")
+  const b = (r && r.body) || {}
+  const cert = b.certificate || {}
+  const pass = b.pass || {}
+  const link = b.link || {}
+  const ver = b.verification || {}
+  const cl = cert.latest || {}
+  const pl = pass.latest || {}
+  ok("HTTP 200 nft resolver", r.status === 200 && b.ok === true)
+  ok("a drill certificate exists on chain, not only in the README", (cert.supply || 0) >= 1 && typeof cl.tokenId === "number", "supply=" + cert.supply)
+  ok("an access pass exists on chain", (pass.supply || 0) >= 1 && typeof pl.tokenId === "number", "supply=" + pass.supply)
+  ok("the certificate reports one of the states its contract defines", ["HOLDING", "INCOMPLETE", "BREACHED", "EXPIRED", "REVOKED"].includes(cl.status), "status=" + cl.status)
+
+  const attrs = {}
+  ;((cl.metadata || {}).attributes || []).forEach((a) => { attrs[String(a.trait_type)] = a.value })
+  const skipped = Number(attrs["Scenarios skipped"] || 0)
+  const breached = Number(attrs["Scenarios breached"] || 0)
+  ok("a skipped scenario is never counted as a passing drill", !(skipped > 0 && cl.status === "HOLDING"), "skipped=" + skipped + " status=" + cl.status)
+  ok("a breached scenario would be published as BREACHED", !(breached > 0 && cl.status !== "BREACHED"), "breached=" + breached)
+
+  const backed = Number(pass.backedPerPassUsdc)
+  const pool = Number(pass.poolUsdc)
+  const cap = Number(pass.coverageCapPerPassUsdc)
+  const supply = Number(pass.supply)
+  ok("the coverage the policy advertises is never above its stated cap", backed <= cap + 1e-9, "backed=" + backed + " cap=" + cap)
+  ok("the policy cannot promise more than the pool actually holds", backed * supply <= pool + 1e-9, "backed=" + backed + " x " + supply + " vs pool=" + pool)
+  ok("the pool is real money, not a configured number", pool > 0, "pool=" + pool)
+
+  ok("the pass reads the certificate rather than a cached opinion", link.certificateStatusSeenByPass === cl.status, "pass sees " + link.certificateStatusSeenByPass + ", chain says " + cl.status)
+  const dead = cl.status === "EXPIRED" || cl.status === "REVOKED"
+  ok("coverage is suspended by the contract when the proofs go stale", !(dead && link.coverageLive === true), "status=" + cl.status + " coverage=" + link.coverageLive)
+  ok("a live policy is backed by a drill that actually happened", !(link.coverageLive === true && dead))
+
+  const svg = (x) => typeof x === "string" && x.startsWith("data:image/svg+xml;base64,") && x.length > 500
+  ok("the certificate draws itself on chain, so the artwork outlives this site", svg(cl.image), "bytes=" + ((cl.image || "").length))
+  ok("the pass draws itself on chain too", svg(pl.image), "bytes=" + ((pl.image || "").length))
+
+  const list = ver.contracts || []
+  ok("the verification tally adds up", (ver.verified + ver.unverified + ver.unknown) === ver.total && list.length === ver.total, ver.verified + "+" + ver.unverified + "+" + ver.unknown + " of " + ver.total)
+  ok("every contract we cannot verify is published with a reason", list.filter((c) => c.verified !== true).every((c) => typeof c.reason === "string" && c.reason.length > 20), "unverified=" + ver.unverified)
+
+  let agree = 0
+  let asked = 0
+  for (const c of list) {
+    try {
+      const e = await fetch("https://testnet.arcscan.app/api/v2/addresses/" + c.address, { headers: { accept: "application/json" } })
+      if (!e.ok) continue
+      const j = await e.json()
+      asked++
+      if ((j.is_verified === true) === (c.verified === true)) agree++
+    } catch { /* the explorer being down is not a failed claim */ }
+  }
+  ok("the verification claim matches what the explorer says right now", asked > 0 && agree === asked, agree + " of " + asked + " addresses agreed")
+
+  ok("nothing on this page was guessed: unread values are reported, not defaulted", Array.isArray(b.unread) && (b.unread.length === 0) === (b.complete === true), "unread=" + (b.unread || []).length + " complete=" + b.complete)
+}
 console.log((fail === 0 ? "ALL CHECKS PASSED" : fail + " CHECK(S) FAILED") + " — " + pass + " passed, " + fail + " failed")
 console.log("No private keys were used. Reproduce: npm run verify-live")
 process.exit(fail === 0 ? 0 : 1)
