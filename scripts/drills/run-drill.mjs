@@ -26,6 +26,8 @@ const GUARD_ABI = [
   "function paused() view returns (bool)",
   "function perTxCap() view returns (uint256)",
   "function available() view returns (uint256)",
+  "function dailyCap() view returns (uint256)",
+  "function MAX_DAILY_CAP() view returns (uint256)",
   "function token() view returns (address)",
   "function allowed(address) view returns (bool)",
   "function spend(address,uint256) returns (bool)",
@@ -166,6 +168,43 @@ const run = {
   note: "Rogue scenarios are broadcast only after a static call proved they revert, so a reverted transaction here is evidence of containment rather than a failed attempt at theft.",
 }
 
+// Mint the soulbound certificate for this exercise. The scenarios go in exactly as they
+// happened, skips included, so a drill that proved little produces a certificate that
+// says so on its face rather than a badge that flatters us.
+if (!SIMULATE && fs.existsSync("drill-certificate-address.txt")) {
+  const certAddr = fs.readFileSync("drill-certificate-address.txt", "utf8").trim()
+  const certAbi = JSON.parse(fs.readFileSync("abi/CronusDrillCertificate.json", "utf8"))
+  const cert = new Contract(certAddr, certAbi, hot)
+  const dailyCap = await guard.dailyCap()
+  const ceiling = await guard.MAX_DAILY_CAP()
+  const ZERO32 = "0x" + "0".repeat(64)
+  const tuples = scenarios.map((x) => [
+    String(x.id),
+    String(x.expect),
+    String(x.outcome),
+    String(x.reason || "").slice(0, 120),
+    x.txHash ? String(x.txHash) : ZERO32,
+    BigInt(x.block || 0),
+  ])
+  const finishedUnix = Math.floor(Date.parse(run.finishedAt) / 1000)
+  const mintTx = await cert.mint(finishedUnix, available, dailyCap, ceiling, tuples)
+  console.log("certificate mint sent " + mintTx.hash)
+  const mrec = await provider.waitForTransaction(mintTx.hash)
+  if (mrec.status !== 1) throw new Error("certificate mint reverted, tx " + mintTx.hash)
+  const tokenId = await cert.totalSupply()
+  const st = await cert.status(tokenId)
+  run.certificate = {
+    contract: certAddr,
+    tokenId: Number(tokenId),
+    status: st,
+    holder: await cert.holder(),
+    mintTx: mintTx.hash,
+    block: mrec.blockNumber,
+    explorer: "https://testnet.arcscan.app/tx/" + mintTx.hash,
+    note: "Soulbound. Artwork and metadata are generated on-chain and expire one day after the drill, with no oracle and no server.",
+  }
+  console.log("certificate #" + tokenId + " minted, status " + st)
+}
 if (!SIMULATE) {
   fs.writeFileSync(path.join("drills", runId + ".json"), JSON.stringify(run, null, 2) + "\n")
   const files = fs.readdirSync("drills").filter((f) => f.endsWith(".json")).sort().reverse().slice(0, 20)

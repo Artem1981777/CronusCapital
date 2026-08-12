@@ -1,0 +1,58 @@
+{
+  "runId": "2026-08-11T23-54-53-936Z",
+  "startedAt": "2026-08-11T23:54:53.936Z",
+  "finishedAt": "2026-08-11T23:55:16.987Z",
+  "mode": "live",
+  "guard": "0xeA4788164c63B0EF2788d9c74859B43f42BC391E",
+  "operator": "0xB8D0054Dd4FE76115E75BF196d89E760bbCD3bc6",
+  "perTxCapUsdc": 25,
+  "availableUsdcAtStart": 25,
+  "allowlistedRecipientUsed": null,
+  "scenarios": [
+    {
+      "id": "drain_to_new_address",
+      "expect": "revert",
+      "outcome": "reverted",
+      "reason": "recipient not allowlisted",
+      "txHash": "0x80762a3df5e421298be408e762e696e5d42477a73396523f08259ed28f283b22",
+      "block": 56524753,
+      "gasUsed": "33577",
+      "why": "a fully compromised key must not reach an address nobody approved"
+    },
+    {
+      "id": "over_per_tx_cap",
+      "expect": "revert",
+      "outcome": "skipped",
+      "reason": "no allowlisted recipient found among the candidates, so a cap test would revert for the wrong reason",
+      "why": "a single payment must not exceed the per-tx cap"
+    },
+    {
+      "id": "operator_escalation",
+      "expect": "revert",
+      "outcome": "reverted",
+      "reason": "not owner",
+      "txHash": "0x38cd529f1da858a66b5e5f8bcf432a7de9416f63beeab2a46b415ff5b85c0a70",
+      "block": 56524772,
+      "gasUsed": "23570",
+      "why": "the spending key must not be able to change the rules or unpause"
+    },
+    {
+      "id": "bounded_allowlisted_payment",
+      "expect": "success",
+      "outcome": "skipped",
+      "reason": "no allowlisted recipient",
+      "why": "a bounded rail must still pay, otherwise the test proves nothing but a dead contract"
+    }
+  ],
+  "note": "Rogue scenarios are broadcast only after a static call proved they revert, so a reverted transaction here is evidence of containment rather than a failed attempt at theft.",
+  "certificate": {
+    "contract": "0xB327a942A64A190b453c7D6b27Cc03FE7ACDF166",
+    "tokenId": 1,
+    "status": "INCOMPLETE",
+    "holder": "0xde8874C53D82a38c1c2864ea575f9E62Dc29dA5F",
+    "mintTx": "0x72d2dc5d124fe3f459eff585879e4a652bb6a63852440695ab09a640884aacc4",
+    "block": 56524792,
+    "explorer": "https://testnet.arcscan.app/tx/0x72d2dc5d124fe3f459eff585879e4a652bb6a63852440695ab09a640884aacc4",
+    "note": "Soulbound. Artwork and metadata are generated on-chain and expire one day after the drill, with no oracle and no server."
+  }
+}
