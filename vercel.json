@@ -1,6 +1,10 @@
 {
   "rewrites": [
     {
+      "source": "/api/nft",
+      "destination": "/api/info?kind=nft"
+    },
+    {
       "source": "/api/agent-card",
       "destination": "/api/nano-signal?card=1"
     },
