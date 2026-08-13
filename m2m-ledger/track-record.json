@@ -344,14 +344,21 @@
       "topic": "BTC-USDC momentum",
       "verdict": "SKIP",
       "result": "ABSTAIN"
+    },
+    {
+      "key": "2026-08-12T15:33:45.376Z",
+      "ts": "2026-08-12T15:33:45.376Z",
+      "topic": "BTC-USDC momentum",
+      "verdict": "SKIP",
+      "result": "ABSTAIN"
     }
   ],
   "stats": {
     "graded": 0,
     "hits": 0,
     "hitRate": null,
-    "abstained": 49,
+    "abstained": 50,
     "calibration": null,
-    "updatedAt": "2026-08-13T08:04:25.853Z"
+    "updatedAt": "2026-08-13T15:35:15.043Z"
   }
 }
