@@ -100,11 +100,13 @@ export default async function handler(req, res) {
       method: "POST",
       headers: { "content-type": "application/json", "authorization": "Bearer " + key },
       body: JSON.stringify({
-        model: "llama-3.3-70b-versatile",
-        max_tokens: 1000,
+        model: (process.env.LLM_MODEL || "openai/gpt-oss-120b"),
+        max_tokens: 2000,
         temperature: TEMP,
         seed: SEED === null ? undefined : SEED,
         response_format: { type: "json_object" },
+        reasoning_effort: process.env.LLM_REASONING_EFFORT || "low",
+        reasoning_format: "hidden",
         messages: [{ role: "system", content: sys }, { role: "user", content: user }]
       })
     });
@@ -136,7 +138,7 @@ export default async function handler(req, res) {
   }
   let traceHash = null;
   if (parsed) {
-    const _rec = withCogs(buildTraceRecord({ model: "llama-3.3-70b-versatile", seed: SEED, temperature: TEMP, topic, instId, price, changePct, high24h, low24h, vol24h }, { verdict: parsed.verdict, conviction: parsed.conviction, trace: parsed.trace, analog: parsed.analog, decisions: parsed.decisions }), economics);
+    const _rec = withCogs(buildTraceRecord({ model: (process.env.LLM_MODEL || "openai/gpt-oss-120b"), seed: SEED, temperature: TEMP, topic, instId, price, changePct, high24h, low24h, vol24h }, { verdict: parsed.verdict, conviction: parsed.conviction, trace: parsed.trace, analog: parsed.analog, decisions: parsed.decisions }), economics);
     traceHash = contentHash(_rec);
     if (process.env.TRACE_ARCHIVE !== "0") await archiveTrace(_rec).catch(() => null);
   }
@@ -157,7 +159,7 @@ export default async function handler(req, res) {
     conviction: parsed.conviction || 0,
     decisions: Array.isArray(parsed.decisions) ? parsed.decisions : [],
     crossCheck: crossCheckResult,
-    reasoning: { deterministic: DET, model: "llama-3.3-70b-versatile", seed: SEED, temperature: TEMP },
+    reasoning: { deterministic: DET, model: (process.env.LLM_MODEL || "openai/gpt-oss-120b"), seed: SEED, temperature: TEMP },
     economics,
     traceHash
   });
