@@ -31,7 +31,7 @@ Cronus is an autonomous prediction-market oracle agent. It scans markets, scores
 Cronus is an autonomous AI agent that runs a real, honest business on Arc: it **earns** via x402 paid calls, **pays** upstream data costs, **stakes its own USDC** on its own verdicts, and **settles every step on-chain** — all independently verifiable in a browser, with zero private keys.
 
 - **Live demo:** https://cronus-capital.vercel.app
-- **Verify in 2 min (no keys):** run **npm run verify-live** (149 checks) or open **/api/scorecard**
+- **Verify in 2 min (no keys):** run **npm run verify-live** (191 checks) or open **/api/scorecard**
 - **Run every test:** `npm run test:all` — production build, 305 Node tests, and 75 Foundry tests across eight contract suites (identity, reputation, vault, job escrow, swap, agent guard, hardened guard v2, multisig).
 - **Live, not placeholder:** every metric on the dashboard is populated from live / on-chain endpoints and reproducible with one command — no dashes, no backfilled or mocked numbers.
 - **Verifiable receipt (new):** paste any payment tx into the **Verifiable Receipt** card on the **Proof / Verify** tab (or call **/api/info?kind=receipt&tx=0x…**) — Cronus re-checks it live on the Arc explorer and binds payer -> amount -> the exact x402 price -> the on-chain commitment, with a non-custodial note. No keys.
@@ -114,10 +114,22 @@ All `/api/*` endpoints return HTTP 200 (or 402 for the paywall) — never 500.
 Every number on this page is reproducible by a judge with **zero private keys**. We publish a machine-readable scorecard that, for each claim, returns *how to verify it* — a command or an on-chain link — never a self-graded "passed":
 
 - **Scorecard:** https://cronus-capital.vercel.app/api/scorecard — 4 Sourcify exact-match contracts, live on-chain counts, honest `external_payers: 0`, and the exact reproduce step for each claim.
-- **No-key end-to-end:** `npm run verify-live` (149 checks) and `npm run verify-intent` (EIP-712 round-trip) reproduce the entire honesty surface against the live deployment without any secret.
-- **Source, not bytecode:** every contract links to its verified, exact-match source on Sourcify.
+- **No-key end-to-end:** `npm run verify-live` (191 checks) and `npm run verify-intent` (EIP-712 round-trip) reproduce the entire honesty surface against the live deployment without any secret.
+- **Source, not bytecode:** every contract links to verified source — four as Sourcify exact-match, the other six verified on the Arc explorer (Blockscout). The verified count is read from the explorer on every request; see "Contract verification: 10 of 10" below.
 
 We would rather show a verifiable **0** external payers than an impressive number you cannot independently check.
+
+### Contract verification: 10 of 10 on the explorer
+
+All ten deployed contracts now read **verified** on the Arc explorer, checked live on every request via `/api/scorecard` and rendered on the **Proof / Verify** tab. Four carry Sourcify exact-match source; the other six verify directly on the explorer (Blockscout).
+
+The last two to land — **Agent guard v2** (`0xeA4788164c63B0EF2788d9c74859B43f42BC391E`) and **Multisig owner** (`0xde8874C53D82a38c1c2864ea575f9E62Dc29dA5F`) — lagged behind the other eight for a while, and we kept them listed as *unverified with a stated reason* rather than dropping them from the count. Why they lagged, stated plainly:
+
+- These two are the only contracts built with **Foundry** on **solc 0.8.36**; the other eight were compiled with npm `solc` (0.8.35) or verified via Sourcify.
+- Our standard verifier submitted a standard-JSON input **without an explicit `evmVersion`** and with a bare source key (`CronusAgentGuardV2.sol`), while Foundry actually compiled with `evmVersion: shanghai` and the fully-qualified key `contracts/CronusAgentGuardV2.sol`. The recompiled metadata never matched the on-chain bytecode, so the explorer accepted the request (`verification started`) but silently failed the match.
+- Fix — **no redeploy, no transaction**: resubmit the standard-JSON input with the exact Foundry settings read straight from `forge-out/<name>.sol/<name>.json` — compiler `v0.8.36+commit.8a079791`, `evmVersion: shanghai`, `bytecodeHash: ipfs`, optimizer enabled/200, and the `contracts/…` source key. Both matched on the first try. Reproducible with `node scripts/verify-exact.mjs`.
+
+We list a contract as unverified with its reason instead of hiding it, so the 10-of-10 you see is earned, not curated.
 
 ## Verify the Gateway integration in 2 minutes
 
@@ -438,7 +450,7 @@ Everything here settles through **@circle-fin/x402-batching**: gas-free EIP-3009
 - Public receipts — https://cronus-capital.vercel.app/api/receipts (append ?format=csv to export)
 - Live metrics — https://cronus-capital.vercel.app/api/metrics
 - Honest traction — https://cronus-capital.vercel.app/api/traction (external_payers, self_generated_*)
-- One-command replay — **npm run verify-live** (149 checks)
+- One-command replay — **npm run verify-live** (191 checks)
 
 ---
 
