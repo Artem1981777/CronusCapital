@@ -2,7 +2,7 @@
 
 Latest transactions of the Cronus Capital treasury and every deployed contract on Arc Testnet.
 
-Generated: 2026-08-13T06:13:31.847Z — regenerate anytime with `node scripts/traction-snapshot.mjs` (public API only, zero private keys).
+Generated: 2026-08-14T06:10:03.235Z — regenerate anytime with `node scripts/traction-snapshot.mjs` (public API only, zero private keys).
 
 ## Treasury (agent wallet)
 
@@ -123,13 +123,13 @@ Address: [`0x5294E9927c3306DcBaDb03fe70b92e01cCede505`](https://testnet.arcscan.
 
 | When (UTC) | Tx | Method | Dir | Value (native) | Status |
 |---|---|---|---|---|---|
-| 2026-08-13 06:12 | [0x3001b4e3...70f053](https://testnet.arcscan.app/tx/0x3001b4e33e55f571fe152e559ad6792b69996f7db2dd40551eb106955e70f053) | memo | IN | 0.000000 | success |
-| 2026-08-13 06:11 | [0x06af007d...216a4d](https://testnet.arcscan.app/tx/0x06af007dd183f0ca7ddc5b42c3138ef57adaaea947a312d6a6e9a9d84b216a4d) | memo | IN | 0.000000 | success |
-| 2026-08-13 06:11 | [0x6646ee64...498d65](https://testnet.arcscan.app/tx/0x6646ee64ddd94466dc664cded9675add47dde514c50a494cecceca3349498d65) | memo | IN | 0.000000 | success |
-| 2026-08-13 06:10 | [0x4a6f9d1a...29fed3](https://testnet.arcscan.app/tx/0x4a6f9d1a8709c1a97795679f5da6ad82cae6f2bf25540aefff91125d0a29fed3) | memo | IN | 0.000000 | success |
-| 2026-08-13 06:10 | [0xe26dca15...80fdc7](https://testnet.arcscan.app/tx/0xe26dca15ed8f656296d1dfc2b55a130e68901a3737463f59c9fe4573c380fdc7) | memo | IN | 0.000000 | success |
-| 2026-08-13 06:10 | [0x5fd66ddc...eaebda](https://testnet.arcscan.app/tx/0x5fd66ddc9dbc893e3c59e5a56445737e50fc3bb662eb35cf99488f83b1eaebda) | memo | IN | 0.000000 | success |
-| 2026-08-13 06:10 | [0x2540d329...b994f2](https://testnet.arcscan.app/tx/0x2540d3297cd6e5abf2e4daa9d8ced2497bed5ce1537ee33d0373fb452bb994f2) | memo | IN | 0.000000 | success |
-| 2026-08-13 06:09 | [0xb8b83fd0...f53988](https://testnet.arcscan.app/tx/0xb8b83fd0330fa914a0a49f7c10d322155c585f554acf341f9ebb80db98f53988) | memo | IN | 0.000000 | success |
-| 2026-08-13 06:09 | [0x83183862...7ead9c](https://testnet.arcscan.app/tx/0x8318386216aa5c9f5a1c5d492c936cb7866660022a44a6b23f4442346b7ead9c) | memo | IN | 0.000000 | success |
-| 2026-08-13 06:09 | [0x34663bee...98b6a0](https://testnet.arcscan.app/tx/0x34663bee5eb3dfe2882e29b4a3ca204a058c0a93edb4a6fb42e967b4ab98b6a0) | memo | IN | 0.000000 | success |
+| 2026-08-14 06:09 | [0xb5bc8d9f...414be2](https://testnet.arcscan.app/tx/0xb5bc8d9fab1e8923331688d2c9f5dc6774f2a27040929c623e607747f5414be2) | memo | IN | 0.000000 | success |
+| 2026-08-14 06:09 | [0xfaabbda2...cf3602](https://testnet.arcscan.app/tx/0xfaabbda2d8dad8210d022a5d0207d24a57aa47c9262a89526b8e2c52efcf3602) | memo | IN | 0.000000 | success |
+| 2026-08-14 06:09 | [0xa1465744...d2912c](https://testnet.arcscan.app/tx/0xa1465744d50204c5a4b5b29796776f0edfbc3cfcde0c1ce453a8d48dced2912c) | memo | IN | 0.000000 | success |
+| 2026-08-14 06:09 | [0xdba3a268...d631bd](https://testnet.arcscan.app/tx/0xdba3a268e2bb3af08c7a52d05fc7ffc53d317046d3fad7d252c40a776cd631bd) | memo | IN | 0.000000 | success |
+| 2026-08-14 06:09 | [0x2c1c2dba...609521](https://testnet.arcscan.app/tx/0x2c1c2dbaef24f28e2b55697126eb963c3b90b1d4e774f3b57115b11aaf609521) | memo | IN | 0.000000 | success |
+| 2026-08-14 06:08 | [0xfaf8b383...66a69d](https://testnet.arcscan.app/tx/0xfaf8b383fb0f0638a8dcc2f67fd973929ec5b78a2fe665db6ef531494066a69d) | memo | IN | 0.000000 | success |
+| 2026-08-14 06:07 | [0xfd643ea5...3a76cd](https://testnet.arcscan.app/tx/0xfd643ea5ac9ea3e5c3abdcf452e421ab7f1bb61a26389d0e19a1f04d603a76cd) | memo | IN | 0.000000 | success |
+| 2026-08-14 06:07 | [0x64943fd1...0714b2](https://testnet.arcscan.app/tx/0x64943fd1f865241f00a3a1ab80828929433805f0555e6ad0c62156d4650714b2) | memo | IN | 0.000000 | success |
+| 2026-08-14 06:07 | [0x764cea3a...ea0c8e](https://testnet.arcscan.app/tx/0x764cea3a1cad1e68fd47fd693f38a3a07cfbdeef66c39ce0318a7d1d13ea0c8e) | memo | IN | 0.000000 | success |
+| 2026-08-14 06:07 | [0x50daa810...69cf3b](https://testnet.arcscan.app/tx/0x50daa8100c6135ce629852b44712a8732ee1cc7ce8cfc7c82ffaf9945769cf3b) | memo | IN | 0.000000 | success |
