@@ -106,7 +106,7 @@ async function main() {
     for (let i = 1; i <= seconds; i++) {
       const t0 = Date.now()
       try {
-        const sUrl = resource + "?topic=" + encodeURIComponent(TOPIC) + "&stream=" + i
+        const sUrl = resource + "?topic=" + encodeURIComponent(TOPIC) + "&stream=" + i + "&client=" + encodeURIComponent("cronus-buyer-agent/0.2 (a2a-demo,stream)")
         const r = await gateway.pay(sUrl)
         spent += Number(r.formattedAmount || priceUsd)
         const d = r.data || {}
@@ -142,7 +142,7 @@ async function main() {
     return
   }
   step(5, "Pay (gas-free EIP-3009 via Circle Gateway) and consume")
-  const url = resource + "?topic=" + encodeURIComponent(TOPIC)
+  const url = resource + "?topic=" + encodeURIComponent(TOPIC) + "&client=" + encodeURIComponent("cronus-buyer-agent/0.2 (a2a-demo)")
   const result = await gateway.pay(url)
   const data = result.data || {}
   log("    settled. amount:", result.formattedAmount, "USDC")

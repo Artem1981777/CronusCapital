@@ -204,10 +204,20 @@ function runGateway(req, res, mw) {
   return Promise.resolve(mw(req, res, () => { called = true })).then(() => called)
 }
 
+function clientTag(req) {
+  try {
+    const q = req && req.query ? req.query.client : null
+    const h = (req && req.headers) ? req.headers : {}
+    const raw = String(q || h["x-a2a-client"] || h["x-mcp-client"] || h["user-agent"] || "").replace(/[\x00-\x1f]/g, " ").trim()
+    return raw ? raw.slice(0, 80) : null
+  } catch (_) { return null }
+}
+
 export default async function handler(req, res) {
   const topic  = String((req.query && req.query.topic) || "BTC-USDC momentum")
   const instId = String((req.query && req.query.instId) || "BTC-USDC")
   const host   = (req.headers && req.headers.host) || "localhost"
+  const client = clientTag(req)
   const tier = (req.query && String(req.query.tier || "")).toLowerCase() === "dataset" ? "dataset" : "nano"
   const payerAddr = String((req.query && req.query.payer) || "").toLowerCase()
     // agent card: machine-readable x402 storefront for stranger agents (public URL /api/agent-card via rewrite)
@@ -360,7 +370,7 @@ export default async function handler(req, res) {
     if (!okRepay) return
     const pay2 = req.payment || {}
     await kv(["DECR", "cronus:credit:units:" + payerAddr])
-    try { await recordTraction({ tier: "CREDIT_REPAY", network: pay2.network || NETWORK, payer: pay2.payer, amount: pay2.amount, transaction: pay2.transaction }) } catch (_) {}
+    try { await recordTraction({ client, tier: "CREDIT_REPAY", network: pay2.network || NETWORK, payer: pay2.payer, amount: pay2.amount, transaction: pay2.transaction }) } catch (_) {}
     if (!res.writableEnded) res.status(200).json({ paid: true, repaid: true, creditStatus: { unitsOutstanding: Math.max(0, creditDebt - 1), limit: CREDIT_LIMIT_UNITS } })
     return
   }
@@ -369,7 +379,7 @@ export default async function handler(req, res) {
     if (!creditEligible) return res.status(402).json({ error: "credit refused", reason: loyal ? "credit limit reached" : "credit is for loyal, ERC-8004 registered buyers", unitsOutstanding: creditDebt, limit: CREDIT_LIMIT_UNITS })
     const creditReport = await generateReport(host, topic, instId)
     await kv(["INCR", "cronus:credit:units:" + payerAddr])
-    try { await recordTraction({ tier: "NANO_CREDIT", payer: payerAddr, verdict: creditReport.verdict || null }) } catch (_) {}
+    try { await recordTraction({ client, tier: "NANO_CREDIT", payer: payerAddr, verdict: creditReport.verdict || null }) } catch (_) {}
     return res.status(200).json({ paid: false, credit: true, creditStatus: { unitsOutstanding: creditDebt + 1, limit: CREDIT_LIMIT_UNITS, unitPrice: LOYAL_PRICE }, report: creditReport })
   }
   // conviction stake: a market-graded MISS entitles the buyer to one free make-good unit
@@ -382,7 +392,7 @@ export default async function handler(req, res) {
     if (Number(already || 0) > 0) return res.status(409).json({ error: "make-good refused", reason: "this miss was already redeemed", key: mgKey })
     const mgReport = await generateReport(host, topic, instId)
     await kv(["SADD", "cronus:stake:redeemed", mgKey])
-    try { await recordTraction({ tier: "STAKE_MAKEGOOD", payer: payerAddr, verdict: mgReport.verdict || null }) } catch (_) {}
+    try { await recordTraction({ client, tier: "STAKE_MAKEGOOD", payer: payerAddr, verdict: mgReport.verdict || null }) } catch (_) {}
     return res.status(200).json({ paid: false, makeGood: true, key: mgKey, stake: { model: st.model, misses: st.misses, redeemed: st.redeemed + 1, owedMakeGoods: st.owedMakeGoods - 1 }, report: mgReport })
   }
   // prepaid session: one x402 payment opens a bundle of metered units - a payment channel without the channel contract
@@ -397,7 +407,7 @@ export default async function handler(req, res) {
       const paySess = req.payment || {}
       const sessBalance = Number(await kv(["INCRBY", sessKey, String(SESSION_UNITS)]) || SESSION_UNITS)
       await kv(["EXPIRE", sessKey, "86400"])
-      try { await recordTraction({ tier: "SESSION_OPEN", network: paySess.network || NETWORK, payer: paySess.payer, amount: paySess.amount, transaction: paySess.transaction }) } catch (_) {}
+      try { await recordTraction({ client, tier: "SESSION_OPEN", network: paySess.network || NETWORK, payer: paySess.payer, amount: paySess.amount, transaction: paySess.transaction }) } catch (_) {}
       if (!res.writableEnded) res.status(200).json({ paid: true, session: { standard: "cronus-session-v1", opened: SESSION_UNITS, unitsRemaining: sessBalance, expiresInSec: 86400, price: SESSION_PRICE, consume: "/api/nano-signal?session=use&topic=TOPIC&payer=" + payerAddr, rule: "prepaid units are metered in KV and burn one per signal; no payment per call; reopening tops up and refreshes the 24h TTL" } })
       return
     }
@@ -406,7 +416,7 @@ export default async function handler(req, res) {
       if (sessBal <= 0) return res.status(402).json({ error: "no active session", reason: "open one with ?session=open (a single x402 payment of " + SESSION_PRICE + " buys " + SESSION_UNITS + " units for 24h)", unitsRemaining: 0 })
       const sessLeft = Number(await kv(["DECR", sessKey]) || 0)
       const sessReport = await generateReport(host, topic, instId)
-      try { await recordTraction({ tier: "SESSION_USE", payer: payerAddr, verdict: sessReport.verdict || null, conviction: (sessReport.conviction != null ? sessReport.conviction : null) }) } catch (_) {}
+      try { await recordTraction({ client, tier: "SESSION_USE", payer: payerAddr, verdict: sessReport.verdict || null, conviction: (sessReport.conviction != null ? sessReport.conviction : null) }) } catch (_) {}
       return res.status(200).json({ paid: false, session: { standard: "cronus-session-v1", consumed: 1, unitsRemaining: Math.max(0, sessLeft) }, report: sessReport })
     }
     return res.status(400).json({ error: "unknown session mode", expected: ["open", "use"] })
@@ -432,7 +442,7 @@ export default async function handler(req, res) {
       rows.push({ topic: tp, verdict: rep.verdict || "SKIP", conviction: rep.conviction || 0 })
     }
     const settledAt = Date.now()
-    try { await recordTraction({ tier: "DATASET", network: payment.network || NETWORK, payer: payment.payer, amount: payment.amount, transaction: payment.transaction }) } catch (_) {}
+    try { await recordTraction({ client, tier: "DATASET", network: payment.network || NETWORK, payer: payment.payer, amount: payment.amount, transaction: payment.transaction }) } catch (_) {}
     const isOnchainDs = /^0x[0-9a-fA-F]{64}$/.test(String(payment.transaction || ""))
     if (!res.writableEnded) {
       res.status(200).json({
@@ -464,7 +474,7 @@ export default async function handler(req, res) {
   if (negoBand) { try { await kv(["DEL", "cronus:nego:" + payerAddr]) } catch (_) {} } // one negotiated deal per handshake
   const settledAt = Date.now()
   try {
-    await recordTraction({ tier: "NANO", network: payment.network || NETWORK, payer: payment.payer, amount: payment.amount, transaction: payment.transaction, verdict: report.verdict || null, conviction: (report.conviction != null ? report.conviction : null) })
+    await recordTraction({ client, tier: "NANO", network: payment.network || NETWORK, payer: payment.payer, amount: payment.amount, transaction: payment.transaction, verdict: report.verdict || null, conviction: (report.conviction != null ? report.conviction : null) })
   } catch (_) {}
 
   const isOnchainTx = /^0x[0-9a-fA-F]{64}$/.test(String(payment.transaction || ""))

@@ -59,6 +59,7 @@ import { PremiumSignal } from "./components/PremiumSignal"
 import { dashboardV2Enabled, useSection } from "./dashboardV2"
 import { SectionNav, Sec } from "./DashboardV2Nav"
 import LeaderboardPanel from "./components/LeaderboardPanel"
+import A2APanel from "./components/A2APanel"
 import { MarketPulse } from "./components/MarketPulse"
 
 const TOPICS = ["crypto markets", "US elections", "Fed interest rates", "AI stocks", "Bitcoin ETF"]
@@ -392,6 +393,7 @@ export default function App() {
                     <Sec id="proof" section={secView}><ProofPanel /><ProofMatrix /><ProofBoxes /><ReceiptCard /></Sec>
       <Sec id="traction" section={secView}><LoopPanel /><TractionChart /></Sec>
       <Sec id="rhea" section={secView}><RheaPanel /></Sec><Sec id="leaderboard" section={secView}><LeaderboardPanel /></Sec>
+<Sec id="a2a" section={secView}><A2APanel /></Sec>
       <Sec id="overview" section={secView}><MoatStrip /></Sec>
       <Sec id="standards" section={secView}><ComposabilityStrip /></Sec>
         <Sec id="risk" section={secView}><GovernancePanel /><PolicyGuardrails /><RiskGauges /><GuardrailProof /></Sec>
