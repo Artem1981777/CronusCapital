@@ -10,8 +10,8 @@ const BASE = (process.env.CRONUS_BASE_URL || "https://cronus-capital.vercel.app"
 const PAY_TO = process.env.CRONUS_PAYTO || "0xdc6778c5f8cc74b10aed11c48306d4cfc5737fbd";
 const NETWORK = process.env.X402_NETWORK || "arc-testnet";
 
-async function apiGet(path) {
-  const res = await fetch(BASE + path, { headers: { accept: "application/json" } });
+async function apiGet(path, clientName) {
+  const res = await fetch(BASE + path, { headers: { accept: "application/json", "x-mcp-client": clientName || process.env.CRONUS_MCP_CLIENT || "mcp-client" } });
   const text = await res.text();
   let body;
   try { body = JSON.parse(text); } catch { body = { raw: text }; }
@@ -72,16 +72,17 @@ const TOOLS = [
   },
 ];
 
-async function callTool(name, instId) {
+async function callTool(name, instId, args, clientName) {
+  args = args || {};
   if (name === "cronus_signal_xlayer") {
     const topic = typeof args.topic === "string" && args.topic ? args.topic : instId + " momentum";
     const path = "/api/signal-x402?topic=" + encodeURIComponent(topic) + "&instId=" + encodeURIComponent(instId);
-    const r = await apiGet(path);
+    const r = await apiGet(path, clientName);
     return { endpoint: path, httpStatus: r.status, payment_required: r.status === 402, network: "eip155:196", asset: "USDT0", builderCode: "0m014j21zgfw1r53", quote: r.body };
   }
   if (name === "cronus_pay" || name === "pay") {
     const path = "/api/signal?instId=" + encodeURIComponent(instId);
-    const r = await apiGet(path);
+    const r = await apiGet(path, clientName);
     return {
       endpoint: path,
       httpStatus: r.status,
@@ -110,7 +111,7 @@ async function callTool(name, instId) {
   const route = map[name];
   if (!route) return { _unknown: true, error: "Unknown tool: " + String(name) };
   const path = route + "?instId=" + encodeURIComponent(instId);
-  const r = await apiGet(path);
+  const r = await apiGet(path, clientName);
   const payload = {
     endpoint: path,
     httpStatus: r.status,
@@ -155,13 +156,23 @@ const server = new Server(
   { capabilities: { tools: {} } }
 );
 
-server.setRequestHandler(ListToolsRequestSchema, async () => ({ tools: TOOLS }));
+server.setRequestHandler(ListToolsRequestSchema, async () => {
+  try {
+    const ci = typeof server.getClientVersion === "function" ? server.getClientVersion() : null;
+    const clientName = ci && ci.name ? ci.name : (process.env.CRONUS_MCP_CLIENT || "mcp-client");
+    fetch(BASE + "/api/nano-signal?handshake=1&client=" + encodeURIComponent(clientName)).catch(() => {});
+  } catch (e) { void e; }
+  return { tools: TOOLS };
+});
 
 server.setRequestHandler(CallToolRequestSchema, async (req) => {
   const name = req.params.name;
   const args = req.params.arguments || {};
   const instId = typeof args.instId === "string" && args.instId ? args.instId : "ETH-USDC";
-  const out = await callTool(name, instId);
+  const ci = typeof server.getClientVersion === "function" ? server.getClientVersion() : null;
+  const clientName = ci && ci.name ? ci.name : (process.env.CRONUS_MCP_CLIENT || "mcp-client");
+  fetch(BASE + "/api/nano-signal?handshake=1&client=" + encodeURIComponent(clientName)).catch(() => {});
+  const out = await callTool(name, instId, args, clientName);
   if (out._unknown) {
     return { isError: true, content: [{ type: "text", text: out.error }] };
   }

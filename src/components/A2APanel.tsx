@@ -6,8 +6,9 @@ const EXPLORER = "https://testnet.arcscan.app"
 type Service = { tier?: string; resource?: string; price?: { amount?: string; asset?: string }; payTo?: string; network?: string; settlement?: string }
 type Manifest = { name?: string; description?: string; services?: Service[] }
 type Client = { client: string; calls: number; lastTs?: number | null; tiers?: string[]; kind?: string }
+type Conn = { client: string; handshakes?: number; calls?: number; lastTs?: number | null; tiers?: string[]; kind?: string }
 type Payer = { payer: string; usdc: number; txs?: number; calls?: number }
-type LeaderResp = { ok?: boolean; recent_clients?: Client[]; self_generated_leaders?: Payer[]; unique_external_payers?: number; external_payers?: number; self_demo_calls?: number; headline_note?: string }
+type LeaderResp = { ok?: boolean; recent_clients?: Client[]; connected_clients?: Conn[]; self_generated_leaders?: Payer[]; unique_external_payers?: number; external_payers?: number; self_demo_calls?: number; headline_note?: string }
 type Card = { card?: { identity?: { agentId?: number | string; feedbacks?: number | null; avgRating?: number | null } } }
 
 const COMPATIBLE = [
@@ -68,6 +69,7 @@ export default function A2APanel() {
 
   const services = (m && Array.isArray(m.services)) ? m.services : []
   const clients = (lb && Array.isArray(lb.recent_clients)) ? lb.recent_clients : []
+  const connected = (lb && Array.isArray(lb.connected_clients)) ? lb.connected_clients : []
   const payers = (lb && Array.isArray(lb.self_generated_leaders)) ? lb.self_generated_leaders : []
   const rep = card && card.card && card.card.identity ? card.card.identity : null
   const extPayers = Number((lb && lb.external_payers) || 0)
@@ -80,6 +82,7 @@ export default function A2APanel() {
   const tag = (c: string): CSSProperties => ({ display: "inline-block", fontSize: 10, padding: "1px 7px", borderRadius: 999, marginLeft: 8, border: "1px solid " + c, color: c })
 
   const findActive = (kw: string[]) => clients.find((c) => { const lc = c.client.toLowerCase(); return kw.some((k) => lc.includes(k)) })
+  const findConnected = (kw: string[]) => connected.find((c) => { const lc = c.client.toLowerCase(); return kw.some((k) => lc.includes(k)) })
 
   const copy = async (t: string) => { try { await navigator.clipboard.writeText(t); setCopied(true); setTimeout(() => setCopied(false), 1500) } catch (e) { void e } }
   const getQuote = async () => {
@@ -97,6 +100,9 @@ export default function A2APanel() {
 @keyframes cronusPulse { 0%{box-shadow:0 0 0 0 rgba(57,217,138,0.45)} 70%{box-shadow:0 0 0 10px rgba(57,217,138,0)} 100%{box-shadow:0 0 0 0 rgba(57,217,138,0)} }
 .a2a-live { animation: cronusPulse 1.8s infinite; border-color:#39d98a !important; background:rgba(57,217,138,0.10) !important; }
 .a2a-dot { display:inline-block;width:8px;height:8px;border-radius:50%;background:#39d98a;margin-right:6px;animation:cronusPulse 1.3s infinite;vertical-align:middle; }
+@keyframes cronusAmber { 0%{box-shadow:0 0 0 0 rgba(201,168,76,0.5)} 70%{box-shadow:0 0 0 9px rgba(201,168,76,0)} 100%{box-shadow:0 0 0 0 rgba(201,168,76,0)} }
+.a2a-conn { animation: cronusAmber 2s infinite; border-color:#c9a84c !important; background:rgba(201,168,76,0.10) !important; }
+.a2a-dot-amber { display:inline-block;width:8px;height:8px;border-radius:50%;background:#c9a84c;margin-right:6px;animation:cronusAmber 1.6s infinite;vertical-align:middle; }
 .a2a-btn { cursor:pointer;border:1px solid rgba(120,160,220,0.5);background:rgba(60,90,160,0.18);color:#dbe4f3;border-radius:8px;padding:8px 14px;font-size:13px;font-weight:600;text-decoration:none;display:inline-block; }
 .a2a-btn:hover { background:rgba(60,90,160,0.35); }
 .a2a-btn:disabled { opacity:.5;cursor:default; }
@@ -190,24 +196,42 @@ export default function A2APanel() {
         <div style={label}>MCP-COMPATIBLE CLIENTS · LIGHT UP ON LIVE INTERACTION</div>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 8 }}>
           {COMPATIBLE.map((c) => {
-            const a = findActive(c.kw)
+            const paid = findActive(c.kw)
+            const conn = paid ? null : findConnected(c.kw)
+            const cls = paid ? "a2a-live" : (conn ? "a2a-conn" : "")
             return (
-              <div key={c.name} className={a ? "a2a-live" : ""} style={chip}>
-                {a ? <span className="a2a-dot" /> : null}
-                <span style={{ fontWeight: 700, color: a ? "#eafff2" : "#e5e7eb", fontSize: 13 }}>{c.name}</span>
+              <div key={c.name} className={cls} style={chip}>
+                {paid ? <span className="a2a-dot" /> : (conn ? <span className="a2a-dot-amber" /> : null)}
+                <span style={{ fontWeight: 700, color: paid ? "#eafff2" : (conn ? "#fff4d6" : "#e5e7eb"), fontSize: 13 }}>{c.name}</span>
                 <span style={{ fontSize: 10, color: "#9ca3af", marginLeft: 6 }}>{c.note}</span>
-                {a ? <span style={{ fontSize: 10, color: "#39d98a", marginLeft: 6, fontWeight: 700 }}>LIVE · {a.calls} call{a.calls === 1 ? "" : "s"}</span> : null}
+                {paid ? <span style={{ fontSize: 10, color: "#39d98a", marginLeft: 6, fontWeight: 700 }}>PAID · {paid.calls} call{paid.calls === 1 ? "" : "s"}</span> : null}
+                {conn ? <span style={{ fontSize: 10, color: "#c9a84c", marginLeft: 6, fontWeight: 700 }}>CONNECTED · handshake</span> : null}
               </div>
             )
           })}
         </div>
         <div style={{ fontSize: 10, color: "#7c8698", marginTop: 8 }}>
-          Honest label: cards glow only when a matching client name actually appears in paid calls. No live match = no glow.
+          Cards glow green on real PAID calls and amber on MCP handshakes (connected, not yet paid). No match = no glow.
         </div>
       </div>
 
       <div style={box}>
         <div style={label}>LIVE INTERACTIONS · REAL CLIENT NAMES (FROM PAID CALLS)</div>
+        {connected.length > 0 ? (
+          <div style={{ marginTop: 8, marginBottom: 6 }}>
+            <div style={{ fontSize: 10, color: "#c9a84c", fontWeight: 700, letterSpacing: 0.3 }}>CONNECTED (MCP HANDSHAKE, NOT YET PAID)</div>
+            <ul style={{ margin: "4px 0 0", paddingLeft: 18 }}>
+              {connected.map((c, i) => (
+                <li key={i} style={{ fontSize: 12, color: "#dbe4f3", margin: "2px 0" }}>
+                  <span className="a2a-dot-amber" />
+                  <span style={{ fontWeight: 600 }}>{c.client}</span>
+                  <span style={tag(c.kind === "self-demo" ? "#c9a84c" : "#39d98a")}>{c.kind === "self-demo" ? "self / demo" : "external"}</span>
+                  <span style={{ color: "#9ca3af", marginLeft: 8 }}>{c.handshakes != null ? c.handshakes : 0} handshake{c.handshakes === 1 ? "" : "s"}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
         {clients.length === 0 ? (
           <div style={{ color: "#9ca3af", fontSize: 12, marginTop: 6 }}>No client-tagged calls recorded yet. Real callers appear here by client name the moment they pay.</div>
         ) : (

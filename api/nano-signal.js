@@ -220,6 +220,16 @@ export default async function handler(req, res) {
   const client = clientTag(req)
   const tier = (req.query && String(req.query.tier || "")).toLowerCase() === "dataset" ? "dataset" : "nano"
   const payerAddr = String((req.query && req.query.payer) || "").toLowerCase()
+
+  if (req.query && req.query.handshake) {
+    const ev = { client: client || "unknown-mcp-client", event: "handshake", tier, topic, instId, ts: Date.now() }
+    try {
+      await kv(["LPUSH", "cronus:mcp:events", JSON.stringify(ev)])
+      await kv(["LTRIM", "cronus:mcp:events", "0", "199"])
+    } catch (e) { void e }
+    res.setHeader("Access-Control-Allow-Origin", "*")
+    return res.status(200).json({ ok: true, event: "handshake", client: ev.client, note: "MCP client handshake recorded (no payment). Appears as a connected client on the live dashboard." })
+  }
     // agent card: machine-readable x402 storefront for stranger agents (public URL /api/agent-card via rewrite)
   if (req.query && req.query.card) {
     const cardBase = "https:" + "//" + host
