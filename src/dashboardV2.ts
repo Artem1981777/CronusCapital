@@ -13,6 +13,7 @@ export const GROUPS: SectionGroup[] = [
     { id: "markets", label: "Markets / Intel", glyph: "▦" },
   ] },
   { label: "ECONOMY", items: [
+    { id: "leaderboard", label: "Leaderboard", glyph: "★" },
     { id: "payments", label: "Payments (x402)", glyph: "◈" },
     { id: "traction", label: "Traction", glyph: "↗" },
     { id: "rhea", label: "Rhea / M2M", glyph: "⇄" },

@@ -58,6 +58,7 @@ import type { AgentState, MarketSignal, BetOpportunity } from "./agents/cronusAg
 import { PremiumSignal } from "./components/PremiumSignal"
 import { dashboardV2Enabled, useSection } from "./dashboardV2"
 import { SectionNav, Sec } from "./DashboardV2Nav"
+import LeaderboardPanel from "./components/LeaderboardPanel"
 import { MarketPulse } from "./components/MarketPulse"
 
 const TOPICS = ["crypto markets", "US elections", "Fed interest rates", "AI stocks", "Bitcoin ETF"]
@@ -390,7 +391,7 @@ export default function App() {
                     <Sec id="payments" section={secView}>{SHOW_SETTLEMENTS && <GatewaySettlements />}</Sec>
                     <Sec id="proof" section={secView}><ProofPanel /><ProofMatrix /><ProofBoxes /><ReceiptCard /></Sec>
       <Sec id="traction" section={secView}><LoopPanel /><TractionChart /></Sec>
-      <Sec id="rhea" section={secView}><RheaPanel /></Sec>
+      <Sec id="rhea" section={secView}><RheaPanel /></Sec><Sec id="leaderboard" section={secView}><LeaderboardPanel /></Sec>
       <Sec id="overview" section={secView}><MoatStrip /></Sec>
       <Sec id="standards" section={secView}><ComposabilityStrip /></Sec>
         <Sec id="risk" section={secView}><GovernancePanel /><PolicyGuardrails /><RiskGauges /><GuardrailProof /></Sec>
