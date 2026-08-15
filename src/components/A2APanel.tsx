@@ -71,6 +71,7 @@ export default function A2APanel() {
   const payers = (lb && Array.isArray(lb.self_generated_leaders)) ? lb.self_generated_leaders : []
   const rep = card && card.card && card.card.identity ? card.card.identity : null
   const extPayers = Number((lb && lb.external_payers) || 0)
+  const apiOpen = !!(m && m.name && services.length > 0)
 
   const box: CSSProperties = { margin: "10px 0", padding: "12px 14px", border: "1px solid rgba(120,160,220,0.30)", borderRadius: 10, background: "rgba(30,45,80,0.18)" }
   const label: CSSProperties = { fontSize: 11, letterSpacing: 0.4, color: "#9ca3af" }
@@ -120,6 +121,24 @@ export default function A2APanel() {
       </div>
 
       {err ? <div style={{ color: "#e06c6c", fontSize: 12 }}>load error: {err}</div> : null}
+      <div style={box}>
+        <div style={label}>ACCESS MODEL · TWO GATES</div>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 8 }}>
+          <div style={{ flex: "1 1 260px", padding: "10px 12px", borderRadius: 8, background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: "#e5e7eb" }}>🧍 Human dashboard</div>
+            <div style={{ fontSize: 11, color: "#9ca3af", marginTop: 3 }}>Vercel Security Checkpoint — bot / DDoS shield for the web UI</div>
+            <span style={{ ...tag("#c9a84c"), marginLeft: 0, marginTop: 6, display: "inline-block" }}>JS challenge · humans only</span>
+          </div>
+          <div className={apiOpen ? "a2a-live" : ""} style={{ flex: "1 1 260px", padding: "10px 12px", borderRadius: 8, background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: "#e5e7eb" }}>🤖 Machine API · /api/*</div>
+            <div style={{ fontSize: 11, color: "#9ca3af", marginTop: 3 }}>x402 micropayment — the paywall is the rate-limit</div>
+            <span style={{ ...tag(apiOpen ? "#39d98a" : "#9ca3af"), marginLeft: 0, marginTop: 6, display: "inline-block" }}>{apiOpen ? "API OPEN · x402-gated" : "checking…"}</span>
+          </div>
+        </div>
+        <div style={{ fontSize: 10, color: "#7c8698", marginTop: 8 }}>
+          No IP allowlists. Every agent call costs USDC, so abuse is self-defeating — pay-per-call is our anti-abuse layer.
+        </div>
+      </div>
 
       {showMcp ? (
         <div style={box}>
