@@ -203,6 +203,18 @@
     {
       "source": "/api/decisions",
       "destination": "/api/info?kind=decisions"
+    },
+    {
+      "source": "/api/insurance-quote",
+      "destination": "/api/info?kind=insurance-quote"
+    },
+    {
+      "source": "/api/insurance-buy",
+      "destination": "/api/info?kind=insurance-buy"
+    },
+    {
+      "source": "/api/insurance-status",
+      "destination": "/api/info?kind=insurance-status"
     }
   ]
 }
