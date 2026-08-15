@@ -11,6 +11,22 @@ type Payer = { payer: string; usdc: number; txs?: number; calls?: number }
 type LeaderResp = { ok?: boolean; recent_clients?: Client[]; connected_clients?: Conn[]; self_generated_leaders?: Payer[]; unique_external_payers?: number; external_payers?: number; self_demo_calls?: number; headline_note?: string }
 type Card = { card?: { identity?: { agentId?: number | string; feedbacks?: number | null; avgRating?: number | null } } }
 
+const AGENT_PRESETS: Array<{ id: string; label: string; glyph: string; client: string; kw: string[] }> = [
+  { id: "claude", label: "Connect with Claude", glyph: "✦", client: "claude-ai", kw: ["claude"] },
+  { id: "chatgpt", label: "Connect with ChatGPT", glyph: "◉", client: "chatgpt", kw: ["gpt", "openai", "chatgpt"] },
+]
+function mcpConfigFor(client: string): string {
+  return `{
+  "mcpServers": {
+    "cronus": {
+      "command": "npx",
+      "args": ["-y", "cronus-mcp"],
+      "env": { "CRONUS_MCP_CLIENT": "${client}" }
+    }
+  }
+}`
+}
+
 const COMPATIBLE = [
   { name: "Claude", note: "MCP-native (Desktop / API)", kw: ["claude"] },
   { name: "ChatGPT / OpenAI", note: "function-calling + MCP", kw: ["gpt", "openai", "chatgpt"] },
@@ -46,6 +62,7 @@ export default function A2APanel() {
   const [quote, setQuote] = useState<Record<string, unknown> | null>(null)
   const [qLoading, setQLoading] = useState(false)
   const [copied, setCopied] = useState(false)
+  const [agentPick, setAgentPick] = useState<string | null>(null)
 
   useEffect(() => {
     let alive = true
@@ -74,6 +91,32 @@ export default function A2APanel() {
   const rep = card && card.card && card.card.identity ? card.card.identity : null
   const extPayers = Number((lb && lb.external_payers) || 0)
   const apiOpen = !!(m && m.name && services.length > 0)
+  const timeAgo = (ts?: number | null) => {
+    if (!ts) return "—"
+    const s = Math.max(0, Math.floor((Date.now() - Number(ts)) / 1000))
+    if (s < 60) return s + "s ago"
+    const mn = Math.floor(s / 60); if (mn < 60) return mn + "m ago"
+    const h = Math.floor(mn / 60); if (h < 24) return h + "h ago"
+    return Math.floor(h / 24) + "d ago"
+  }
+  const agentRoster = (() => {
+    const map = new Map<string, { client: string; paid: number; handshakes: number; lastTs: number; tiers: string[]; kind: string }>()
+    for (const c of connected) {
+      const cur = map.get(c.client) || { client: c.client, paid: 0, handshakes: 0, lastTs: 0, tiers: [], kind: c.kind || "external-client" }
+      cur.handshakes += Number(c.handshakes || 0)
+      if (Number(c.lastTs || 0) > cur.lastTs) cur.lastTs = Number(c.lastTs || 0)
+      if (c.tiers) for (const t of c.tiers) if (!cur.tiers.includes(t)) cur.tiers.push(t)
+      map.set(c.client, cur)
+    }
+    for (const c of clients) {
+      const cur = map.get(c.client) || { client: c.client, paid: 0, handshakes: 0, lastTs: 0, tiers: [], kind: c.kind || "external-client" }
+      cur.paid += Number(c.calls || 0)
+      if (Number(c.lastTs || 0) > cur.lastTs) cur.lastTs = Number(c.lastTs || 0)
+      if (c.tiers) for (const t of c.tiers) if (!cur.tiers.includes(t)) cur.tiers.push(t)
+      map.set(c.client, cur)
+    }
+    return Array.from(map.values()).sort((a, b) => b.lastTs - a.lastTs)
+  })()
 
   const box: CSSProperties = { margin: "10px 0", padding: "12px 14px", border: "1px solid rgba(120,160,220,0.30)", borderRadius: 10, background: "rgba(30,45,80,0.18)" }
   const label: CSSProperties = { fontSize: 11, letterSpacing: 0.4, color: "#9ca3af" }
@@ -126,7 +169,55 @@ export default function A2APanel() {
         <a className="a2a-btn" href="/api/manifest" target="_blank" rel="noreferrer">📜 Open manifest</a>
       </div>
 
-      {err ? <div style={{ color: "#e06c6c", fontSize: 12 }}>load error: {err}</div> : null}
+      <div style={box}>
+          <div style={label}>CONNECT AN AGENT</div>
+          <div style={{ fontSize: 11, color: "#9ca3af", marginTop: 3 }}>Each agent runs cronus-mcp under its own client id. Pick one, drop the config into your MCP host, and it lights up here live (via MCP — no OAuth needed).</div>
+          <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 10 }}>
+            {AGENT_PRESETS.map((a) => (
+              <button key={a.id} type="button" className="a2a-btn" onClick={() => setAgentPick((v) => (v === a.id ? null : a.id))}>{a.glyph} {a.label}</button>
+            ))}
+          </div>
+          {agentPick ? (() => {
+            const preset = AGENT_PRESETS.find((p) => p.id === agentPick)
+            if (!preset) return null
+            const cfg = mcpConfigFor(preset.client)
+            const live = agentRoster.find((r) => { const lc = r.client.toLowerCase(); return preset.kw.some((k) => lc.includes(k)) })
+            return (
+              <div style={{ marginTop: 10 }}>
+                <div style={{ fontSize: 12, color: "#dbe4f3" }}>Drop this into your MCP client config (Claude Desktop / Cursor / any MCP host):</div>
+                <pre style={preS}>{cfg}</pre>
+                <button type="button" className="a2a-btn" onClick={() => copy(cfg)}>{copied ? "✓ copied" : "copy config"}</button>
+                <span style={{ ...tag(live ? "#39d98a" : "#c9a84c"), marginLeft: 10 }}>{live ? "● connected · " + timeAgo(live.lastTs) : "○ waiting for first handshake"}</span>
+              </div>
+            )
+          })() : null}
+        </div>
+
+        <div style={box}>
+          <div style={label}>AGENTS · {agentRoster.length} active</div>
+          {agentRoster.length === 0 ? (
+            <div style={{ color: "#9ca3af", fontSize: 12, marginTop: 6 }}>No agents yet. Connect one above — it appears here the moment it handshakes or pays.</div>
+          ) : (
+            <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 8 }}>
+              {agentRoster.map((r, i) => {
+                const isExt = r.kind !== "self-demo"
+                const paidLive = r.paid > 0
+                return (
+                  <div key={i} className={paidLive ? "a2a-live" : "a2a-conn"} style={{ flex: "1 1 260px", padding: "10px 12px", borderRadius: 8, background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.08)" }}>
+                    <div>
+                      <span style={{ ...tag(paidLive ? "#39d98a" : "#c9a84c"), marginLeft: 0 }}>{paidLive ? "ACTIVE · PAID" : "ACTIVE · MCP"}</span>
+                      <span style={{ fontWeight: 700, color: "#e5e7eb", fontSize: 13, marginLeft: 8 }}>{r.client}</span>
+                    </div>
+                    <div style={{ fontSize: 11, color: "#9ca3af", marginTop: 4 }}>{isExt ? "external" : "self / demo"} · {r.tiers.length ? r.tiers.length : 1} grant{(r.tiers.length || 1) === 1 ? "" : "s"} · last used {timeAgo(r.lastTs)}</div>
+                    <div style={{ fontSize: 11, color: "#bcd0f5", marginTop: 3 }}>{r.paid} paid call{r.paid === 1 ? "" : "s"} · {r.handshakes} handshake{r.handshakes === 1 ? "" : "s"}</div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        </div>
+
+        {err ? <div style={{ color: "#e06c6c", fontSize: 12 }}>load error: {err}</div> : null}
       <div style={box}>
         <div style={label}>ACCESS MODEL · TWO GATES</div>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 8 }}>
