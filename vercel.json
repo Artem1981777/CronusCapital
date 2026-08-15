@@ -219,6 +219,10 @@
     {
       "source": "/api/cctp-status",
       "destination": "/api/info?kind=cctp-status"
+    },
+    {
+      "source": "/api/identity",
+      "destination": "/api/info?kind=identity"
     }
   ]
 }
