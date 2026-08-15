@@ -191,6 +191,14 @@
     {
       "source": "/api/mcp",
       "destination": "/api/info?kind=mcp"
+    },
+    {
+      "source": "/api/balance",
+      "destination": "/api/info?kind=balance"
+    },
+    {
+      "source": "/api/payout-status",
+      "destination": "/api/info?kind=payout-status"
     }
   ]
 }
