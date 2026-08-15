@@ -11,21 +11,12 @@ type Payer = { payer: string; usdc: number; txs?: number; calls?: number }
 type LeaderResp = { ok?: boolean; recent_clients?: Client[]; connected_clients?: Conn[]; self_generated_leaders?: Payer[]; unique_external_payers?: number; external_payers?: number; self_demo_calls?: number; headline_note?: string }
 type Card = { card?: { identity?: { agentId?: number | string; feedbacks?: number | null; avgRating?: number | null } } }
 
-const AGENT_PRESETS: Array<{ id: string; label: string; glyph: string; client: string; kw: string[] }> = [
-  { id: "claude", label: "Connect with Claude", glyph: "✦", client: "claude-ai", kw: ["claude"] },
-  { id: "chatgpt", label: "Connect with ChatGPT", glyph: "◉", client: "chatgpt", kw: ["gpt", "openai", "chatgpt"] },
+const CONNECTOR_NAME = "Cronus Capital"
+const MCP_URL = (typeof window !== "undefined" ? window.location.origin : "https://cronus-capital.vercel.app") + "/api/mcp"
+const AGENT_PRESETS: Array<{ id: string; label: string; glyph: string; connectUrl: string; provider: string; steps: string; kw: string[] }> = [
+  { id: "claude", label: "Connect with Claude", glyph: "✦", connectUrl: "https://claude.ai/settings/connectors", provider: "Claude", steps: "Claude → Settings → Connectors → Add custom connector", kw: ["claude"] },
+  { id: "chatgpt", label: "Connect with ChatGPT", glyph: "◉", connectUrl: "https://chatgpt.com/#settings/Connectors", provider: "ChatGPT", steps: "ChatGPT → Settings → Connectors → Add", kw: ["gpt", "openai", "chatgpt"] },
 ]
-function mcpConfigFor(client: string): string {
-  return `{
-  "mcpServers": {
-    "cronus": {
-      "command": "npx",
-      "args": ["-y", "cronus-mcp"],
-      "env": { "CRONUS_MCP_CLIENT": "${client}" }
-    }
-  }
-}`
-}
 
 const COMPATIBLE = [
   { name: "Claude", note: "MCP-native (Desktop / API)", kw: ["claude"] },
@@ -170,24 +161,28 @@ export default function A2APanel() {
       </div>
 
       <div style={box}>
-          <div style={label}>CONNECT AN AGENT</div>
-          <div style={{ fontSize: 11, color: "#9ca3af", marginTop: 3 }}>Each agent runs cronus-mcp under its own client id. Pick one, drop the config into your MCP host, and it lights up here live (via MCP — no OAuth needed).</div>
+          <div style={label}>CONNECT AN AGENT · REMOTE MCP</div>
+          <div style={{ fontSize: 11, color: "#9ca3af", marginTop: 3 }}>Cronus runs a hosted MCP server. Click an agent: we open its connector page and copy the URL. While logged in, paste the URL + name and Cronus shows up as a live connector you can call right in chat.</div>
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginTop: 10 }}>
             {AGENT_PRESETS.map((a) => (
-              <button key={a.id} type="button" className="a2a-btn" onClick={() => setAgentPick((v) => (v === a.id ? null : a.id))}>{a.glyph} {a.label}</button>
+              <button key={a.id} type="button" className="a2a-btn" onClick={() => { copy(MCP_URL); setAgentPick(a.id); if (typeof window !== "undefined") window.open(a.connectUrl, "_blank", "noopener,noreferrer") }}>{a.glyph} {a.label}</button>
             ))}
           </div>
           {agentPick ? (() => {
             const preset = AGENT_PRESETS.find((p) => p.id === agentPick)
             if (!preset) return null
-            const cfg = mcpConfigFor(preset.client)
             const live = agentRoster.find((r) => { const lc = r.client.toLowerCase(); return preset.kw.some((k) => lc.includes(k)) })
             return (
               <div style={{ marginTop: 10 }}>
-                <div style={{ fontSize: 12, color: "#dbe4f3" }}>Drop this into your MCP client config (Claude Desktop / Cursor / any MCP host):</div>
-                <pre style={preS}>{cfg}</pre>
-                <button type="button" className="a2a-btn" onClick={() => copy(cfg)}>{copied ? "✓ copied" : "copy config"}</button>
-                <span style={{ ...tag(live ? "#39d98a" : "#c9a84c"), marginLeft: 10 }}>{live ? "● connected · " + timeAgo(live.lastTs) : "○ waiting for first handshake"}</span>
+                <div style={{ fontSize: 12, color: "#dbe4f3" }}>In {preset.steps}, paste:</div>
+                <div style={{ fontSize: 10, color: "#9ca3af", marginTop: 6 }}>Name</div>
+                <pre style={preS}>{CONNECTOR_NAME}</pre>
+                <div style={{ fontSize: 10, color: "#9ca3af" }}>Remote MCP URL</div>
+                <pre style={preS}>{MCP_URL}</pre>
+                <button type="button" className="a2a-btn" onClick={() => copy(MCP_URL)}>{copied ? "✓ copied URL" : "copy URL"}</button>
+                <a className="a2a-btn" href={preset.connectUrl} target="_blank" rel="noreferrer" style={{ marginLeft: 8 }}>↗ open {preset.provider}</a>
+                <span style={{ ...tag(live ? "#39d98a" : "#c9a84c"), marginLeft: 10 }}>{live ? "● connected · " + timeAgo(live.lastTs) : "○ waiting for first connect"}</span>
+                <div style={{ fontSize: 10, color: "#7c8698", marginTop: 8 }}>Free: cronus_consult. Paid tools return an x402 quote until settled. No OAuth — public discovery/quotes; payment happens at call time.</div>
               </div>
             )
           })() : null}

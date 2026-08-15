@@ -187,6 +187,10 @@
     {
       "source": "/api/make-good",
       "destination": "/api/info?kind=make-good"
+    },
+    {
+      "source": "/api/mcp",
+      "destination": "/api/info?kind=mcp"
     }
   ]
 }
