@@ -37,3 +37,6 @@ seed-traction.mjs
 structure.txt
 yarn-debug.log*
 yarn-error.log*
+
+external_candidates.txt
+payers.txt
