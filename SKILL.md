@@ -35,7 +35,7 @@ Returns JSON:
 
 Field notes:
 - price / changePct / high24h / low24h / vol24h are REAL data pulled live from the OKX public ticker.
-- trace is produced by a real LLM (Groq, Llama 3.3 70B) reasoning ONLY over the provided data; it never invents indicators.
+- trace is produced by a real LLM (Groq, GPT-OSS 120B) reasoning ONLY over the provided data; it never invents indicators.
 - analog is a heuristic historical-regime recall (an estimate, not a backtest).
 - verdict is YES / NO / SKIP. Cronus abstains (SKIP) when conviction is below 65 - it is not a YES-machine.
 
