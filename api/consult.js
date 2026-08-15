@@ -31,9 +31,9 @@ export default async function handler(req, res) {
     res.setHeader("Cache-Control", "s-maxage=" + cacheSec + ", stale-while-revalidate=" + (cacheSec * 5));
   }
 
-  const topic = (req.query && req.query.topic) || "BTC-USDC momentum";
-  // POLISH: the default instrument can be overridden via env; the default itself is unchanged.
   const instId = (req.query && req.query.instId) || process.env.CONSULT_DEFAULT_INST || "BTC-USDC";
+  // default topic derives from the instrument so the untrusted label always matches instId (no cross-pair label leak).
+  const topic = (req.query && req.query.topic) || (instId + " momentum");
 
   let price = null, prevPrice = null, changePct = null, high24h = null, low24h = null, vol24h = null;
   try {
