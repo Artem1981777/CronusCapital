@@ -174,5 +174,13 @@
     "block": 56918523,
     "anchoredAt": "2026-08-14T08:00:52.377Z",
     "by": "0xbe3a16bD4137A8a293aCBcaA75cCE3420919D21d"
+  },
+  {
+    "file": "2026-08-14.json",
+    "keccak256": "0x1c9ea1b2cfd4792b814f8d1d0df8f760b74a4fd8268291c9bd0954c003df4bbf",
+    "tx": "0x756a2f1290cc6f3a1b7ca6ac3cbd83a2c8285ebe9ee809d13e578a700291fb0a",
+    "block": 57081531,
+    "anchoredAt": "2026-08-15T07:12:36.388Z",
+    "by": "0xbe3a16bD4137A8a293aCBcaA75cCE3420919D21d"
   }
 ]
