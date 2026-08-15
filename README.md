@@ -1416,3 +1416,58 @@ look independent. Rather than inflate the number, we keep external demand at a
 truthful 0 and keep the on-ramp open — any third party can pay 0.02 USDC via
 the Pay Cronus button or `node scripts/pay-cronus.mjs` and, once independently
 verified, be counted with on-chain proof.
+
+---
+
+# 🏆 Judge Walkthrough — Build Log (Aug 15, 2026)
+
+> Everything below is **live on Arc testnet** — no mocks, no stubs. Every claim is verifiable via a public endpoint or on-chain. Honesty invariant: our own test traffic is **never** counted as external demand.
+
+## 1. Public Honest Leaderboard (`/api/leaderboard`)
+
+A public, self-auditing leaderboard of who pays Cronus.
+
+- Endpoint: https://cronus-capital.vercel.app/api/leaderboard
+- Canonical field `external_payers`: a wallet counts only if it is (a) an on-chain receipt payer AND (b) explicitly allow-listed in `VERIFIED_EXTERNAL_PAYERS`. Today = **0** (no independent third party has paid yet; we refuse to fake one).
+- Self/demo separated, never hidden: `unique_self_demo_payers` (distinct wallets WE used to exercise the paywall, =5), `self_demo_calls`, `self_generated_wallets/txs/usdc`.
+- Honesty fix shipped today: `unique_external_payers` previously leaked our 5 test wallets; now allow-list-gated → **0 across `/api/leaderboard` and `/api/traction`**.
+- Verify: `curl -s https://cronus-capital.vercel.app/api/leaderboard | grep -o '"external_payers":[0-9]*\|"unique_external_payers":[0-9]*\|"unique_self_demo_payers":[0-9]*'` => `"external_payers":0 "unique_external_payers":0 "unique_self_demo_payers":5`
+
+## 2. MCP Integration — Cronus as a tool inside Claude & ChatGPT
+
+Cronus is exposed as a **remote MCP server over HTTPS** (stateless Streamable-HTTP JSON-RPC) — agents discover it, see prices, and pay via x402, no install.
+
+- Remote MCP URL: `https://cronus-capital.vercel.app/api/mcp`
+- Tools: `cronus_consult` (free verdict), `cronus_signal` (paid 0.02 USDC), `cronus_nano_signal` (paid 0.001 USDC, gas-free), `cronus_pay`, `cronus_signal_xlayer`.
+- Served via `api/info?kind=mcp` + `vercel.json` rewrite — 0 extra serverless functions (stays within Vercel Hobby 12-function limit).
+
+### 2a. Connect in Claude (verified live today)
+1. Claude -> Settings -> Connectors -> Add custom connector.
+2. Name: `Cronus Capital`  |  URL: `https://cronus-capital.vercel.app/api/mcp`  -> Save.
+3. Free verdict: ask "Give me a Cronus verdict on ETH-USDC." -> BUY/SELL/HOLD + conviction + Coinbase cross-check (no payment).
+4. Paid signal: ask "Give me the paid nano signal on ETH-USDC." -> 402 -> pay -> 200 + settlement id (0.001 USDC, Circle Gateway, gas-free EIP-3009) + signed EIP-191 delivery receipt.
+
+### 2b. Connect in ChatGPT (Custom GPT Action)
+1. ChatGPT -> Create a GPT -> Configure -> Actions -> Create new action.
+2. Import from URL: `https://cronus-capital.vercel.app/api/openapi` (live OpenAPI for /api/signal + /api/nano-signal).
+3. Ask: "Get a Cronus consult on ETH-USDC" (free). Paid endpoints return HTTP 402 with accepts[] for x402-capable agents.
+4. Alt: MCP-capable ChatGPT clients can point directly at `https://cronus-capital.vercel.app/api/mcp`.
+
+## 3. Real payment inside the chat (server-side auto-settle)
+
+- `lib/settle.js` (opt-in via env `CRONUS_AUTOSETTLE=1`): paid tools auto-pay from our test wallet through Circle Gateway and return signal + `settlement` id, tagged `settledBy: "cronus-test-wallet (self/demo)"`, `external: false`.
+- Smoke verified: `tools/call cronus_nano_signal -> 200`, 0.001 USDC settled, verdict YES / conviction 75, signed delivery receipt. `external_payers` stays 0.
+
+## 4. What we shipped today
+- Model migration Llama 3.3 70B -> GPT-OSS 120B.
+- Honest "Traction & Honesty" section + `/api/traction`, `/api/leaderboard`, `/api/receipts`.
+- Idea #2 Public Leaderboard (self/external separation, allow-list gating).
+- Idea #1 A2A Marketplace via MCP + x402: published `cronus-mcp` npm v0.2.0; autonomous buyer-agent executed a live A2A purchase (gas-free 0.001 USDC + on-chain ERC-8004 reputation feedback).
+- Remote MCP over HTTPS + live external Claude connect (Anthropic clients show as EXTERNAL handshakes; external_payers honestly still 0).
+- Server-side auto-settle for in-chat paid demos.
+- Honesty bug fixed: unique_external_payers allow-list-gated -> 0 everywhere.
+
+## 5. Video demos
+- Demo 1 (2:36): dashboard -> leaderboard -> MCP panel -> Get live quote -> Connect Claude -> Claude calls cronus_consult live -> BUY ETH-USDC, conviction 78, Coinbase cross-check agrees. Human only clicks Connect.
+- Demo 2 (paid flow): in Claude "give me the paid nano signal on ETH-USDC" -> 402 -> pay -> 200 + settlement id, live.
+- Video links: (paste here)
