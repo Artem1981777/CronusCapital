@@ -1470,4 +1470,5 @@ Cronus is exposed as a **remote MCP server over HTTPS** (stateless Streamable-HT
 ## 5. Video demos
 - Demo 1 (2:36): dashboard -> leaderboard -> MCP panel -> Get live quote -> Connect Claude -> Claude calls cronus_consult live -> BUY ETH-USDC, conviction 78, Coinbase cross-check agrees. Human only clicks Connect.
 - Demo 2 (paid flow): in Claude "give me the paid nano signal on ETH-USDC" -> 402 -> pay -> 200 + settlement id, live.
-- Video links: (paste here)
+- Demo 1 — dashboard + honesty leaderboard + live Claude connect + free consult (2:36): https://youtube.com/shorts/830W9RiDCxs
+- Demo 2 — paid flow in-chat: 402 -> pay 0.001 USDC -> 200 + settlement id + signed receipt (2:27): https://youtube.com/shorts/55fdlJ8cce0
