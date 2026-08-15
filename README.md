@@ -1386,3 +1386,33 @@ After a self-audit we redeployed the pool as a hardened v2: a reentrancy guard o
 
 Each row is a complete CCTP V2 round-trip leg: USDC burned on the source chain and
 minted natively on the destination chain, both signed by the recipient's own wallet.
+
+
+## 📊 Traction & Honesty
+
+**Verified external payers: `0` (honest count).** We never present our own
+testing volume as third-party demand.
+
+All on-chain payment volume on the live endpoints — currently ~239
+self-generated x402 settlements (~4.78 USDC) across 52 wallets, out of 283
+total settlements — is self-generated test traffic. Because Cronus runs on the
+Arc testnet, the maintainer executes daily x402 transactions against the live
+paywall to continuously prove the payment rail, settlement, and receipts
+pipeline are operational end-to-end.
+
+This traffic is:
+- Fully verifiable — every payment is a real on-chain tx, checkable on arcscan
+  (https://testnet.arcscan.app) and via /api/receipts.
+- Always labeled — it appears only under self_generated_* in /api/traction and
+  /api/leaderboard, and is never counted toward external_payers.
+- Tamper-resistant — external_payers counts an address only if it is (a) in the
+  VERIFIED_EXTERNAL_PAYERS allowlist, (b) independently funded (verified via
+  scripts/audit-funders.mjs), and (c) not one of our own wallets. The allowlist
+  is empty by default, so the honest count stays 0 until a real third party
+  pays and is independently verified.
+
+Why we keep it at 0: on a testnet, throwaway wallets can be faucet-funded to
+look independent. Rather than inflate the number, we keep external demand at a
+truthful 0 and keep the on-ramp open — any third party can pay 0.02 USDC via
+the Pay Cronus button or `node scripts/pay-cronus.mjs` and, once independently
+verified, be counted with on-chain proof.
