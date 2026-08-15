@@ -199,6 +199,10 @@
     {
       "source": "/api/payout-status",
       "destination": "/api/info?kind=payout-status"
+    },
+    {
+      "source": "/api/decisions",
+      "destination": "/api/info?kind=decisions"
     }
   ]
 }
