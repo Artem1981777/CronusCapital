@@ -52,5 +52,70 @@
       "prev": "sha256:b5e1fbbb4bba5cecd637467f7c6c8d9fd123f9865e691e858727e79dcc55dd48"
     },
     "policyHash": "sha256:fa6496db7611aeb26710b34b3401992704cc21891df021a9262bd9c13ffdeb38"
+  },
+  {
+    "agent": "rhea",
+    "ts": "2026-08-16T14:56:45.068Z",
+    "action": "SESSION_OPEN",
+    "paidUsd": 0.006,
+    "settlement": "0fe20efd-3aa6-44e7-874d-a77d2bc0e656",
+    "session": {
+      "standard": "cronus-session-v1",
+      "opened": 10,
+      "unitsRemaining": 10,
+      "expiresInSec": 86400,
+      "price": "$0.006",
+      "consume": "/api/nano-signal?session=use&topic=TOPIC&payer=0xbe3a16bd4137a8a293acbcaa75cce3420919d21d",
+      "rule": "prepaid units are metered in KV and burn one per signal; no payment per call; reopening tops up and refreshes the 24h TTL"
+    },
+    "chain": {
+      "standard": "cronus-hashchain-v1",
+      "prev": "sha256:4810833578781eb119efe5adb5a95568c48efe5104dd46c595cdef514978285d"
+    },
+    "policyHash": "sha256:fa6496db7611aeb26710b34b3401992704cc21891df021a9262bd9c13ffdeb38"
+  },
+  {
+    "agent": "rhea",
+    "ts": "2026-08-16T14:56:40.517Z",
+    "topic": "SOL-USDC breakout",
+    "bandit": {
+      "mode": "explore",
+      "epsilon": 0.2
+    },
+    "quote": {
+      "tier": "nano",
+      "price": "$0.0007"
+    },
+    "purchases": 73,
+    "loyal": true,
+    "convictionPricing": {
+      "model": "conviction-pegged",
+      "conviction": 70,
+      "band": "standard",
+      "bands": {
+        "discount": "$0.0005",
+        "standard": "$0.0007",
+        "premium": "$0.0009"
+      },
+      "note": "loyal price floats with live oracle confidence, hard-clamped to the band range"
+    },
+    "action": "BUY",
+    "via": "prepaid-session",
+    "paidUsd": 0,
+    "session": {
+      "standard": "cronus-session-v1",
+      "consumed": 1,
+      "unitsRemaining": 9
+    },
+    "quality": {
+      "delivered": true,
+      "verdict": "SKIP",
+      "conviction": 0
+    },
+    "chain": {
+      "standard": "cronus-hashchain-v1",
+      "prev": "sha256:6863b6554a55aa59e3c1c0966515c0f14aee0d7659bb408ef95f0c649fd95e97"
+    },
+    "policyHash": "sha256:fa6496db7611aeb26710b34b3401992704cc21891df021a9262bd9c13ffdeb38"
   }
 ]
