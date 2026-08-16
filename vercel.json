@@ -193,6 +193,10 @@
       "destination": "/api/info?kind=mcp"
     },
     {
+      "source": "/api/mcp-private",
+      "destination": "/api/info?kind=mcp-private"
+    },
+    {
       "source": "/api/balance",
       "destination": "/api/info?kind=balance"
     },
