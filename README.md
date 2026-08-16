@@ -1489,6 +1489,18 @@ Cronus exposes **two** MCP endpoints. The public one is read/dry-run only; the p
 | `/api/mcp` (public) | 19 | dry-run only (`execKey`-gated) | none |
 | `/api/mcp-private` | 21 (19 + 2 execute) | **real, keyless** | `MCP_PRIVATE_TOKEN` |
 
+### Judges — one-click keyless demo
+
+Connect Claude with the public demo token (already in the URL) and ask in plain language:
+
+**Connector URL:** `https://cronus-capital.vercel.app/api/mcp-private?k=cronus-judge-2026`
+
+Then say: *"swap 0.1 USDC to CRN"* → Claude calls `cronus_swap_execute` → a real on-chain tx you can verify on arcscan. No key in the chat, no setup.
+
+Latest verified demo swap: [`0x616d1d7d…c15733b`](https://testnet.arcscan.app/tx/0x616d1d7d2001cec9ff7ee4c3aed8e04cc26b5f41d5dba2163f94fe338c15733b)
+
+Demo-token limits (gate-enforced): swap `usdc_to_crn` only, <= 0.1 USDC/swap, 20/day; bridge <= 0.5 USDC to treasury only, 5/day; 1/min. Full execute (both directions, higher caps) stays behind the private token.
+
 ### How keyless execution works
 The private endpoint adds `cronus_swap_execute` and `cronus_bridge_execute`. The fund-moving secret (`CRONUS_EXEC_SECRET`) lives **only in server env** and is injected server-side on each call — **the caller never sends a key**. An AI client (e.g. Claude) connects once with a connector token and then executes real on-chain actions from plain language, with **no secret in the chat**.
 
