@@ -239,6 +239,16 @@
     {
       "source": "/api/complete-evm",
       "destination": "/api/info?kind=complete-evm"
+    },
+    {
+      "source": "/api/payout-cron",
+      "destination": "/api/agent-payout?action=execute"
+    }
+  ],
+  "crons": [
+    {
+      "path": "/api/payout-cron",
+      "schedule": "0 12 * * *"
     }
   ]
 }
