@@ -235,6 +235,10 @@
     {
       "source": "/api/bridge",
       "destination": "/api/info?kind=bridge"
+    },
+    {
+      "source": "/api/complete-evm",
+      "destination": "/api/info?kind=complete-evm"
     }
   ]
 }
