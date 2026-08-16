@@ -223,6 +223,10 @@
     {
       "source": "/api/identity",
       "destination": "/api/info?kind=identity"
+    },
+    {
+      "source": "/api/swap",
+      "destination": "/api/info?kind=swap"
     }
   ]
 }
