@@ -1472,3 +1472,45 @@ Cronus is exposed as a **remote MCP server over HTTPS** (stateless Streamable-HT
 - Demo 2 (paid flow): in Claude "give me the paid nano signal on ETH-USDC" -> 402 -> pay -> 200 + settlement id, live.
 - Demo 1 — dashboard + honesty leaderboard + live Claude connect + free consult (2:36): https://youtube.com/shorts/830W9RiDCxs
 - Demo 2 — paid flow in-chat: 402 -> pay 0.001 USDC -> 200 + settlement id + signed receipt (2:27): https://youtube.com/shorts/55fdlJ8cce0
+
+## 🔐 Keyless Execution via Private MCP
+
+![First autonomous AI-initiated swap on Arc testnet: Claude executed a real on-chain swap via Cronus Private MCP with no key in the chat](docs/img/historic-claude-swap.jpg)
+
+> **Historic moment** — Claude discovered the endpoint, read the signal, and executed a real on-chain swap end-to-end (0.1 USDC to 90.44 CRN). No key in chat, no human clicking a button. This is the agent-to-agent commerce the Arc ecosystem is being built for.
+
+**[Verify on Arc explorer](https://testnet.arcscan.app/tx/0x5eeabd21becd8ae8cec9e270bdd56c3609a5654526e0f9c1c5567c64eba076dc)** · tx `0x5eeabd21…0eba076dc`
+
+
+Cronus exposes **two** MCP endpoints. The public one is read/dry-run only; the private one adds real, keyless on-chain execution for trusted AI clients.
+
+| Endpoint | Tools | Execute | Auth |
+|---|---|---|---|
+| `/api/mcp` (public) | 19 | dry-run only (`execKey`-gated) | none |
+| `/api/mcp-private` | 21 (19 + 2 execute) | **real, keyless** | `MCP_PRIVATE_TOKEN` |
+
+### How keyless execution works
+The private endpoint adds `cronus_swap_execute` and `cronus_bridge_execute`. The fund-moving secret (`CRONUS_EXEC_SECRET`) lives **only in server env** and is injected server-side on each call — **the caller never sends a key**. An AI client (e.g. Claude) connects once with a connector token and then executes real on-chain actions from plain language, with **no secret in the chat**.
+
+### Safety model
+- **Auth gate:** every private request needs a valid `MCP_PRIVATE_TOKEN` (`x-mcp-token` header, `Authorization: Bearer`, or `?k=`); missing/invalid returns `401`.
+- **Treasury allowlist:** `cronus_bridge_execute` sends only to Cronus treasury addresses (EVM `0xdc6778...5737fbd`, Stellar `GBNJ2JNN...CAZK`); any other recipient returns `403`, no funds move.
+- **Server caps:** swap <= 2 USDC/call, 50 USDC/day, 1/min; bridge <= 5 USDC, 1/5min.
+- **Audit:** every execute is appended to a KV audit log (`cronus:mcp:audit`) with tool, amount, txHash, caller.
+- **Public surface unchanged:** `/api/mcp` stays 19 read/dry-run tools — external agents and judges see no execute surface.
+
+### Verified on-chain (Arc testnet)
+| Action | txHash |
+|---|---|
+| Keyless swap via Claude (UI, no key in chat) | `0x48547ebd6e1515d96869ba050e370b5d89568bf7defa4f752d8871aae5cfad91` |
+| Keyless swap via Claude (autonomous) | `0x5eeabd21becd8ae8cec9e270bdd56c3609a5654526e0f9c1c5567c64eba076dc` |
+| Keyless swap via private MCP (server-injected key) | `0x0298e8cf02918149f83f852d0c22d771193b650daf8db519657251957139fb9d` |
+| Bridge Arc->Stellar (CCTP v2 burn) | `0xc75ed27896abc179aadbd336090a180883afdccc7afb66da5a461061d79bb3d0` |
+| Stellar mint (settlement) | `50c8558082ae249fb98eadd8afeb76592420813d42bb13e5919ad56cf0ff12a8` |
+
+Explorer: Arc `https://testnet.arcscan.app/tx/<hash>` · Stellar `https://stellar.expert/explorer/testnet/tx/<hash>`
+
+### Connect in Claude
+Settings -> Connectors -> **Add custom connector**
+- **URL:** `https://cronus-capital.vercel.app/api/mcp-private?k=<MCP_PRIVATE_TOKEN>`
+- Then ask in plain language: *"swap 0.1 USDC to CRN"* -> Claude calls `cronus_swap_execute` -> real tx, no key in chat.
