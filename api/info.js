@@ -38,6 +38,7 @@ import insurance from "../lib/insurance.js"
 import cctpStatus from "../lib/cctpStatus.js"
 import identity from "../lib/identity.js"
 import swapExec from "../lib/swapExec.js"
+import bridgeExec from "../lib/bridgeExec.js"
 import { UPGRADE_ROUTES } from "../lib/upgrades/router.js"
 import { REAL_ROUTES } from "../lib/council/routes.js"
 import { mapContract } from "../lib/provenance/wrap.js"
@@ -45,7 +46,7 @@ import { PRIVACY_ROUTES } from "../lib/privacy/routes.js"
 import { TREASURY_ROUTES } from "../lib/treasury/routes.js"
 
 const ROUTES = { ...mapContract(UPGRADE_ROUTES), ...REAL_ROUTES, ...PRIVACY_ROUTES,
-	...TREASURY_ROUTES, cover, alerts, governance, drills, nft, "backtest": backtest, "trace": trace, "agent-withdraw": agentWithdraw, "subscription": subscription, "split-pay": splitPay, "spend-limit": spendLimit, "fund-escrow": fundEscrow, "resolve-stake": resolveStake, manifest, openapi, receipts, receipt, metrics, traction, leaderboard, settlements, "spend-intent": spendIntent, scorecard, "track-record": trackRecord, "open-stake": openStake, "pay-to-think": payToThink, "vault-nav": vaultNav, "signal-x402": signalX402, balance, "payout-status": payoutStatus, decisions, "insurance-quote": insurance, "insurance-buy": insurance, "insurance-status": insurance, "cctp-status": cctpStatus, identity, swap: swapExec, mcp }
+	...TREASURY_ROUTES, cover, alerts, governance, drills, nft, "backtest": backtest, "trace": trace, "agent-withdraw": agentWithdraw, "subscription": subscription, "split-pay": splitPay, "spend-limit": spendLimit, "fund-escrow": fundEscrow, "resolve-stake": resolveStake, manifest, openapi, receipts, receipt, metrics, traction, leaderboard, settlements, "spend-intent": spendIntent, scorecard, "track-record": trackRecord, "open-stake": openStake, "pay-to-think": payToThink, "vault-nav": vaultNav, "signal-x402": signalX402, balance, "payout-status": payoutStatus, decisions, "insurance-quote": insurance, "insurance-buy": insurance, "insurance-status": insurance, "cctp-status": cctpStatus, identity, swap: swapExec, bridge: bridgeExec, mcp }
 
 export default async function handler(req, res) {
 	const kind = String((req.query && req.query.kind) || "").toLowerCase()

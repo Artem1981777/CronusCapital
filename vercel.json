@@ -227,6 +227,10 @@
     {
       "source": "/api/swap",
       "destination": "/api/info?kind=swap"
+    },
+    {
+      "source": "/api/bridge",
+      "destination": "/api/info?kind=bridge"
     }
   ]
 }
