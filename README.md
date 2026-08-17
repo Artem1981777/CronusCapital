@@ -65,7 +65,53 @@ Cronus is an autonomous AI agent that runs a real, honest business on Arc: it **
 - [Verify it yourself](#verify-it-yourself)
 - [Dashboard V2 — screenshots](#dashboard-v2--visual-tour)
 - [Rogue-agent containment (security)](docs/rogue-agent-containment.md)
+- [Application-layer security (MCP + API)](#application-layer-security)
 - [Full build log (CHANGELOG)](CHANGELOG.md)
+
+---
+
+## Application-layer security
+
+**Threat model:** what if the AI agent (or a leaked MCP / exec key) goes rogue and tries to drain the treasury to an unknown address? The on-chain guard bounds the money rail at the contract level; this layer bounds it at the **API + MCP layer** too — defense-in-depth. Every check is *additive* on top of the existing endpoints (no working logic was removed).
+
+Every outbound money path — `/api/bridge`, `/api/agent-payout`, and the private-MCP `cronus_bridge_execute` / `cronus_swap_execute` — passes these gates:
+
+### 1. Hard recipient allowlist (a valid key cannot override it)
+External transfers may only reach Cronus treasury-owned addresses. A non-allowlisted recipient is rejected with **403 even when the request carries a valid exec key**. Enforced in three independent places:
+- HTTP endpoints: `lib/bridgeExec.js` (`isBridgeAllowlisted`) and `api/agent-payout.js` (`isPayoutAllowlisted`, checked at set-policy time **and** pre-burn).
+- MCP layer: `lib/mcpExec.js` (`isAllowlisted`).
+- Config: `TREASURY_ALLOWLIST` (EVM), `TREASURY_ALLOWLIST_STELLAR`, `PAYOUT_ALLOWLIST_STELLAR` — defaults hardcoded to the current treasury, so a missing/empty env can never widen the set.
+
+### 2. Server-side caps + shared daily breaker + rate limit
+- Per-swap 2 USDC, 50 USDC/day; per-bridge 5 USDC; shared daily spend breaker (`lib/breaker.js`, `SPEND_DAILY_CAP_ATOMIC`); 1 action/min.
+- The demo MCP tier is tighter: swap ≤ 0.1 USDC-equiv (20/day), bridge ≤ 0.5 USDC (5/day), 1/min.
+- Caps live server-side and are injected from env; the caller never supplies a key or a limit.
+
+### 3. Kill switch (`EMERGENCY_PAUSE`)
+`EMERGENCY_PAUSE=1` makes every execute path (swap, bridge, payout, MCP) return **503** before the transfer completes. Togglable only through the Vercel env, never via a request — a compromised key cannot un-pause.
+
+### 4. Exec-key separation (blast-radius reduction)
+Outbound bridge burns are signed with a **separate** `CRONUS_BRIDGE_EXEC_SECRET`; in-pool swaps keep `CRONUS_EXEC_SECRET`. A leaked swap key can no longer open an outbound bridge. The bridge key falls back to `CRONUS_EXEC_SECRET` when unset, so nothing breaks before the env is provisioned.
+
+### 5. Auth-gated control surface (`CRON_SECRET`)
+`execute`, `set-policy` and `set-available` on `api/agent-payout.js` require `Authorization: Bearer CRON_SECRET`. `set-policy` additionally re-checks the recipient against the payout allowlist, so the policy itself cannot be pointed at a new address.
+
+### 6. Immutable treasury target
+The recipient set is fixed by hardcoded defaults + allowlist env; no code path sends funds to a brand-new, request-supplied address.
+
+### 7. Tamper-evident payout ledger
+Every payout decision is appended to a keccak256 hash-chain (`appendLedger`: `hash = keccak256(prevHash + body)`, head at `cronus:payout:head`), so any edit to history is detectable.
+
+### Verify it (no funds move)
+- Blocked recipient, even with a valid key:
+  `curl -s -X POST .../api/bridge -H "Authorization: Bearer <bridge-key>" -d '{"dest":"stellar","to":"<non-allowlisted G-addr>","amount":"0.01","execute":true}'` → `403 recipient not in Cronus treasury allowlist`.
+- Auth-gated control: `curl -s ".../api/agent-payout?action=set-policy&recipientG=GTEST"` (no auth) → `403 set-policy requires Authorization: Bearer CRON_SECRET`.
+- Key separation: the old swap key on `/api/bridge` → `401 execute requires a valid execKey`.
+
+### Optional / roadmap
+- **Anomaly alerts** (planned): a `lib/alert.js` hook firing to Telegram (`TELEGRAM_BOT_TOKEN` + `TELEGRAM_CHAT_ID`) and/or `ALERT_WEBHOOK_URL` on blocked-recipient attempts and outbound executions; designed to ship disabled by default (no env = silent no-op).
+- **Timelock** for any transfer above ~20% of treasury (queue + delay + revoke).
+- **Human-in-the-loop** approval for first-time addresses (largely subsumed by the hard allowlist today).
 
 ---
 
