@@ -15,6 +15,8 @@ const HEAD_KEY = "cronus:payout:head"
 const LOCK_KEY = "cronus:payout:execlock"
 const ZERO = "0x0000000000000000000000000000000000000000000000000000000000000000"
 const G_RE = /^G[A-Z2-7]{55}$/
+const PAYOUT_ALLOWLIST = String(process.env.PAYOUT_ALLOWLIST_STELLAR || "GBNJ2JNNLKQ53MO353PPOTNKI47DMHWVULKXMJMNLQWPF3FBIOA2CAZK").split(",").map(function (x) { return x.trim() }).filter(Boolean)
+function isPayoutAllowlisted(g) { return typeof g === "string" && PAYOUT_ALLOWLIST.indexOf(g) !== -1 }
 
 const ARC_USDC = "0x3600000000000000000000000000000000000000"
 const ARC_TOKEN_MESSENGER = "0x8FE6B999Dc680CcFDD5Bf7EB0974218be2542DAA"
@@ -230,7 +232,8 @@ async function runExecute(req, res, q) {
                     return
                 }
             }
-		const fwd = strkeyToBytes32(STELLAR_FORWARDER)
+		if (!isPayoutAllowlisted(policy.recipientG)) { await kvDel(LOCK_KEY); res.status(403).json({ ok: false, error: "payout recipient not in PAYOUT_ALLOWLIST_STELLAR" }); return }
+    const fwd = strkeyToBytes32(STELLAR_FORWARDER)
 		const hook = buildHookData(policy.recipientG)
 		const maxFee = amt / 100n
 		const MAX_UINT = (2n ** 256n) - 1n
@@ -317,8 +320,11 @@ export default async function handler(req, res) {
 	}
 
 	if (action === "set-policy") {
+    const csP = process.env.CRON_SECRET || ""
+    const authP = String((req.headers && req.headers.authorization) || "")
+    if (!csP || authP !== "Bearer " + csP) { res.status(403).json({ ok: false, error: "set-policy requires Authorization: Bearer CRON_SECRET" }); return }
 		const policy = await getPolicy()
-		if (q.recipientG) policy.recipientG = String(q.recipientG)
+		if (q.recipientG) { const g = String(q.recipientG); if (!isPayoutAllowlisted(g)) { res.status(403).json({ ok: false, error: "recipientG not in PAYOUT_ALLOWLIST_STELLAR" }); return } policy.recipientG = g }
 		if (q.sharePct) policy.sharePct = Number(q.sharePct)
 		if (q.minThresholdUSDC) policy.minThresholdUSDC = Number(q.minThresholdUSDC)
 		if (q.perPayoutCapUSDC) policy.perPayoutCapUSDC = Number(q.perPayoutCapUSDC)
