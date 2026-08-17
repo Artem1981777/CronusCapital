@@ -2,6 +2,7 @@ import { keccak256, toHex } from "viem"
 import { createWalletClient, createPublicClient, http, defineChain } from "viem"
 import { privateKeyToAccount } from "viem/accounts"
 import { checkDaily, recordDaily } from "../lib/breaker.js"
+import { emergencyPaused, pauseError } from "../lib/guard.js"
 
 export const config = { maxDuration: 60 }
 
@@ -167,6 +168,7 @@ function normPk(pk) {
 }
 
 async function runExecute(req, res, q) {
+  if (emergencyPaused()) { res.status(503).json(Object.assign({ ok: false }, pauseError())); return }
         // ADDITIVE auth gate - refuses to move funds without CRON_SECRET. Suffixed names so the
         // existing cronSecret/auth/trustedCron declarations below remain untouched.
         const cronSecret0 = process.env.CRON_SECRET || ""
