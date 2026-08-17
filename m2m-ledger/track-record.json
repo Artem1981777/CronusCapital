@@ -400,14 +400,21 @@
       "topic": "BTC-USDC momentum",
       "verdict": "SKIP",
       "result": "ABSTAIN"
+    },
+    {
+      "key": "2026-08-16T14:56:40.517Z",
+      "ts": "2026-08-16T14:56:40.517Z",
+      "topic": "SOL-USDC breakout",
+      "verdict": "SKIP",
+      "result": "ABSTAIN"
     }
   ],
   "stats": {
     "graded": 0,
     "hits": 0,
     "hitRate": null,
-    "abstained": 57,
+    "abstained": 58,
     "calibration": null,
-    "updatedAt": "2026-08-17T07:37:32.323Z"
+    "updatedAt": "2026-08-17T14:58:42.246Z"
   }
 }
