@@ -1526,3 +1526,66 @@ Explorer: Arc `https://testnet.arcscan.app/tx/<hash>` · Stellar `https://stella
 Settings -> Connectors -> **Add custom connector**
 - **URL:** `https://cronus-capital.vercel.app/api/mcp-private?k=<MCP_PRIVATE_TOKEN>`
 - Then ask in plain language: *"swap 0.1 USDC to CRN"* -> Claude calls `cronus_swap_execute` -> real tx, no key in chat.
+
+---
+
+## Cronus MCP — full tool surface (live-verified in Claude)
+
+Cronus ships as a hosted remote MCP server (Streamable HTTP / JSON-RPC 2.0), ridden on the existing `api/info.js` router — **zero extra serverless functions** (Hobby 12-fn cap intact). Add it in any MCP client (Claude, etc.) by URL:
+
+- **Public (read + paid, 19 tools):** `https://cronus-capital.vercel.app/api/mcp`
+- **Private execute (adds 3 treasury-signed tools, 22 total):** `https://cronus-capital.vercel.app/api/mcp-private?k=<token>`
+
+The private tier injects the Cronus exec secret **server-side** from env — the caller never supplies a key. A demo token exposes the execute tools under hard, server-enforced caps; funds only ever move inside Cronus's own wallets (the AMM pool for swaps, the treasury allowlist for bridges).
+
+### Tools
+
+| Tool | Type | What it does |
+| --- | --- | --- |
+| `cronus_consult` | free | Market verdict (BUY/SKIP/HOLD/CACHE) + conviction + re-verifiable traceHash |
+| `cronus_signal` | x402 (0.02 USDC) | Premium signal; returns HTTP 402 quote without payment |
+| `cronus_nano_signal` | Gateway (~0.001 USDC) | Sub-cent nano signal (EIP-3009, gas-free) |
+| `cronus_signal_xlayer` | x402 (USDT0) | Premium signal on OKX X Layer (eip155:196) |
+| `cronus_pay` | free | Exact on-chain payment instructions for a signal |
+| `cronus_insurance_quote` | free | Signal-insurance quote (5% premium, money-back on MISS) |
+| `cronus_insurance_buy` | x402 | Buy signal insurance; 402 quote without payment |
+| `cronus_insurance_status` | free | Policy status / refund check by policy_id |
+| `cronus_receipts` | read | Recent x402 receipts (payer, amount, external flag) |
+| `cronus_metrics` | read | Aggregate agent stats |
+| `cronus_leaderboard` | read | External-payer leaderboard (self/demo labeled separately) |
+| `cronus_balance` | read | Treasury balances on Arc |
+| `cronus_payout_status` | read | Autonomous payout-agent status + hash-chain tip |
+| `cronus_decisions` | read | On-chain decision log (CronusDecisions) |
+| `cronus_vault` | read | Vault NAV (ERC-4626 totalAssets) |
+| `cronus_cctp_status` | read | CCTP attestation status for an Arc burn (Arc→Stellar route) |
+| `cronus_identity` | read | ERC-8004 on-chain agent identity |
+| `cronus_swap` | dry-run / execute* | Real USDC↔CRN AMM swap; dry-run by default |
+| `cronus_bridge` | dry-run / execute* | Real CCTP burn Arc→EVM/Stellar; dry-run by default |
+| `cronus_swap_execute` | private (treasury-signed) | Real AMM swap; exec secret injected server-side |
+| `cronus_bridge_execute` | private (treasury-signed) | Real CCTP burn to a treasury-allowlisted address only |
+| `cronus_bridge_complete` | private (treasury-signed) | Finalize an attested burn by minting on the destination |
+
+\* On the public MCP, `cronus_swap` / `cronus_bridge` stay dry-run unless the caller passes `execute:true` **and** a valid `execKey`; the server never substitutes its own secret, so the public MCP cannot move funds anonymously.
+
+### Server-enforced caps
+
+- **Swap:** endpoint 2 USDC/swap · 50 USDC/day · 1/min, treasury-signed. Demo tier adds a stricter **0.1 USDC-equivalent/swap · 20/day** (for `crn_to_usdc` the CRN input is priced to USDC via a live pool quote, so the cap is symmetric in both directions).
+- **Bridge:** endpoint 5 USDC/bridge · shared daily spend breaker · 1/min; recipient **must** be a Cronus treasury allowlisted address (else 403). Demo tier adds **0.5 USDC/bridge · 5/day**.
+
+### Live-verified in Claude (demo tier)
+
+Every execute tool was driven end-to-end from Claude against production, funds moving only inside Cronus's own wallets, each verifiable on arcscan / basescan:
+
+| Action | Result | Tx |
+| --- | --- | --- |
+| Swap USDC→CRN | 0.019737 USDC → ~16.32 CRN | arc `0xda4e42f200dd2cbb748503836dec16561307d928aef37d4f46fc6d8e9a028a8b` |
+| Swap CRN→USDC | 16.42 CRN → 0.019737 USDC | arc `0xd63e6a49f58114a565f5d20913f7a9ac3fc5be9a2eb0becc2121875f1366bc9b` |
+| Bridge Base→Arc (reverse leg) | burn (Base Sepolia) → mint (Arc) | burn `0x6c5b2d9056d53e0b1b638e3375b71504b1dee4751e126cca6bf9ec999981fbb2` → mint `0x5c6234af4d08a9340c08e4e4e51d72d32af6a26e201af8e7fb95a62b0b3529b7` |
+
+Previously verified on-chain with the same tools (CCTP round-trip, Arc→Base):
+
+| Action | Tx |
+| --- | --- |
+| Bridge Arc→Base | burn `0x3a18100cc0167c41bf4f5563db0b264701ea77575b4e33f4a47c225caf0cb119` → mint `0xa976e9a789f846b671bb16ef2acad4d2ad26d5ac83478b4a5852422173810837` |
+
+Honest notes: the USDC↔CRN round-trip loses ~1.3% (two 0.3% AMM fees + price impact on a small pool) — quoted openly, never hidden. CCTP burns use v2 **Fast Transfer** (`minFinalityThreshold: 1000`) for seconds-latency attestation. `crn_to_usdc` sells are ungated by the conviction signal (`autoSignal:false`); `usdc_to_crn` buys can optionally gate on a live Cronus verdict (conviction ≥ 65).
