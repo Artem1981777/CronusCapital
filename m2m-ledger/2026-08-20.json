@@ -1,0 +1,72 @@
+[
+  {
+    "agent": "rhea",
+    "ts": "2026-08-20T07:26:54.278Z",
+    "action": "SESSION_OPEN",
+    "paidUsd": 0.006,
+    "settlement": "0c08df76-53ce-498e-8d6d-a73c47f14058",
+    "session": {
+      "standard": "cronus-session-v1",
+      "opened": 10,
+      "unitsRemaining": 10,
+      "expiresInSec": 86400,
+      "price": "$0.006",
+      "consume": "/api/nano-signal?session=use&topic=TOPIC&payer=0xbe3a16bd4137a8a293acbcaa75cce3420919d21d",
+      "rule": "prepaid units are metered in KV and burn one per signal; no payment per call; reopening tops up and refreshes the 24h TTL"
+    },
+    "chain": {
+      "standard": "cronus-hashchain-v1",
+      "prev": "sha256:3c511dc9cc423105f14e0984def8daccd75ac9d543aa60f88648008949623010"
+    },
+    "policyHash": "sha256:fa6496db7611aeb26710b34b3401992704cc21891df021a9262bd9c13ffdeb38"
+  },
+  {
+    "agent": "rhea",
+    "ts": "2026-08-20T07:26:48.612Z",
+    "topic": "BTC-USDC momentum",
+    "bandit": {
+      "mode": "exploit",
+      "epsilon": 0.2
+    },
+    "quote": {
+      "tier": "nano",
+      "price": "$0.0009"
+    },
+    "purchases": 83,
+    "loyal": true,
+    "convictionPricing": {
+      "model": "conviction-pegged",
+      "conviction": 80,
+      "band": "premium",
+      "bands": {
+        "discount": "$0.0005",
+        "standard": "$0.0007",
+        "premium": "$0.0009"
+      },
+      "note": "loyal price floats with live oracle confidence, hard-clamped to the band range"
+    },
+    "negotiation": {
+      "countered": "$0.0009",
+      "agreed": "$0.0007",
+      "band": "standard"
+    },
+    "action": "BUY",
+    "via": "prepaid-session",
+    "paidUsd": 0,
+    "session": {
+      "standard": "cronus-session-v1",
+      "consumed": 1,
+      "unitsRemaining": 9
+    },
+    "quality": {
+      "delivered": true,
+      "verdict": "YES",
+      "conviction": 78
+    },
+    "chain": {
+      "standard": "cronus-hashchain-v1",
+      "prev": "sha256:75b3b5be77b249ead747e8f749dc8c1325bb11476fe07ebab7bbaba9849618b8"
+    },
+    "policyHash": "sha256:fa6496db7611aeb26710b34b3401992704cc21891df021a9262bd9c13ffdeb38"
+  }
+]
