@@ -491,14 +491,21 @@
       "topic": "BTC-USDC momentum",
       "verdict": "YES",
       "result": "ABSTAIN"
+    },
+    {
+      "key": "2026-08-23T07:19:34.268Z",
+      "ts": "2026-08-23T07:19:34.268Z",
+      "topic": "BTC-USDC momentum",
+      "verdict": "NO",
+      "result": "ABSTAIN"
     }
   ],
   "stats": {
     "graded": 0,
     "hits": 0,
     "hitRate": null,
-    "abstained": 70,
+    "abstained": 71,
     "calibration": null,
-    "updatedAt": "2026-08-23T14:57:26.769Z"
+    "updatedAt": "2026-08-24T07:43:29.652Z"
   }
 }
