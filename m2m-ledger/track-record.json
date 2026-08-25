@@ -505,14 +505,28 @@
       "topic": "BTC-USDC momentum",
       "verdict": "YES",
       "result": "ABSTAIN"
+    },
+    {
+      "key": "2026-08-24T07:43:16.673Z",
+      "ts": "2026-08-24T07:43:16.673Z",
+      "topic": "BTC-USDC momentum",
+      "verdict": "YES",
+      "result": "ABSTAIN"
+    },
+    {
+      "key": "2026-08-24T15:20:48.829Z",
+      "ts": "2026-08-24T15:20:48.829Z",
+      "topic": "SOL-USDC breakout",
+      "verdict": "SKIP",
+      "result": "ABSTAIN"
     }
   ],
   "stats": {
     "graded": 0,
     "hits": 0,
     "hitRate": null,
-    "abstained": 72,
+    "abstained": 74,
     "calibration": null,
-    "updatedAt": "2026-08-25T07:29:11.328Z"
+    "updatedAt": "2026-08-25T15:26:19.187Z"
   }
 }
