@@ -278,5 +278,13 @@
     "block": 59145883,
     "anchoredAt": "2026-08-27T17:54:07.498Z",
     "by": "0xbe3a16bD4137A8a293aCBcaA75cCE3420919D21d"
+  },
+  {
+    "file": "2026-08-27.json",
+    "keccak256": "0xf90e52200b9d532e0f28dfbcd571514cf9bd1283b6fc736c87faf8aa7433ad31",
+    "tx": "0x4637c013bcfb5b80596ef663c82eba02087688e156213d5143eccee4b36a9b57",
+    "block": 59319278,
+    "anchoredAt": "2026-08-28T19:00:09.535Z",
+    "by": "0xbe3a16bD4137A8a293aCBcaA75cCE3420919D21d"
   }
 ]
