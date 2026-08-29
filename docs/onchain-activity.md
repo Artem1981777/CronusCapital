@@ -2,7 +2,7 @@
 
 Latest transactions of the Cronus Capital treasury and every deployed contract on Arc Testnet.
 
-Generated: 2026-08-28T17:07:44.968Z — regenerate anytime with `node scripts/traction-snapshot.mjs` (public API only, zero private keys).
+Generated: 2026-08-29T11:27:37.893Z — regenerate anytime with `node scripts/traction-snapshot.mjs` (public API only, zero private keys).
 
 ## Treasury (agent wallet)
 
@@ -123,13 +123,13 @@ Address: [`0x5294E9927c3306DcBaDb03fe70b92e01cCede505`](https://testnet.arcscan.
 
 | When (UTC) | Tx | Method | Dir | Value (native) | Status |
 |---|---|---|---|---|---|
-| 2026-08-28 17:07 | [0x89569697...aa280a](https://testnet.arcscan.app/tx/0x895696978220f921c1c4df11715417cca4056581dfa9114e90ca0c6a3daa280a) | 0xe2f46bd6 | IN | 0.001000 | error |
-| 2026-08-28 17:07 | [0xaa738e8b...2fadf8](https://testnet.arcscan.app/tx/0xaa738e8b1bee0f1e419e7685d4d66114c4a32ce24ad3c7a67c0b23afa22fadf8) | 0xe2f46bd6 | IN | 0.001000 | error |
-| 2026-08-28 17:07 | [0x5b4bdb34...831fb6](https://testnet.arcscan.app/tx/0x5b4bdb34f116ac640da3af4cf01967165d8150913f4f4fe8dc1615a429831fb6) | 0xe2f46bd6 | IN | 0.001000 | error |
-| 2026-08-28 17:07 | [0x5cd0998f...454fec](https://testnet.arcscan.app/tx/0x5cd0998f0350242dc4a7fc422406266e203f2ea8a781711b19e504f8a4454fec) | 0xe2f46bd6 | IN | 0.001000 | error |
-| 2026-08-28 17:07 | [0x054e17b8...f109c5](https://testnet.arcscan.app/tx/0x054e17b8f541c65e648a8f4a1d0a6d6585053caa861e6265b739c876f8f109c5) | 0xe2f46bd6 | IN | 0.001000 | error |
-| 2026-08-28 17:07 | [0xd56d4b5c...b12cf7](https://testnet.arcscan.app/tx/0xd56d4b5cdf707d485d969c5e8128f084fc4ee67cca5faabf6eaa7cee40b12cf7) | 0xe2f46bd6 | IN | 0.001000 | error |
-| 2026-08-28 17:07 | [0x80051a29...c32842](https://testnet.arcscan.app/tx/0x80051a29b66ff2aac41742869de5c5cff3439511e5397c2a9359bee032c32842) | 0xe2f46bd6 | IN | 0.001000 | error |
-| 2026-08-28 17:07 | [0x57dd073e...84d5f4](https://testnet.arcscan.app/tx/0x57dd073e4b6fbc701421ec3ccaf02b77172245c2ef438d5526793e2dbe84d5f4) | 0xe2f46bd6 | IN | 0.001000 | error |
-| 2026-08-28 17:07 | [0xe6bbe73f...28dbee](https://testnet.arcscan.app/tx/0xe6bbe73fb8b7ae1f9bc2fdbfa17b443c463e9cce80505f196bef1d097528dbee) | 0xe2f46bd6 | IN | 0.001000 | error |
-| 2026-08-28 17:07 | [0x31025763...183458](https://testnet.arcscan.app/tx/0x31025763de7abe3483246556e02381a23ee0f2dfae1ba8dd35940f5d03183458) | 0xe2f46bd6 | IN | 0.001000 | error |
+| 2026-08-29 11:27 | [0x8e493755...41590e](https://testnet.arcscan.app/tx/0x8e49375505b50c69831b2a8342dff22fc1f40306457e1df0aed38b475b41590e) | 0xe2f46bd6 | IN | 0.001000 | error |
+| 2026-08-29 11:27 | [0xe910b370...126c9f](https://testnet.arcscan.app/tx/0xe910b370d8de799ef2aa8a18118d6a5f79ea8f997a276fec73ed7cc19e126c9f) | 0xe2f46bd6 | IN | 0.001000 | error |
+| 2026-08-29 11:27 | [0x6a011adb...dfe203](https://testnet.arcscan.app/tx/0x6a011adbb8e578be5d635f09923ddfc2a4a8bfd68ea0708e26c827b98bdfe203) | 0xe2f46bd6 | IN | 0.001000 | error |
+| 2026-08-29 11:27 | [0xc89f7f0d...fc10b5](https://testnet.arcscan.app/tx/0xc89f7f0d9f4c600c3c1c558c0ce4dd15369afa79b4a4bec33f3f5b66fdfc10b5) | 0xe2f46bd6 | IN | 0.001000 | error |
+| 2026-08-29 11:27 | [0x4aaff78c...fa0be3](https://testnet.arcscan.app/tx/0x4aaff78ca60f60ac782aa9518867f71a8308a6fbd48db0f117ea8f8ea1fa0be3) | 0xe2f46bd6 | IN | 0.001000 | error |
+| 2026-08-29 11:27 | [0x5e136d0c...1e26a7](https://testnet.arcscan.app/tx/0x5e136d0c1b1157b85edcd20ffb461992719c9f1bc615a9426bec85c6041e26a7) | 0xe2f46bd6 | IN | 0.001000 | error |
+| 2026-08-29 11:27 | [0x4e43a0bf...4a3394](https://testnet.arcscan.app/tx/0x4e43a0bf3773fb200d9b00ae979fd25736027ebbcfc7962dba2323a68a4a3394) | 0xe2f46bd6 | IN | 0.001000 | error |
+| 2026-08-29 11:27 | [0xa3aa5cbd...79bc0f](https://testnet.arcscan.app/tx/0xa3aa5cbd56f3b9676a7bdaf961ffb854c15afdf8bd694fb9135f4d1b7379bc0f) | 0xe2f46bd6 | IN | 0.001000 | error |
+| 2026-08-29 11:27 | [0xa1214e1f...9f94ac](https://testnet.arcscan.app/tx/0xa1214e1f67855283f49e29614dc513d1ac7c6a312a166b1c72a531d1269f94ac) | 0xe2f46bd6 | IN | 0.001000 | error |
+| 2026-08-29 11:27 | [0x540603db...f17a17](https://testnet.arcscan.app/tx/0x540603db0afa9246ace4427df72ef246c4d12ef27197e3476bb4cb8084f17a17) | 0xe2f46bd6 | IN | 0.001000 | error |
