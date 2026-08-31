@@ -63,5 +63,54 @@
       "prev": "sha256:041cc3d58e31cd68915fd6c05e3b6ef70557948989f5bc4df0484cf711913b19"
     },
     "policyHash": "sha256:fa6496db7611aeb26710b34b3401992704cc21891df021a9262bd9c13ffdeb38"
+  },
+  {
+    "agent": "rhea",
+    "ts": "2026-08-31T20:21:51.090Z",
+    "topic": "BTC-USDC momentum",
+    "bandit": {
+      "mode": "exploit",
+      "epsilon": 0.2
+    },
+    "quote": {
+      "tier": "nano",
+      "price": "$0.0009"
+    },
+    "purchases": 114,
+    "loyal": true,
+    "convictionPricing": {
+      "model": "conviction-pegged",
+      "conviction": 80,
+      "band": "premium",
+      "bands": {
+        "discount": "$0.0005",
+        "standard": "$0.0007",
+        "premium": "$0.0009"
+      },
+      "note": "loyal price floats with live oracle confidence, hard-clamped to the band range"
+    },
+    "negotiation": {
+      "countered": "$0.0009",
+      "agreed": "$0.0007",
+      "band": "standard"
+    },
+    "action": "BUY",
+    "via": "prepaid-session",
+    "paidUsd": 0,
+    "session": {
+      "standard": "cronus-session-v1",
+      "consumed": 1,
+      "unitsRemaining": 8
+    },
+    "quality": {
+      "delivered": true,
+      "verdict": "YES",
+      "conviction": 70
+    },
+    "chain": {
+      "standard": "cronus-hashchain-v1",
+      "prev": "sha256:dad5a2e5e92d14449dc903af51907e8a7db94193991ea2c120fbaa2c7b062230"
+    },
+    "policyHash": "sha256:fa6496db7611aeb26710b34b3401992704cc21891df021a9262bd9c13ffdeb38"
   }
 ]
