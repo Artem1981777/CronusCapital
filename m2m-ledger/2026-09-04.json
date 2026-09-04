@@ -1,0 +1,67 @@
+[
+  {
+    "agent": "rhea",
+    "ts": "2026-09-04T11:46:44.005Z",
+    "action": "SESSION_OPEN",
+    "paidUsd": 0.006,
+    "settlement": "e26e0b86-dc22-41de-ab4e-9b71a7ccae42",
+    "session": {
+      "standard": "cronus-session-v1",
+      "opened": 10,
+      "unitsRemaining": 10,
+      "expiresInSec": 86400,
+      "price": "$0.006",
+      "consume": "/api/nano-signal?session=use&topic=TOPIC&payer=0xbe3a16bd4137a8a293acbcaa75cce3420919d21d",
+      "rule": "prepaid units are metered in KV and burn one per signal; no payment per call; reopening tops up and refreshes the 24h TTL"
+    },
+    "chain": {
+      "standard": "cronus-hashchain-v1",
+      "prev": "sha256:a606f08c42446f93a80e583aca79bcd5449590c5bea0039d110782607acc3e09"
+    },
+    "policyHash": "sha256:fa6496db7611aeb26710b34b3401992704cc21891df021a9262bd9c13ffdeb38"
+  },
+  {
+    "agent": "rhea",
+    "ts": "2026-09-04T11:46:38.850Z",
+    "topic": "BTC-USDC momentum",
+    "bandit": {
+      "mode": "exploit",
+      "epsilon": 0.2
+    },
+    "quote": {
+      "tier": "nano",
+      "price": "$0.0007"
+    },
+    "purchases": 123,
+    "loyal": true,
+    "convictionPricing": {
+      "model": "conviction-pegged",
+      "conviction": 78,
+      "band": "standard",
+      "bands": {
+        "discount": "$0.0005",
+        "standard": "$0.0007",
+        "premium": "$0.0009"
+      },
+      "note": "loyal price floats with live oracle confidence, hard-clamped to the band range"
+    },
+    "action": "BUY",
+    "via": "prepaid-session",
+    "paidUsd": 0,
+    "session": {
+      "standard": "cronus-session-v1",
+      "consumed": 1,
+      "unitsRemaining": 9
+    },
+    "quality": {
+      "delivered": true,
+      "verdict": "YES",
+      "conviction": 78
+    },
+    "chain": {
+      "standard": "cronus-hashchain-v1",
+      "prev": "sha256:1f014b3d99428ec17912f9accf3c43a372197cf1e646875637672c7ebb3ab876"
+    },
+    "policyHash": "sha256:fa6496db7611aeb26710b34b3401992704cc21891df021a9262bd9c13ffdeb38"
+  }
+]
