@@ -673,14 +673,21 @@
       "topic": "ETH-USDC trend",
       "verdict": "YES",
       "result": "ABSTAIN"
+    },
+    {
+      "key": "2026-09-06T11:19:38.816Z",
+      "ts": "2026-09-06T11:19:38.816Z",
+      "topic": "BTC-USDC momentum",
+      "verdict": "YES",
+      "result": "ABSTAIN"
     }
   ],
   "stats": {
     "graded": 0,
     "hits": 0,
     "hitRate": null,
-    "abstained": 96,
+    "abstained": 97,
     "calibration": null,
-    "updatedAt": "2026-09-06T17:20:44.498Z"
+    "updatedAt": "2026-09-07T13:00:20.034Z"
   }
 }
