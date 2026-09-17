@@ -21,8 +21,29 @@ Cronus is an autonomous prediction-market oracle agent. It scans markets, scores
 - **Repo:** https://github.com/Artem1981777/CronusCapital
 - **Use via MCP:** `npx cronus-mcp@latest` exposes Cronus as agent tools — free verdict + x402-paid signal + Circle Gateway nano.
 - **Primitives:** `npm i arc-honest-money` — four zero-dependency money primitives extracted from this repo (MIT, 42 tests, no network); `lib/priceSources.js` consumes the published package.
-- **Explorer:** https://testnet.arcscan.app
-- **Network:** Arc Testnet · chainId 5042002 · native USDC 0x3600...0000 (6 decimals)
+- **Explorer:** https://explorer.arc.io
+- **Network:** Arc Mainnet · chainId 5042 · native USDC `0x3600000000000000000000000000000000000000`
+
+> **Deployment status (2026-09-17):** the Cronus contract suite is deployed on Arc Mainnet. The live Vercel frontend and API still contain legacy Arc Testnet defaults in several client/server paths and must be switched to the Mainnet addresses below before the public demo is called fully production-ready. The deployment intentionally leaves multisig migration and initial swap liquidity for a follow-up change.
+
+### Arc Mainnet deployment
+
+The deployment was executed by the guarded manual workflow [Deploy Cronus to Arc Mainnet](https://github.com/Artem1981777/CronusCapital/actions/workflows/deploy-mainnet.yml). The complete machine-readable record, including transaction hashes and constructor arguments, is [deployments/Cronus-mainnet.json](deployments/Cronus-mainnet.json).
+
+| Contract | Mainnet address | Explorer |
+|---|---|---|
+| Identity Registry | `0x5B179bFF284a17a5C8C3ccaDed1984949B410522` | [view](https://explorer.arc.io/address/0x5B179bFF284a17a5C8C3ccaDed1984949B410522) |
+| Decisions | `0x6190E140F6a643E16D0B2f61FCDA5883430BE310` | [view](https://explorer.arc.io/address/0x6190E140F6a643E16D0B2f61FCDA5883430BE310) |
+| Vault | `0x6104FC25E1B32B69F5c3Ef0DbBE4D7eC2821b0d3` | [view](https://explorer.arc.io/address/0x6104FC25E1B32B69F5c3Ef0DbBE4D7eC2821b0d3) |
+| Job Escrow | `0x5C7f8f12D6aEcbA1A7461435F45f25b6c8Be18Ad` | [view](https://explorer.arc.io/address/0x5C7f8f12D6aEcbA1A7461435F45f25b6c8Be18Ad) |
+| Reputation | `0x7426bF7ec186F7E0fb57D3f9487fA94234D2C1Dd` | [view](https://explorer.arc.io/address/0x7426bF7ec186F7E0fb57D3f9487fA94234D2C1Dd) |
+| Agent Guard V2 | `0x37846B767EC1889b0b719945c1168e42228b944C` | [view](https://explorer.arc.io/address/0x37846B767EC1889b0b719945c1168e42228b944C) |
+| Drill Certificate | `0x8B5A4aff399e37F5d571A13aABbD095Bb91D0fB5` | [view](https://explorer.arc.io/address/0x8B5A4aff399e37F5d571A13aABbD095Bb91D0fB5) |
+| Access Pass | `0x668811DD7e0b1c9DaBb041BE4a9d064789a77E05` | [view](https://explorer.arc.io/address/0x668811DD7e0b1c9DaBb041BE4a9d064789a77E05) |
+| Cronus Token | `0x1D4721eeC2ea3E06F666A3C4204a2bC3606065D2` | [view](https://explorer.arc.io/address/0x1D4721eeC2ea3E06F666A3C4204a2bC3606065D2) |
+| Cronus Swap | `0xc2a8239987205Ec9afF830022A75977cA07cBEf6` | [view](https://explorer.arc.io/address/0xc2a8239987205Ec9afF830022A75977cA07cBEf6) |
+
+**Mainnet caveats:** `CronusMultisig` was intentionally not deployed in this phase, so temporary privileged roles remain with the deployer address. `CronusSwap` has no initial liquidity. Do not deposit material production funds until the multisig migration is completed and the frontend/API network configuration has been updated and verified.
 
 ---
 
