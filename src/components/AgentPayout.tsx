@@ -2,7 +2,7 @@ import { useState, useEffect } from "react"
 import type { CSSProperties, ChangeEvent } from "react"
 
 const API = "/api/agent-payout"
-const ARCSCAN = "https://testnet.arcscan" + ".app/tx/"
+const ARCSCAN = "https://explorer.arc.io/tx/"
 
 type Policy = {
 	enabled: boolean

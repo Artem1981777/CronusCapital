@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { useAccount, useConnect, useDisconnect, useBalance } from "wagmi"
-import { arcTestnet } from "../wagmiConfig"
+import { arcMainnet } from "../wagmiConfig"
 import { useAutoArcNetwork } from "../hooks/useAutoArcNetwork"
 
 export function WalletButton() {
@@ -51,7 +51,7 @@ useAutoArcNetwork()
         }}>
           {connectors.map(connector => (
             <button key={connector.id} onClick={() => {
-              connect({ connector, chainId: arcTestnet.id })
+              connect({ connector, chainId: arcMainnet.id })
               setShowMenu(false)
             }} style={{
               display: "block", width: "100%", padding: "12px 16px",

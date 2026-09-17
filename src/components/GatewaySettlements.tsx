@@ -7,7 +7,7 @@ type GatewaySample = { txHash: string; to: string; amountUsdc: number; explorer:
 type GatewayRail = { rail: string; mapping: string; note: string; chainTip: number; windowBlocks: number; gatewayWallet: string; onchainSettleTransfers: number; onchainBurns: number; topRecipients: Array<{ addr: string; count: number }>; samples: GatewaySample[] }
 type SettlementsResp = { ok: boolean; resolver?: string; generatedAt?: string; treasury?: string; usdc?: string; rails?: { directOnchain?: DirectRail; gatewayBatched?: GatewayRail }; honesty?: string }
 
-const EXPLORER = "https://testnet.arcscan.app"
+const EXPLORER = "https://explorer.arc.io"
 const short = (a: string) => (a && a.length > 10 ? a.slice(0, 6) + "\u2026" + a.slice(-4) : a)
 
 const S: Record<string, CSSProperties> = {

@@ -92,7 +92,7 @@ export default function PublisherPanel() {
 						receipts.map((r, i) => (
 							<div key={(r.txHash || "") + i} style={feedRowS}>
 								<span>{short(r.payer || "external") + " \u2192 " + (r.amountUsdc || 0) + " USDC"}</span>
-								<a style={linkS} href={r.explorer || ("https://testnet.arcscan.app/tx/" + r.txHash)} target="_blank" rel="noreferrer">{short(r.txHash || "") + " \u2197"}</a>
+								<a style={linkS} href={r.explorer || ("https://explorer.arc.io/tx/" + r.txHash)} target="_blank" rel="noreferrer">{short(r.txHash || "") + " \u2197"}</a>
 							</div>
 						))
 					)}

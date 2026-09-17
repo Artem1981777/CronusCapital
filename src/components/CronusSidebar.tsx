@@ -2,7 +2,7 @@ import { useState, useEffect } from "react"
 import { createPortal } from "react-dom"
 import { useAccount, useChainId, useSwitchChain, useReadContract } from "wagmi"
 
-const ARC_CHAIN_ID = 5042002
+const ARC_CHAIN_ID = 5042
 const USDC = "0x3600000000000000000000000000000000000000" as const
 const ERC20_ABI = [ { type: "function", name: "balanceOf", stateMutability: "view", inputs: [ { name: "account", type: "address" } ], outputs: [ { type: "uint256" } ] } ] as const
 

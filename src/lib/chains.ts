@@ -1,7 +1,7 @@
 // src/lib/chains.ts
-// Central, TESTNET-ONLY network registry for the whole Cronus site.
-// Mainnets are deliberately excluded. If a wallet is on an unsupported network
-// (e.g. Ethereum mainnet, chainId 1), the UI refuses to act and offers to switch.
+// Central, MAINNET-ONLY network registry for the whole Cronus site.
+// Only Arc Mainnet is supported. If a wallet is on any other network
+// (testnet or otherwise), the UI refuses to act and offers to switch to Arc.
 
 export type ChainMeta = {
   id: number
@@ -12,15 +12,9 @@ export type ChainMeta = {
   nativeCurrency: { name: string; symbol: string; decimals: number }
 }
 
-export const ARC_CHAIN_ID = 5042002
-
+export const ARC_CHAIN_ID = 5042
 export const SUPPORTED_CHAINS: Record<number, ChainMeta> = {
-  5042002: { id: 5042002, hexId: "0x4cef52", name: "Arc Testnet", rpcUrls: ["https://rpc.testnet.arc.network"], explorer: "https://testnet.arcscan.app", nativeCurrency: { name: "USD Coin", symbol: "USDC", decimals: 6 } },
-  84532: { id: 84532, hexId: "0x14a34", name: "Base Sepolia", rpcUrls: ["https://sepolia.base.org"], explorer: "https://sepolia.basescan.org", nativeCurrency: { name: "Sepolia Ether", symbol: "ETH", decimals: 18 } },
-  11155111: { id: 11155111, hexId: "0xaa36a7", name: "Ethereum Sepolia", rpcUrls: ["https://rpc.sepolia.org"], explorer: "https://sepolia.etherscan.io", nativeCurrency: { name: "Sepolia Ether", symbol: "ETH", decimals: 18 } },
-  421614: { id: 421614, hexId: "0x66eee", name: "Arbitrum Sepolia", rpcUrls: ["https://sepolia-rollup.arbitrum.io/rpc"], explorer: "https://sepolia.arbiscan.io", nativeCurrency: { name: "Sepolia Ether", symbol: "ETH", decimals: 18 } },
-  11155420: { id: 11155420, hexId: "0xaa37dc", name: "OP Sepolia", rpcUrls: ["https://sepolia.optimism.io"], explorer: "https://sepolia-optimism.etherscan.io", nativeCurrency: { name: "Sepolia Ether", symbol: "ETH", decimals: 18 } },
-  43113: { id: 43113, hexId: "0xa869", name: "Avalanche Fuji", rpcUrls: ["https://api.avax-test.network/ext/bc/C/rpc"], explorer: "https://testnet.snowtrace.io", nativeCurrency: { name: "Avalanche", symbol: "AVAX", decimals: 18 } },
+  5042: { id: 5042, hexId: "0x13b2", name: "Arc", rpcUrls: ["https://rpc.mainnet.arc.io"], explorer: "https://explorer.arc.io", nativeCurrency: { name: "USD Coin", symbol: "USDC", decimals: 6 } },
 }
 
 export function isSupportedChain(id: number | undefined | null): boolean {
@@ -35,7 +29,7 @@ type EnsureOpts = { switchChainAsync?: SwitchFn; getProvider?: () => Promise<any
 // keeps working on mobile wallets whose wagmi connector lacks getChainId.
 export async function ensureChain(targetId: number, opts: EnsureOpts = {}): Promise<void> {
   const meta = SUPPORTED_CHAINS[targetId]
-  if (!meta) throw new Error("Refusing to switch: " + targetId + " is not a supported testnet.")
+  if (!meta) throw new Error("Refusing to switch: " + targetId + " is not a supported network.")
 
   let provider: any = null
   try { provider = opts.getProvider ? await opts.getProvider() : null } catch { provider = null }

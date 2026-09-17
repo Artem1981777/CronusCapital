@@ -1,6 +1,6 @@
 const ENDPOINT = "POST /api/signal"
 const PRICE = "0.02 USDC"
-const NETWORK = "arc-testnet"
+const NETWORK = "arc-mainnet"
 const CURRENCY = "USDC live · EURC-ready (dual-stablecoin)"
 
 const LINES = [
@@ -8,7 +8,7 @@ const LINES = [
 	"curl -s https://cronus-capital.vercel.app/api/signal?m=BTC",
 	"",
 	"# 2 · Cronus replies 402 Payment Required (x402)",
-	"HTTP 402 · price 0.02 USDC · network arc-testnet",
+	"HTTP 402 · price 0.02 USDC · network arc-mainnet",
 	"",
 	"# 3 · client pays USDC + retries with X-PAYMENT header",
 	"200 OK -> { verdict: EXECUTE, confidence: 0.95 }",
@@ -31,7 +31,7 @@ export default function X402Integration() {
 					<div key={i} className={l.indexOf("#") === 0 ? "cd-x402-line cd-x402-cmt" : "cd-x402-line"}>{l}</div>
 				))}
 			</div>
-			<div className="cd-x402-foot">Any agent or contract can pay Cronus per call — real on-chain USDC settlement on Arc testnet today. Circle Gateway batched x402 nanopayments (sub-cent) are on the roadmap.</div>
+			<div className="cd-x402-foot">Any agent or contract can pay Cronus per call — real on-chain USDC settlement on Arc mainnet today. Circle Gateway batched x402 nanopayments (sub-cent) are on the roadmap.</div>
 		</div>
 	)
 }

@@ -98,7 +98,7 @@ export function Dashboard({ totalOnChain }: { totalOnChain: number }) {
                   <div style={{ display: "flex", justifyContent: "space-between" }}>
                     <span style={{ color: "#39e01444", fontSize: "9px" }}>TOPIC: {d.topic}</span>
                     <a
-                      href={"https://testnet.arcscan.app/tx/" + d.txHash}
+                      href={"https://explorer.arc.io/tx/" + d.txHash}
                       target="_blank"
                       style={{ color: "#39e01466", fontSize: "9px", letterSpacing: "1px" }}
                     >TX →</a>
@@ -110,7 +110,7 @@ export function Dashboard({ totalOnChain }: { totalOnChain: number }) {
 
           <div style={{ marginTop: "12px", textAlign: "right" }}>
             <a
-              href={"https://testnet.arcscan.app/address/" + DEPLOYED_CONTRACT}
+              href={"https://explorer.arc.io/address/" + DEPLOYED_CONTRACT}
               target="_blank"
               style={{ color: "#39e01466", fontSize: "10px", letterSpacing: "2px", fontFamily: "Cinzel, serif" }}
             >VIEW CONTRACT ON ARCSCAN →</a>

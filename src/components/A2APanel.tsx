@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import type { CSSProperties } from "react"
 
-const EXPLORER = "https://testnet.arcscan.app"
+const EXPLORER = "https://explorer.arc.io"
 
 type Service = { tier?: string; resource?: string; price?: { amount?: string; asset?: string }; payTo?: string; network?: string; settlement?: string }
 type Manifest = { name?: string; description?: string; services?: Service[] }
@@ -240,7 +240,7 @@ export default function A2APanel() {
           <div style={{ fontSize: 12, color: "#dbe4f3", marginTop: 6 }}>2) Or drop this into your MCP client config (Claude Desktop / Cursor):</div>
           <pre style={preS}>{MCP_CONFIG}</pre>
           <button type="button" className="a2a-btn" onClick={() => copy(MCP_CONFIG)}>{copied ? "✓ copied" : "copy config"}</button>
-          <div style={{ fontSize: 10, color: "#7c8698", marginTop: 8 }}>Discovery + quotes are free. Autonomous paying needs a funded Arc-testnet wallet in the server env (see repo README).</div>
+          <div style={{ fontSize: 10, color: "#7c8698", marginTop: 8 }}>Discovery + quotes are free. Autonomous paying needs a funded Arc wallet in the server env (see repo README).</div>
         </div>
       ) : null}
 

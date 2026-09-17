@@ -2,8 +2,8 @@ import { useState, useEffect, type CSSProperties } from "react"
 
 const GREEN = "#39e014", GOLD = "#c9a84c", DIM = "#7e8c6a", BG = "#070b07"
 const RPC = "/api/rpc"
-const ARC_CHAIN_ID = 5042002
-const EXPLORER = "https://testnet.arcscan.app"
+const ARC_CHAIN_ID = 5042
+const EXPLORER = "https://explorer.arc.io"
 
 type Block = { number: number; timestamp: number; txs: number; gasUsed: number; gasLimit: number; baseFee: number; hash: string }
 type Stat = {
@@ -94,16 +94,16 @@ export default function MarketBoard() {
             <span style={feedAge}>{Math.max(0, Math.floor(Date.now() / 1000 - b.timestamp)) + "s ago"}</span>
           </div>
         ))}
-        {!s && <div style={feedRow}><span style={dim}>connecting to rpc.testnet.arc.network…</span></div>}
+        {!s && <div style={feedRow}><span style={dim}>connecting to rpc.mainnet.arc.io…</span></div>}
       </div>
 
       <div style={proof}>
         <span style={liveStyle(alive ? GREEN : DIM)}>{alive ? "● LIVE" : "◌ OFFLINE"}</span>
-        <span style={dim}>{"Source: rpc.testnet.arc.network · synced " + (synced || "…")}</span>
+        <span style={dim}>{"Source: rpc.mainnet.arc.io · synced " + (synced || "…")}</span>
         <a href={EXPLORER} target="_blank" rel="noreferrer" style={link}>Arc Explorer ↗</a>
         <a href="https://www.circle.com/pressroom/circle-launches-arc-public-testnet" target="_blank" rel="noreferrer" style={link}>Circle ↗</a>
       </div>
-      <div style={get}>POST {"https://rpc.testnet.arc.network"} {"{ eth_blockNumber, eth_gasPrice, eth_chainId, eth_getBlockByNumber }"}</div>
+      <div style={get}>POST {"https://rpc.mainnet.arc.io"} {"{ eth_blockNumber, eth_gasPrice, eth_chainId, eth_getBlockByNumber }"}</div>
       <div style={note}>
         Circle Arc — a stablecoin-native L1: USDC as gas, ~780ms finality (Malachite consensus). The native token is still in presale ($222M raised, $3B valuation) and is not traded on exchanges yet — so we show the network's live on-chain metrics straight from RPC, not a made-up price.
       </div>

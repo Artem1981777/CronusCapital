@@ -4,10 +4,10 @@ export default function SiteFooter() {
 			title: "VERIFIED SOURCE",
 			glyph: "✓",
 			items: [
-				{ label: "Reputation — verified source", href: "https://repo.sourcify.dev/contracts/full_match/5042002/0x2A19ad056EaE83364B0a6420685974cA219c209E/" },
-				{ label: "Identity registry — verified source", href: "https://repo.sourcify.dev/contracts/full_match/5042002/0x252cAA46b9b0648908000f6C87e0a561DB4dEb6c/" },
-				{ label: "Job escrow — verified source", href: "https://repo.sourcify.dev/contracts/full_match/5042002/0x64e55De4CbC3CDf981B2c970807129FA61806873/" },
-				{ label: "Vault — verified source", href: "https://repo.sourcify.dev/contracts/full_match/5042002/0x13B6984357e27dAB17DF44a6396042239e70542C/" },
+				{ label: "Reputation — verified source", href: "https://repo.sourcify.dev/contracts/full_match/5042/0x7426bF7ec186F7E0fb57D3f9487fA94234D2C1Dd/" },
+				{ label: "Identity registry — verified source", href: "https://repo.sourcify.dev/contracts/full_match/5042/0x5B179bFF284a17a5C8C3ccaDed1984949B410522/" },
+				{ label: "Job escrow — verified source", href: "https://repo.sourcify.dev/contracts/full_match/5042/0x5C7f8f12D6aEcbA1A7461435F45f25b6c8Be18Ad/" },
+				{ label: "Vault — verified source", href: "https://repo.sourcify.dev/contracts/full_match/5042/0x6104FC25E1B32B69F5c3Ef0DbBE4D7eC2821b0d3/" },
 			],
 		},
 		{
@@ -34,10 +34,10 @@ export default function SiteFooter() {
 			title: "ON-CHAIN PROOF",
 			glyph: "𓊽",
 			items: [
-				{ label: "Paywall proof tx", href: "https://testnet.arcscan.app/tx/0xfe2764b2b837365ea7cb896fbbe55119ffbf250e51941945bf013a88bb942086" },
-				{ label: "Reputation contract", href: "https://testnet.arcscan.app/address/0x2A19ad056EaE83364B0a6420685974cA219c209E" },
-				{ label: "Treasury wallet", href: "https://testnet.arcscan.app/address/0xdc6778c5f8cc74b10aed11c48306d4cfc5737fbd" },
-				{ label: "Arc explorer", href: "https://testnet.arcscan.app" },
+				{ label: "Paywall proof tx", href: "https://explorer.arc.io/tx/0xfe2764b2b837365ea7cb896fbbe55119ffbf250e51941945bf013a88bb942086" },
+				{ label: "Reputation contract", href: "https://explorer.arc.io/address/0x7426bF7ec186F7E0fb57D3f9487fA94234D2C1Dd" },
+				{ label: "Treasury wallet", href: "https://explorer.arc.io/address/0xdc6778c5f8cc74b10aed11c48306d4cfc5737fbd" },
+				{ label: "Arc explorer", href: "https://explorer.arc.io" },
 			],
 		},
 		{

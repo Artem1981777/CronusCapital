@@ -76,7 +76,7 @@ export function TractionChart() {
         <div className="cd-trac-stat"><span className="cd-trac-n">{meta ? "$" + meta.total.toFixed(2) : "—"}</span><span className="cd-trac-l">total USDC</span></div>
         <div className="cd-trac-stat"><span className="cd-trac-n">{ext != null ? ext : "—"}</span><span className="cd-trac-l">external payers</span></div>
       </div>
-      <div className="cd-trac-note">Honest: every settlement charted here is self-generated test traffic on Arc testnet — real end-to-end paywall settlement, not external demand. External payers = {ext != null ? ext : "n/a"}. Self-generated test volume is never counted as external.</div>
+      <div className="cd-trac-note">Honest: every settlement charted here is self-generated test traffic on Arc mainnet — real end-to-end paywall settlement, not external demand. External payers = {ext != null ? ext : "n/a"}. Self-generated test volume is never counted as external.</div>
     </div>
   )
 }

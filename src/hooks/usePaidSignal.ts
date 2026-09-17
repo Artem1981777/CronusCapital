@@ -113,7 +113,7 @@ export function usePaidSignal() {
   const buySignal = useCallback(
     async (topic: string): Promise<SignalResponse> => {
       if (!walletClient || !address) throw new Error("Connect wallet first")
-      if (!publicClient) throw new Error("RPC not ready — switch to Arc Testnet and retry")
+      if (!publicClient) throw new Error("RPC not ready — switch to Arc and retry")
       const clean = topic.trim().slice(0, 120)
       if (!clean) throw new Error("Enter a topic to consult the oracle")
 

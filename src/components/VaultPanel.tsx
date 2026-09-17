@@ -1,8 +1,8 @@
-// src/components/VaultPanel.tsx — read-only on-chain view of the Arc testnet vault (real reads; additive, fail-open).
+// src/components/VaultPanel.tsx — read-only on-chain view of the Arc mainnet vault (real reads; additive, fail-open).
 import { useEffect, useState, useCallback } from "react"
 import { useAccount, usePublicClient } from "wagmi"
 
-const ARC_CHAIN_ID = 5042002
+const ARC_CHAIN_ID = 5042
 const VAULT_ADDRESS = "0x13B6984357e27dAB17DF44a6396042239e70542C" as const
 const VAULT_ABI = [
   { type: "function", name: "totalAssets", stateMutability: "view", inputs: [], outputs: [{ type: "uint256" }] },
@@ -41,7 +41,7 @@ export function VaultPanel() {
     <div className="cd-vault">
       <div className="cd-vault-head">
         <span className="cd-vault-title">◈ VAULT</span>
-        <a className="cd-vault-src" href={"https://testnet.arcscan.app/address/" + VAULT_ADDRESS} target="_blank" rel="noreferrer">Arc testnet · on-chain read</a>
+        <a className="cd-vault-src" href={"https://explorer.arc.io/address/" + VAULT_ADDRESS} target="_blank" rel="noreferrer">Arc mainnet · on-chain read</a>
       </div>
       <div className="cd-vault-grid">
         <div className="cd-vault-cell">
@@ -55,7 +55,7 @@ export function VaultPanel() {
           <div className="cd-vault-cap">{isConnected ? "shares -> convertToAssets()" : "connect wallet to view"}</div>
         </div>
       </div>
-      <div className="cd-vault-note">Read-only view. Deposits / withdrawals live in the Overview dashboard. Figures are live on-chain reads from the Arc testnet vault (testnet balances).</div>
+      <div className="cd-vault-note">Read-only view. Deposits / withdrawals live in the Overview dashboard. Figures are live on-chain reads from the Arc mainnet vault.</div>
     </div>
   )
 }

@@ -6,15 +6,15 @@ import { ensureChain } from "../lib/chains"
 
 // Swap against the Cronus AMM on Arc: contracts/CronusSwap.sol, deployed and funded by us.
 //
-// This is not an integration with a third-party DEX, because Arc testnet has none. It is our
+// This is not an integration with a third-party DEX, because Arc mainnet has none. It is our
 // own constant-product pool holding our own liquidity, and the interface says so out loud.
 // USYC is deliberately absent: it is permissioned, the entitlements contract answers false
 // for us, so quoting it here would be theatre.
 
 type Hex = `0x${string}`
 
-const ARC_CHAIN_ID = 5042002
-const SCAN = "https://testnet.arcscan.app/tx/"
+const ARC_CHAIN_ID = 5042
+const SCAN = "https://explorer.arc.io/tx/"
 const USDC: Hex = "0x3600000000000000000000000000000000000000"
 const CRN: Hex = "0x352991E7Ba195DcB2AdAC9128B88cD3bd80E53C9"
 const POOL: Hex = "0x0924Dae7005FC214D3A243E4f811ae4A34607400"
@@ -174,7 +174,7 @@ export function CronusSwap() {
       </div>
       <p style={note}>
         A constant-product pool we wrote and deployed ourselves (<code>contracts/CronusSwap.sol</code>),
-        holding our own liquidity in native Arc USDC against CRN, a fixed-supply test token. Arc testnet
+        holding our own liquidity in native Arc USDC against CRN, a fixed-supply test token. Arc mainnet
         has no DEX, so this is not an integration with one. Pricing is {"x \u00D7 y = k"} with a 0.3% fee,
         the pool is thin on purpose, and large orders will visibly move the price. USYC is absent because
         it is permissioned and the entitlements contract answers false for us.

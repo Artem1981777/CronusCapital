@@ -1,5 +1,5 @@
 // CoverPanel.tsx — Cronus Cover: parametric price-drop micro-insurance (additive hackathon module).
-// Quote -> buy (real USDC premium via wallet on Arc Testnet, or labeled demo) -> live policy feed with explorer links.
+// Quote -> buy (real USDC premium via wallet on Arc, or labeled demo) -> live policy feed with explorer links.
 import { useEffect, useState } from "react"
 import { useAccount, useWriteContract, usePublicClient, useSwitchChain } from "wagmi"
 import type { CSSProperties } from "react"
@@ -8,8 +8,8 @@ type Quote = { ok: boolean; market?: string; openPrice?: number; thresholdPct?: 
 type Policy = { id: string; market: string; rule: string; openPrice: number; payoutUsdc: number; premiumUsdc: number; status: string; demo: boolean; resolveBy: number; paymentTx?: string | null; payoutTx?: string | null }
 
 const MARKETS = ["BTC-USDC", "ETH-USDC", "SOL-USDC", "BNB-USDC"]
-const ARC_CHAIN_ID = 5042002
-const EXPLORER_TX = "https://testnet.arcscan.app/tx/"
+const ARC_CHAIN_ID = 5042
+const EXPLORER_TX = "https://explorer.arc.io/tx/"
 const USDC = "0x3600000000000000000000000000000000000000" as const
 const TREASURY = "0xdc6778c5f8cc74b10aed11c48306d4cfc5737fbd" as const
 const ERC20_ABI = [{ type: "function", name: "transfer", stateMutability: "nonpayable", inputs: [{ name: "to", type: "address" }, { name: "value", type: "uint256" }], outputs: [{ type: "bool" }] }] as const
@@ -71,10 +71,10 @@ export function CoverPanel() {
     if (!isConnected || !address) { setNote("Connect wallet first (top of page)"); return }
     setBusy(true); setLastTx("")
     try {
-      setNote("Requesting Arc Testnet in wallet…")
+      setNote("Requesting Arc in wallet…")
       try { await switchChainAsync({ chainId: ARC_CHAIN_ID }) } catch { /* wallet may already be on Arc */ }
       const amount = BigInt(Math.round(quote.premiumUsdc * 1.05 * 1e6)) // +5% buffer vs price drift
-      setNote("Paying premium " + quote.premiumUsdc + " USDC to treasury on Arc Testnet…")
+      setNote("Paying premium " + quote.premiumUsdc + " USDC to treasury on Arc…")
       const hash = await writeContractAsync({ chainId: ARC_CHAIN_ID, address: USDC, abi: ERC20_ABI, functionName: "transfer", args: [TREASURY, amount] })
       setLastTx(hash)
       setNote("Premium tx sent, waiting for confirmation…")

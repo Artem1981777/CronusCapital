@@ -16,7 +16,7 @@ import NanoTraction from "./NanoTraction"
 
 /* ============================================================
    CRONUS CAPITAL — WOW DASHBOARD (cyber-Egyptian)
-   FORCE EXECUTE -> real 0.01 USDC test settlement on Arc Testnet
+   FORCE EXECUTE -> real 0.01 USDC test settlement on Arc
    ============================================================ */
 
 type Trend = "up" | "down" | "flat"
@@ -27,8 +27,8 @@ interface Kpi { id: string; label: string; value: string; sub: string; trend: Tr
 interface AgentInfo { id: string; name: string; role: string; glyph: string; state: AgentState; perf: number }
 interface Signal { id: string; asset: string; action: Action; conf: number; time: string }
 
-// === Arc Testnet settlement config — CUSTOMIZE here ===
-const ARC_CHAIN_ID = 5042002
+// === Arc settlement config — CUSTOMIZE here ===
+const ARC_CHAIN_ID = 5042
 const USDC_ADDRESS = "0x3600000000000000000000000000000000000000" as const
 const SETTLE_TO = "0xdc6778c5f8cc74b10aed11c48306d4cfc5737fbd" as const // CRONUS treasury (test sink)
 const TEST_AMOUNT = BigInt(10000) // 0.01 USDC (6 decimals)
@@ -227,7 +227,7 @@ export function CronusDashboard() {
 	const [consultPhase, setConsultPhase] = useState<"idle" | "scout" | "analyst" | "executor">("idle")
 	const [consultMsg, setConsultMsg] = useState("")
 	const [trace, setTrace] = useState<Array<string>>([])
-	const txMeta = useRef<{ topic: string; decision: string; agentId: string }>({ topic: "Manual settlement", decision: "FORCE EXECUTE - 0.01 USDC settled on Arc Testnet", agentId: "executor" })
+	const txMeta = useRef<{ topic: string; decision: string; agentId: string }>({ topic: "Manual settlement", decision: "FORCE EXECUTE - 0.01 USDC settled on Arc", agentId: "executor" })
 	const [boost, setBoost] = useState(0)
 	const { isConnected, address } = useAccount()
 	const { switchChainAsync } = useSwitchChain()
@@ -364,7 +364,7 @@ export function CronusDashboard() {
       setRunning(false)
     }
   }
-  // FORCE EXECUTE -> real test settlement tx on Arc Testnet (0.01 USDC self-transfer)
+  // FORCE EXECUTE -> real test settlement tx on Arc (0.01 USDC self-transfer)
 	const [vaultAmt, setVaultAmt] = useState("0.1")
 	const [vaultBusy, setVaultBusy] = useState(false)
 	const [vaultMsg, setVaultMsg] = useState("")
@@ -565,9 +565,9 @@ export function CronusDashboard() {
 		} finally { setSpendBusy(false) }
 	}
 	const forceExecute = async () => {
-		txMeta.current = { topic: "Manual settlement", decision: "FORCE EXECUTE - 0.01 USDC settled on Arc Testnet", agentId: "executor" }
+		txMeta.current = { topic: "Manual settlement", decision: "FORCE EXECUTE - 0.01 USDC settled on Arc", agentId: "executor" }
 		if (!isConnected || !address) { setWalletOpen(true); return }
-		const ok = window.confirm("FORCE EXECUTE\n\nSend a 0.01 USDC test settlement on Arc Testnet?\n(Real on-chain tx — gas only, funds go to treasury.)")
+		const ok = window.confirm("FORCE EXECUTE\n\nSend a 0.01 USDC test settlement on Arc?\n(Real on-chain tx — gas only, funds go to treasury.)")
 		if (!ok) return
 		txReset()
 		try { await switchChainAsync({ chainId: ARC_CHAIN_ID }) } catch { /* may already be on Arc, or wallet will prompt */ }
@@ -606,9 +606,9 @@ export function CronusDashboard() {
 					<div className="cd-head-title">CRONUS ORACLE DASHBOARD</div>
 					<div className="cd-head-sub">Autonomous Market Intelligence · Arc Network · USDC</div>
 					<div className="cd-badge">⚡ NANO $0.001 · gas-free via Circle Gateway · PREMIUM $0.02</div>
-									<a className="cd-badge" href="https://testnet.arcscan.app/address/0x252cAA46b9b0648908000f6C87e0a561DB4dEb6c" target="_blank" rel="noreferrer">🪪 ERC-8004 IDENTITY ✓ on Arc · #1</a>
-									<a className="cd-badge" href="https://testnet.arcscan.app/address/0x64e55De4CbC3CDf981B2c970807129FA61806873" target="_blank" rel="noreferrer">🤝 ERC-8183 ESCROW ✓ on Arc</a>
-									<a className="cd-badge" href="https://testnet.arcscan.app/address/0x2A19ad056EaE83364B0a6420685974cA219c209E" target="_blank" rel="noreferrer">⭐ ERC-8004 REPUTATION ✓ on Arc</a>
+									<a className="cd-badge" href="https://explorer.arc.io/address/0x252cAA46b9b0648908000f6C87e0a561DB4dEb6c" target="_blank" rel="noreferrer">🪪 ERC-8004 IDENTITY ✓ on Arc · #1</a>
+									<a className="cd-badge" href="https://explorer.arc.io/address/0x64e55De4CbC3CDf981B2c970807129FA61806873" target="_blank" rel="noreferrer">🤝 ERC-8183 ESCROW ✓ on Arc</a>
+									<a className="cd-badge" href="https://explorer.arc.io/address/0x2A19ad056EaE83364B0a6420685974cA219c209E" target="_blank" rel="noreferrer">⭐ ERC-8004 REPUTATION ✓ on Arc</a>
 								<ReputationBadge />
 				</div>
 				<button className={"cd-ankh" + (isConnected ? " cd-ankh-on" : "")} title="Connect Wallet" onClick={() => setWalletOpen(true)}>{walletLabel}</button>
@@ -652,12 +652,12 @@ export function CronusDashboard() {
 						{trace.length > 0 ? (<div className="cd-x402-code">{trace.map((l, i) => (<div key={i} className="cd-x402-line">{l}</div>))}</div>) : null}
 					<button className="cd-btn cd-btn-exec" onClick={forceExecute} disabled={txBusy}>{txBusy ? "EXECUTING…" : "FORCE EXECUTE"}</button>
 						<button className="cd-btn cd-btn-gold" onClick={buySignal} disabled={buyBusy}>{buyBusy ? "BUYING..." : "PREMIUM SIGNAL — $0.02 (on-chain x402)"}</button>
-				{buyMsg ? (<div className="cd-claim-msg">{buyMsg}{buyOut && buyOut.txHash ? (<a href={"https://testnet.arcscan.app/tx/" + buyOut.txHash} target="_blank" rel="noreferrer"> view tx</a>) : null}</div>) : null}
+				{buyMsg ? (<div className="cd-claim-msg">{buyMsg}{buyOut && buyOut.txHash ? (<a href={"https://explorer.arc.io/tx/" + buyOut.txHash} target="_blank" rel="noreferrer"> view tx</a>) : null}</div>) : null}
 				{buyOut ? (<div className="cd-x402-code"><div className="cd-x402-line">VERDICT: {String(buyOut.verdict || "SKIP")} - conviction {Number(buyOut.conviction || 0)}</div><div className="cd-x402-line">commitment {String(buyOut.commitment || "").slice(0, 18)}...</div><div className="cd-x402-line">payment verified on-chain</div>{buyOut.trace && buyOut.trace.length ? (<><div className="cd-x402-line">agent decision log</div>{buyOut.trace.map((t, i) => (<div key={i} className="cd-x402-line">{"- " + String(t)}</div>))}</>) : null}</div>) : null}
 				<button className="cd-btn cd-btn-primary" onClick={payX402} disabled={x402Busy}>{x402Busy ? "PAYING..." : "PREMIUM (demo) — $0.02 (x402)"}</button>
 						<button className="cd-btn cd-btn-exec" onClick={payUpstream} disabled={spendBusy}>{spendBusy ? "PAYING..." : "PAY UPSTREAM - $0.005 (agent buys data)"}</button>
-						{spendMsg ? (<div className="cd-claim-msg">{spendMsg}{spendTx ? (<a href={"https://testnet.arcscan.app/tx/" + spendTx} target="_blank" rel="noreferrer"> view tx</a>) : null}</div>) : null}
-						{x402Msg ? (<div className="cd-claim-msg">{x402Msg}{x402Tx ? (<a href={"https://testnet.arcscan.app/tx/" + x402Tx} target="_blank" rel="noreferrer"> view tx</a>) : null}</div>) : null}
+						{spendMsg ? (<div className="cd-claim-msg">{spendMsg}{spendTx ? (<a href={"https://explorer.arc.io/tx/" + spendTx} target="_blank" rel="noreferrer"> view tx</a>) : null}</div>) : null}
+						{x402Msg ? (<div className="cd-claim-msg">{x402Msg}{x402Tx ? (<a href={"https://explorer.arc.io/tx/" + x402Tx} target="_blank" rel="noreferrer"> view tx</a>) : null}</div>) : null}
 					<div className="cd-vault">
 					<div className="cd-vault-row">
 						<input className="cd-vault-input" type="number" min="0" step="0.01" value={vaultAmt} onChange={(e) => setVaultAmt(e.target.value)} placeholder="0.10" />
@@ -665,12 +665,12 @@ export function CronusDashboard() {
 						<button className="cd-btn cd-btn-exec" onClick={withdrawVault} disabled={vaultBusy}>WITHDRAW</button>
 					</div>
 					<div className="cd-vault-stats">Your position: {vaultPos || "0.0000"} USDC · Vault TVL: {vaultTvl || "0.00"} USDC</div>
-					{vaultMsg ? (<div className="cd-claim-msg">{vaultMsg}{vaultTx ? (<a href={"https://testnet.arcscan.app/tx/" + vaultTx} target="_blank" rel="noreferrer"> view tx</a>) : null}</div>) : null}
+					{vaultMsg ? (<div className="cd-claim-msg">{vaultMsg}{vaultTx ? (<a href={"https://explorer.arc.io/tx/" + vaultTx} target="_blank" rel="noreferrer"> view tx</a>) : null}</div>) : null}
 					<button className="cd-btn cd-btn-exec" onClick={runStrategy} disabled={yieldBusy}>{yieldBusy ? "AGENTS TRADING…" : "⚙ RUN AGENT STRATEGY"}</button>
-					{yieldMsg ? (<div className="cd-claim-msg">{yieldMsg}{yieldTx ? (<a href={"https://testnet.arcscan.app/tx/" + yieldTx} target="_blank" rel="noreferrer"> view tx</a>) : null}</div>) : null}
+					{yieldMsg ? (<div className="cd-claim-msg">{yieldMsg}{yieldTx ? (<a href={"https://explorer.arc.io/tx/" + yieldTx} target="_blank" rel="noreferrer"> view tx</a>) : null}</div>) : null}
 				</div>
 				<button className="cd-btn cd-btn-gold" onClick={() => setRiskOpen(true)}>RISK ADJUST</button>
-					<a className="cd-btn cd-btn-ghost" href="https://testnet.arcscan.app" target="_blank" rel="noreferrer">VIEW ON ARC ↗</a>
+					<a className="cd-btn cd-btn-ghost" href="https://explorer.arc.io" target="_blank" rel="noreferrer">VIEW ON ARC ↗</a>
 					<button className="cd-btn cd-btn-deploy" onClick={deployAgent} disabled={deployed.length >= ROSTER.length}>{deployed.length >= ROSTER.length ? "✓ ALL AGENTS DEPLOYED" : "＋ DEPLOY NEW AGENT"}</button>
 				</div>
 			</div>
@@ -682,8 +682,8 @@ export function CronusDashboard() {
 				<div className={"cd-tx" + ((txError || preflight.status === "fail") ? " cd-tx-err" : txConfirmed ? " cd-tx-ok" : "")}>
 					<span className="cd-tx-glyph">𓊽</span>
 					<div className="cd-tx-body">
-						<span>{preflight.status === "running" ? "PRE-FLIGHT: simulating eth_call..." : preflight.status === "fail" ? "PRE-FLIGHT REVERTED - tx blocked: " + (preflight.msg || "") : txError ? "Execution failed: " + txErrText : txConfirmed ? "✓ Settlement confirmed on Arc Testnet" : txConfirming ? "Settling on-chain… awaiting confirmation" : "Awaiting wallet signature…"}</span>
-						{txHash && <a className="cd-tx-link" href={"https://testnet.arcscan.app/tx/" + txHash} target="_blank" rel="noreferrer">{txHash.slice(0, 10)}…{txHash.slice(-8)} ↗</a>}
+						<span>{preflight.status === "running" ? "PRE-FLIGHT: simulating eth_call..." : preflight.status === "fail" ? "PRE-FLIGHT REVERTED - tx blocked: " + (preflight.msg || "") : txError ? "Execution failed: " + txErrText : txConfirmed ? "✓ Settlement confirmed on Arc" : txConfirming ? "Settling on-chain… awaiting confirmation" : "Awaiting wallet signature…"}</span>
+						{txHash && <a className="cd-tx-link" href={"https://explorer.arc.io/tx/" + txHash} target="_blank" rel="noreferrer">{txHash.slice(0, 10)}…{txHash.slice(-8)} ↗</a>}
 					</div>
 					<button className="cd-tx-x" onClick={() => { txReset(); setPreflight({ status: "idle" }) }}>✕</button>
 				</div>

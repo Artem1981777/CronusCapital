@@ -4,7 +4,7 @@ import type { Address } from "viem"
 import { createSession, streamPay, ARC, GATEWAY_DEPOSIT_ABI, ERC20_ALLOWANCE_APPROVE_ABI, type SessionKey, type StreamTick } from "../lib/session"
 
 const CHAIN_ID = ARC.chainId
-const EXPLORER = "https://testnet.arcscan.app"
+const EXPLORER = "https://explorer.arc.io"
 
 const wrapS: CSSProperties = { border: "1px solid #8b5cf655", borderRadius: 10, padding: "14px 16px", margin: "12px 0", background: "linear-gradient(180deg,#0d0814,#050308)" }
 const titleS: CSSProperties = { fontWeight: 800, color: "#c4b5fd", fontSize: 14, marginBottom: 6 }

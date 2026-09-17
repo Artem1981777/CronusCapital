@@ -38,7 +38,7 @@ export function SystemPanel() {
   const reg = (label: string, r?: Reg) => (
     <div className="cd-sys-row">
       <span className="cd-sys-k">{label}</span>
-      {r && r.address ? <a className="cd-sys-v cd-sys-link" href={r.explorer || ("https://testnet.arcscan.app/address/" + r.address)} target="_blank" rel="noreferrer">{r.address.slice(0, 6) + "…" + r.address.slice(-4)}</a> : <span className="cd-sys-v">n/a</span>}
+      {r && r.address ? <a className="cd-sys-v cd-sys-link" href={r.explorer || ("https://explorer.arc.io/address/" + r.address)} target="_blank" rel="noreferrer">{r.address.slice(0, 6) + "…" + r.address.slice(-4)}</a> : <span className="cd-sys-v">n/a</span>}
     </div>
   )
 
@@ -58,7 +58,7 @@ export function SystemPanel() {
       ) : (
         <div className="cd-sys-grid">
           {row("Protocol", (m.protocol || "x402") + (m.x402Version ? " · v" + m.x402Version : ""))}
-          {row("Network", (m.network && m.network.name ? m.network.name : "arc-testnet") + (m.network && m.network.chainId ? " · chain " + m.network.chainId : ""))}
+          {row("Network", (m.network && m.network.name ? m.network.name : "arc-mainnet") + (m.network && m.network.chainId ? " · chain " + m.network.chainId : ""))}
           {row("Settlement asset", (m.network && m.network.symbol ? m.network.symbol : "USDC") + (m.network && m.network.decimals != null ? " · " + m.network.decimals + " dec" : ""))}
           {row("Payment rails", (m.paymentRails && m.paymentRails.length ? m.paymentRails.join(" · ") : "n/a"))}
           {reg("ERC-8004 identity" + (m.identityRegistry && m.identityRegistry.agentId != null ? " · #" + m.identityRegistry.agentId : ""), m.identityRegistry)}
@@ -67,7 +67,7 @@ export function SystemPanel() {
           {row("Services", (std && std.price && std.price.display ? "STANDARD " + std.price.display : "STANDARD 0.02 USDC") + " · " + (nano && nano.price && nano.price.display ? "NANO " + nano.price.display : "NANO 0.001 USDC"))}
         </div>
       )}
-      <div className="cd-sys-foot">Read-only. Live values from the agent manifest; addresses link to the Arc testnet explorer.</div>
+      <div className="cd-sys-foot">Read-only. Live values from the agent manifest; addresses link to the Arc mainnet explorer.</div>
     </div>
   )
 }

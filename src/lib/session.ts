@@ -8,7 +8,7 @@ import { GatewayClient } from "@circle-fin/x402-batching/client"
 import type { Address, Hex } from "viem"
 
 export const ARC = {
-  chainId: 5042002,
+  chainId: 5042,
   usdc: "0x3600000000000000000000000000000000000000" as Address,
   gatewayWallet: "0x0077777d7EBA4688BDeF3E311b846F25870A19B9" as Address,
   gatewayMinter: "0x0022222ABE238Cc2C7Bb1f21003F0a260052475B" as Address,
@@ -94,7 +94,7 @@ export async function streamPay(opts: StreamOpts): Promise<StreamResult> {
   const topic = opts.topic ?? "BTC-USDC momentum"
   const perTxCapUsd = opts.perTxCapUsd ?? opts.perTickUsd
   const ttlMs = opts.ttlMs ?? 5 * 60 * 1000
-  const gateway = new GatewayClient({ chain: "arcTestnet", privateKey: opts.privateKey })
+  const gateway = new GatewayClient({ chain: "arcMainnet", privateKey: opts.privateKey })
   const deadline = Date.now() + ttlMs
   const settlements: string[] = []
   let spent = 0

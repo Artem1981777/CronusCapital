@@ -408,7 +408,7 @@ export default function App() {
         <div style={{ padding: "12px 32px", background: "#050505", borderTop: "1px solid #39e01422" }}>
           {onChainTxs.map((hash, i) => (
             <div key={i} style={{ color: "#39e01466", fontSize: "10px", letterSpacing: "1px", fontFamily: "Courier New, monospace", marginBottom: "4px" }}>
-              ⛓ ON-CHAIN: <a href={"https://testnet.arcscan.app/tx/" + hash} target="_blank" style={{ color: "#39e014" }}>{hash.slice(0,20)}...</a>
+              ⛓ ON-CHAIN: <a href={"https://explorer.arc.io/tx/" + hash} target="_blank" style={{ color: "#39e014" }}>{hash.slice(0,20)}...</a>
             </div>
           ))}
         </div>

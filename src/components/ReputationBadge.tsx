@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { createPublicClient, http } from "viem"
-import { arcTestnet } from "../wagmiConfig"
+import { arcMainnet } from "../wagmiConfig"
 
 const REPUTATION_ADDRESS = "0x2A19ad056EaE83364B0a6420685974cA219c209E"
 const REP_ABI = [
@@ -17,7 +17,7 @@ const REP_ABI = [
 	},
 ] as const
 
-const client = createPublicClient({ chain: arcTestnet, transport: http("/api/rpc") })
+const client = createPublicClient({ chain: arcMainnet, transport: http("/api/rpc") })
 
 export default function ReputationBadge() {
 	const [count, setCount] = useState<number | null>(null)
@@ -57,7 +57,7 @@ export default function ReputationBadge() {
 	return (
 		<a
 			className="cd-badge"
-			href={"https://testnet.arcscan.app/address/" + REPUTATION_ADDRESS}
+			href={"https://explorer.arc.io/address/" + REPUTATION_ADDRESS}
 			target="_blank"
 			rel="noreferrer"
 			title="Live ERC-8004 on-chain reputation"

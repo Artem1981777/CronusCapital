@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 
-const EXPLORER = "https://testnet.arcscan.app/tx/"
+const EXPLORER = "https://explorer.arc.io/tx/"
 
 interface Decision { topic?: string; decision?: string; txHash?: string; timestamp?: number; agentId?: string; jobHash?: string }
 
@@ -39,7 +39,7 @@ export function LiveSettlements() {
 		<section className="cd-feed-wrap">
 			<div className="cd-feed-head">
 				<span className="cd-feed-title">{"\u26A1"} Live On-chain Settlements</span>
-				<span className="cd-feed-meta">{settled.length} settled {"\u00B7"} {rows.length} decisions {"\u00B7"} Arc Testnet</span>
+				<span className="cd-feed-meta">{settled.length} settled {"\u00B7"} {rows.length} decisions {"\u00B7"} Arc</span>
 			</div>
 			{settled.length === 0 ? (
 				<div className="cd-feed-empty">No settlements yet {"\u2014"} run FORCE EXECUTE to post a real 0.01 USDC settlement on-chain.</div>

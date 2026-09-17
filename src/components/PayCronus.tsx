@@ -1,7 +1,7 @@
 import { useState, type CSSProperties } from "react"
 import { useAccount, useConnect, useSwitchChain, useWriteContract, usePublicClient } from "wagmi"
 
-const ARC_CHAIN_ID = 5042002
+const ARC_CHAIN_ID = 5042
 const USDC_ADDRESS = "0x3600000000000000000000000000000000000000" as const
 const PAY_TO = "0xdc6778c5f8cc74b10aed11c48306d4cfc5737fbd" as const
 const ERC20_ABI = [
@@ -57,7 +57,7 @@ export default function PayCronus() {
 			setMsg("Confirm the payment in your wallet...")
 			const h = await writeContractAsync({ chainId: ARC_CHAIN_ID, address: USDC_ADDRESS, abi: ERC20_ABI, functionName: "transfer", args: [PAY_TO, amount] })
 			setTx(h)
-			setMsg("Payment sent - confirming on Arc Testnet...")
+			setMsg("Payment sent - confirming on Arc...")
 			if (publicClient) { try { await publicClient.waitForTransactionReceipt({ hash: h }) } catch (_) {} }
 			setMsg("Verifying on-chain and fetching your signal...")
 			try {
@@ -82,15 +82,15 @@ export default function PayCronus() {
 		<section style={wrapS}>
 			<div style={titleS}>{"Support Cronus \u2014 pay on-chain in one click"}</div>
 			<div style={subS}>
-				{"Connect your wallet and pay on Arc Testnet. One real on-chain USDC transaction \u2014 you'll appear in the public settled-payments feed. Need test USDC? Get it free at "}
+				{"Connect your wallet and pay on Arc. One real on-chain USDC transaction \u2014 you'll appear in the public settled-payments feed. Need test USDC? Get it free at "}
 				<a style={linkS} href="https://faucet.circle.com" target="_blank" rel="noreferrer">{"faucet.circle.com"}</a>
-				{" (select Arc Testnet)."}
+				{" (select Arc)."}
 			</div>
 			<button style={btnS(busy)} onClick={pay} disabled={busy}>
 				{busy ? "WORKING..." : (isConnected ? "PAY 0.02 USDC ON ARC" : "CONNECT WALLET & PAY 0.02 USDC")}
 			</button>
 			{msg ? <div style={msgS}>{msg}</div> : null}
-			{tx ? <div style={txS}><a style={linkS} href={"https://testnet.arcscan.app/tx/" + tx} target="_blank" rel="noreferrer">{"View your transaction on arcscan \u2197"}</a></div> : null}
+			{tx ? <div style={txS}><a style={linkS} href={"https://explorer.arc.io/tx/" + tx} target="_blank" rel="noreferrer">{"View your transaction on arcscan \u2197"}</a></div> : null}
 			{verdict ? <div style={verdictS}>{"Your signal: " + verdict}</div> : null}
                         {verdict && policyReceipt !== "not-provided" ? <div style={{...txS, color: "#5eead4", marginTop: 8}}>{"✅ Policy Verified: " + policyReceipt.slice(0, 10) + "..."}</div> : null}
 		</section>

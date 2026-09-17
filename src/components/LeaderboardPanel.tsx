@@ -1,6 +1,6 @@
 import { useEffect, useState, type CSSProperties } from "react"
 
-const EXPLORER = "https://testnet.arcscan.app"
+const EXPLORER = "https://explorer.arc.io"
 const GREEN = "#39e014", GOLD = "#c9a84c", DIM = "#7e8c6a", RED = "#d4543a"
 const short = (a: string) => (a && a.length > 10 ? a.slice(0, 6) + "\u2026" + a.slice(-4) : a)
 const addr = (a: string) => `${EXPLORER}/address/${a}`
@@ -59,10 +59,10 @@ export default function LeaderboardPanel() {
     <section className="cd2-section" data-sec="leaderboard">
       <div style={{ display: "flex", alignItems: "baseline", gap: 12 }}>
         <span style={{ fontSize: 22 }}>🏆</span>
-        <h2 style={{ fontFamily: "Cinzel, serif", color: GREEN, margin: 0 }}>Arc Testnet Leaderboard</h2>
+        <h2 style={{ fontFamily: "Cinzel, serif", color: GREEN, margin: 0 }}>Arc Leaderboard</h2>
       </div>
       <p style={{ color: DIM, fontSize: 12, marginTop: 4 }}>
-        Live agent-to-agent payments for Cronus signals on Arc testnet. Independently verifiable at{" "}
+        Live agent-to-agent payments for Cronus signals on Arc mainnet. Independently verifiable at{" "}
         <a style={link} href="/api/leaderboard" target="_blank" rel="noreferrer">/api/leaderboard</a>.
       </p>
 

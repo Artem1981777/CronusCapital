@@ -2,7 +2,7 @@ import type { CSSProperties } from "react"
 
 const ARC_BURN = "0x8df20b0e4d3e46b7fd04336bec44080516d97ef5348b575823a3cd6ca9faf172"
 const STELLAR_MINT = "b9baf4efea289c49e12e09aa12c6c02d70b6613c2be80b3db7398385a76805d4"
-const ARCSCAN_TX = "https://testnet.arcscan" + ".app/tx/"
+const ARCSCAN_TX = "https://explorer.arc.io/tx/"
 const STELLAR_EXPLORER = "https://stellar" + ".expert/explorer/testnet/tx/"
 
 const wrap: CSSProperties = { border: "1px solid #2a2a3a", borderRadius: "14px", padding: "18px", background: "#120e1d", color: "#e8e8f0", marginTop: "16px", fontFamily: "Inter, system-ui, sans-serif" }

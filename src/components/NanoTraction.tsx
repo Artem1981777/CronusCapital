@@ -14,7 +14,7 @@ type TractionResp = { ok: boolean; network?: string; treasury?: string; nano?: N
 type Leader = { payer: string; calls: number; micros: string; usdc: number; settlements: number }
 type LeaderResp = { ok: boolean; count?: number; leaders?: Array<Leader> }
 
-const EXPLORER = "https://testnet.arcscan.app"
+const EXPLORER = "https://explorer.arc.io"
 const short = (a: string) => (a && a.length > 10 ? a.slice(0, 6) + "\u2026" + a.slice(-4) : a)
 
 export default function NanoTraction() {
@@ -99,7 +99,7 @@ export default function NanoTraction() {
 			</div>
 
 			<div className="cd-nano-foot">
-				<span>Self-demo (A2A): <b>{selfDemo}</b> · honestly labeled autonomous traffic</span><span> · Batching: Circle Gateway batches many signed authorizations \u2192 1 on-chain settlement at scale; on Arc testnet each call settles individually ({batch || 1}:1 observed)</span>
+				<span>Self-demo (A2A): <b>{selfDemo}</b> · honestly labeled autonomous traffic</span><span> · Batching: Circle Gateway batches many signed authorizations \u2192 1 on-chain settlement at scale; on Arc mainnet each call settles individually ({batch || 1}:1 observed)</span>
 				{std ? <span> · STANDARD on-chain: <b>{std.payments || 0}</b> calls · ${Number(std.totalUsdc || 0).toFixed(2)}</span> : null}
 			</div>
 

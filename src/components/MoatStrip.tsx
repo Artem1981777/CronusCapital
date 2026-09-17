@@ -94,7 +94,7 @@ export default function MoatStrip() {
 					<div style={tileSub}>on-chain USDC</div>
 				</div>
 			</div>
-			<div style={foot}>{"Settlement: real on-chain USDC on Arc testnet \u00b7 Identity & reputation: ERC-8004 \u00b7 Job settlement: ERC-8183 \u00b7 Caps: $0.01/tx \u00b7 $5.00/day"}</div>
+			<div style={foot}>{"Settlement: real on-chain USDC on Arc mainnet \u00b7 Identity & reputation: ERC-8004 \u00b7 Job settlement: ERC-8183 \u00b7 Caps: $0.01/tx \u00b7 $5.00/day"}</div>
 		</div>
 	)
 }

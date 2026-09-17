@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { useAccount, useWriteContract, usePublicClient, useChainId, useSwitchChain } from "wagmi"
 
-// Arc Testnet <-> EVM testnets USDC bridge via Circle CCTP V2 (burn-and-mint), either direction.
+// Arc <-> EVM testnets USDC bridge via Circle CCTP V2 (burn-and-mint), either direction.
 // Non-custodial: every tx is signed by the visitor's own connected wallet.
 // Addresses verified against https://developers.circle.com/cctp/references/contract-addresses
 type Hex = `0x${string}`
@@ -22,7 +22,7 @@ const MESSAGE_TRANSMITTER_V2 = "0xE737e5cEBEEBa77EFE34D4aa090756590b1CE275"
 type ChainInfo = { key: string; name: string; chainId: number; domain: number; usdc: Hex; scan: string }
 
 // Arc is always one side of the route.
-const ARC: ChainInfo = { key: "arc", name: "Arc Testnet", chainId: 5042002, domain: 26, usdc: "0x3600000000000000000000000000000000000000", scan: "https://testnet.arcscan.app/tx/" }
+const ARC: ChainInfo = { key: "arc", name: "Arc", chainId: 5042, domain: 26, usdc: "0x3600000000000000000000000000000000000000", scan: "https://explorer.arc.io/tx/" }
 
 // The paired chain; pick which one + which direction on the dashboard.
 const CHAINS: ChainInfo[] = [
@@ -178,7 +178,7 @@ export default function CronusBridge() {
     if (!isConnected || !address) { setErr("Connect your wallet first (button at top)."); return }
     if (!sourceClient) { setErr(source.name + " RPC client unavailable."); return }
     if (!destClient) { setErr(dest.name + " RPC client unavailable."); return }
-    if (!isSupportedChain(source.chainId) || !isSupportedChain(dest.chainId)) { setErr("Blocked: this route includes a non-testnet network."); return }
+    if (!isSupportedChain(source.chainId) || !isSupportedChain(dest.chainId)) { setErr("Blocked: this route includes an unsupported network — only Arc is supported."); return }
     const amt = toUnits(amount, 6)
     if (amt <= 0n) { setErr("Enter an amount greater than 0."); return }
     const route = source.name + " " + ARROW + " " + dest.name

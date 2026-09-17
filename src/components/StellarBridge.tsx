@@ -112,8 +112,8 @@ export function StellarBridge() {
     }
   }
 
-  const fromLabel = dir === "arc-stellar" ? "Arc Testnet" : "Stellar Testnet"
-  const toLabel = dir === "arc-stellar" ? "Stellar Testnet" : "Arc Testnet"
+  const fromLabel = dir === "arc-stellar" ? "Arc" : "Stellar Testnet"
+  const toLabel = dir === "arc-stellar" ? "Stellar Testnet" : "Arc"
   const fromDom = dir === "arc-stellar" ? ARC_DOMAIN : STELLAR_DOMAIN
   const toDom = dir === "arc-stellar" ? STELLAR_DOMAIN : ARC_DOMAIN
 
@@ -182,7 +182,7 @@ export function StellarBridge() {
           <div style={small}>Queries Circle Iris sandbox for source domain {fromDom}. Automated relayer mint is on the Cronus roadmap.</div>
         </div>
         <div style={addrList}>
-          <div style={dim}>CCTP contracts {DASH} Arc Testnet (domain {ARC_DOMAIN})</div>
+          <div style={dim}>CCTP contracts {DASH} Arc (domain {ARC_DOMAIN})</div>
           <div style={aRow}><span style={aName}>USDC ERC-20</span><a style={aAddr} href={ARCSCAN + "/address/" + ARC_USDC} target="_blank" rel="noreferrer">{ARC_USDC}</a></div>
           <div style={aRow}><span style={aName}>MessageTransmitterV2</span><a style={aAddr} href={ARCSCAN + "/address/" + ARC_MSG_TRANSMITTER} target="_blank" rel="noreferrer">{ARC_MSG_TRANSMITTER}</a></div>
           <div style={aRow}><span style={aName}>TokenMinterV2</span><a style={aAddr} href={ARCSCAN + "/address/" + ARC_TOKEN_MINTER} target="_blank" rel="noreferrer">{ARC_TOKEN_MINTER}</a></div>
