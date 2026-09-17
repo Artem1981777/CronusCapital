@@ -36,18 +36,18 @@ jobs:
       - name: Compile and verify Mainnet runner
         env:
           CRONUS_WALLET_KEY: ${{ secrets.CRONUS_WALLET_KEY }}
-          DEPLOYER_ADDRESS: 0xd4939e42bd3e0ec9cb00091778a331c35d1834aa
+          DEPLOYER_ADDRESS: "0xd4939e42bd3e0ec9cb00091778a331c35d1834aa"
           ARC_RPC: https://rpc.mainnet.arc.io
-          ARC_USDC_ADDRESS: 0x3600000000000000000000000000000000000000
+          ARC_USDC_ADDRESS: "0x3600000000000000000000000000000000000000"
         run: node scripts/deploy-mainnet.mjs --dry-run
 
       - name: Deploy to Arc Mainnet
         if: ${{ inputs.dry_run == false }}
         env:
           CRONUS_WALLET_KEY: ${{ secrets.CRONUS_WALLET_KEY }}
-          DEPLOYER_ADDRESS: 0xd4939e42bd3e0ec9cb00091778a331c35d1834aa
+          DEPLOYER_ADDRESS: "0xd4939e42bd3e0ec9cb00091778a331c35d1834aa"
           ARC_RPC: https://rpc.mainnet.arc.io
-          ARC_USDC_ADDRESS: 0x3600000000000000000000000000000000000000
+          ARC_USDC_ADDRESS: "0x3600000000000000000000000000000000000000"
         run: node scripts/deploy-mainnet.mjs
 
       - name: Upload deployment result
