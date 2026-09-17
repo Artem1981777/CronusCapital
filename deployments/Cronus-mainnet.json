@@ -1,0 +1,163 @@
+{
+  "contract": "Cronus Capital",
+  "network": "arc-mainnet",
+  "chainId": 5042,
+  "rpc": "https://rpc.mainnet.arc.io",
+  "explorer": "https://explorer.arc.io",
+  "deployer": "0xD4939e42Bd3e0EC9cb00091778a331c35d1834Aa",
+  "multisig": {
+    "status": "deferred",
+    "note": "Temporary deployer ownership; migrate privileged roles to 2-of-3 multisig before production funds are held."
+  },
+  "contracts": {
+    "identityRegistry": {
+      "address": "0x5B179bFF284a17a5C8C3ccaDed1984949B410522",
+      "source": "contracts/CronusIdentityRegistry.sol",
+      "constructorArgs": [],
+      "txHash": "0xa2d7c305b3ac18397f2a460273589797a88381e9893e58edd357f963d252687d",
+      "explorer": "https://explorer.arc.io/address/0x5B179bFF284a17a5C8C3ccaDed1984949B410522"
+    },
+    "decisions": {
+      "address": "0x6190E140F6a643E16D0B2f61FCDA5883430BE310",
+      "source": "contracts/CronusDecisions.sol",
+      "constructorArgs": [],
+      "txHash": "0xbe84cef8bef29591ffa1866dd28573a2b18094520867164bb6c163d8ba999d9e",
+      "explorer": "https://explorer.arc.io/address/0x6190E140F6a643E16D0B2f61FCDA5883430BE310"
+    },
+    "vault": {
+      "address": "0x6104FC25E1B32B69F5c3Ef0DbBE4D7eC2821b0d3",
+      "source": "contracts/CronusVault.sol",
+      "constructorArgs": [
+        "0x3600000000000000000000000000000000000000"
+      ],
+      "txHash": "0x3ed0d1fcaec469b467b160940537a75ca117f5cb6e9a91e59e2fe2107f3308bf",
+      "explorer": "https://explorer.arc.io/address/0x6104FC25E1B32B69F5c3Ef0DbBE4D7eC2821b0d3"
+    },
+    "jobEscrow": {
+      "address": "0x5C7f8f12D6aEcbA1A7461435F45f25b6c8Be18Ad",
+      "source": "contracts/CronusJobEscrow.sol",
+      "constructorArgs": [
+        "0x3600000000000000000000000000000000000000",
+        "0x5B179bFF284a17a5C8C3ccaDed1984949B410522"
+      ],
+      "txHash": "0x55e3090f8605841843eb1fd6e528a9933975d997372cfef45329f52b7fdc0742",
+      "explorer": "https://explorer.arc.io/address/0x5C7f8f12D6aEcbA1A7461435F45f25b6c8Be18Ad"
+    },
+    "reputation": {
+      "address": "0x7426bF7ec186F7E0fb57D3f9487fA94234D2C1Dd",
+      "source": "contracts/CronusReputation.sol",
+      "constructorArgs": [
+        "0x5B179bFF284a17a5C8C3ccaDed1984949B410522"
+      ],
+      "txHash": "0x7a0ee31bef8a9b400aa6208230032649bfa8af54731d742fcc88030d3b136784",
+      "explorer": "https://explorer.arc.io/address/0x7426bF7ec186F7E0fb57D3f9487fA94234D2C1Dd"
+    },
+    "agentGuardV2": {
+      "address": "0x37846B767EC1889b0b719945c1168e42228b944C",
+      "source": "contracts/CronusAgentGuardV2.sol",
+      "constructorArgs": [
+        "0x3600000000000000000000000000000000000000",
+        "0xD4939e42Bd3e0EC9cb00091778a331c35d1834Aa",
+        "0xD4939e42Bd3e0EC9cb00091778a331c35d1834Aa",
+        "0xD4939e42Bd3e0EC9cb00091778a331c35d1834Aa",
+        "0xD4939e42Bd3e0EC9cb00091778a331c35d1834Aa",
+        "100000",
+        "500000",
+        "1000000",
+        "5000000",
+        "86400"
+      ],
+      "txHash": "0xbad5a1c7721df10ab77d043b54f3ec039c0f7ba48f351f4a1e93253315c586cc",
+      "explorer": "https://explorer.arc.io/address/0x37846B767EC1889b0b719945c1168e42228b944C"
+    },
+    "drillCertificate": {
+      "address": "0x8B5A4aff399e37F5d571A13aABbD095Bb91D0fB5",
+      "source": "contracts/CronusDrillCertificate.sol",
+      "constructorArgs": [
+        "0xD4939e42Bd3e0EC9cb00091778a331c35d1834Aa",
+        "0xD4939e42Bd3e0EC9cb00091778a331c35d1834Aa",
+        "0xD4939e42Bd3e0EC9cb00091778a331c35d1834Aa",
+        "0x37846B767EC1889b0b719945c1168e42228b944C"
+      ],
+      "txHash": "0x23d523a8355738d052d608e168a7a73886af55621131dd22fe44a412ac044c16",
+      "explorer": "https://explorer.arc.io/address/0x8B5A4aff399e37F5d571A13aABbD095Bb91D0fB5"
+    },
+    "accessPass": {
+      "address": "0x668811DD7e0b1c9DaBb041BE4a9d064789a77E05",
+      "source": "contracts/CronusAccessPass.sol",
+      "constructorArgs": [
+        "0x3600000000000000000000000000000000000000",
+        "0xD4939e42Bd3e0EC9cb00091778a331c35d1834Aa",
+        "0x8B5A4aff399e37F5d571A13aABbD095Bb91D0fB5",
+        "2000000",
+        "2592000",
+        "5000000"
+      ],
+      "txHash": "0x329b62f41063137a5d3c2a5febb2e4fe3e262024e34bd3118304fbb307693684",
+      "explorer": "https://explorer.arc.io/address/0x668811DD7e0b1c9DaBb041BE4a9d064789a77E05"
+    },
+    "cronusToken": {
+      "address": "0x1D4721eeC2ea3E06F666A3C4204a2bC3606065D2",
+      "source": "contracts/CronusSwap.sol",
+      "constructorArgs": [
+        "1000000000000"
+      ],
+      "txHash": "0x804fd8913adb39e62b7a6dd8f5a71d8c90502a3c7846a7c7a0e886ef36d5a3e0",
+      "explorer": "https://explorer.arc.io/address/0x1D4721eeC2ea3E06F666A3C4204a2bC3606065D2"
+    },
+    "cronusSwap": {
+      "address": "0xc2a8239987205Ec9afF830022A75977cA07cBEf6",
+      "source": "contracts/CronusSwap.sol",
+      "constructorArgs": [
+        "0x3600000000000000000000000000000000000000",
+        "0x1D4721eeC2ea3E06F666A3C4204a2bC3606065D2"
+      ],
+      "txHash": "0x7ec4082c0b81402451dd80152faa6ab55308f25406b7eb8dea20f57d7a362bd6",
+      "explorer": "https://explorer.arc.io/address/0xc2a8239987205Ec9afF830022A75977cA07cBEf6"
+    }
+  },
+  "transactions": [
+    {
+      "key": "identityRegistry",
+      "hash": "0xa2d7c305b3ac18397f2a460273589797a88381e9893e58edd357f963d252687d"
+    },
+    {
+      "key": "decisions",
+      "hash": "0xbe84cef8bef29591ffa1866dd28573a2b18094520867164bb6c163d8ba999d9e"
+    },
+    {
+      "key": "vault",
+      "hash": "0x3ed0d1fcaec469b467b160940537a75ca117f5cb6e9a91e59e2fe2107f3308bf"
+    },
+    {
+      "key": "jobEscrow",
+      "hash": "0x55e3090f8605841843eb1fd6e528a9933975d997372cfef45329f52b7fdc0742"
+    },
+    {
+      "key": "reputation",
+      "hash": "0x7a0ee31bef8a9b400aa6208230032649bfa8af54731d742fcc88030d3b136784"
+    },
+    {
+      "key": "agentGuardV2",
+      "hash": "0xbad5a1c7721df10ab77d043b54f3ec039c0f7ba48f351f4a1e93253315c586cc"
+    },
+    {
+      "key": "drillCertificate",
+      "hash": "0x23d523a8355738d052d608e168a7a73886af55621131dd22fe44a412ac044c16"
+    },
+    {
+      "key": "accessPass",
+      "hash": "0x329b62f41063137a5d3c2a5febb2e4fe3e262024e34bd3118304fbb307693684"
+    },
+    {
+      "key": "cronusToken",
+      "hash": "0x804fd8913adb39e62b7a6dd8f5a71d8c90502a3c7846a7c7a0e886ef36d5a3e0"
+    },
+    {
+      "key": "cronusSwap",
+      "hash": "0x7ec4082c0b81402451dd80152faa6ab55308f25406b7eb8dea20f57d7a362bd6"
+    }
+  ],
+  "startedAt": "2026-09-17T09:25:08.775Z",
+  "finishedAt": "2026-09-17T09:25:57.971Z"
+}
