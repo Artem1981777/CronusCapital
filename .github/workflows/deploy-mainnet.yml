@@ -1,0 +1,68 @@
+name: Deploy Cronus to Arc Mainnet
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Compile and validate only; send no transactions"
+        required: true
+        default: true
+        type: boolean
+
+permissions:
+  contents: write
+
+concurrency:
+  group: cronus-mainnet-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Compile and verify Mainnet runner
+        env:
+          CRONUS_WALLET_KEY: ${{ secrets.CRONUS_WALLET_KEY }}
+          DEPLOYER_ADDRESS: 0xd4939e42bd3e0ec9cb00091778a331c35d1834aa
+          ARC_RPC: https://rpc.mainnet.arc.io
+          ARC_USDC_ADDRESS: 0x3600000000000000000000000000000000000000
+        run: node scripts/deploy-mainnet.mjs --dry-run
+
+      - name: Deploy to Arc Mainnet
+        if: ${{ inputs.dry_run == false }}
+        env:
+          CRONUS_WALLET_KEY: ${{ secrets.CRONUS_WALLET_KEY }}
+          DEPLOYER_ADDRESS: 0xd4939e42bd3e0ec9cb00091778a331c35d1834aa
+          ARC_RPC: https://rpc.mainnet.arc.io
+          ARC_USDC_ADDRESS: 0x3600000000000000000000000000000000000000
+        run: node scripts/deploy-mainnet.mjs
+
+      - name: Upload deployment result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cronus-mainnet-deployment
+          path: deployments/Cronus-mainnet.json
+          if-no-files-found: ignore
+
+      - name: Commit deployment manifest
+        if: ${{ inputs.dry_run == false && success() }}
+        run: |
+          git config user.name "cronus-mainnet-deployer"
+          git config user.email "actions@users.noreply.github.com"
+          git add deployments/Cronus-mainnet.json
+          git commit -m "deploy: Cronus contracts to Arc Mainnet" || echo "No manifest changes"
+          git push
