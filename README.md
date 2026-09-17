@@ -24,7 +24,7 @@ Cronus is an autonomous prediction-market oracle agent. It scans markets, scores
 - **Explorer:** https://explorer.arc.io
 - **Network:** Arc Mainnet · chainId 5042 · native USDC `0x3600000000000000000000000000000000000000`
 
-> **Deployment status (2026-09-17):** the Cronus contract suite is deployed on Arc Mainnet. The live Vercel frontend and API still contain legacy Arc Testnet defaults in several client/server paths and must be switched to the Mainnet addresses below before the public demo is called fully production-ready. The deployment intentionally leaves multisig migration and initial swap liquidity for a follow-up change.
+> **Deployment status (2026-09-17):** the Cronus contract suite and the live Vercel frontend/API are on Arc Mainnet — wallet connection, RPC, and explorer links now default to Arc Mainnet (chainId 5042). Historical proof-of-work links below (tx hashes on testnet.arcscan.app, dated before this cutover) are kept as-is and unedited for audit integrity; they document real testnet activity from development, not current mainnet state. Multisig migration and initial swap liquidity remain open follow-ups.
 
 ### Arc Mainnet deployment
 
@@ -467,7 +467,7 @@ Proof Seals deliberately give **no random prizes and no rewards for user activit
 ## How to use it (step-by-step for judges)
 
 1. **Open the demo** - https://cronus-capital.vercel.app
-2. **Connect your wallet** (top-right chip) and approve switching to **Arc Testnet** (chainId 5042002). Grab test USDC from the Circle faucet if needed.
+2. **Connect your wallet** (top-right chip) and approve switching to **Arc Mainnet** (chainId 5042). Fund it with a small amount of real USDC — see the funding section above.
 3. **Press CONSULT ORACLES (free).** Watch the agent pull live BTC data and reason step by step (SCOUT -> DECOMPOSE -> DISCOVER -> DECIDE -> SUFFICIENCY -> EXECUTOR -> MEMORY -> CONSENSUS). It may return **SKIP** - it abstains when expected value is below its bar, by design.
 4. **Press BUY SIGNAL - 0.02 USDC (real x402).** Confirm the transaction in your wallet. The agent verifies the on-chain payment, then unlocks the signal with its verdict, conviction, `commitment`, and live **agent decision log**. Click **VIEW TX** to see the real settlement (with a `Memo` event) on the Arc explorer.
 5. **Press PAY UPSTREAM - 0.005 USDC** to see the cost side: the agent spends on data. Watch **NET FLOW** stay positive.
@@ -484,13 +484,13 @@ The whole loop in one screen: **reason -> earn (x402) -> spend (upstream) -> set
 
 ## Judge walkthrough — the Overview screen, button by button
 
-The **Overview** tab is the control panel for the whole agent business. It is taller than one screen, so both halves are shown below with every control explained. Anything marked **real** is a genuine on-chain transaction on **Arc Testnet** (chainId 5042002), independently verifiable in the block explorer. Read-only buttons need no wallet — you can just watch.
+The **Overview** tab is the control panel for the whole agent business. It is taller than one screen, so both halves are shown below with every control explained. Anything marked **real** is a genuine on-chain transaction on **Arc Mainnet** (chainId 5042), independently verifiable in the block explorer. Read-only buttons need no wallet — you can just watch.
 
 ### Part 1 — agent actions & vault
 
 ![Overview — agent action buttons and vault controls](assets/screenshots/overview-actions.png)
 
-**Before you start (optional):** connect a wallet via the top-right chip and switch to **Arc Testnet**. Need test USDC? Get it free at faucet.circle.com (select Arc Testnet).
+**Before you start (optional):** connect a wallet via the top-right chip — it will prompt you to switch to **Arc Mainnet**. You'll need a small amount of real USDC for gas and premiums.
 
 1. **CONSULT ORACLES** — *free, no wallet.* Runs the full reasoning pipeline (SCOUT → DECOMPOSE → DISCOVER → DECIDE → SUFFICIENCY → EXECUTOR → MEMORY → CONSENSUS) on live BTC data. **Look at:** the agent decision log streaming in. It often returns **SKIP** — the agent abstains when expected value is below its bar. That is honesty by design, not a failure.
 2. **FORCE EXECUTE** — *free.* Forces a full verdict even when the agent would normally SKIP, so you can see a decision on demand. **Look at:** the verdict and conviction score.
@@ -732,7 +732,7 @@ The full dated build log (every commit, newest first) now lives in **[CHANGELOG.
     npm install
     npm run dev
 
-Connect a wallet on Arc Testnet (chainId 5042002), grab test USDC from the Circle faucet, then try CONSULT → UNLOCK → PAY UPSTREAM → FORCE EXECUTE.
+Connect a wallet on Arc Mainnet (chainId 5042), fund it with a small amount of real USDC, then try CONSULT → UNLOCK → PAY UPSTREAM → FORCE EXECUTE.
 
 **No-key live verification (judges).** Reproduce every honesty claim end-to-end against the live deployment:
 
