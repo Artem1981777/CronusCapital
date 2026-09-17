@@ -94,7 +94,7 @@ export async function streamPay(opts: StreamOpts): Promise<StreamResult> {
   const topic = opts.topic ?? "BTC-USDC momentum"
   const perTxCapUsd = opts.perTxCapUsd ?? opts.perTickUsd
   const ttlMs = opts.ttlMs ?? 5 * 60 * 1000
-  const gateway = new GatewayClient({ chain: "arcMainnet", privateKey: opts.privateKey })
+  const gateway = new GatewayClient({ chain: "arc", privateKey: opts.privateKey })
   const deadline = Date.now() + ttlMs
   const settlements: string[] = []
   let spent = 0
