@@ -226,10 +226,11 @@ export default function CronusBridge() {
         functionName: "depositForBurn",
         args: [amt, dest.domain, addrToBytes32(address), source.usdc, ZERO32, maxFee, 1000],
       } as any)
-      await sourceClient.waitForTransactionReceipt({ hash: bHash })
       setBurnTx(bHash)
       entryId = Date.now()
       pushEntry({ id: entryId, route, amount, burnTx: bHash, burnUrl: source.scan + bHash, mintTx: "", mintUrl: "", status: "attesting" })
+      setStep("2/4 Burn submitted; waiting for confirmation" + DASH)
+      await sourceClient.waitForTransactionReceipt({ hash: bHash })
       setStep("3/4 Waiting for Circle attestation" + DASH)
       let msg: any = null
       for (let i = 0; i < 60; i++) {
