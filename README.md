@@ -1372,50 +1372,62 @@ The submission is saved locally at ~/.arc-canteen/showcase.yaml and can be resub
 <!-- BRIDGE-CCTP-SECTION -->
 ## Cross-chain USDC Bridge — Circle CCTP V2
 
-A **non-custodial** USDC bridge is built into the dashboard (**Bridge** tab), moving
-native USDC between **Arc Testnet** and major EVM testnets via Circle CCTP V2
-burn-and-mint. No wrapped tokens, no liquidity pool, no custodian — every step is signed
-by the visitor's own wallet. Full threat model and verification steps:
-[`docs/BRIDGE_SECURITY.md`](docs/BRIDGE_SECURITY.md).
+A **non-custodial** USDC bridge is built into the dashboard and private MCP tools.
+The production route is limited to **Arc Mainnet <-> Base Mainnet** using Circle
+CCTP V2 burn-and-mint. No wrapped tokens, liquidity pool, or bridge custodian is
+used. Each burn is signed by the Cronus treasury and each mint is finalized from
+Circle's attestation on the destination chain.
 
-### Progress log — 31 Jul 2026
-- CLI bridge script (`scripts/bridge.mjs`) for Base -> Arc transfers via Circle CCTP V2.
-- Bridge integrated into the dashboard as a first-class **Bridge** section (`008c628`, `f4ce5d1`).
-- Preflight hardening: balance check, allowance read + poll to kill the approve->burn race, and `simulateContract` before every burn.
-- **Selectable paired network** — Base / Ethereum / Arbitrum / Optimism / Avalanche (`2bc64e4`).
-- **Manual direction toggle** — Arc <-> EVM, default Base -> Arc, flip on the dashboard (`5ab2645`).
-- **Persistent transaction history** — burn/mint hashes and status saved in `localStorage`, surviving reloads.
-- End-to-end verified live on testnet in **both directions** (see below).
+### Mainnet configuration
 
-### Live bridge transactions (testnet, verified on-chain)
+| Parameter | Arc Mainnet | Base Mainnet |
+|---|---|---|
+| Chain ID | `5042` | `8453` |
+| RPC | `https://rpc.mainnet.arc.io` | `https://mainnet.base.org` |
+| CCTP domain | `26` | `6` |
+| USDC | `0x3600000000000000000000000000000000000000` | `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913` |
+| TokenMessengerV2 | `0x28b5a0e9C621a5BadaA536219b3a228C8168cf5d` | `0x28b5a0e9C621a5BadaA536219b3a228C8168cf5d` |
+| MessageTransmitterV2 | `0x81D40F21F12A8F0E3252Bccb954D722d4c464B64` | `0x81D40F21F12A8F0E3252Bccb954D722d4c464B64` |
+| Explorer | `https://explorer.arc.io` | `https://basescan.org` |
+
+Arc supports standard CCTP transfer. It does not provide Fast Transfer, so the
+Arc <-> Base route uses the standard attestation flow. Arc USDC has an ERC-20
+interface with 6 decimals and is also the native gas asset; bridge amounts use
+the 6-decimal ERC-20 representation.
+
+### Bridge flow
+
+1. The source-chain USDC allowance is checked and approved for TokenMessengerV2.
+2. `depositForBurn` burns USDC on the source chain.
+3. Circle Iris provides the CCTP V2 attestation.
+4. `MessageTransmitterV2.receiveMessage` mints USDC on the destination chain.
+5. The status endpoint reports the real burn and mint state; it never fabricates a
+   destination transaction.
+
+Both directions are supported:
+
+- **Base Mainnet -> Arc Mainnet**: source domain `6`, destination domain `26`.
+- **Arc Mainnet -> Base Mainnet**: source domain `26`, destination domain `6`.
+
+### Production limits
+
+- Per-transaction bridge cap: **5 USDC**.
+- Bridge-only daily cap: **500 USDC**.
+- Rate limit: **one bridge execution per minute**.
+- Recipient must be a Cronus treasury allowlisted EVM address.
+- Dry-run is the default; execution requires the private execution gate.
+
+### Mainnet round-trip verification
 
 Recipient wallet: `0xdc6778c5f8cc74b10aed11c48306d4cfc5737fbd`
 
-| Date (UTC) | Time (UTC) | Route | Amount | Burn tx | Mint tx |
-|---|---|---|---|---|---|
-| 31 Jul 2026 | 19:07:56 | Base Sepolia -> Arc Testnet | 1 USDC | [`0x957acd…2d7b41`](https://sepolia.basescan.org/tx/0x957acdf34455475cfd44042d3baa39ec20f60760778fad472cc75816ca2d7b41) | [`0x62db1a…477855`](https://testnet.arcscan.app/tx/0x62db1ab921503ecaaa8afa3dc4e371926159d2b56d9ffda3e74f473731477855) |
-| 31 Jul 2026 | 19:09:34 | Arc Testnet -> Base Sepolia | 1 USDC | [`0xbf1616…945ba1`](https://testnet.arcscan.app/tx/0xbf1616af8a378643b158802ebea0b0b9254b536659f521a1c26bb2299e945ba1) | [`0x17cccc…20cd5b`](https://sepolia.basescan.org/tx/0x17ccccceb6c937d9b729136942f0e3a22c7918f898a512be6f420abb3620cd5b) |
-| 1 Aug 2026 | 13:44:32 | Base Sepolia -> Arc Testnet | 1 USDC | [`0x53a60f…557e9e`](https://sepolia.basescan.org/tx/0x53a60f765cc71b6a144fa853e85f1d4b3fd20b70cc3959c9ac9b4f3743557e9e) | [`0x9894b4…ac1f3d`](https://testnet.arcscan.app/tx/0x9894b458f264e8aa7f47353a8e4208a53de3b4a8bc8062a6d3de8cc8b0ac1f3d) |
-| 1 Aug 2026 | 13:48:02 | Base Sepolia -> Arc Testnet | 1 USDC | [`0xaaf07c…727c13`](https://sepolia.basescan.org/tx/0xaaf07c36a5fd7d7561511d62e10249bd16bba8636cfe44bbb4dc215aeb727c13) | [`0xe38179…a20a11`](https://testnet.arcscan.app/tx/0xe38179d77e7bc2131ab5579b274473741597e52639ad9b3451c81afdcaa20a11) |
-| 1 Aug 2026 | 14:12:03 | Base Sepolia -> Arc Testnet | 1 USDC | [`0x5e74a9…cad0e1`](https://sepolia.basescan.org/tx/0x5e74a9b1b01664c5640c4ca47909802c86aba715716b4b8240cedbf276cad0e1) | [`0xd0a6e8…1d976c`](https://testnet.arcscan.app/tx/0xd0a6e8b88c3b0495a13a01ee42b5664c0eb31c4619f9a542bb82a831441d976c) |
-| 1 Aug 2026 | 14:19:56 | Arbitrum Sepolia -> Base Sepolia | 5 USDC | [`0x73a54f…dc87c7`](https://sepolia.arbiscan.io/tx/0x73a54fb672f3cad4c741ded63083df441fe5eea061b60f3342d376ededdc87c7) | [`0x57ddae…48c223`](https://sepolia.basescan.org/tx/0x57ddaeae3e3e0146bb1df986cc969b0b25dfa400393e9e83fa77915b7848c223) |
-| 1 Aug 2026 | 14:38:37 | Ethereum Sepolia -> Arc Testnet | 5 USDC | [`0x76c834…d32b94`](https://sepolia.etherscan.io/tx/0x76c8347290a20ecd8cf78a12b7a9d4a5d3966f02ab6fe5413d2d76cd33d32b94) | [`0x262ed6…f362f6`](https://testnet.arcscan.app/tx/0x262ed60bd3be46118b4ddce0fea7482e2f7ab78a75dbb9d4ef57e4c388f362f6) |
+| Route | Amount | Burn transaction | Mint transaction |
+|---|---:|---|---|
+| Base Mainnet -> Arc Mainnet | pending | pending | pending |
+| Arc Mainnet -> Base Mainnet | pending | pending | pending |
 
-Every row dated 1 Aug 2026 was started by typing a sentence in plain language, not by picking
-chains from a dropdown. A deterministic parser turned that sentence into an allowlisted route
-and the policy layer judged it before anything was signed. No language model took part, and
-the wallet signed every step.
-
-The 14:19:56 leg is the first executed route that never touches Arc, which is what makes the
-any-to-any claim above a fact rather than a capability: Arbitrum Sepolia to Base Sepolia, 5
-USDC, burned and minted natively, started from the Russian sentence "переведи 5 usdc из
-арбитрума в base".
-
-Four of the thirty directed routes have now been executed on-chain: Base to Arc, Arc to Base,
-Arbitrum to Base, and Ethereum to Arc. The remaining twenty-six use the same CCTP V2 domain
-mechanism and the same code path, so they are expected to behave identically — but this table
-lists only what has actually been signed and settled, and the widget marks any route it has
-not executed as unverified rather than implying otherwise.
+The two transaction hashes and explorer links will be added only after a real
+minimal-value round-trip has completed in both directions.
 
 ### Swap — a constant-product AMM written from scratch
 

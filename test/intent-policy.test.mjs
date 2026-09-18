@@ -61,10 +61,9 @@ test("bridge: a missing destination asks for exactly that field", () => {
   assert.ok(r.missing.includes("destination_network"))
 })
 
-test("bridge: mainnet is refused because the bridge is testnet-only", () => {
+test("bridge: Base Mainnet to Arc Mainnet is supported", () => {
   const r = parseIntent("bridge 1 usdc from base mainnet to arc")
-  assert.equal(r.ok, false)
-  assert.ok(r.reasons.includes("mainnet_not_supported"))
+  assert.equal(r.ok, true)
 })
 
 test("bridge: more precision than USDC carries is refused", () => {
@@ -283,10 +282,9 @@ test("lang: an English sentence is never mangled by a foreign dictionary", () =>
   assert.equal(text, "bridge 5 usdc from base to arc")
 })
 
-test("lang: mainnet is refused in Russian too", () => {
+test("lang: Russian Base Mainnet to Arc Mainnet is supported", () => {
   const r = parseIntent("переведи 1 usdc с base на арк майннет")
-  assert.equal(r.ok, false)
-  assert.ok(r.reasons.includes("mainnet_not_supported"))
+  assert.equal(r.ok, true)
 })
 
 test("lang: the record states which language was used", () => {
