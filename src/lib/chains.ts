@@ -1,7 +1,6 @@
 // src/lib/chains.ts
 // Central, MAINNET-ONLY network registry for the whole Cronus site.
-// Only Arc Mainnet is supported. If a wallet is on any other network
-// (testnet or otherwise), the UI refuses to act and offers to switch to Arc.
+// Arc Mainnet and Base Mainnet are supported. Other networks are refused.
 
 export type ChainMeta = {
   id: number
@@ -13,8 +12,25 @@ export type ChainMeta = {
 }
 
 export const ARC_CHAIN_ID = 5042
+export const BASE_CHAIN_ID = 8453
+
 export const SUPPORTED_CHAINS: Record<number, ChainMeta> = {
-  5042: { id: 5042, hexId: "0x13b2", name: "Arc", rpcUrls: ["https://rpc.mainnet.arc.io"], explorer: "https://explorer.arc.io", nativeCurrency: { name: "USD Coin", symbol: "USDC", decimals: 6 } },
+  5042: {
+    id: 5042,
+    hexId: "0x13b2",
+    name: "Arc Mainnet",
+    rpcUrls: ["https://rpc.mainnet.arc.io"],
+    explorer: "https://explorer.arc.io",
+    nativeCurrency: { name: "USDC", symbol: "USDC", decimals: 18 },
+  },
+  8453: {
+    id: 8453,
+    hexId: "0x2105",
+    name: "Base Mainnet",
+    rpcUrls: ["https://mainnet.base.org"],
+    explorer: "https://basescan.org",
+    nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
+  },
 }
 
 export function isSupportedChain(id: number | undefined | null): boolean {
@@ -22,27 +38,71 @@ export function isSupportedChain(id: number | undefined | null): boolean {
 }
 
 type SwitchFn = (args: { chainId: number }) => Promise<unknown>
-type EnsureOpts = { switchChainAsync?: SwitchFn; getProvider?: () => Promise<any> | any }
 
-// Move the connected wallet onto `targetId`, adding the network first if the
-// wallet does not know it yet. Talks to the wallet's own EIP-1193 provider so it
-// keeps working on mobile wallets whose wagmi connector lacks getChainId.
-export async function ensureChain(targetId: number, opts: EnsureOpts = {}): Promise<void> {
+type Eip1193Provider = {
+  request(args: { method: string; params?: readonly unknown[] }): Promise<unknown>
+}
+
+type EnsureOpts = {
+  switchChainAsync?: SwitchFn
+  getProvider?: () => Promise<unknown> | unknown
+}
+
+function asEip1193Provider(value: unknown): Eip1193Provider | null {
+  if (typeof value !== "object" || value === null) return null
+  const candidate = value as { request?: unknown }
+  return typeof candidate.request === "function"
+    ? (value as Eip1193Provider)
+    : null
+}
+
+type SwitchError = {
+  code?: number
+  data?: { originalError?: { code?: number } }
+  message?: string
+}
+
+// Move the connected wallet onto targetId, adding the network first if the
+// wallet does not know it yet. Works with mobile EIP-1193 providers.
+export async function ensureChain(
+  targetId: number,
+  opts: EnsureOpts = {},
+): Promise<void> {
   const meta = SUPPORTED_CHAINS[targetId]
-  if (!meta) throw new Error("Refusing to switch: " + targetId + " is not a supported network.")
+  if (!meta) {
+    throw new Error("Refusing to switch: " + targetId + " is not a supported network.")
+  }
 
-  let provider: any = null
-  try { provider = opts.getProvider ? await opts.getProvider() : null } catch { provider = null }
-  if (!provider && typeof window !== "undefined") provider = (window as any).ethereum
+  let provider: Eip1193Provider | null = null
 
-  if (provider && typeof provider.request === "function") {
+  try {
+    const provided = opts.getProvider ? await opts.getProvider() : null
+    provider = asEip1193Provider(provided)
+  } catch {
+    // Keep the initial null provider and use the browser fallback below.
+  }
+
+  if (!provider && typeof window !== "undefined") {
+    provider = (window as Window & { ethereum?: Eip1193Provider }).ethereum ?? null
+  }
+
+  if (provider) {
     try {
-      await provider.request({ method: "wallet_switchEthereumChain", params: [{ chainId: meta.hexId }] })
+      await provider.request({
+        method: "wallet_switchEthereumChain",
+        params: [{ chainId: meta.hexId }],
+      })
       return
-    } catch (e: any) {
-      const code = e?.code ?? e?.data?.originalError?.code
-      const msg = String(e?.message || "")
-      if (code === 4902 || code === -32603 || /unrecognized|not been added|add.*chain/i.test(msg)) {
+    } catch (e: unknown) {
+      const error = e as SwitchError
+      const code = error.code ?? error.data?.originalError?.code
+      const msg = String(error.message || "")
+
+      if (
+        code === 4902 ||
+        code === -32603 ||
+        /unrecognized|not been added|add.*chain/i.test(msg)
+      ) {
         await provider.request({
           method: "wallet_addEthereumChain",
           params: [{
@@ -53,14 +113,24 @@ export async function ensureChain(targetId: number, opts: EnsureOpts = {}): Prom
             blockExplorerUrls: [meta.explorer],
           }],
         })
-        await provider.request({ method: "wallet_switchEthereumChain", params: [{ chainId: meta.hexId }] })
+
+        await provider.request({
+          method: "wallet_switchEthereumChain",
+          params: [{ chainId: meta.hexId }],
+        })
         return
       }
-      if (code === 4001) throw new Error("Network switch was rejected in your wallet.")
-      // fall through to wagmi fallback
+
+      if (code === 4001) {
+        throw new Error("Network switch was rejected in your wallet.", { cause: e })
+      }
     }
   }
 
-  if (opts.switchChainAsync) { await opts.switchChainAsync({ chainId: targetId }); return }
+  if (opts.switchChainAsync) {
+    await opts.switchChainAsync({ chainId: targetId })
+    return
+  }
+
   throw new Error("No wallet provider available to switch networks.")
 }

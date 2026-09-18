@@ -1,12 +1,12 @@
 import { useState } from "react"
 import { useAccount, useWriteContract, usePublicClient, useChainId, useSwitchChain } from "wagmi"
 
-// Arc <-> EVM testnets USDC bridge via Circle CCTP V2 (burn-and-mint), either direction.
+// Arc Mainnet <-> Base Mainnet USDC bridge via Circle CCTP V2 (burn-and-mint), either direction.
 // Non-custodial: every tx is signed by the visitor's own connected wallet.
 // Addresses verified against https://developers.circle.com/cctp/references/contract-addresses
 type Hex = `0x${string}`
 
-// V2 contracts are identical across all supported EVM testnets (including Arc).
+// Mainnet CCTP V2 contracts for Arc and Base.
 import { evaluateIntent, isVerifiedRoute } from "../../lib/intentPolicyCore.js"
 import { ensureChain, isSupportedChain } from "../lib/chains"
 
@@ -16,21 +16,30 @@ const POLICY_TO_UI: Record<string, string> = {
   arc: "arc", base: "base", ethereum: "eth", arbitrum: "arb", optimism: "op", avalanche: "avax",
 }
 
-const TOKEN_MESSENGER_V2 = "0x8FE6B999Dc680CcFDD5Bf7EB0974218be2542DAA"
-const MESSAGE_TRANSMITTER_V2 = "0xE737e5cEBEEBa77EFE34D4aa090756590b1CE275"
+const TOKEN_MESSENGER_V2 = "0x28b5a0e9C621a5BadaA536219b3a228C8168cf5d"
+const MESSAGE_TRANSMITTER_V2 = "0x81D40F21F12A8F0E3252Bccb954D722d4c464B64"
 
 type ChainInfo = { key: string; name: string; chainId: number; domain: number; usdc: Hex; scan: string }
 
 // Arc is always one side of the route.
-const ARC: ChainInfo = { key: "arc", name: "Arc", chainId: 5042, domain: 26, usdc: "0x3600000000000000000000000000000000000000", scan: "https://explorer.arc.io/tx/" }
+const ARC: ChainInfo = {
+  key: "arc",
+  name: "Arc Mainnet",
+  chainId: 5042,
+  domain: 26,
+  usdc: "0x3600000000000000000000000000000000000000",
+  scan: "https://explorer.arc.io/tx/",
+}
 
-// The paired chain; pick which one + which direction on the dashboard.
 const CHAINS: ChainInfo[] = [
-  { key: "base", name: "Base Sepolia", chainId: 84532, domain: 6, usdc: "0x036CbD53842c5426634e7929541eC2318f3dCF7e", scan: "https://sepolia.basescan.org/tx/" },
-  { key: "eth", name: "Ethereum Sepolia", chainId: 11155111, domain: 0, usdc: "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238", scan: "https://sepolia.etherscan.io/tx/" },
-  { key: "arb", name: "Arbitrum Sepolia", chainId: 421614, domain: 3, usdc: "0x75faf114eafb1BDbe2F0316DF893fd58CE46AA4d", scan: "https://sepolia.arbiscan.io/tx/" },
-  { key: "op", name: "OP Sepolia", chainId: 11155420, domain: 2, usdc: "0x5fd84259d66Cd46123540766Be93DFE6D43130D7", scan: "https://sepolia-optimism.etherscan.io/tx/" },
-  { key: "avax", name: "Avalanche Fuji", chainId: 43113, domain: 1, usdc: "0x5425890298aed601595a70AB815c96711a31Bc65", scan: "https://testnet.snowtrace.io/tx/" },
+  {
+    key: "base",
+    name: "Base Mainnet",
+    chainId: 8453,
+    domain: 6,
+    usdc: "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+    scan: "https://basescan.org/tx/",
+  },
 ]
 
 // CCTP V2 uses the same TokenMessengerV2 and MessageTransmitterV2 on every supported
@@ -178,7 +187,7 @@ export default function CronusBridge() {
     if (!isConnected || !address) { setErr("Connect your wallet first (button at top)."); return }
     if (!sourceClient) { setErr(source.name + " RPC client unavailable."); return }
     if (!destClient) { setErr(dest.name + " RPC client unavailable."); return }
-    if (!isSupportedChain(source.chainId) || !isSupportedChain(dest.chainId)) { setErr("Blocked: this route includes an unsupported network — only Arc is supported."); return }
+    if (!isSupportedChain(source.chainId) || !isSupportedChain(dest.chainId)) { setErr("Blocked: this route includes an unsupported network — only Arc Mainnet and Base Mainnet are supported."); return }
     const amt = toUnits(amount, 6)
     if (amt <= 0n) { setErr("Enter an amount greater than 0."); return }
     const route = source.name + " " + ARROW + " " + dest.name
@@ -191,7 +200,7 @@ export default function CronusBridge() {
       }
       const maxFee = amt / 100n
       const bal = await sourceClient.readContract({ address: source.usdc, abi: ERC20_ABI, functionName: "balanceOf", args: [address] }) as bigint
-      if (bal < amt) throw new Error("Insufficient " + source.name + " USDC balance. Fund this wallet at faucet.circle.com and retry.")
+      if (bal < amt) throw new Error("Insufficient " + source.name + " USDC balance. Fund this wallet with mainnet USDC and retry.")
       let allowance = await sourceClient.readContract({ address: source.usdc, abi: ERC20_ABI, functionName: "allowance", args: [address, TOKEN_MESSENGER_V2] }) as bigint
       if (allowance < amt) {
         setStep("1/4 Approving USDC on " + source.name + DASH)
@@ -282,7 +291,7 @@ export default function CronusBridge() {
   return (
     <div style={wrap}>
       <div style={head}><span style={title}>{"\u2726"} USDC BRIDGE {DASH} CCTP V2</span></div>
-      <p style={note}>Native burn-and-mint via Circle CCTP V2 between any two of six supported testnets, in any direction, including routes that never touch Arc. No wrapped tokens, no liquidity pool, no custodian. Every step is signed by your own connected wallet {DASH} Cronus never holds your key. You need source-chain USDC and a little native gas.</p>
+      <p style={note}>Native burn-and-mint via Circle CCTP V2 between Arc Mainnet and Base Mainnet, in any direction, including routes that never touch Arc. No wrapped tokens, no liquidity pool, no custodian. Every step is signed by your own connected wallet {DASH} Cronus never holds your key. You need source-chain USDC and a little native gas.</p>
         <label style={lbl}>INTENT {DASH} PLAIN LANGUAGE</label>
         <input
           style={inp}
