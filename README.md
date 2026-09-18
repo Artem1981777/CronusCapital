@@ -1668,3 +1668,17 @@ Previously verified on-chain with the same tools (CCTP round-trip, Arc→Base):
 | Bridge Arc→Base | burn `0x3a18100cc0167c41bf4f5563db0b264701ea77575b4e33f4a47c225caf0cb119` → mint `0xa976e9a789f846b671bb16ef2acad4d2ad26d5ac83478b4a5852422173810837` |
 
 Honest notes: the USDC↔CRN round-trip loses ~1.3% (two 0.3% AMM fees + price impact on a small pool) — quoted openly, never hidden. CCTP burns use v2 **Fast Transfer** (`minFinalityThreshold: 1000`) for seconds-latency attestation. `crn_to_usdc` sells are ungated by the conviction signal (`autoSignal:false`); `usdc_to_crn` buys can optionally gate on a live Cronus verdict (conviction ≥ 65).
+
+## Verified CCTP V2 Mainnet round-trip
+
+Verified on 2026-09-18 with two real `0.01 USDC` user-wallet transfers between Arc Mainnet and Base Mainnet. Both burns received Circle CCTP V2 mainnet attestations and both destination mints completed on-chain.
+
+| Direction | Source burn | Destination mint | Status |
+|---|---|---|---|
+| Base Mainnet → Arc Mainnet | [BaseScan](https://basescan.org/tx/0x951fc9c82bfffad695f2f15121568815314d558ae8c7089df7ffec92caa5274f) | [Arc Explorer](https://explorer.arc.io/tx/0x7a3c10b3c0a914ea0b643c3a4e872eeaeddd3c0fbe4d593fc58025def974a53b) | Complete |
+| Arc Mainnet → Base Mainnet | [Arc Explorer](https://explorer.arc.io/tx/0x8a8b1ff77016e6cfcc8a61c3b471ab8a0fad628085b126d846e86335d157aef9) | [BaseScan](https://basescan.org/tx/0x90d1c26a17cf2e888a3843d7bbe9bec3b42523b945120637514ff87c4cfe2b9f) | Complete |
+
+The verified routes use Circle CCTP V2 standard burn-and-mint:
+Arc domain `26` ↔ Base domain `6`. No wrapped tokens, liquidity pool, fabricated destination hashes, or private keys were used. Circle mainnet Iris was used for attestation polling.
+
+Production limits remain `5 USDC` per bridge and `500 USDC/day` for the bridge rail.
