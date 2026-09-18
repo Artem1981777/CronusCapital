@@ -54,7 +54,7 @@ const UI_TO_POLICY: Record<string, string> = Object.fromEntries(
   Object.entries(POLICY_TO_UI).map(([policyKey, uiKey]) => [uiKey, policyKey]),
 )
 
-const IRIS = "https://iris-api-sandbox.circle.com"
+const IRIS = "https://iris-api.circle.com"
 const ZERO32 = "0x0000000000000000000000000000000000000000000000000000000000000000"
 const DASH = "\u2014"
 const ARROW = "\u2192"
