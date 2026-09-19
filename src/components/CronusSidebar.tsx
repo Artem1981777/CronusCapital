@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react"
 import { createPortal } from "react-dom"
 import { useAccount, useChainId, useSwitchChain, useReadContract } from "wagmi"
+import ContractDeployPanel from "./ContractDeployPanel"
 
 const ARC_CHAIN_ID = 5042
 const USDC = "0x3600000000000000000000000000000000000000" as const
@@ -82,12 +83,13 @@ export function CronusSidebar() {
 				<div className={onArc ? "cd-sb-pill" : "cd-sb-pill bad"}>
 					<span className="cd-sb-dot" />
 					<div className="cd-sb-pill-body">
-						<div className="cd-sb-pill-title">{onArc ? "ARC TESTNET" : "WRONG NETWORK"}</div>
+							<div className="cd-sb-pill-title">{onArc ? "ARC MAINNET" : "WRONG NETWORK"}</div>
 						<div className="cd-sb-pill-sub">sub-second · ~$0.01 USDC fee</div>
 					</div>
 					{!onArc && <button className="cd-sb-switch" onClick={() => switchChain({ chainId: ARC_CHAIN_ID })}>SWITCH</button>}
 				</div>
-				<button className="cd-sb-cast" onClick={quickCast}>⚡ QUICK CAST</button>
+					<ContractDeployPanel />
+					<button className="cd-sb-cast" onClick={quickCast}>⚡ QUICK CAST</button>
 				<div className="cd-sb-section">ORACLE</div>
 				<nav className="cd-sb-nav">
 					{NAV.map((n) => (
