@@ -2,14 +2,14 @@ import { createWalletClient, createPublicClient, http, defineChain, parseUnits }
 import { privateKeyToAccount } from "viem/accounts"
 
 const arc = defineChain( {
-  id: 5042002,
-  name: "Arc Testnet",
+  id: 5042,
+  name: "Arc Mainnet",
   nativeCurrency: { name: "USDC", symbol: "USDC", decimals: 18 },
-  rpcUrls: { default: { http: [ "https://rpc.testnet.arc.network" ] } }
+  rpcUrls: { default: { http: [ "https://rpc.mainnet.arc.io" ] } }
 } )
 
 const USDC = "0x3600000000000000000000000000000000000000"
-const VAULT = "0x13B6984357e27dAB17DF44a6396042239e70542C"
+const VAULT = "0x6104FC25E1B32B69F5c3Ef0DbBE4D7eC2821b0d3"
 
 const ERC20 = [
   { type: "function", name: "approve", stateMutability: "nonpayable", inputs: [ { name: "s", type: "address" }, { name: "a", type: "uint256" } ], outputs: [ { name: "", type: "bool" } ] }

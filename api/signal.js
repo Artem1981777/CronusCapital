@@ -7,14 +7,14 @@ import { claimOnce, failClosedEnabled } from "../lib/kvSafe.js"
 import { recordSignalBuyer } from "../lib/upgrades/makegoodEscrow.js"
 
 const X402_VERSION = 1
-const NETWORK    = process.env.X402_NETWORK     || "arc-testnet"
+const NETWORK    = process.env.X402_NETWORK     || "arc-mainnet"
 const USDC_ASSET = (process.env.ARC_USDC_ADDRESS || "0x3600000000000000000000000000000000000000").toLowerCase()
-const PAY_TO     = (process.env.CRONUS_PAYTO     || "0xdc6778c5f8cc74b10aed11c48306d4cfc5737fbd").toLowerCase()
+const PAY_TO     = (process.env.CRONUS_PAYTO     || "0xd4939e42bd3e0ec9cb00091778a331c35d1834aa").toLowerCase()
 const PRICE      = BigInt(process.env.SIGNAL_PRICE || "20000") // 0.02 USDC (6 decimals)
 const MAX_AGE_SEC = Number(process.env.SIGNAL_MAX_AGE_SECONDS || "1800")
 const EUR_USD_REF = process.env.EUR_USD_REFERENCE || "1.08"
 const TRANSFER_TOPIC = "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"
-const RPC_URLS = ["https://rpc.testnet.arc.network", process.env.SIGNAL_RPC_URL, process.env.VITE_RPC_URL, process.env.RPC_URL].filter(Boolean)
+const RPC_URLS = ["https://rpc.mainnet.arc.io", process.env.SIGNAL_RPC_URL, process.env.VITE_RPC_URL, process.env.RPC_URL].filter(Boolean)
 
 function requirements(resource) {
   const origin = String(resource).split("/api/")[0]
@@ -176,7 +176,7 @@ export default async function handler(req, res) {
   res.setHeader("X-Cronus-Policy-Receipt", policyHash);
   res.status(200).json({
     paid: true,
-    payment: { network: NETWORK, txHash, payer: proof.from, amount: proof.amount, block: proof.block, asset: USDC_ASSET, payTo: PAY_TO, explorer: "https://testnet.arcscan.app/tx/" + txHash },
+    payment: { network: NETWORK, txHash, payer: proof.from, amount: proof.amount, block: proof.block, asset: USDC_ASSET, payTo: PAY_TO, explorer: "https://explorer.arc.io/tx/" + txHash },
     commitment,
     settledAt,
     report,

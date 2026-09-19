@@ -20,7 +20,7 @@ async function lrange(key) {
   return raw.map((s) => { try { return JSON.parse(s) } catch (_) { return null } }).filter(Boolean)
 }
 
-const EXP = "https://testnet.arcscan.app/tx/"
+const EXP = "https://explorer.arc.io/tx/"
 const isTx = (t) => /^0x[0-9a-fA-F]{64}$/.test(String(t || ""))
 
 export default async function handler(req, res) {

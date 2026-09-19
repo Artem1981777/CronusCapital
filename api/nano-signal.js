@@ -5,7 +5,7 @@
 import { createGatewayMiddleware } from "@circle-fin/x402-batching/server"
 
 // --- ERC-8004 identity gate: the loyal tier requires a registered on-chain identity ---
-const IDENTITY_REGISTRY = process.env.IDENTITY_REGISTRY || "0x252cAA46b9b0648908000f6C87e0a561DB4dEb6c"
+const IDENTITY_REGISTRY = process.env.IDENTITY_REGISTRY || "0x5B179bFF284a17a5C8C3ccaDed1984949B410522"
 const ARC_RPC_URL = process.env.ARC_RPC || "https://rpc.blockdaemon.testnet.arc.network"
 const _idCache = new Map() // registration is permanent -> cache positives per instance
 async function payerRegistered(addr) {
@@ -25,7 +25,7 @@ async function payerRegistered(addr) {
 }
 
 // --- ERC-8004 reputation: expose the seller live on-chain rating in every quote ---
-const REPUTATION_REGISTRY = process.env.REPUTATION_REGISTRY || "0x2A19ad056EaE83364B0a6420685974cA219c209E"
+const REPUTATION_REGISTRY = process.env.REPUTATION_REGISTRY || "0x7426bF7ec186F7E0fb57D3f9487fA94234D2C1Dd"
 const SELLER_AGENT_ID = Number(process.env.SELLER_AGENT_ID || "1")
 let _repCache = { at: 0, value: null } // 60s TTL; feedback is append-only so staleness is harmless
 async function sellerReputation() {
@@ -46,11 +46,11 @@ async function sellerReputation() {
   } catch (_) { return null } // fail open: reputation unknown, quotes never break
 }
 
-const PAY_TO        = (process.env.CRONUS_PAYTO || "0xdc6778c5f8cc74b10aed11c48306d4cfc5737fbd")
-const NETWORK       = process.env.GATEWAY_NETWORK || "eip155:5042002"            // Arc testnet
+const PAY_TO        = (process.env.CRONUS_PAYTO || "0xd4939e42bd3e0ec9cb00091778a331c35d1834aa")
+const NETWORK       = process.env.GATEWAY_NETWORK || "eip155:5042"            // Arc testnet
 const FAC_URL       = process.env.GATEWAY_FACILITATOR_URL || "https://gateway-api-testnet.circle.com"
 const NANO_PRICE    = process.env.NANO_PRICE_USD || "$0.001"
-const NETWORK_LABEL = process.env.X402_NETWORK || "arc-testnet"
+const NETWORK_LABEL = process.env.X402_NETWORK || "arc-mainnet"
 
 const gateway = createGatewayMiddleware({
   sellerAddress: PAY_TO,
@@ -471,7 +471,7 @@ export default async function handler(req, res) {
           settlement: payment.transaction || null,
           settlementType: isOnchainDs ? "onchain" : "gateway-batch",
           settlementNote: isOnchainDs ? null : "EIP-3009 verified, dataset served immediately; Gateway batched settlement id (see README: Arc deviation).",
-          explorer: isOnchainDs ? "https://testnet.arcscan.app/tx/" + payment.transaction : null,
+          explorer: isOnchainDs ? "https://explorer.arc.io/tx/" + payment.transaction : null,
         },
         dataset: { count: rows.length, topics, rows },
         settledAt,
@@ -489,7 +489,7 @@ export default async function handler(req, res) {
 
   const isOnchainTx = /^0x[0-9a-fA-F]{64}$/.test(String(payment.transaction || ""))
   const deliveryReceipt = await signReceipt(payment, report)
-  const txUrl = isOnchainTx ? "https://testnet.arcscan.app/tx/" + payment.transaction : null
+  const txUrl = isOnchainTx ? "https://explorer.arc.io/tx/" + payment.transaction : null
   if (!res.writableEnded) {
     res.status(200).json({
       paid: true,

@@ -22,9 +22,9 @@ const ARC_USDC = "0x3600000000000000000000000000000000000000"
 const ARC_TOKEN_MESSENGER = "0x8FE6B999Dc680CcFDD5Bf7EB0974218be2542DAA"
 const STELLAR_FORWARDER = "CA66Q2WFBND6V4UEB7RD4SAXSVIWMD6RA4X3U32ELVFGXV5PJK4T4VSZ"
 const STELLAR_DOMAIN = 27
-const ARC_RPC = "https://rpc.testnet.arc" + ".network"
-const ARCSCAN = "https://testnet.arcscan" + ".app/tx/"
-const ARC_CHAIN_ID = 5042002
+const ARC_RPC = "https://rpc.mainnet.arc.io"
+const ARCSCAN = "https://explorer.arc.io/tx/"
+const ARC_CHAIN_ID = 5042
 
 const DEFAULT_POLICY = {
 	enabled: true,
@@ -159,7 +159,7 @@ async function readLedger(n) {
 
 const arcChain = defineChain({
 	id: ARC_CHAIN_ID,
-	name: "Arc Testnet",
+	name: "Arc Mainnet",
 	nativeCurrency: { name: "USDC", symbol: "USDC", decimals: 18 },
 	rpcUrls: { default: { http: [ARC_RPC] } },
 })

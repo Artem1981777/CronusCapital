@@ -1,5 +1,5 @@
-const PRIMARY = process.env.VITE_RPC_URL || process.env.VITE_ARC_RPC_URL || "https://rpc.testnet.arc.network";
-const FALLBACK = "https://rpc.testnet.arc.network";
+const PRIMARY = process.env.VITE_RPC_URL || process.env.VITE_ARC_RPC_URL || "https://rpc.mainnet.arc.io";
+const FALLBACK = "https://rpc.mainnet.arc.io";
 
 async function tryRpc(url, body) {
   const r = await fetch(url, {

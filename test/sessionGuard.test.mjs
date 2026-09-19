@@ -1,6 +1,6 @@
 import { test } from "node:test"
 import assert from "node:assert/strict"
-import { decideTick } from "../src/lib/sessionGuard.ts"
+import { decideTick } from "../src/lib/sessionGuard.mjs"
 
 const base = { stopped: false, now: 1000, deadline: 10000, perTickUsd: 0.01, perTxCapUsd: 0.02, spentUsd: 0, budgetUsd: 0.05 }
 

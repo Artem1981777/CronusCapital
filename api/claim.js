@@ -3,14 +3,14 @@ import { privateKeyToAccount } from "viem/accounts"
 import { checkDaily, recordDaily } from "../lib/breaker.js"
 
 const USDC = "0x3600000000000000000000000000000000000000"
-const CHAIN_ID = 5042002
-const RPC_URL = process.env.RPC_URL || "https://rpc.testnet.arc.network"
+const CHAIN_ID = 5042
+const RPC_URL = process.env.RPC_URL || "https://rpc.mainnet.arc.io"
 const CLAIM_USDC = process.env.CLAIM_USDC || "0.05"
 const MAX_CLAIM = 1
 
 const arc = defineChain({
   id: CHAIN_ID,
-  name: "Arc Testnet",
+  name: "Arc Mainnet",
   nativeCurrency: { name: "USD Coin", symbol: "USDC", decimals: 6 },
   rpcUrls: { default: { http: [RPC_URL] } },
 })

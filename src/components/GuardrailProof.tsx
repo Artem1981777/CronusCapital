@@ -5,7 +5,7 @@ type CheckResp = { ok?: boolean; amountAtomic?: string; decision?: Decision }
 type Policy = { dailyCapAtomic?: string; perRecipientCapAtomic?: string; enabled?: boolean }
 type PolicyResp = { policy?: Policy; remainingDailyAtomic?: string; spentTodayAtomic?: string }
 
-const TREASURY = "0xdc6778c5f8cc74b10aed11c48306d4cfc5737fbd"
+const TREASURY = "0xd4939e42bd3e0ec9cb00091778a331c35d1834aa"
 
 function usd(atomic: string | number | undefined) {
 	const n = Number(atomic || 0)

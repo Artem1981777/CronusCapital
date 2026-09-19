@@ -2,7 +2,7 @@ import { useEffect, useState } from "react"
 import { createPublicClient, http } from "viem"
 import { arcMainnet } from "../wagmiConfig"
 
-const REPUTATION_ADDRESS = "0x2A19ad056EaE83364B0a6420685974cA219c209E"
+const REPUTATION_ADDRESS = "0x7426bF7ec186F7E0fb57D3f9487fA94234D2C1Dd"
 const REP_ABI = [
 	{
 		inputs: [{ internalType: "uint256", name: "agentId", type: "uint256" }],

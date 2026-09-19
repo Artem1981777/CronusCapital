@@ -3,7 +3,7 @@ import { useEffect, useState, useCallback } from "react"
 import { useAccount, usePublicClient } from "wagmi"
 
 const ARC_CHAIN_ID = 5042
-const VAULT_ADDRESS = "0x13B6984357e27dAB17DF44a6396042239e70542C" as const
+const VAULT_ADDRESS = "0x6104FC25E1B32B69F5c3Ef0DbBE4D7eC2821b0d3" as const
 const VAULT_ABI = [
   { type: "function", name: "totalAssets", stateMutability: "view", inputs: [], outputs: [{ type: "uint256" }] },
   { type: "function", name: "shares", stateMutability: "view", inputs: [{ type: "address" }], outputs: [{ type: "uint256" }] },

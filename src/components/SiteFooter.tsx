@@ -36,7 +36,7 @@ export default function SiteFooter() {
 			items: [
 				{ label: "Paywall proof tx", href: "https://explorer.arc.io/tx/0xfe2764b2b837365ea7cb896fbbe55119ffbf250e51941945bf013a88bb942086" },
 				{ label: "Reputation contract", href: "https://explorer.arc.io/address/0x7426bF7ec186F7E0fb57D3f9487fA94234D2C1Dd" },
-				{ label: "Treasury wallet", href: "https://explorer.arc.io/address/0xdc6778c5f8cc74b10aed11c48306d4cfc5737fbd" },
+				{ label: "Treasury wallet", href: "https://explorer.arc.io/address/0xd4939e42bd3e0ec9cb00091778a331c35d1834aa" },
 				{ label: "Arc explorer", href: "https://explorer.arc.io" },
 			],
 		},

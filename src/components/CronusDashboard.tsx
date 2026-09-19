@@ -30,7 +30,7 @@ interface Signal { id: string; asset: string; action: Action; conf: number; time
 // === Arc settlement config — CUSTOMIZE here ===
 const ARC_CHAIN_ID = 5042
 const USDC_ADDRESS = "0x3600000000000000000000000000000000000000" as const
-const SETTLE_TO = "0xdc6778c5f8cc74b10aed11c48306d4cfc5737fbd" as const // CRONUS treasury (test sink)
+const SETTLE_TO = "0xd4939e42bd3e0ec9cb00091778a331c35d1834aa" as const // CRONUS treasury (test sink)
 const TEST_AMOUNT = BigInt(10000) // 0.01 USDC (6 decimals)
 const AGENT_ADDRESS = "0xd81a420BFa4CE8778473BD46195B8E97e928880f" as const // CRONUS x402 agent contract
 const X402_AMOUNT = BigInt(20000) // 0.02 USDC (6 decimals) - pay-per-call price
@@ -50,7 +50,7 @@ const ERC20_ABI = [
 	},
 ] as const
 
-const VAULT_ADDRESS = "0x13B6984357e27dAB17DF44a6396042239e70542C" as const
+const VAULT_ADDRESS = "0x6104FC25E1B32B69F5c3Ef0DbBE4D7eC2821b0d3" as const
 const VAULT_ABI = [
 	{ type: "function", name: "deposit", stateMutability: "nonpayable", inputs: [{ name: "assets", type: "uint256" }], outputs: [{ name: "", type: "uint256" }] },
 	{ type: "function", name: "withdrawAll", stateMutability: "nonpayable", inputs: [], outputs: [{ name: "", type: "uint256" }] },
@@ -606,9 +606,9 @@ export function CronusDashboard() {
 					<div className="cd-head-title">CRONUS ORACLE DASHBOARD</div>
 					<div className="cd-head-sub">Autonomous Market Intelligence · Arc Network · USDC</div>
 					<div className="cd-badge">⚡ NANO $0.001 · gas-free via Circle Gateway · PREMIUM $0.02</div>
-									<a className="cd-badge" href="https://explorer.arc.io/address/0x252cAA46b9b0648908000f6C87e0a561DB4dEb6c" target="_blank" rel="noreferrer">🪪 ERC-8004 IDENTITY ✓ on Arc · #1</a>
-									<a className="cd-badge" href="https://explorer.arc.io/address/0x64e55De4CbC3CDf981B2c970807129FA61806873" target="_blank" rel="noreferrer">🤝 ERC-8183 ESCROW ✓ on Arc</a>
-									<a className="cd-badge" href="https://explorer.arc.io/address/0x2A19ad056EaE83364B0a6420685974cA219c209E" target="_blank" rel="noreferrer">⭐ ERC-8004 REPUTATION ✓ on Arc</a>
+									<a className="cd-badge" href="https://explorer.arc.io/address/0x5B179bFF284a17a5C8C3ccaDed1984949B410522" target="_blank" rel="noreferrer">🪪 ERC-8004 IDENTITY ✓ on Arc · #1</a>
+									<a className="cd-badge" href="https://explorer.arc.io/address/0x5C7f8f12D6aEcbA1A7461435F45f25b6c8Be18Ad" target="_blank" rel="noreferrer">🤝 ERC-8183 ESCROW ✓ on Arc</a>
+									<a className="cd-badge" href="https://explorer.arc.io/address/0x7426bF7ec186F7E0fb57D3f9487fA94234D2C1Dd" target="_blank" rel="noreferrer">⭐ ERC-8004 REPUTATION ✓ on Arc</a>
 								<ReputationBadge />
 				</div>
 				<button className={"cd-ankh" + (isConnected ? " cd-ankh-on" : "")} title="Connect Wallet" onClick={() => setWalletOpen(true)}>{walletLabel}</button>

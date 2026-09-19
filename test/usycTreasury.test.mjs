@@ -82,8 +82,8 @@ test("entitlement is checked with canCall, whose selector is ERC-4626 deposit", 
   assert.equal(SELECTORS.redeem, "0xba087652")
 })
 
-test("addresses are the ones Circle documents for Arc testnet", () => {
-  assert.equal(ARC.usyc.toLowerCase(), "0xe9185f0c5f296ed1797aae4238d26ccabeadb86c")
-  assert.equal(ARC.chainId, 5042002)
+test("addresses are the ones Hashnote documents for Arc mainnet", () => {
+  assert.equal(ARC.usyc.toLowerCase(), "0x8a5d989bbb96929f689b0200f435f53da42bf490")
+  assert.equal(ARC.chainId, 5042)
   assert.equal(USYC_VERSION, "usyc-1")
 })

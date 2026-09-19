@@ -2,7 +2,7 @@ import { useState } from "react"
 import type { CSSProperties, ChangeEvent } from "react"
 
 const STELLAR_EXPLORER = "https://stellar" + ".expert/explorer/testnet/tx/"
-const ARCSCAN_TX = "https://testnet.arcscan" + ".app/tx/"
+const ARCSCAN_TX = "https://explorer.arc.io/tx/"
 const HORIZON = "https://horizon-testnet.stellar" + ".org/accounts/"
 const USDC_ISSUER = "GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5"
 const BURN_KEY = "cronus_stellar_burn_tx"

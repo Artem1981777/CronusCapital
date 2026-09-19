@@ -34,7 +34,7 @@ interface SpendState { count: number; usd: number }
 
 const PRICE_USD = 0.02
 const PRICE_ATOMIC = 20000n // 0.02 USDC (6 decimals) on Arc
-const PAY_TO = "0xdc6778c5f8cc74b10aed11c48306d4cfc5737fbd" as `0x${string}`
+const PAY_TO = "0xd4939e42bd3e0ec9cb00091778a331c35d1834aa" as `0x${string}`
 const SPEND_KEY = "cronus.spend.v1"
 const TIMEOUT_MS = 30000
 const MAX_RETRIES = 2

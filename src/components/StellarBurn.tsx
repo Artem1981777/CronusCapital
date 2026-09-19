@@ -7,7 +7,7 @@ const STELLAR_FORWARDER = "CA66Q2WFBND6V4UEB7RD4SAXSVIWMD6RA4X3U32ELVFGXV5PJK4T4
 const STELLAR_DOMAIN = 27
 const KEY = "cronus_stellar_addr"
 const SCHEME = "https://"
-const ARCSCAN = SCHEME + "testnet.arcscan" + ".app/tx/"
+const ARCSCAN = SCHEME + "explorer.arc.io/tx/"
 const DASH = "\u2014"
 const STAR = "\u2726"
 

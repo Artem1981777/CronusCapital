@@ -1,7 +1,7 @@
 import { useState, useEffect, type CSSProperties } from "react"
 
 const GREEN = "#39e014", GOLD = "#c9a84c", RED = "#e0563a", DIM = "#7e8c6a", BG = "#070b07"
-const SETTLE_TO = "0xdc6778c5f8cc74b10aed11c48306d4cfc5737fbd"
+const SETTLE_TO = "0xd4939e42bd3e0ec9cb00091778a331c35d1834aa"
 const CHAIN_ID = 5042
 const PER_TX_CAP = 0.01
 const DAILY_CAP = 5.0

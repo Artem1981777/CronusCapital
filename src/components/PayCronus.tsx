@@ -3,7 +3,7 @@ import { useAccount, useConnect, useSwitchChain, useWriteContract, usePublicClie
 
 const ARC_CHAIN_ID = 5042
 const USDC_ADDRESS = "0x3600000000000000000000000000000000000000" as const
-const PAY_TO = "0xdc6778c5f8cc74b10aed11c48306d4cfc5737fbd" as const
+const PAY_TO = "0xd4939e42bd3e0ec9cb00091778a331c35d1834aa" as const
 const ERC20_ABI = [
 	{ type: "function", name: "transfer", stateMutability: "nonpayable", inputs: [{ name: "to", type: "address" }, { name: "amount", type: "uint256" }], outputs: [{ name: "", type: "bool" }] },
 ] as const

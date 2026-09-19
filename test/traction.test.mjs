@@ -2,7 +2,7 @@ import { test } from "node:test"
 import assert from "node:assert/strict"
 import { reduceTraction, leaderboard, selfAddresses } from "../lib/traction.js"
 
-const T = "0xdc6778c5f8cc74b10aed11c48306d4cfc5737fbd"
+const T = "0xd4939e42bd3e0ec9cb00091778a331c35d1834aa"
 
 test("leaderboard ranks external payers by volume, excludes treasury/self", () => {
 	const ledger = [
