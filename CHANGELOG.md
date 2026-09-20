@@ -4,6 +4,14 @@ Full dated build log for Cronus Capital, newest first. See the [README](README.m
 
 ## What's new (build log)
 
+- **2026-09-20 — CI was red for eight consecutive commits and the test counts were stale.** `foundry.toml`
+  pinned solc 0.8.20 while `CronusGuestbook.sol` and `CronusProofNote.sol` declare `^0.8.24`, so
+  `forge build` refused to resolve a compiler and both the contracts job and `npm run test:all` failed
+  on a clean checkout - the two newest contracts had never been compiled in CI. The pin moves to 0.8.28,
+  which satisfies every pragma in the tree. With the suite running again it also prints a different
+  number than the README claimed: 322 Node tests and 107 Foundry tests across ten suites, not 305 and 75
+  across eight. A build log that cannot build is worth less than no build log.
+
 - **The pass now buys something, and the verification gap got measured.** `/api/signal-x402` honours a
   live access pass instead of charging per call: the contract is the only subscriber list, a malformed or
   passless claim still pays, and a silent chain denies rather than grants. The response states plainly that

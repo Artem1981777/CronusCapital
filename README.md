@@ -64,7 +64,7 @@ Cronus is an autonomous AI agent that runs a real, honest business on Arc: it **
 
 - **Live demo:** https://cronus-capital.vercel.app
 - **Verify in 2 min (no keys):** run **npm run verify-live** (191 checks) or open **/api/scorecard**
-- **Run every test:** `npm run test:all` — production build, 305 Node tests, and 75 Foundry tests across eight contract suites (identity, reputation, vault, job escrow, swap, agent guard, hardened guard v2, multisig).
+- **Run every test:** `npm run test:all` — production build, 322 Node tests, and 107 Foundry tests across ten contract suites (identity, reputation, vault, job escrow, swap, agent guard, hardened guard v2, multisig, access pass, drill certificate).
 - **Live, not placeholder:** every metric on the dashboard is populated from live / on-chain endpoints and reproducible with one command — no dashes, no backfilled or mocked numbers.
 - **Verifiable receipt (new):** paste any payment tx into the **Verifiable Receipt** card on the **Proof / Verify** tab (or call **/api/info?kind=receipt&tx=0x…**) — Cronus re-checks it live on the Arc explorer and binds payer -> amount -> the exact x402 price -> the on-chain commitment, with a non-custodial note. No keys.
 - **Guardrail proof (new):** the **Risk / SecOps** tab live-runs the real spending policy — an oversized payout is **blocked** (no funds move) while an in-budget one clears — plus the EIP-712 **SpendIntent** fields every autonomous spend must carry (signer, payTo, asset, maxAmount, nonce, deadline). Verify via **/api/spend-limit** and **/api/spend-intent**.
