@@ -28,3 +28,9 @@ To stay under Vercel's 12-function cap, new endpoints (backtest, trace, traction
 
 ## 9. Arc-native receipts, no extra registry contract
 Each paid call is listed at `/api/receipts` (JSON), backed by on-chain settlement — verifiable history without a separate registry contract.
+## 10. Mainnet governance migration is a re-deployment, not a transfer
+The first Arc Mainnet deployment left `owner`, `operator`, `guardian` and `recovery` of `CronusAgentGuardV2` on the deployer key, and `/api/governance` has published that as three failing invariants ever since. Two of them cannot be repaired in place: `recovery` is `immutable`, and `CronusDrillCertificate` binds `operator`, `guardian`, `holder` and `guard` immutably as well. `extTransferOwnership` through the 24h timelock would therefore fix one invariant and leave the cold exit sink pointing at the same hot key that the guard exists to contain.
+
+So `scripts/deploy-governance-mainnet.mjs` deploys `CronusMultisig` and re-deploys the three role-bound contracts (guard, drill certificate, access pass) with the roles separated from birth, then asserts the invariants back off the chain before the addresses are published. The cost of the choice is new addresses and a break in the deployed-contract history; the reason it is cheap here is that it was checked rather than assumed — on Mainnet the superseded guard, vault, pass and swap all hold 0 USDC and the pass has 0 holders, so no user state exists to strand. The script refuses to run if that stops being true.
+
+`CronusVault.owner` and `CronusSwap.owner` stay with the deployer and are *not* migrated: the vault owner's only power is `addYield` (it can add funds, never remove them) and the swap owner's is `pause` plus `removeLiquidity` of liquidity it supplied itself. Both are documented as such rather than quietly counted as governed.

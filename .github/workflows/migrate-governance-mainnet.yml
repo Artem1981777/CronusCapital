@@ -1,0 +1,98 @@
+name: Migrate Cronus governance to a multisig (Arc Mainnet)
+
+# Deploys CronusMultisig and re-deploys the three contracts whose privileged roles are
+# immutable (guard, drill certificate, access pass) with the roles separated from birth.
+# The deployer key never leaves GitHub: it is read from the production environment secret
+# CRONUS_WALLET_KEY, the same one the initial Mainnet deployment used.
+#
+# Run it with dry_run=true first. The dry run validates the role split against the exact
+# invariants /api/governance publishes, compiles all four contracts, and checks that the
+# superseded contracts are empty — without sending a transaction.
+
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Validate and compile only; send no transactions"
+        required: true
+        default: true
+        type: boolean
+      multisig_owners:
+        description: "Comma-separated multisig owner addresses (>= 3, all cold, none of them the operator)"
+        required: true
+        type: string
+      multisig_threshold:
+        description: "Signatures required (must be >= 2)"
+        required: true
+        default: "2"
+        type: string
+      operator:
+        description: "Agent hot key: spend() only, must not be a multisig signer"
+        required: true
+        type: string
+      guardian:
+        description: "Cold watcher: pause / veto / de-allowlist only"
+        required: true
+        type: string
+      recovery:
+        description: "Immutable cold exit sink; must differ from owner, operator and guardian"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: cronus-mainnet-governance
+  cancel-in-progress: false
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      CRONUS_WALLET_KEY: ${{ secrets.CRONUS_WALLET_KEY }}
+      DEPLOYER_ADDRESS: "0xd4939e42bd3e0ec9cb00091778a331c35d1834aa"
+      ARC_RPC: https://rpc.mainnet.arc.io
+      ARC_USDC_ADDRESS: "0x3600000000000000000000000000000000000000"
+      MULTISIG_OWNERS: ${{ inputs.multisig_owners }}
+      MULTISIG_THRESHOLD: ${{ inputs.multisig_threshold }}
+      GUARD_OPERATOR: ${{ inputs.operator }}
+      GUARD_GUARDIAN: ${{ inputs.guardian }}
+      GUARD_RECOVERY: ${{ inputs.recovery }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+
+      - name: Validate role split and compile
+        run: node scripts/deploy-governance-mainnet.mjs --dry-run
+
+      - name: Deploy multisig and re-deploy the role-bound contracts
+        if: ${{ inputs.dry_run == false }}
+        run: node scripts/deploy-governance-mainnet.mjs
+
+      - name: Upload deployment manifest
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cronus-mainnet-governance
+          path: deployments/Cronus-mainnet.json
+          if-no-files-found: ignore
+
+      - name: Commit deployment manifest
+        if: ${{ inputs.dry_run == false && success() }}
+        run: |
+          git config user.name "cronus-mainnet-deployer"
+          git config user.email "actions@users.noreply.github.com"
+          git add deployments/Cronus-mainnet.json
+          git commit -m "deploy: CronusMultisig + role-separated guard on Arc Mainnet" || echo "No manifest changes"
+          git push
