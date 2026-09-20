@@ -2,9 +2,11 @@ import { useEffect, useMemo, useState } from "react"
 import { useAccount, useChainId, useDeployContract, useSwitchChain, useWaitForTransactionReceipt } from "wagmi"
 import { cronusProofNoteAbi, cronusProofNoteBytecode } from "../contracts/cronusProofNoteArtifact"
 import { ensureChain } from "../lib/chains"
+import { cronusGuestbookAbi, cronusGuestbookBytecode } from "../contracts/cronusGuestbookArtifact"
 
 const ARC_CHAIN_ID = 5042
 const EXPLORER = "https://explorer.arc.io"
+const IDENTITY_REGISTRY = "0x5B179bFF284a17a5C8C3ccaDed1984949B410522"
 const HISTORY_KEY = "cronus.deploys.v1"
 
 interface DeployRecord {
@@ -33,6 +35,30 @@ export default function ContractDeployPanel() {
   const { switchChainAsync } = useSwitchChain()
   const { deployContractAsync, data: hash, isPending, error, reset } = useDeployContract()
   const { data: receipt, isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({ hash })
+  const { deployContractAsync: deployGuestbookAsync, data: gbHash, isPending: gbPending, error: gbError } = useDeployContract()
+  const { data: gbReceipt, isLoading: gbConfirming, isSuccess: gbSuccess } = useWaitForTransactionReceipt({ hash: gbHash })
+  const [gbStatus, setGbStatus] = useState("")
+
+  async function deployGuestbookOnce() {
+    setGbStatus("")
+    if (!isConnected) { setGbStatus("Connect a wallet first."); return }
+    if (!onArc) {
+      try { await ensureChain(ARC_CHAIN_ID, { switchChainAsync, getProvider: () => connector?.getProvider?.() }) }
+      catch (e) { setGbStatus(e instanceof Error ? e.message : "Network switch was rejected."); return }
+    }
+    try {
+      setGbStatus("Review the guestbook deployment in your wallet.")
+      await deployGuestbookAsync({
+        chainId: ARC_CHAIN_ID,
+        abi: cronusGuestbookAbi,
+        bytecode: cronusGuestbookBytecode,
+        args: [IDENTITY_REGISTRY],
+      })
+      setGbStatus("Transaction submitted. Waiting for Arc confirmation…")
+    } catch (e) {
+      setGbStatus(e instanceof Error ? e.message : "Deployment was rejected.")
+    }
+  }
   const [message, setMessage] = useState("Cronus proof note")
   const [status, setStatus] = useState("")
   const [history, setHistory] = useState<DeployRecord[]>([])
@@ -143,6 +169,22 @@ export default function ContractDeployPanel() {
             <div className="cd-deploy-item-time">{new Date(r.timestamp).toLocaleString()}</div>
           </div>
         ))}
+      </div>
+
+      <div className="cd-deploy-card" style={{ marginTop: 20, borderColor: "#39e01466" }}>
+        <div className="cd-sb-deploy-title">⬢ ONE-TIME: DEPLOY SHARED GUESTBOOK</div>
+        <div className="cd-sb-deploy-copy">Temporary admin action — deploys the single shared CronusGuestbook contract that the public note wall will read from. No owner, no privileged deployer. Run this once, then this block gets removed.</div>
+        <button className="cd-sb-deploy-btn" onClick={deployGuestbookOnce} disabled={!isConnected || gbPending || gbConfirming}>
+          {gbPending ? "CONFIRM IN WALLET" : gbConfirming ? "CONFIRMING…" : gbSuccess ? "DEPLOYED" : "DEPLOY GUESTBOOK"}
+        </button>
+        {gbStatus && <div className="cd-sb-deploy-status">{gbStatus}</div>}
+        {gbError && !gbStatus && <div className="cd-sb-deploy-status bad">{gbError.message}</div>}
+        {gbHash && <a className="cd-sb-deploy-link" href={`${EXPLORER}/tx/${gbHash}`} target="_blank" rel="noreferrer">View deployment transaction ↗</a>}
+        {gbReceipt?.contractAddress && (
+          <div className="cd-sb-deploy-status" style={{ color: "#39e014", fontWeight: 700 }}>
+            GUESTBOOK ADDRESS: {gbReceipt.contractAddress}
+          </div>
+        )}
       </div>
     </section>
   )
