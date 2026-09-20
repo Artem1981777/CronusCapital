@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react"
 import { useAccount, useChainId, useDeployContract, useSwitchChain, useWaitForTransactionReceipt } from "wagmi"
 import { cronusProofNoteAbi, cronusProofNoteBytecode } from "../contracts/cronusProofNoteArtifact"
+import { ensureChain } from "../lib/chains"
 
 const ARC_CHAIN_ID = 5042
 const EXPLORER = "https://explorer.arc.io"
@@ -27,7 +28,7 @@ function saveHistory(list: DeployRecord[]) {
 }
 
 export default function ContractDeployPanel() {
-  const { address, isConnected } = useAccount()
+  const { address, isConnected, connector } = useAccount()
   const chainId = useChainId()
   const { switchChainAsync } = useSwitchChain()
   const { deployContractAsync, data: hash, isPending, error, reset } = useDeployContract()
@@ -36,11 +37,12 @@ export default function ContractDeployPanel() {
   const [status, setStatus] = useState("")
   const [history, setHistory] = useState<DeployRecord[]>([])
   const [savedForHash, setSavedForHash] = useState<string | null>(null)
+  const [switching, setSwitching] = useState(false)
   const onArc = chainId === ARC_CHAIN_ID
   const contractAddress = receipt?.contractAddress
   const txUrl = hash ? `${EXPLORER}/tx/${hash}` : ""
   const contractUrl = contractAddress ? `${EXPLORER}/address/${contractAddress}` : ""
-  const disabled = !isConnected || isPending || isConfirming || !message.trim() || message.length > 140
+  const disabled = !isConnected || switching || isPending || isConfirming || !message.trim() || message.length > 140
 
   useEffect(() => { setHistory(loadHistory()) }, [])
 
@@ -61,12 +63,12 @@ export default function ContractDeployPanel() {
 
   const buttonLabel = useMemo(() => {
     if (!isConnected) return "CONNECT WALLET FIRST"
-    if (!onArc) return "SWITCH TO ARC"
+    if (switching) return "SWITCHING TO ARC…"
     if (isPending) return "CONFIRM IN WALLET"
     if (isConfirming) return "CONFIRMING…"
     if (isSuccess) return "DEPLOY ANOTHER NOTE"
     return "DEPLOY CONTRACT"
-  }, [isConnected, onArc, isPending, isConfirming, isSuccess])
+  }, [isConnected, switching, isPending, isConfirming, isSuccess])
 
   async function deploy() {
     reset()
@@ -74,9 +76,16 @@ export default function ContractDeployPanel() {
     setSavedForHash(null)
     if (!isConnected) { setStatus("Connect a wallet first."); return }
     if (!onArc) {
-      try { await switchChainAsync({ chainId: ARC_CHAIN_ID }); setStatus("Arc selected. Press deploy again to review the transaction.") }
-      catch { setStatus("Network switch was rejected in your wallet.") }
-      return
+      setSwitching(true)
+      setStatus("Switching your wallet to Arc Mainnet…")
+      try {
+        await ensureChain(ARC_CHAIN_ID, { switchChainAsync, getProvider: () => connector?.getProvider?.() })
+      } catch (e) {
+        setSwitching(false)
+        setStatus(e instanceof Error ? e.message : "Network switch was rejected in your wallet.")
+        return
+      }
+      setSwitching(false)
     }
     try {
       setStatus("Review the contract deployment in your wallet.")
@@ -104,7 +113,7 @@ export default function ContractDeployPanel() {
         <div className="cd-sb-deploy-copy">Deploy a real Cronus Proof Note from any connected wallet. Your wallet becomes the owner. No server key is ever used.</div>
         <input className="cd-sb-deploy-input" value={message} maxLength={140} onChange={(e) => setMessage(e.target.value)} placeholder="Initial on-chain message" aria-label="Initial contract message" />
         <button className="cd-sb-deploy-btn" onClick={deploy} disabled={disabled}>{buttonLabel}</button>
-        <div className="cd-sb-deploy-meta">Arc Mainnet · chain 5042 · wallet pays gas in native USDC</div>
+        <div className="cd-sb-deploy-meta">Auto-switches your wallet to Arc Mainnet · chain 5042 · wallet pays gas in native USDC</div>
         {status && <div className="cd-sb-deploy-status">{status}</div>}
         {error && !status && <div className="cd-sb-deploy-status bad">{error.message}</div>}
         {hash && <a className="cd-sb-deploy-link" href={txUrl} target="_blank" rel="noreferrer">View deployment transaction ↗</a>}
