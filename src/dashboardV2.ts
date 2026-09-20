@@ -7,6 +7,7 @@ export type SectionGroup = { label: string; items: SectionItem[] }
 export const GROUPS: SectionGroup[] = [
   { label: "COMMAND", items: [
     { id: "overview", label: "Overview", glyph: "⬡" },
+    { id: "deploy", label: "Deploy Contract", glyph: "⬢" },
     { id: "oracle", label: "Oracle / Signals", glyph: "𓂀" },
   ] },
   { label: "MARKETS", items: [
