@@ -62,6 +62,7 @@ import LeaderboardPanel from "./components/LeaderboardPanel"
 import A2APanel from "./components/A2APanel"
 import { MarketPulse } from "./components/MarketPulse"
 import ContractDeployPanel from "./components/ContractDeployPanel"
+import GuestbookWall from "./components/GuestbookWall"
 
 const TOPICS = ["crypto markets", "US elections", "Fed interest rates", "AI stocks", "Bitcoin ETF"]
 
@@ -301,7 +302,7 @@ export default function App() {
       <div className="scanline" />
       <EgyptTheme />
         <div id="cap-top" /><div className={V2 ? "cd2-shell" : ""}>{V2 ? <SectionNav section={sec} onSelect={setSec} /> : null}<div className={V2 ? "cd2-main" : ""}>
-        <Sec id="overview" section={secView}><div id="cap-agents" /><RegimeStrip /><CronusDashboard /><EquityCurve /></Sec><Sec id="deploy" section={secView}><div id="cap-deploy" /><ContractDeployPanel /></Sec><Sec id="track" section={secView}><TrackRecord /><CalibrationPanel /><AdjudicationReceipt /></Sec><Sec id="system" section={secView}><ChainBar stats={chainStats} /><SystemPanel /></Sec><Sec id="oracle" section={secView}><ReasoningTrace logs={reasoningLogs} topic={topic} />
+        <Sec id="overview" section={secView}><div id="cap-agents" /><RegimeStrip /><CronusDashboard /><EquityCurve /></Sec><Sec id="deploy" section={secView}><div id="cap-deploy" /><ContractDeployPanel /><GuestbookWall /></Sec><Sec id="track" section={secView}><TrackRecord /><CalibrationPanel /><AdjudicationReceipt /></Sec><Sec id="system" section={secView}><ChainBar stats={chainStats} /><SystemPanel /></Sec><Sec id="oracle" section={secView}><ReasoningTrace logs={reasoningLogs} topic={topic} />
       
       <div style={{ borderBottom: "1px solid #39e01422", padding: "20px 32px", display: "flex", alignItems: "center", justifyContent: "space-between", background: "linear-gradient(180deg, #050505 0%, transparent 100%)" }}>
         <div>

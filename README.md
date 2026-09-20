@@ -1706,3 +1706,18 @@ is the contract owner.
 | Deployment tx | [`0x815b388ddb480035c63d3eeb5b258aeec56dd4c7efd42c5be71e2c5a34f72549`](https://explorer.arc.io/tx/0x815b388ddb480035c63d3eeb5b258aeec56dd4c7efd42c5be71e2c5a34f72549) |
 | Network | Arc Mainnet (chain 5042) |
 | Path | Sidebar → COMMAND → Deploy Contract → wallet-signed `depositForBurn`-free plain contract creation |
+
+## Public Guestbook (CronusGuestbook)
+
+A permissionless, shared, append-only wall on Arc Mainnet. Any connected wallet can leave a
+short public note; no owner, no privileged deployer, no funds ever move. Notes from addresses
+registered in `CronusIdentityRegistry` are flagged `AGENT` on-chain, so it doubles as a live
+proof-of-engagement surface for the identity/reputation stack rather than a decoration.
+
+| Field | Value |
+| --- | --- |
+| Contract | [`0xCcC23DaC8FCE10B4F957DC761115D6B9Ce397DB4`](https://explorer.arc.io/address/0xCcC23DaC8FCE10B4F957DC761115D6B9Ce397DB4) |
+| Deployment tx | [`0x450171421f2e2073e2660df2b854ee6f71734ee86e2622669cae6bc93`](https://explorer.arc.io/tx/0x450171421f2e2073e2660df2b854ee6f71734ee86e2622669cae6bc93) |
+| Source | `contracts/CronusGuestbook.sol` |
+| Rules | Max 280 chars/note, 30s cooldown per address (spam guard only, no moderation) |
+| UI | Sidebar → COMMAND → Deploy Contract → Public Guestbook |
