@@ -1693,3 +1693,16 @@ The verified routes use Circle CCTP V2 standard burn-and-mint:
 Arc domain `26` ↔ Base domain `6`. No wrapped tokens, liquidity pool, fabricated destination hashes, or private keys were used. Circle mainnet Iris was used for attestation polling.
 
 Production limits remain `5 USDC` per bridge and `500 USDC/day` for the bridge rail.
+
+## Verified wallet-deployed contract (DEPLOY CONTRACT panel)
+
+First live proof that the sidebar's DEPLOY CONTRACT panel works end-to-end: a `CronusProofNote`
+deployed directly by a connected wallet on Arc Mainnet — no server key involved, deployer wallet
+is the contract owner.
+
+| Field | Value |
+| --- | --- |
+| Contract | [`0x8AD1eE52216bCdfC875BFA8E6337af1e472DD10d`](https://explorer.arc.io/address/0x8AD1eE52216bCdfC875BFA8E6337af1e472DD10d) |
+| Deployment tx | [`0x815b388ddb480035c63d3eeb5b258aeec56dd4c7efd42c5be71e2c5a34f72549`](https://explorer.arc.io/tx/0x815b388ddb480035c63d3eeb5b258aeec56dd4c7efd42c5be71e2c5a34f72549) |
+| Network | Arc Mainnet (chain 5042) |
+| Path | Sidebar → COMMAND → Deploy Contract → wallet-signed `depositForBurn`-free plain contract creation |
